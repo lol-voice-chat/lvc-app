@@ -13,7 +13,6 @@ const createWindow = async () => {
   });
 
   mainWindow.loadURL('http://localhost:3000');
-
   // const credentials: Credentials = await authenticate({
   //   awaitConnection: true,
   // });

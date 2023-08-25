@@ -35,38 +35,38 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var electron_1 = require("electron");
-var league_connect_1 = require("league-connect");
+var electron_log_1 = __importDefault(require("electron-log"));
+// import { authenticate, createHttp1Request, Credentials, Http1Response } from 'league-connect';
 var mainWindow;
 var createWindow = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var credentials, response, displayName;
     return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                mainWindow = new electron_1.BrowserWindow({
-                    width: 640,
-                    height: 480,
-                    webPreferences: {
-                        nodeIntegration: true,
-                    },
-                });
-                mainWindow.loadURL('http://localhost:3000');
-                return [4 /*yield*/, (0, league_connect_1.authenticate)({
-                        awaitConnection: true,
-                    })];
-            case 1:
-                credentials = _a.sent();
-                return [4 /*yield*/, (0, league_connect_1.createHttp1Request)({
-                        method: 'GET',
-                        url: '/lol-champ-select/v1/session',
-                    }, credentials)];
-            case 2:
-                response = _a.sent();
-                displayName = JSON.parse(response.text()).displayName;
-                mainWindow.webContents.send('summoner-name', { displayName: displayName });
-                return [2 /*return*/];
-        }
+        mainWindow = new electron_1.BrowserWindow({
+            width: 640,
+            height: 480,
+            webPreferences: {
+                nodeIntegration: true,
+            },
+        });
+        mainWindow.loadURL('http://localhost:3000');
+        // const credentials: Credentials = await authenticate({
+        //   awaitConnection: true,
+        // });
+        // const response: Http1Response = await createHttp1Request(
+        //   {
+        //     method: 'GET',
+        //     url: '/lol-champ-select/v1/session',
+        //   },
+        //   credentials
+        // );
+        // const { displayName } = JSON.parse(response.text());
+        mainWindow.webContents.send('start', 'test');
+        electron_log_1.default.info('성공');
+        return [2 /*return*/];
     });
 }); };
 electron_1.app.whenReady().then(function () { return __awaiter(void 0, void 0, void 0, function () {
