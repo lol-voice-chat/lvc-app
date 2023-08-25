@@ -1,7 +1,14 @@
-import React from "react";
+import { ipcRenderer } from 'electron';
+import React, { useState } from 'react';
 
 function App() {
-  return <h1>앙기모찌ㅣㅣ</h1>;
+  const [name, setName] = useState('');
+
+  ipcRenderer.on('summoner-name', (data: any) => {
+    setName(data.displayName);
+  });
+
+  return <h1>{name}</h1>;
 }
 
 export default App;
