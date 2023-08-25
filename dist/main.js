@@ -35,12 +35,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 var electron_1 = require("electron");
-var electron_log_1 = __importDefault(require("electron-log"));
 // import { authenticate, createHttp1Request, Credentials, Http1Response } from 'league-connect';
 var mainWindow;
 var createWindow = function () { return __awaiter(void 0, void 0, void 0, function () {
@@ -65,7 +61,6 @@ var createWindow = function () { return __awaiter(void 0, void 0, void 0, functi
         // );
         // const { displayName } = JSON.parse(response.text());
         mainWindow.webContents.send('start', 'test');
-        electron_log_1.default.info('성공');
         return [2 /*return*/];
     });
 }); };

@@ -1,7 +1,7 @@
 import React from 'react';
+import { ipcRenderer } from 'electron';
 
 function App() {
-  const { ipcRenderer } = window.require('electron');
   // const [name, setName] = useState('기본');
 
   ipcRenderer.on('start', (event, payload) => {
