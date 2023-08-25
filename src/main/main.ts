@@ -1,8 +1,9 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow } from 'electron';
+import { authenticate, createHttp1Request, Credentials, Http1Response } from 'league-connect';
 
 let mainWindow: BrowserWindow;
 
-const createWindow = () => {
+const createWindow = async () => {
   mainWindow = new BrowserWindow({
     width: 640,
     height: 480,
@@ -11,22 +12,37 @@ const createWindow = () => {
     },
   });
 
-  mainWindow.loadURL("http://localhost:3000");
-  //mainWindow.loadFile(path.join(__dirname, "public/index.html"));
+  mainWindow.loadURL('http://localhost:3000');
+
+  const credentials: Credentials = await authenticate({
+    awaitConnection: true,
+  });
+
+  const response: Http1Response = await createHttp1Request(
+    {
+      method: 'GET',
+      url: '/lol-champ-select/v1/session',
+    },
+    credentials
+  );
+
+  const { displayName } = JSON.parse(response.text());
+
+  mainWindow.webContents.send('summoner-name', { displayName });
 };
 
-app.whenReady().then(() => {
-  createWindow();
+app.whenReady().then(async () => {
+  await createWindow();
 
-  app.on("activate", () => {
+  app.on('activate', async () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
+      await createWindow();
     }
   });
 });
 
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
     app.quit();
   }
 });
