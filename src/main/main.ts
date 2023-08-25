@@ -1,5 +1,5 @@
 import { app, BrowserWindow } from 'electron';
-import { authenticate, createHttp1Request, Credentials, Http1Response } from 'league-connect';
+// import { authenticate, createHttp1Request, Credentials, Http1Response } from 'league-connect';
 
 let mainWindow: BrowserWindow;
 
@@ -14,21 +14,20 @@ const createWindow = async () => {
 
   mainWindow.loadURL('http://localhost:3000');
 
-  const credentials: Credentials = await authenticate({
-    awaitConnection: true,
-  });
+  // const credentials: Credentials = await authenticate({
+  //   awaitConnection: true,
+  // });
 
-  const response: Http1Response = await createHttp1Request(
-    {
-      method: 'GET',
-      url: '/lol-champ-select/v1/session',
-    },
-    credentials
-  );
+  // const response: Http1Response = await createHttp1Request(
+  //   {
+  //     method: 'GET',
+  //     url: '/lol-champ-select/v1/session',
+  //   },
+  //   credentials
+  // );
 
-  const { displayName } = JSON.parse(response.text());
-
-  mainWindow.webContents.send('summoner-name', { displayName });
+  // const { displayName } = JSON.parse(response.text());
+  mainWindow.webContents.send('start', 'test');
 };
 
 app.whenReady().then(async () => {
