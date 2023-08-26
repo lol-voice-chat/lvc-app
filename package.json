@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "main": "./dist/main.js",
+  "author": "lvc-app-authors",
+  "description": "lol voice chat app",
   "homepage": "./",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
@@ -24,8 +26,7 @@
     "electron-start": "tsc && electron .",
     "start": "concurrently \"npm run react-start\" \"wait-on http://localhost:3000\" \"npm run electron-start\"",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "test": "react-scripts test"
   },
   "eslintConfig": {
     "extends": [
@@ -48,6 +49,7 @@
   "devDependencies": {
     "concurrently": "^8.2.1",
     "electron": "^26.1.0",
+    "electron-builder": "^24.6.3",
     "wait-on": "^7.0.1"
   }
 }

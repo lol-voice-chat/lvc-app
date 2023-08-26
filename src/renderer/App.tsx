@@ -1,19 +1,16 @@
-import React from 'react';
-import { ipcRenderer } from 'electron';
+import React, { useEffect, useState } from 'react';
+const { ipcRenderer } = window.require('electron');
 
 function App() {
-  // const [name, setName] = useState('기본');
+  const [name, setName] = useState('');
 
-  ipcRenderer.on('start', (event, payload) => {
-    console.log(event, payload);
+  useEffect(() => {
+    ipcRenderer.once('summoner-name', (event, summoner: { name: string }) => {
+      setName(summoner.name);
+    });
   });
 
-  // ipcRenderer.on('summoner-name', (event, payload: { displayName: string }) => {
-  //   setName(payload.displayName);
-  //   console.log(event);
-  // });
-
-  return <h1>dsdfds</h1>;
+  return <h1>{name}</h1>;
 }
 
 export default App;
