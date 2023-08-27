@@ -4,7 +4,7 @@ import { createWebSocketConnection, LeagueWebSocket } from 'league-connect';
 
 let mainWindow: BrowserWindow;
 
-const createWindow = async () => {
+const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 640,
     height: 480,
@@ -24,7 +24,11 @@ const createWindow = async () => {
     const profileImage: string = `https://ddragon-webp.lolmath.net/latest/img/profileicon/${profileIconId}.webp`;
     mainWindow.webContents.send('on-league-client', { summonerId, displayName, profileImage });
 
-    const ws: LeagueWebSocket = await createWebSocketConnection();
+    const ws: LeagueWebSocket = await createWebSocketConnection({
+      authenticationOptions: {
+        awaitConnection: true,
+      },
+    });
 
     //champSelect
     const { phase } = await league('GET', '/lol-gameflow/v1/session');
@@ -56,11 +60,11 @@ function createTeamRoomName(myTeam: []): string {
 }
 
 app.whenReady().then(async () => {
-  await createWindow();
+  createWindow();
 
   app.on('activate', async () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      await createWindow();
+      createWindow();
     }
   });
 });
