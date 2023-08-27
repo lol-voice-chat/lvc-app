@@ -24,7 +24,11 @@ const createWindow = () => {
     const profileImage: string = `https://ddragon-webp.lolmath.net/latest/img/profileicon/${profileIconId}.webp`;
     mainWindow.webContents.send('on-league-client', { summonerId, displayName, profileImage });
 
-    const ws: LeagueWebSocket = await createWebSocketConnection();
+    const ws: LeagueWebSocket = await createWebSocketConnection({
+      authenticationOptions: {
+        awaitConnection: true,
+      },
+    });
 
     //champSelect
     const { phase } = await league('GET', '/lol-gameflow/v1/session');
