@@ -21,10 +21,9 @@ function Header() {
     });
 
     ipcRenderer.once('join-room', (event, { roomName }) => {
-      const socket = io(PATH.SERVER_URL + '/lvc', { transports: ['websocket'] });
-      updateVoiceChatInfo({ roomName, socket });
+      updateVoiceChatInfo({ roomName });
       navigate(PATH.VOICE_CHAT_ROOM);
-      console.log('롤 매칭됨', socket, roomName);
+      console.log('롤 매칭됨', roomName);
     });
   });
 

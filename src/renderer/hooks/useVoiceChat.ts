@@ -2,17 +2,20 @@ import { useRecoilValue } from 'recoil';
 import { summonerState, voiceChatInfoState } from '../@store/Recoil';
 import * as mediasoup from 'mediasoup-client';
 import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
+import { io } from 'socket.io-client';
+import { PATH } from '../const';
 
 function useVoiceChat() {
   const voiceChatInfo = useRecoilValue(voiceChatInfoState);
   const summoner = useRecoilValue(summonerState);
 
   const onVoiceChatRoom = () => {
-    if (!voiceChatInfo.socket || !voiceChatInfo.roomName || !summoner) return;
+    if (!voiceChatInfo.roomName || !summoner) return;
 
+    const socket = io(PATH.SERVER_URL + '/voice-chat', { transports: ['websocket'] });
     let device: mediasoup.types.Device | null = null;
 
-    voiceChatInfo.socket.emit(
+    socket.emit(
       'join-room',
       { roomName: voiceChatInfo.roomName, summoner },
       ({ rtpCapabilities }) => {
