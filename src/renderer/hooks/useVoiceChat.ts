@@ -16,6 +16,7 @@ function useVoiceChat() {
       'join-room',
       { roomName: voiceChatInfo.roomName, summoner },
       ({ rtpCapabilities }) => {
+        console.log('방 참여');
         getUserAudio(rtpCapabilities);
       }
     );
@@ -41,7 +42,7 @@ function useVoiceChat() {
     };
 
     const createSendTransport = (audioTrack: MediaStreamTrack) => {
-      console.log(summoner, voiceChatInfo.roomName, device);
+      console.log('디바이스 생성', device);
     };
   };
 

@@ -59,10 +59,10 @@ function createTeamRoomName(myTeam: []): string {
   return summonerIds.join('');
 }
 
-app.whenReady().then(async () => {
+app.whenReady().then(() => {
   createWindow();
 
-  app.on('activate', async () => {
+  app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
