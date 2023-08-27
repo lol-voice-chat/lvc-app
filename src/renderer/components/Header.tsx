@@ -4,7 +4,6 @@ import { useSetRecoilState } from 'recoil';
 import { voiceChatInfoState, summonerState } from '../@store/Recoil';
 import { useNavigate } from 'react-router-dom';
 import { PATH } from '../const';
-import { io } from 'socket.io-client';
 
 const { ipcRenderer } = window.require('electron');
 

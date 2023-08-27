@@ -3,6 +3,7 @@ import league from './league';
 import { createWebSocketConnection, LeagueWebSocket } from 'league-connect';
 
 let mainWindow: BrowserWindow;
+let isJoinedRoom = false;
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -38,8 +39,11 @@ const createWindow = () => {
       mainWindow.webContents.send('join-room', { roomName });
     } else {
       ws.subscribe('/lol-champ-select/v1/session', async (data) => {
-        const roomName: string = createTeamRoomName(data.myTeam);
-        mainWindow.webContents.send('join-room', { roomName });
+        if (!isJoinedRoom) {
+          const roomName: string = createTeamRoomName(data.myTeam);
+          mainWindow.webContents.send('join-room', { roomName });
+          isJoinedRoom = true;
+        }
       });
     }
 
