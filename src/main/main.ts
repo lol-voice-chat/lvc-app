@@ -4,7 +4,7 @@ import { createWebSocketConnection, LeagueWebSocket } from 'league-connect';
 
 let mainWindow: BrowserWindow;
 
-const createWindow = async () => {
+const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 640,
     height: 480,
@@ -55,12 +55,12 @@ function createTeamRoomName(myTeam: []): string {
   return summonerIds.join('');
 }
 
-app.whenReady().then(async () => {
-  await createWindow();
+app.whenReady().then(() => {
+  createWindow();
 
-  app.on('activate', async () => {
+  app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      await createWindow();
+      createWindow();
     }
   });
 });
