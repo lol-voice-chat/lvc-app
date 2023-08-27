@@ -1,6 +1,6 @@
 import { authenticate, createHttp1Request } from 'league-connect';
 
-type methodType = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+type methodType = 'GET' | 'POST';
 
 const league = async (method: methodType, url: string) => {
   const credentials = await authenticate({
