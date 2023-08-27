@@ -1,6 +1,6 @@
-import { io } from 'socket.io-client';
-import { PATH } from '../const';
+// import { io } from 'socket.io-client';
+// import { PATH } from '../const';
 
-const socket = io(PATH.SERVER_URL + '/lvc', { transports: ['websocket'] });
+// const socket = io(PATH.SERVER_URL + '/lvc', { transports: ['websocket'] });
 
-export default socket;
+// export default socket;
