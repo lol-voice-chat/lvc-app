@@ -49,7 +49,10 @@ const createWindow = () => {
 
     ws.subscribe('/lol-gameflow/v1/session', async (data) => {
       if (data.phase === 'None' && !data.gameClient.running) {
-        mainWindow.webContents.send('exit-champ-select');
+        if (isJoinedRoom) {
+          mainWindow.webContents.send('exit-champ-select');
+          isJoinedRoom = false;
+        }
       }
     });
   });
