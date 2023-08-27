@@ -16,17 +16,15 @@ function Header() {
   useEffect(() => {
     ipcRenderer.once('on-league-client', (event, summoner: SummonerType) => {
       saveSummoner(summoner);
-      console.log('롤 켜짐');
     });
 
     ipcRenderer.once('join-room', (event, { roomName }) => {
       updateVoiceChatInfo({ roomName });
       navigate(PATH.VOICE_CHAT_ROOM);
-      console.log('롤 매칭됨', roomName);
     });
   });
 
-  return <h1>앙기모띠</h1>;
+  return <h1>롤보챗</h1>;
 }
 
 export default Header;
