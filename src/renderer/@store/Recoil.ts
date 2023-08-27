@@ -1,10 +1,9 @@
-import { Socket } from 'socket.io-client';
 import { SummonerType } from '../@type/summoner';
 import { atom } from 'recoil';
 
-export const voiceChatInfoState = atom<{ roomName: string | null; socket: Socket | null }>({
+export const voiceChatInfoState = atom<{ roomName: string | null }>({
   key: 'voiceChatInfo',
-  default: { roomName: null, socket: null },
+  default: { roomName: null },
 });
 
 export const summonerState = atom<SummonerType | null>({
