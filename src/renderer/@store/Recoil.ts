@@ -11,7 +11,7 @@ export const summonerState = atom<SummonerType | null>({
   default: null,
 });
 
-export const myTeamSummonersState = atom<SummonerType[] | []>({
+export const myTeamSummonersState = atom<SummonerType[] | null>({
   key: 'myTeamSummoners',
-  default: [],
+  default: null,
 });
