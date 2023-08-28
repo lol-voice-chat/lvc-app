@@ -14,7 +14,7 @@ function VoiceChatRoom() {
   }, []);
 
   return (
-    <div>
+    <>
       {/* 내 소환사 UI */}
       {summoner && (
         <div id={summoner.summonerId.toString()}>
@@ -28,7 +28,6 @@ function VoiceChatRoom() {
       )}
 
       {/* 팀원 소환사 UI */}
-
       {myTeamSummoners?.map((myTeamSummoner) => (
         <div id={myTeamSummoner.summonerId.toString()} key={myTeamSummoner.summonerId.toString()}>
           <img
@@ -39,7 +38,7 @@ function VoiceChatRoom() {
           <h1>팀원놈 : {myTeamSummoner.displayName}</h1>
         </div>
       ))}
-    </div>
+    </>
   );
 }
 

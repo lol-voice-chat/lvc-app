@@ -14,12 +14,12 @@ function Header() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    ipcRenderer.once('on-league-client', (event, summoner: SummonerType) => {
+    ipcRenderer.once('on-league-client', (_, summoner: SummonerType) => {
       saveSummoner(summoner);
     });
 
-    ipcRenderer.once('join-room', (event, { roomName }) => {
-      updateVoiceChatInfo({ roomName });
+    ipcRenderer.once('join-room', (_, { roomName }) => {
+      updateVoiceChatInfo({ roomName: '777' });
       navigate(PATH.VOICE_CHAT_ROOM);
     });
   });
