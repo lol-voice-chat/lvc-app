@@ -19,7 +19,7 @@ function Header() {
     });
 
     ipcRenderer.once('join-room', (event, { roomName }) => {
-      updateVoiceChatInfo({ roomName });
+      updateVoiceChatInfo({ roomName: '777' });
       navigate(PATH.VOICE_CHAT_ROOM);
     });
   });

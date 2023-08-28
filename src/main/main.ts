@@ -50,7 +50,7 @@ const createWindow = () => {
     ws.subscribe('/lol-gameflow/v1/session', async (data) => {
       if (data.phase === 'None' && !data.gameClient.running) {
         if (isJoinedRoom) {
-          mainWindow.webContents.send('exit-champ-select');
+          // mainWindow.webContents.send('exit-champ-select');
           isJoinedRoom = false;
         }
       }
