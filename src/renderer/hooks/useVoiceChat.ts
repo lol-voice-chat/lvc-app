@@ -11,7 +11,6 @@ import {
   TransportType,
 } from '../@type/webRtc';
 import { SummonerType } from '../@type/summoner';
-import { useNavigate } from 'react-router-dom';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -19,8 +18,6 @@ function useVoiceChat() {
   const voiceChatInfo = useRecoilValue(voiceChatInfoState);
   const summoner = useRecoilValue(summonerState);
   const [myTeamSummoners, setMyTeamSummoners] = useRecoilState(myTeamSummonersState);
-
-  const navigate = useNavigate();
 
   const onVoiceChatRoom = () => {
     if (!voiceChatInfo.roomName || !summoner) return;
@@ -66,7 +63,6 @@ function useVoiceChat() {
 
         producerTransport.on('connect', ({ dtlsParameters }, callback, errback) => {
           try {
-            console.log('connect');
             socket.emit('transport-connect', { dtlsParameters });
             callback();
           } catch (err) {
@@ -94,6 +90,12 @@ function useVoiceChat() {
 
     const connectSendTransport = async (audioTrack: MediaStreamTrack) => {
       if (!producerTransport || !audioTrack) return console.log('프로듀서 or 오디오 없음');
+
+      try {
+        await audioTrack.applyConstraints({ advanced: [{ echoCancellation: true }] });
+      } catch (err) {
+        console.error('에코 캔슬링 설정 적용 중 오류:', err);
+      }
 
       producerTransport
         .produce({ track: audioTrack })
@@ -125,19 +127,13 @@ function useVoiceChat() {
       consumingList.push(remoteProducerId);
       setMyTeamSummoners([...(myTeamSummoners ?? []), newSummoner]);
 
-      console.log('get-producers 잘됨!');
-
       socket.emit('create-transport', { remoteProducerId }, ({ params }: any) => {
         if (!device) return;
-
-        console.log('create-transport!');
 
         const consumerTransport = device.createRecvTransport(params);
 
         consumerTransport.on('connect', ({ dtlsParameters }, callback, errback) => {
           try {
-            console.log('connect');
-
             socket.emit('transport-recv-connect', {
               dtlsParameters,
               remoteConsumerId: params.id,
@@ -165,8 +161,6 @@ function useVoiceChat() {
     ) => {
       if (!device) return;
 
-      console.log('consume 잘됨!');
-
       socket.emit(
         'consume',
         {
@@ -189,7 +183,6 @@ function useVoiceChat() {
             consumer: consumer,
           });
 
-          console.log('consume-resume');
           socket.emit('consumer-resume', { remoteConsumerId: params.id });
         }
       );
@@ -223,7 +216,6 @@ function useVoiceChat() {
 
     ipcRenderer.once('exit-champ-select', () => {
       socket.disconnect();
-      // navigate(PATH.HOME);
       window.location.replace(PATH.HOME);
     });
   };
