@@ -11,6 +11,7 @@ import {
   TransportType,
 } from '../@type/webRtc';
 import { SummonerType } from '../@type/summoner';
+import { useNavigate } from 'react-router-dom';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -18,6 +19,8 @@ function useVoiceChat() {
   const voiceChatInfo = useRecoilValue(voiceChatInfoState);
   const summoner = useRecoilValue(summonerState);
   const [myTeamSummoners, setMyTeamSummoners] = useRecoilState(myTeamSummonersState);
+
+  const navigate = useNavigate();
 
   const onVoiceChatRoom = () => {
     if (!voiceChatInfo.roomName || !summoner) return;
@@ -210,7 +213,9 @@ function useVoiceChat() {
     });
 
     ipcRenderer.once('exit-champ-select', () => {
-      socket.emit('exit-champ-select');
+      socket.disconnect();
+      // navigate(PATH.HOME);
+      window.location.replace(PATH.HOME);
     });
   };
 
