@@ -12,6 +12,8 @@ import {
 } from '../@type/webRtc';
 import { SummonerType } from '../@type/summoner';
 
+const { ipcRenderer } = window.require('electron');
+
 function useVoiceChat() {
   const voiceChatInfo = useRecoilValue(voiceChatInfoState);
   const summoner = useRecoilValue(summonerState);
@@ -205,6 +207,10 @@ function useVoiceChat() {
       localConsumertList = localConsumertList.filter(
         (consumer) => consumer.remoteProducerId !== remoteProducerId
       );
+    });
+
+    ipcRenderer.once('exit-champ-select', () => {
+      socket.emit('exit-champ-select');
     });
   };
 
