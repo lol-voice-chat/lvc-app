@@ -125,13 +125,19 @@ function useVoiceChat() {
       consumingList.push(remoteProducerId);
       setMyTeamSummoners([...(myTeamSummoners ?? []), newSummoner]);
 
+      console.log('get-producers 잘됨!');
+
       socket.emit('create-transport', { remoteProducerId }, ({ params }: any) => {
         if (!device) return;
+
+        console.log('create-transport!');
 
         const consumerTransport = device.createRecvTransport(params);
 
         consumerTransport.on('connect', ({ dtlsParameters }, callback, errback) => {
           try {
+            console.log('connect');
+
             socket.emit('transport-recv-connect', {
               dtlsParameters,
               remoteConsumerId: params.id,
@@ -159,6 +165,8 @@ function useVoiceChat() {
     ) => {
       if (!device) return;
 
+      console.log('consume 잘됨!');
+
       socket.emit(
         'consume',
         {
@@ -181,6 +189,7 @@ function useVoiceChat() {
             consumer: consumer,
           });
 
+          console.log('consume-resume');
           socket.emit('consumer-resume', { remoteConsumerId: params.id });
         }
       );
