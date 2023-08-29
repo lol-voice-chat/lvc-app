@@ -42,9 +42,7 @@ function useVoiceChat() {
           video: false,
         })
         .then((mediaStream) => createDevice(mediaStream, deviceLoadParam))
-        .catch((err) => {
-          console.log('미디어 권한 에러', err);
-        });
+        .catch((err) => console.log('미디어 권한 에러', err));
     };
 
     const createDevice = (mediaStream: MediaStream, routerRtpCapabilities: RtpCapabilities) => {
@@ -63,9 +61,8 @@ function useVoiceChat() {
 
         producerTransport.on('connect', ({ dtlsParameters }, callback, errback) => {
           try {
-            socket.emit('transport-connect', {
-              dtlsParameters,
-            });
+            console.log('connect');
+            socket.emit('transport-connect', { dtlsParameters });
             callback();
           } catch (err) {
             errback(err as Error);
@@ -75,10 +72,7 @@ function useVoiceChat() {
           try {
             socket.emit(
               'transport-produce',
-              {
-                kind,
-                rtpParameters,
-              },
+              { kind, rtpParameters },
               ({ id, producersExist }: { id: string; producersExist: boolean }) => {
                 callback({ id });
                 producersExist && getProducers();
@@ -102,9 +96,7 @@ function useVoiceChat() {
           audioProducer.on('trackended', () => console.log('audio track ended'));
           audioProducer.on('transportclose', () => console.log('audio transport ended'));
         })
-        .catch((err) => {
-          console.log('프로듀스 메서드 에러', err);
-        });
+        .catch((err) => console.log('프로듀스 메서드 에러', err));
     };
 
     socket.on(
