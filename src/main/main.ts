@@ -1,6 +1,11 @@
 import { app, BrowserWindow } from 'electron';
 import league from './league/league';
+import electronReload from 'electron-reload';
 import { createWebSocketConnection, LeagueWebSocket } from 'league-connect';
+
+if (process.env.NODE_ENV === 'development') {
+  electronReload(__dirname, {});
+}
 
 let mainWindow: BrowserWindow;
 let isJoinedRoom: boolean = false;
@@ -48,6 +53,7 @@ const createWindow = () => {
       });
     }
 
+    //챔피언선택 종료
     ws.subscribe('/lol-gameflow/v1/session', async (data) => {
       if (data.phase === 'None' && !data.gameClient.running) {
         if (isJoinedRoom) {
