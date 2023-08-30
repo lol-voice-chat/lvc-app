@@ -217,7 +217,7 @@ function useVoiceChat() {
       );
     });
 
-    ipcRenderer.once('exit-champ-select', () => {
+    ipcRenderer.on('exit-champ-select', () => {
       socket.disconnect();
       window.location.replace(PATH.HOME);
     });
