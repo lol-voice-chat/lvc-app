@@ -219,7 +219,8 @@ function useVoiceChat() {
 
     ipcRenderer.on('exit-champ-select', () => {
       socket.disconnect();
-      window.location.replace(PATH.HOME);
+      window.location.replace('');
+      console.log(window.location.href);
     });
   };
 
