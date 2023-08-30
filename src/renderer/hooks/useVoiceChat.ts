@@ -59,8 +59,6 @@ function useVoiceChat() {
       socket.emit('create-producer-transport', ({ params }: any) => {
         if (!device) return;
 
-        console.log('producer 콜백 받음', params);
-
         producerTransport = device.createSendTransport(params);
 
         producerTransport.on('connect', ({ dtlsParameters }, callback, errback) => {
@@ -111,6 +109,7 @@ function useVoiceChat() {
     socket.on(
       'new-producer',
       ({ id, summonerId, displayName, profileImage }: LocalProducerType) => {
+        console.log('new', id, summonerId, displayName, profileImage);
         signalNewConsumerTransport(id, { summonerId, displayName, profileImage });
       }
     );
@@ -129,39 +128,10 @@ function useVoiceChat() {
       consumingList.push(remoteProducerId);
       setMyTeamSummoners([...(myTeamSummoners ?? []), newSummoner]);
 
-      // socket.emit('create-consumer-transport', ({ params }: any) => {
-      //   if (!device) return;
-
-      //   console.log('consumer 콜백 받음', params);
-
-      //   const consumerTransport = device.createRecvTransport(params);
-
-      //   consumerTransport.on('connect', ({ dtlsParameters }, callback, errback) => {
-      //     try {
-      //       socket.emit('transport-recv-connect', {
-      //         dtlsParameters,
-      //         remoteConsumerId: params.id,
-      //       });
-      //       callback();
-      //     } catch (err) {
-      //       errback(err as Error);
-      //     }
-      //   });
-
-      //   connectRecvTransport(
-      //     newSummoner.summonerId,
-      //     remoteProducerId,
-      //     params.id,
-      //     consumerTransport
-      //   );
-      // });
-
       socket.emit('create-consumer-transport');
 
-      socket.on('test', ({ params }) => {
+      socket.on('complete-create-consumer-transport', ({ params }) => {
         if (!device) return;
-
-        console.log('consumer 콜백 받음', params);
 
         const consumerTransport = device.createRecvTransport(params);
 
