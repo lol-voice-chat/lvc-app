@@ -59,6 +59,8 @@ function useVoiceChat() {
       socket.emit('create-producer-transport', ({ params }: any) => {
         if (!device) return;
 
+        console.log('producer 콜백 받음', params);
+
         producerTransport = device.createSendTransport(params);
 
         producerTransport.on('connect', ({ dtlsParameters }, callback, errback) => {
@@ -129,6 +131,8 @@ function useVoiceChat() {
 
       socket.emit('create-consumer-transport', ({ params }: any) => {
         if (!device) return;
+
+        console.log('consumer 콜백 받음', params);
 
         const consumerTransport = device.createRecvTransport(params);
 
