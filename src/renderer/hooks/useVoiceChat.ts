@@ -218,6 +218,10 @@ function useVoiceChat() {
     });
 
     ipcRenderer.on('exit-champ-select', () => {
+      socket.emit('exit-champ-select');
+    });
+
+    socket.on('inform-exit-champ-select', () => {
       socket.disconnect();
       producerTransport?.close();
       localConsumertList.map((localConsumer) => {
