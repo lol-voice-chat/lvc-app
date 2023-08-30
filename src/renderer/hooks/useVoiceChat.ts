@@ -91,11 +91,7 @@ function useVoiceChat() {
     const connectSendTransport = async (audioTrack: MediaStreamTrack) => {
       if (!producerTransport || !audioTrack) return console.log('프로듀서 or 오디오 없음');
 
-      try {
-        await audioTrack.applyConstraints({ advanced: [{ echoCancellation: true }] });
-      } catch (err) {
-        console.error('에코 캔슬링 설정 적용 중 오류:', err);
-      }
+      await audioTrack.applyConstraints({ advanced: [{ echoCancellation: true }] });
 
       producerTransport
         .produce({ track: audioTrack })
