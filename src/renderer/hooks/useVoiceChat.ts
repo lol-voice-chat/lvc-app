@@ -222,13 +222,13 @@ function useVoiceChat() {
     });
 
     socket.on('inform-exit-champ-select', () => {
+      window.location.replace('');
       socket.disconnect();
       producerTransport?.close();
       localConsumertList.map((localConsumer) => {
         localConsumer.consumer.close();
         localConsumer.consumerTransport.close();
       });
-      window.location.replace('');
     });
   };
 
