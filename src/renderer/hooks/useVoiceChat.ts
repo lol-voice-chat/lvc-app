@@ -56,7 +56,7 @@ function useVoiceChat() {
     };
 
     const createSendTransport = (audioTrack: MediaStreamTrack) => {
-      socket.emit('create-producer-transport', { remoteProducerId: null }, ({ params }: any) => {
+      socket.emit('create-producer-transport', ({ params }: any) => {
         if (!device) return;
 
         producerTransport = device.createSendTransport(params);
