@@ -27,7 +27,7 @@ export const leagueHandler = async (webContents: WebContents) => {
     });
   }
 
-  function createTeamRoomName(myTeam: []): string {
+  function createTeamRoomName(myTeam: []) {
     const summonerIds: string[] = myTeam.map(
       (summoner: { summonerId: string }) => summoner.summonerId
     );
@@ -37,8 +37,8 @@ export const leagueHandler = async (webContents: WebContents) => {
 
   //챔피언선택 종료
   ws.subscribe('/lol-gameflow/v1/session', async (data) => {
-    if (data.phase === 'None' && !data.gameClient.running) {
-      if (isJoinedRoom) {
+    if (isJoinedRoom) {
+      if (data.phase === 'None' && !data.gameClient.running) {
         webContents.send('exit-champ-select');
         isJoinedRoom = false;
       }
