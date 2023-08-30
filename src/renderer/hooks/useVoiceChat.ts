@@ -56,7 +56,7 @@ function useVoiceChat() {
     };
 
     const createSendTransport = (audioTrack: MediaStreamTrack) => {
-      socket.emit('create-transport', { remoteProducerId: null }, ({ params }: any) => {
+      socket.emit('create-producer-transport', { remoteProducerId: null }, ({ params }: any) => {
         if (!device) return;
 
         producerTransport = device.createSendTransport(params);
@@ -127,7 +127,7 @@ function useVoiceChat() {
       consumingList.push(remoteProducerId);
       setMyTeamSummoners([...(myTeamSummoners ?? []), newSummoner]);
 
-      socket.emit('create-transport', { remoteProducerId }, ({ params }: any) => {
+      socket.emit('create-consumer-transport', ({ params }: any) => {
         if (!device) return;
 
         const consumerTransport = device.createRecvTransport(params);
