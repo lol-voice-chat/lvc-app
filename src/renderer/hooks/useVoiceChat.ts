@@ -217,14 +217,14 @@ function useVoiceChat() {
       socket.emit('exit-champ-select');
     });
 
-    socket.on('inform-exit-champ-select', () => {
+    socket.on('inform-exit-champ-select', async () => {
       socket.disconnect();
-      producerTransport?.close();
-      localConsumertList.map((localConsumer) => {
-        localConsumer.consumer.close();
-        localConsumer.consumerTransport.close();
-      });
       window.location.replace('');
+      // producerTransport?.close();
+      // localConsumertList.map((localConsumer) => {
+      //   localConsumer.consumer.close();
+      //   localConsumer.consumerTransport.close();
+      // });
     });
   };
 
