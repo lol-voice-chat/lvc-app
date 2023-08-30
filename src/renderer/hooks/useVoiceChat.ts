@@ -219,6 +219,11 @@ function useVoiceChat() {
 
     ipcRenderer.on('exit-champ-select', () => {
       socket.disconnect();
+      producerTransport?.close();
+      localConsumertList.map((localConsumer) => {
+        localConsumer.consumer.close();
+        localConsumer.consumerTransport.close();
+      });
       window.location.replace('');
     });
   };
