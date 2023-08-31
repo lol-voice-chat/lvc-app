@@ -5,11 +5,23 @@ import { WebContents } from 'electron';
 let isJoinedRoom: boolean = false;
 let isMovedGameLoadingWindow: boolean = false;
 
+type GameflowData = {
+  gameClient: {
+    running: boolean;
+    visible: boolean;
+  };
+  phase: string;
+  gameData: {
+    teamOne: [];
+    teamTwo: [];
+  };
+};
+
 export const leagueHandler = async (webContents: WebContents) => {
-  const gameflowData = await league('GET', '/lol-gameflow/v1/session');
+  const gameflowData: GameflowData = await league('GET', '/lol-gameflow/v1/session');
   const ws: LeagueWebSocket = await createWebSocketConnection();
 
-  if (isChampionSelectionWindow(gameflowData.phase)) {
+  if (isChampionSelectionWindow(gameflowData)) {
     const { myTeam } = await league('GET', '/lol-champ-select/v1/session');
     const roomName: string = createVoiceRoomName(myTeam);
     webContents.send('join-room', { roomName });
@@ -22,14 +34,17 @@ export const leagueHandler = async (webContents: WebContents) => {
       }
 
       if (isCloseChampionSelectionWindow(data.timer.phase)) {
-        webContents.send('exit-champ-select');
-        isJoinedRoom = false;
+        const phase = await league('GET', '/lol-gameflow/v1/gameflow-phase');
+        if (phase !== 'InProgress') {
+          webContents.send('exit-champ-select');
+          isJoinedRoom = false;
+        }
       }
     });
   }
 
-  function isChampionSelectionWindow(phase: string): boolean {
-    return phase === 'ChampSelect';
+  function isChampionSelectionWindow(data: GameflowData): boolean {
+    return data.phase === 'ChampSelect';
   }
 
   function isCloseChampionSelectionWindow(phase: string): boolean {
@@ -62,8 +77,8 @@ export const leagueHandler = async (webContents: WebContents) => {
     });
   }
 
-  function isGameLoadingWindow(gameflowData: any) {
-    return gameflowData.phase === 'InProgress' && !gameflowData.gameClient.visible;
+  function isGameLoadingWindow(data: GameflowData) {
+    return data.phase === 'InProgress' && !data.gameClient.visible;
   }
 };
 
