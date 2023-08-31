@@ -11,7 +11,6 @@ import {
   TransportType,
 } from '../@type/webRtc';
 import { SummonerType } from '../@type/summoner';
-
 const { ipcRenderer } = window.require('electron');
 
 function useVoiceChat() {
@@ -41,13 +40,12 @@ function useVoiceChat() {
       navigator.mediaDevices
         .getUserMedia({
           audio: {
-            autoGainControl: true,
-            noiseSuppression: true,
             echoCancellation: true,
+            noiseSuppression: false,
+            autoGainControl: false,
           },
-          video: false,
         })
-        .then((mediaStream) => createDevice(mediaStream, deviceLoadParam))
+        .then(async (mediaStream) => createDevice(mediaStream, deviceLoadParam))
         .catch((err) => console.log('미디어 권한 에러', err));
     };
 
