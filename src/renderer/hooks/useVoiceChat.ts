@@ -208,12 +208,7 @@ function useVoiceChat() {
       newSummonerSpeeker.srcObject = new MediaStream([track]);
     };
 
-    ipcRenderer.on('exit-champ-select', () => {
-      console.log('나감');
-      // socket.emit('exit-champ-select');
-    });
-
-    socket.on('inform-exit-champ-select', () => {
+    ipcRenderer.once('exit-champ-select', () => {
       socket.disconnect();
       window.location.replace('');
     });
