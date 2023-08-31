@@ -117,6 +117,12 @@ function useVoiceChat() {
       });
     };
 
+    socket.on('new-enemy-producers', (enemyProducers: LocalProducerType[]) => {
+      enemyProducers.map(({ id, summonerId, displayName, profileImage }) => {
+        signalNewConsumerTransport(id, { summonerId, displayName, profileImage });
+      });
+    });
+
     const signalNewConsumerTransport = (remoteProducerId: string, newSummoner: SummonerType) => {
       if (consumingList.includes(remoteProducerId)) return;
 
@@ -202,8 +208,21 @@ function useVoiceChat() {
 
     ipcRenderer.once('exit-champ-select', () => {
       socket.disconnect();
+      producerTransport?.close();
+      localConsumertList.map((localConsumer) => {
+        localConsumer.consumer.close();
+        localConsumer.consumerTransport.close();
+      });
+
       window.location.replace('');
     });
+
+    ipcRenderer.once(
+      'game-loading',
+      (_, teamData: { teamOneVoiceRoomName: string; teamTwoVoiceRoomName: string }) => {
+        socket.emit('game-loading', teamData);
+      }
+    );
   };
 
   return { onVoiceChatRoom };
