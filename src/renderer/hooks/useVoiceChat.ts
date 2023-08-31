@@ -201,18 +201,6 @@ function useVoiceChat() {
       newSummonerSpeeker.srcObject = new MediaStream([track]);
     };
 
-    socket.on('producer-closed', ({ remoteProducerId }) => {
-      const producerToClose = localConsumertList.find(
-        (consumer) => consumer.remoteProducerId === remoteProducerId
-      );
-      producerToClose?.consumerTransport.close();
-      producerToClose?.consumer.close();
-
-      localConsumertList = localConsumertList.filter(
-        (consumer) => consumer.remoteProducerId !== remoteProducerId
-      );
-    });
-
     ipcRenderer.on('exit-champ-select', () => {
       socket.emit('exit-champ-select');
     });
@@ -220,11 +208,6 @@ function useVoiceChat() {
     socket.on('inform-exit-champ-select', async () => {
       socket.disconnect();
       window.location.replace('');
-      // producerTransport?.close();
-      // localConsumertList.map((localConsumer) => {
-      //   localConsumer.consumer.close();
-      //   localConsumer.consumerTransport.close();
-      // });
     });
   };
 
