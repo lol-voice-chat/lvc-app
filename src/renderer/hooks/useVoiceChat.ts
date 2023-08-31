@@ -40,7 +40,11 @@ function useVoiceChat() {
     const getUserAudio = (deviceLoadParam: RtpCapabilities) => {
       navigator.mediaDevices
         .getUserMedia({
-          audio: true,
+          audio: {
+            autoGainControl: true,
+            noiseSuppression: true,
+            echoCancellation: true,
+          },
           video: false,
         })
         .then((mediaStream) => createDevice(mediaStream, deviceLoadParam))
@@ -51,15 +55,7 @@ function useVoiceChat() {
       device = new mediasoup.Device();
       device
         .load({ routerRtpCapabilities })
-        .then(() => {
-          const audioContext = new AudioContext();
-          const audioSource = audioContext.createMediaStreamSource(mediaStream);
-          const gainNode = audioContext.createGain();
-          audioSource.connect(gainNode);
-          gainNode.gain.value = 0;
-
-          createSendTransport(audioSource.mediaStream.getAudioTracks()[0]);
-        })
+        .then(() => createSendTransport(mediaStream.getAudioTracks()[0]))
         .catch((err) => console.log('디바이스 로드 에러', err));
     };
 
@@ -98,8 +94,6 @@ function useVoiceChat() {
 
     const connectSendTransport = async (audioTrack: MediaStreamTrack) => {
       if (!producerTransport || !audioTrack) return console.log('프로듀서 or 오디오 없음');
-
-      await audioTrack.applyConstraints({ advanced: [{ echoCancellation: true }] });
 
       producerTransport
         .produce({ track: audioTrack })
