@@ -41,16 +41,6 @@ export const leagueHandler = async (webContents: WebContents) => {
     return summonerIds.join('');
   }
 
-  //챔피언선택 종료
-  // ws.subscribe('/lol-gameflow/v1/session', async (data) => {
-  //   if (isJoinedRoom) {
-  //     if (data.phase === 'None' && !data.gameClient.running) {
-  //       webContents.send('exit-champ-select');
-  //       isJoinedRoom = false;
-  //     }
-  //   }
-  // });
-
   //게임 로딩창
   if (gameflowData.phase === 'InProgress' && !gameflowData.gameClient.visible) {
     if (!isJoinedRoom) {
