@@ -39,6 +39,7 @@ export const leagueHandler = async (webContents: WebContents) => {
   ws.subscribe('/lol-gameflow/v1/session', async (data) => {
     if (isJoinedRoom) {
       if (data.phase === 'None' && !data.gameClient.running) {
+        console.log(new Date());
         webContents.send('exit-champ-select');
         isJoinedRoom = false;
       }

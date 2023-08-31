@@ -51,7 +51,15 @@ function useVoiceChat() {
       device = new mediasoup.Device();
       device
         .load({ routerRtpCapabilities })
-        .then(() => createSendTransport(mediaStream.getAudioTracks()[0]))
+        .then(() => {
+          const audioContext = new AudioContext();
+          const audioSource = audioContext.createMediaStreamSource(mediaStream);
+          const gainNode = audioContext.createGain();
+          audioSource.connect(gainNode);
+          gainNode.gain.value = 0;
+
+          createSendTransport(audioSource.mediaStream.getAudioTracks()[0]);
+        })
         .catch((err) => console.log('디바이스 로드 에러', err));
     };
 
@@ -105,7 +113,6 @@ function useVoiceChat() {
     socket.on(
       'new-producer',
       ({ id, summonerId, displayName, profileImage }: LocalProducerType) => {
-        console.log('new', id, summonerId, displayName, profileImage);
         signalNewConsumerTransport(id, { summonerId, displayName, profileImage });
       }
     );
@@ -202,10 +209,11 @@ function useVoiceChat() {
     };
 
     ipcRenderer.on('exit-champ-select', () => {
-      socket.emit('exit-champ-select');
+      console.log('나감');
+      // socket.emit('exit-champ-select');
     });
 
-    socket.on('inform-exit-champ-select', async () => {
+    socket.on('inform-exit-champ-select', () => {
       socket.disconnect();
       window.location.replace('');
     });
