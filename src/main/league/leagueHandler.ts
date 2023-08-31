@@ -35,7 +35,7 @@ export const leagueHandler = async (webContents: WebContents) => {
 
       if (isCloseChampionSelectionWindow(data.timer.phase)) {
         const phase = await league('GET', '/lol-gameflow/v1/gameflow-phase');
-        if (phase !== 'InProgress') {
+        if (phase === 'None') {
           webContents.send('exit-champ-select');
           isJoinedRoom = false;
         }
