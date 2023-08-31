@@ -24,6 +24,12 @@ export const leagueHandler = async (webContents: WebContents) => {
         webContents.send('join-room', { roomName });
         isJoinedRoom = true;
       }
+
+      //챔피언선택 종료
+      if (isJoinedRoom && data.timer.phase === '') {
+        webContents.send('exit-champ-select');
+        isJoinedRoom = false;
+      }
     });
   }
 
@@ -36,14 +42,14 @@ export const leagueHandler = async (webContents: WebContents) => {
   }
 
   //챔피언선택 종료
-  ws.subscribe('/lol-gameflow/v1/session', async (data) => {
-    if (isJoinedRoom) {
-      if (data.phase === 'None' && !data.gameClient.running) {
-        webContents.send('exit-champ-select');
-        isJoinedRoom = false;
-      }
-    }
-  });
+  // ws.subscribe('/lol-gameflow/v1/session', async (data) => {
+  //   if (isJoinedRoom) {
+  //     if (data.phase === 'None' && !data.gameClient.running) {
+  //       webContents.send('exit-champ-select');
+  //       isJoinedRoom = false;
+  //     }
+  //   }
+  // });
 
   //게임 로딩창
   if (gameflowData.phase === 'InProgress' && !gameflowData.gameClient.visible) {
