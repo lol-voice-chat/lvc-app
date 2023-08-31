@@ -11,7 +11,6 @@ import {
   TransportType,
 } from '../@type/webRtc';
 import { SummonerType } from '../@type/summoner';
-
 const { ipcRenderer } = window.require('electron');
 
 function useVoiceChat() {
@@ -40,10 +39,13 @@ function useVoiceChat() {
     const getUserAudio = (deviceLoadParam: RtpCapabilities) => {
       navigator.mediaDevices
         .getUserMedia({
-          audio: true,
-          video: false,
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: false,
+            autoGainControl: false,
+          },
         })
-        .then((mediaStream) => createDevice(mediaStream, deviceLoadParam))
+        .then(async (mediaStream) => createDevice(mediaStream, deviceLoadParam))
         .catch((err) => console.log('미디어 권한 에러', err));
     };
 
@@ -51,15 +53,7 @@ function useVoiceChat() {
       device = new mediasoup.Device();
       device
         .load({ routerRtpCapabilities })
-        .then(() => {
-          const audioContext = new AudioContext();
-          const audioSource = audioContext.createMediaStreamSource(mediaStream);
-          const gainNode = audioContext.createGain();
-          audioSource.connect(gainNode);
-          gainNode.gain.value = 0;
-
-          createSendTransport(audioSource.mediaStream.getAudioTracks()[0]);
-        })
+        .then(() => createSendTransport(mediaStream.getAudioTracks()[0]))
         .catch((err) => console.log('디바이스 로드 에러', err));
     };
 
@@ -98,8 +92,6 @@ function useVoiceChat() {
 
     const connectSendTransport = async (audioTrack: MediaStreamTrack) => {
       if (!producerTransport || !audioTrack) return console.log('프로듀서 or 오디오 없음');
-
-      await audioTrack.applyConstraints({ advanced: [{ echoCancellation: true }] });
 
       producerTransport
         .produce({ track: audioTrack })
