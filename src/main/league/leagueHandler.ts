@@ -1,9 +1,11 @@
 import { createWebSocketConnection, LeagueWebSocket } from 'league-connect';
 import league from './league';
 import { WebContents } from 'electron';
+import { LCU_ENDPOINT, IPC_KEY } from '../../../const/index';
 
-let isJoinedRoom: boolean = false;
-let isMovedGameLoadingWindow: boolean = false;
+type Team = {
+  summonerId: string;
+};
 
 type GameflowData = {
   gameClient: {
@@ -12,50 +14,51 @@ type GameflowData = {
   };
   phase: string;
   gameData: {
-    teamOne: [];
-    teamTwo: [];
+    teamOne: Team[];
+    teamTwo: Team[];
   };
 };
 
 export const leagueHandler = async (webContents: WebContents) => {
-  const gameflowData: GameflowData = await league('GET', '/lol-gameflow/v1/session');
   const ws: LeagueWebSocket = await createWebSocketConnection();
+  let isJoinedRoom = false;
+  let isMovedGameLoadingWindow = false;
+
+  const gameflowData: GameflowData = await league(LCU_ENDPOINT.GAMEFLOW_SESSION_URL);
 
   if (isChampionSelectionWindow(gameflowData)) {
-    const { myTeam } = await league('GET', '/lol-champ-select/v1/session');
+    const { myTeam } = await league(LCU_ENDPOINT.CHAMP_SELECT_SESSION_URL);
     const roomName: string = createVoiceRoomName(myTeam);
-    webContents.send('join-room', { roomName });
+    webContents.send(IPC_KEY.JOIN_ROOM, { roomName });
   } else {
-    ws.subscribe('/lol-champ-select/v1/session', async (data) => {
+    ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_SESSION_URL, async (data) => {
       if (!isJoinedRoom) {
         const roomName: string = createVoiceRoomName(data.myTeam);
-        webContents.send('join-room', { roomName });
+        webContents.send(IPC_KEY.JOIN_ROOM, { roomName });
         isJoinedRoom = true;
       }
 
-      if (isCloseChampionSelectionWindow(data.timer.phase)) {
-        const phase = await league('GET', '/lol-gameflow/v1/gameflow-phase');
-        if (phase === 'None') {
-          webContents.send('exit-champ-select');
-          isJoinedRoom = false;
-        }
+      if (await isCloseChampionSelectionWindow(data.timer.phase)) {
+        webContents.send(IPC_KEY.EXIT_CHAMP_SELECT);
+        isJoinedRoom = false;
       }
     });
   }
 
-  function isChampionSelectionWindow(data: GameflowData): boolean {
+  function isChampionSelectionWindow(data: GameflowData) {
     return data.phase === 'ChampSelect';
   }
 
-  function isCloseChampionSelectionWindow(phase: string): boolean {
-    return isJoinedRoom && phase === '';
+  async function isCloseChampionSelectionWindow(phase: string) {
+    const gameflowPhase = await league(LCU_ENDPOINT.GAMEFLOW_PHASE_URL);
+    return isJoinedRoom && phase === '' && gameflowPhase === 'None';
   }
 
   if (isGameLoadingWindow(gameflowData)) {
     if (!isJoinedRoom) {
-      const { myTeam } = await league('GET', '/lol-champ-select/v1/session');
+      const { myTeam } = await league(LCU_ENDPOINT.CHAMP_SELECT_SESSION_URL);
       const roomName: string = createVoiceRoomName(myTeam);
-      webContents.send('join-room', { roomName });
+      webContents.send(IPC_KEY.JOIN_ROOM, { roomName });
       isJoinedRoom = true;
     }
 
@@ -63,15 +66,15 @@ export const leagueHandler = async (webContents: WebContents) => {
     const teamOneVoiceRoomName: string = createVoiceRoomName(teamOne);
     const teamTwoVoiceRoomName: string = createVoiceRoomName(teamTwo);
 
-    webContents.send('game-loading', { teamOneVoiceRoomName, teamTwoVoiceRoomName });
+    webContents.send(IPC_KEY.GAME_LOADING, { teamOneVoiceRoomName, teamTwoVoiceRoomName });
   } else {
-    ws.subscribe('/lol-gameflow/v1/sessioin', async (data) => {
+    ws.subscribe(LCU_ENDPOINT.GAMEFLOW_SESSION_URL, async (data) => {
       if (isGameLoadingWindow(data) && !isMovedGameLoadingWindow) {
         const { teamOne, teamTwo } = data.gameData;
         const teamOneVoiceRoomName: string = createVoiceRoomName(teamOne);
         const teamTwoVoiceRoomName: string = createVoiceRoomName(teamTwo);
 
-        webContents.send('game-loading', { teamOneVoiceRoomName, teamTwoVoiceRoomName });
+        webContents.send(IPC_KEY.GAME_LOADING, { teamOneVoiceRoomName, teamTwoVoiceRoomName });
         isMovedGameLoadingWindow = true;
       }
     });
@@ -82,7 +85,7 @@ export const leagueHandler = async (webContents: WebContents) => {
   }
 };
 
-function createVoiceRoomName(team: []) {
-  const summonerIds: string[] = team.map((summoner: { summonerId: string }) => summoner.summonerId);
+function createVoiceRoomName(team: Team[]) {
+  const summonerIds: string[] = team.map((summoner: Team) => summoner.summonerId);
   return summonerIds.join('');
 }

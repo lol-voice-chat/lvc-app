@@ -1,8 +1,9 @@
 import { authenticate, createHttp1Request } from 'league-connect';
 
-type methodType = 'GET' | 'POST';
-
-const league = async (method: methodType, url: string) => {
+/**
+ * GET http method 엔드포인트만 사용가능
+ */
+const league = async (url: string) => {
   const credentials = await authenticate({
     awaitConnection: true,
   });
@@ -10,7 +11,7 @@ const league = async (method: methodType, url: string) => {
   try {
     const response = await createHttp1Request(
       {
-        method,
+        method: 'GET',
         url,
       },
       credentials
