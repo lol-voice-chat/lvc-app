@@ -2,7 +2,7 @@ import { createWebSocketConnection, LeagueWebSocket } from 'league-connect';
 import league from './league';
 import { WebContents } from 'electron';
 import { IPC_KEY } from '../../const/index';
-import { LCU_ENDPOINT } from '../const';
+import { LCU_ENDPOINT, PHASE } from '../const';
 
 type Team = {
   summonerId: string;
@@ -47,12 +47,12 @@ export const leagueHandler = async (webContents: WebContents) => {
   }
 
   function isChampionSelectionWindow(data: GameflowData) {
-    return data.phase === 'ChampSelect';
+    return data.phase === PHASE.CHAMP_SELECT;
   }
 
   async function isCloseChampionSelectionWindow(phase: string) {
     const gameflowPhase = await league(LCU_ENDPOINT.GAMEFLOW_PHASE_URL);
-    return isJoinedRoom && phase === '' && gameflowPhase === 'None';
+    return isJoinedRoom && phase === '' && gameflowPhase === PHASE.NONE;
   }
 
   if (isGameLoadingWindow(gameflowData)) {
@@ -83,7 +83,7 @@ export const leagueHandler = async (webContents: WebContents) => {
   }
 
   function isGameLoadingWindow(data: GameflowData) {
-    return data.phase === 'InProgress' && !data.gameClient.visible;
+    return data.phase === PHASE.IN_GAME && !data.gameClient.visible;
   }
 };
 

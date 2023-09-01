@@ -4,3 +4,9 @@ export const LCU_ENDPOINT = {
   CHAMP_SELECT_URL: '/lol-champ-select/v1/session',
   SUMMONER_URL: '/lol-summoner/v1/current-summoner',
 };
+
+export const PHASE = {
+  NONE: 'None',
+  CHAMP_SELECT: 'ChampSelect',
+  IN_GAME: 'InProgress',
+};
