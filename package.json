@@ -2,7 +2,7 @@
   "name": "lvc-app",
   "version": "0.1.0",
   "private": true,
-  "main": "./dist/main.js",
+  "main": "./dist/main/main.js",
   "author": "lvc-app-authors",
   "description": "lol voice chat app",
   "homepage": "./",
@@ -27,7 +27,8 @@
   },
   "scripts": {
     "react-start": "react-scripts start",
-    "electron-start": "tsc && electron .",
+    "clean": "rm -rf dist",
+    "electron-start": "npm run clean && tsc && electron .",
     "start": "concurrently \"npm run react-start\" \"wait-on http://localhost:3000\" \"npm run electron-start\"",
     "build": "react-scripts build",
     "test": "react-scripts test"
