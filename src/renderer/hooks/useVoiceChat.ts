@@ -220,6 +220,7 @@ function useVoiceChat() {
     ipcRenderer.once(
       'game-loading',
       (_, teamData: { teamOneVoiceRoomName: string; teamTwoVoiceRoomName: string }) => {
+        console.log('game loading 진입!');
         socket.emit('game-loading', teamData);
       }
     );
