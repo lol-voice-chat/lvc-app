@@ -1,5 +1,5 @@
 export const IPC_KEY = {
-  JOIN_ROOM: 'join-room',
-  GAME_LOADING: 'game-loading',
+  TEAM_JOIN_ROOM: 'team-join-room',
+  LEAGUE_JOIN_ROOM: 'league-join-room',
   EXIT_CHAMP_SELECT: 'exit-champ-select',
 };

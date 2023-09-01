@@ -30,12 +30,12 @@ export const leagueHandler = async (webContents: WebContents) => {
   if (isChampionSelectionWindow(gameflowData)) {
     const { myTeam } = await league(LCU_ENDPOINT.CHAMP_SELECT_URL);
     const roomName: string = createVoiceRoomName(myTeam);
-    webContents.send(IPC_KEY.JOIN_ROOM, { roomName });
+    webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName });
   } else {
     ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, async (data) => {
       if (!isJoinedRoom) {
         const roomName: string = createVoiceRoomName(data.myTeam);
-        webContents.send(IPC_KEY.JOIN_ROOM, { roomName });
+        webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName });
         isJoinedRoom = true;
       }
 
@@ -59,21 +59,23 @@ export const leagueHandler = async (webContents: WebContents) => {
     if (!isJoinedRoom) {
       const { myTeam } = await league(LCU_ENDPOINT.CHAMP_SELECT_URL);
       const roomName: string = createVoiceRoomName(myTeam);
-      webContents.send(IPC_KEY.JOIN_ROOM, { roomName });
+      webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName });
       isJoinedRoom = true;
     }
 
     const { teamOne, teamTwo } = gameflowData.gameData;
-    const enemyTeamRoomName: string = await findEnemyTeamRoomName(teamOne, teamTwo);
+    const roomName: string = await createLeagueVoiceRoomName(teamOne, teamTwo);
+    const teamName: string = await getTeamName(teamOne);
 
-    webContents.send(IPC_KEY.GAME_LOADING, { enemyTeamRoomName });
+    webContents.send(IPC_KEY.LEAGUE_JOIN_ROOM, { roomName, teamName });
   } else {
     ws.subscribe(LCU_ENDPOINT.GAMEFLOW_URL, async (data) => {
       if (isGameLoadingWindow(data) && !isMovedGameLoadingWindow) {
         const { teamOne, teamTwo } = data.gameData;
-        const enemyTeamRoomName: string = await findEnemyTeamRoomName(teamOne, teamTwo);
+        const roomName: string = await createLeagueVoiceRoomName(teamOne, teamTwo);
+        const teamName: string = await getTeamName(teamOne);
 
-        webContents.send(IPC_KEY.GAME_LOADING, { enemyTeamRoomName });
+        webContents.send(IPC_KEY.LEAGUE_JOIN_ROOM, { roomName, teamName });
         isMovedGameLoadingWindow = true;
       }
     });
@@ -83,11 +85,16 @@ export const leagueHandler = async (webContents: WebContents) => {
     return data.phase === PHASE.IN_GAME && !data.gameClient.visible;
   }
 
-  async function findEnemyTeamRoomName(teamOne: Team[], teamTwo: Team[]) {
+  async function createLeagueVoiceRoomName(teamOne: Team[], teamTwo: Team[]) {
+    const teamOneVoiceRoomName: string = createVoiceRoomName(teamOne);
+    const teamTwoVoiceRoomName: string = createVoiceRoomName(teamTwo);
+    return teamOneVoiceRoomName + teamTwoVoiceRoomName;
+  }
+
+  async function getTeamName(teamOne: Team[]) {
     const { summonerId } = await league(LCU_ENDPOINT.SUMMONER_URL);
     const foundSummoner = teamOne.find((summoner) => summoner.summonerId === summonerId);
-
-    return createVoiceRoomName(foundSummoner ? teamTwo : teamOne);
+    return foundSummoner ? 'teamOne' : 'teamTwo';
   }
 };
 
