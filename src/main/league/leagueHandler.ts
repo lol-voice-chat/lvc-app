@@ -1,7 +1,8 @@
 import { createWebSocketConnection, LeagueWebSocket } from 'league-connect';
 import league from './league';
 import { WebContents } from 'electron';
-import { LCU_ENDPOINT, IPC_KEY } from '../../../const/index';
+import { IPC_KEY } from '../../../const/index';
+import { LCU_ENDPOINT } from '../const';
 
 type Team = {
   summonerId: string;
