@@ -2,7 +2,7 @@
   "name": "lvc-app",
   "version": "0.1.0",
   "private": true,
-  "main": "./dist/main.js",
+  "main": "./dist/main/main.js",
   "author": "lvc-app-authors",
   "description": "lol voice chat app",
   "homepage": "./",
