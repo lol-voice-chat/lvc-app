@@ -11,6 +11,8 @@ import {
   TransportType,
 } from '../@type/webRtc';
 import { SummonerType } from '../@type/summoner';
+import { IPC_KEY } from '../../../const';
+
 const { ipcRenderer } = window.require('electron');
 
 function useVoiceChat() {
@@ -29,7 +31,7 @@ function useVoiceChat() {
     const consumingList: string[] = [];
 
     socket.emit(
-      'join-room',
+      IPC_KEY.JOIN_ROOM,
       { roomName: voiceChatInfo.roomName, summoner },
       ({ rtpCapabilities }) => {
         getUserAudio(rtpCapabilities);
@@ -206,7 +208,7 @@ function useVoiceChat() {
       newSummonerSpeeker.srcObject = new MediaStream([track]);
     };
 
-    ipcRenderer.once('exit-champ-select', () => {
+    ipcRenderer.once(IPC_KEY.EXIT_CHAMP_SELECT, () => {
       socket.disconnect();
       producerTransport?.close();
       localConsumertList.map((localConsumer) => {
@@ -218,7 +220,7 @@ function useVoiceChat() {
     });
 
     ipcRenderer.once(
-      'game-loading',
+      IPC_KEY.GAME_LOADING,
       (_, teamData: { teamOneVoiceRoomName: string; teamTwoVoiceRoomName: string }) => {
         console.log('game loading 진입!');
         socket.emit('game-loading', teamData);
