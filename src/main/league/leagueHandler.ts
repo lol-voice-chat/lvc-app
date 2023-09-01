@@ -24,14 +24,14 @@ export const leagueHandler = async (webContents: WebContents) => {
   let isJoinedRoom = false;
   let isMovedGameLoadingWindow = false;
 
-  const gameflowData: GameflowData = await league(LCU_ENDPOINT.GAMEFLOW_SESSION_URL);
+  const gameflowData: GameflowData = await league(LCU_ENDPOINT.GAMEFLOW_URL);
 
   if (isChampionSelectionWindow(gameflowData)) {
-    const { myTeam } = await league(LCU_ENDPOINT.CHAMP_SELECT_SESSION_URL);
+    const { myTeam } = await league(LCU_ENDPOINT.CHAMP_SELECT_URL);
     const roomName: string = createVoiceRoomName(myTeam);
     webContents.send(IPC_KEY.JOIN_ROOM, { roomName });
   } else {
-    ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_SESSION_URL, async (data) => {
+    ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, async (data) => {
       if (!isJoinedRoom) {
         const roomName: string = createVoiceRoomName(data.myTeam);
         webContents.send(IPC_KEY.JOIN_ROOM, { roomName });
@@ -56,7 +56,7 @@ export const leagueHandler = async (webContents: WebContents) => {
 
   if (isGameLoadingWindow(gameflowData)) {
     if (!isJoinedRoom) {
-      const { myTeam } = await league(LCU_ENDPOINT.CHAMP_SELECT_SESSION_URL);
+      const { myTeam } = await league(LCU_ENDPOINT.CHAMP_SELECT_URL);
       const roomName: string = createVoiceRoomName(myTeam);
       webContents.send(IPC_KEY.JOIN_ROOM, { roomName });
       isJoinedRoom = true;
@@ -68,7 +68,7 @@ export const leagueHandler = async (webContents: WebContents) => {
 
     webContents.send(IPC_KEY.GAME_LOADING, { teamOneVoiceRoomName, teamTwoVoiceRoomName });
   } else {
-    ws.subscribe(LCU_ENDPOINT.GAMEFLOW_SESSION_URL, async (data) => {
+    ws.subscribe(LCU_ENDPOINT.GAMEFLOW_URL, async (data) => {
       if (isGameLoadingWindow(data) && !isMovedGameLoadingWindow) {
         const { teamOne, teamTwo } = data.gameData;
         const teamOneVoiceRoomName: string = createVoiceRoomName(teamOne);
