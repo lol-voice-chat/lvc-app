@@ -1,16 +1,18 @@
 import React, { useEffect } from 'react';
 import useVoiceChat from '../hooks/useVoiceChat';
 import { useRecoilValue } from 'recoil';
-import { myTeamSummonersState, summonerState } from '../@store/Recoil';
+import { enemySummonersState, myTeamSummonersState, summonerState } from '../@store/Recoil';
 
 function VoiceChatRoom() {
   const summoner = useRecoilValue(summonerState);
   const myTeamSummoners = useRecoilValue(myTeamSummonersState);
+  const enemySummoners = useRecoilValue(enemySummonersState);
 
-  const { onVoiceChatRoom } = useVoiceChat();
+  const { onTeamVoiceChatRoom, onLeagueVoiceChatRoom } = useVoiceChat();
 
   useEffect(() => {
-    onVoiceChatRoom();
+    onTeamVoiceChatRoom();
+    onLeagueVoiceChatRoom();
   }, []);
 
   return (
@@ -20,10 +22,10 @@ function VoiceChatRoom() {
         <div id={summoner.summonerId.toString()}>
           <img
             src={summoner.profileImage}
-            alt="내 챔피언 프로필 사진"
-            style={{ width: '50px', height: 'auto' }}
+            alt="내 소환사 프로필 사진"
+            style={{ width: '30px', height: 'auto' }}
           />
-          <h1>{summoner.displayName} 소환사님</h1>
+          <h2>{summoner.displayName} 소환사님</h2>
         </div>
       )}
 
@@ -33,9 +35,21 @@ function VoiceChatRoom() {
           <img
             src={myTeamSummoner.profileImage}
             alt="팀원 프로필 사진"
-            style={{ width: '50px', height: 'auto' }}
+            style={{ width: '30px', height: 'auto' }}
           />
-          <h1>팀원놈 : {myTeamSummoner.displayName}</h1>
+          <h3>팀원놈 : {myTeamSummoner.displayName}</h3>
+        </div>
+      ))}
+
+      {/* 적팀 소환사 UI */}
+      {enemySummoners?.map((enemySummoner) => (
+        <div id={enemySummoner.summonerId.toString()} key={enemySummoner.summonerId.toString()}>
+          <img
+            src={enemySummoner.profileImage}
+            alt="적팀 프로필 사진"
+            style={{ width: '30px', height: 'auto' }}
+          />
+          <h3>즉팀새퀴 : {enemySummoner.displayName}</h3>
         </div>
       ))}
     </>

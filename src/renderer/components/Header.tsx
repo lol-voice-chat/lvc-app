@@ -4,6 +4,7 @@ import { useSetRecoilState } from 'recoil';
 import { voiceChatInfoState, summonerState } from '../@store/Recoil';
 import { useNavigate } from 'react-router-dom';
 import { PATH } from '../const';
+import { IPC_KEY } from '../../const';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -18,8 +19,8 @@ function Header() {
       saveSummoner(summoner);
     });
 
-    ipcRenderer.once('join-room', (_, { roomName }) => {
-      updateVoiceChatInfo({ roomName });
+    ipcRenderer.once(IPC_KEY.TEAM_JOIN_ROOM, (_, { roomName }) => {
+      updateVoiceChatInfo({ teamRoomName: roomName });
       navigate(PATH.VOICE_CHAT_ROOM);
     });
   });
