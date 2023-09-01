@@ -64,19 +64,16 @@ export const leagueHandler = async (webContents: WebContents) => {
     }
 
     const { teamOne, teamTwo } = gameflowData.gameData;
-    const teamOneVoiceRoomName: string = createVoiceRoomName(teamOne);
-    const teamTwoVoiceRoomName: string = createVoiceRoomName(teamTwo);
+    const enemyTeamRoomName: string = await findEnemyTeamRoomName(teamOne, teamTwo);
 
-    webContents.send(IPC_KEY.GAME_LOADING, { teamOneVoiceRoomName, teamTwoVoiceRoomName });
+    webContents.send(IPC_KEY.GAME_LOADING, { enemyTeamRoomName });
   } else {
     ws.subscribe(LCU_ENDPOINT.GAMEFLOW_URL, async (data) => {
       if (isGameLoadingWindow(data) && !isMovedGameLoadingWindow) {
         const { teamOne, teamTwo } = data.gameData;
-        const teamOneVoiceRoomName: string = createVoiceRoomName(teamOne);
-        const teamTwoVoiceRoomName: string = createVoiceRoomName(teamTwo);
+        const enemyTeamRoomName: string = await findEnemyTeamRoomName(teamOne, teamTwo);
 
-        webContents.send(IPC_KEY.GAME_LOADING, { teamOneVoiceRoomName, teamTwoVoiceRoomName });
-        console.log('전체입장 성공');
+        webContents.send(IPC_KEY.GAME_LOADING, { enemyTeamRoomName });
         isMovedGameLoadingWindow = true;
       }
     });
@@ -84,6 +81,13 @@ export const leagueHandler = async (webContents: WebContents) => {
 
   function isGameLoadingWindow(data: GameflowData) {
     return data.phase === PHASE.IN_GAME && !data.gameClient.visible;
+  }
+
+  async function findEnemyTeamRoomName(teamOne: Team[], teamTwo: Team[]) {
+    const { summonerId } = await league(LCU_ENDPOINT.SUMMONER_URL);
+    const foundSummoner = teamOne.find((summoner) => summoner.summonerId === summonerId);
+
+    return createVoiceRoomName(foundSummoner ? teamOne : teamTwo);
   }
 };
 
