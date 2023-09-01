@@ -135,6 +135,7 @@ function useVoiceChat() {
 
       socket.on('complete-create-consumer-transport', ({ params }) => {
         if (!device) return;
+        console.log('컨슘 트랜스포트 생성 완료!');
 
         const consumerTransport = device.createRecvTransport(params);
 
@@ -219,17 +220,10 @@ function useVoiceChat() {
       window.location.replace('');
     });
 
-    ipcRenderer.once(
-      IPC_KEY.GAME_LOADING,
-      (_, teamData: { teamOneVoiceRoomName: string; teamTwoVoiceRoomName: string }) => {
-        console.log(
-          'game loading 진입!',
-          teamData.teamOneVoiceRoomName,
-          teamData.teamTwoVoiceRoomName
-        );
-        socket.emit('game-loading', teamData);
-      }
-    );
+    ipcRenderer.once(IPC_KEY.GAME_LOADING, (_, { enemyTeamRoomName }) => {
+      console.log('game loading 진입!', enemyTeamRoomName);
+      socket.emit('game-loading', { enemyTeamRoomName });
+    });
   };
 
   return { onVoiceChatRoom };

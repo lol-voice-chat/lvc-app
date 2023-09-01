@@ -72,6 +72,7 @@ export const leagueHandler = async (webContents: WebContents) => {
     ws.subscribe(LCU_ENDPOINT.GAMEFLOW_URL, async (data) => {
       if (isGameLoadingWindow(data) && !isMovedGameLoadingWindow) {
         const { teamOne, teamTwo } = data.gameData;
+        console.log(teamOne, teamTwo);
         const teamOneVoiceRoomName: string = createVoiceRoomName(teamOne);
         const teamTwoVoiceRoomName: string = createVoiceRoomName(teamTwo);
 
