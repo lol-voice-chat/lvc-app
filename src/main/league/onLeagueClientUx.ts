@@ -1,4 +1,5 @@
 import league from './league';
+import { LCU_ENDPOINT } from '../../../const';
 
 export type SummonerInfo = {
   summonerId: string;
@@ -7,10 +8,7 @@ export type SummonerInfo = {
 };
 
 export const onLeagueClientUx = async () => {
-  const { summonerId, displayName, profileIconId } = await league(
-    'GET',
-    '/lol-summoner/v1/current-summoner'
-  );
+  const { summonerId, displayName, profileIconId } = await league(LCU_ENDPOINT.SUMMONER_URL);
   const profileImage: string = `https://ddragon-webp.lolmath.net/latest/img/profileicon/${profileIconId}.webp`;
 
   const summoner: SummonerInfo = { summonerId, displayName, profileImage };
