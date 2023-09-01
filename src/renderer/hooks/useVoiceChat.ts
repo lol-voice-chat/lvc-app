@@ -11,7 +11,7 @@ import {
   TransportType,
 } from '../@type/webRtc';
 import { SummonerType } from '../@type/summoner';
-import { IPC_KEY } from '../../../const';
+import { IPC_KEY } from '../../const';
 
 const { ipcRenderer } = window.require('electron');
 

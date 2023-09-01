@@ -1,5 +1,5 @@
 import league from './league';
-import { LCU_ENDPOINT } from '../../../const';
+import { LCU_ENDPOINT } from '../const';
 
 export type SummonerInfo = {
   summonerId: string;
