@@ -87,7 +87,7 @@ export const leagueHandler = async (webContents: WebContents) => {
     const { summonerId } = await league(LCU_ENDPOINT.SUMMONER_URL);
     const foundSummoner = teamOne.find((summoner) => summoner.summonerId === summonerId);
 
-    return createVoiceRoomName(foundSummoner ? teamOne : teamTwo);
+    return createVoiceRoomName(foundSummoner ? teamTwo : teamOne);
   }
 };
 
