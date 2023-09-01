@@ -75,6 +75,7 @@ export const leagueHandler = async (webContents: WebContents) => {
         const teamTwoVoiceRoomName: string = createVoiceRoomName(teamTwo);
 
         webContents.send(IPC_KEY.GAME_LOADING, { teamOneVoiceRoomName, teamTwoVoiceRoomName });
+        console.log('전체입장 성공');
         isMovedGameLoadingWindow = true;
       }
     });
