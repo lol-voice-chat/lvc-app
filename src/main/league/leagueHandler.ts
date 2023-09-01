@@ -65,7 +65,7 @@ export const leagueHandler = async (webContents: WebContents) => {
 
     webContents.send('game-loading', { teamOneVoiceRoomName, teamTwoVoiceRoomName });
   } else {
-    ws.subscribe('/lol-gameflow/v1/sessioin', async (data) => {
+    ws.subscribe('/lol-gameflow/v1/session', async (data) => {
       if (isGameLoadingWindow(data) && !isMovedGameLoadingWindow) {
         const { teamOne, teamTwo } = data.gameData;
         const teamOneVoiceRoomName: string = createVoiceRoomName(teamOne);
