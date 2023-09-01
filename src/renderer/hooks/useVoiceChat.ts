@@ -217,9 +217,7 @@ function useVoiceChat() {
     });
   };
 
-  const onLeagueVoiceChatRoom = () => {
-    if (!summoner) return;
-
+  const onLeagueVoiceChatRoom = (roomName: string, teamName: string) => {
     const socket = io(PATH.SERVER_URL + '/league-voice-chat', { transports: ['websocket'] });
 
     let device: DeviceType | null = null;
@@ -227,10 +225,8 @@ function useVoiceChat() {
     let localConsumertList: LocalConsumerTransportType[] = [];
     const consumingList: string[] = [];
 
-    ipcRenderer.once(IPC_KEY.LEAGUE_JOIN_ROOM, (_, { roomName, teamName }) => {
-      socket.emit('league-join-room', { roomName, teamName, summoner }, ({ rtpCapabilities }) => {
-        getUserAudio(rtpCapabilities);
-      });
+    socket.emit('league-join-room', { roomName, teamName, summoner }, ({ rtpCapabilities }) => {
+      getUserAudio(rtpCapabilities);
     });
 
     const getUserAudio = (deviceLoadParam: RtpCapabilities) => {
