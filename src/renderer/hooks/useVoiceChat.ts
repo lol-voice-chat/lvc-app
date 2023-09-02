@@ -209,7 +209,7 @@ function useVoiceChat() {
       );
     });
 
-    /* 게임 중 방 떠남 */
+    /* 인게임 방 떠남 */
     ipcRenderer.once(IPC_KEY.EXIT_IN_GAME, () => {
       disconnectVoiceChat();
     });
@@ -432,7 +432,6 @@ function useVoiceChat() {
         localConsumer.consumer.close();
         localConsumer.consumerTransport.close();
       });
-      window.location.replace('');
     };
   };
 
