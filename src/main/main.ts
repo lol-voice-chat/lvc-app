@@ -24,6 +24,7 @@ const createWindow = () => {
   mainWindow.webContents.on('did-finish-load', async () => {
     const summoner: SummonerInfo = await onLeagueClientUx();
     mainWindow.webContents.send('on-league-client', summoner);
+    await leagueHandler(mainWindow.webContents);
   });
 };
 
@@ -35,8 +36,6 @@ app.whenReady().then(async () => {
       createWindow();
     }
   });
-
-  await leagueHandler(mainWindow.webContents);
 });
 
 app.on('window-all-closed', () => {
