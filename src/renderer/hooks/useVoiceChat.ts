@@ -143,19 +143,13 @@ function useVoiceChat() {
           }
         });
 
-        connectRecvTransport(
-          newSummoner.summonerId,
-          remoteProducerId,
-          params.id,
-          consumerTransport
-        );
+        connectRecvTransport(newSummoner.summonerId, remoteProducerId, consumerTransport);
       });
     };
 
     const connectRecvTransport = (
       newSummonerId: number,
       remoteProducerId: string,
-      remoteConsumerId: string,
       consumerTransport: TransportType
     ) => {
       if (!device) return;
@@ -165,7 +159,6 @@ function useVoiceChat() {
         {
           rtpCapabilities: device.rtpCapabilities,
           remoteProducerId,
-          remoteConsumerId,
         },
         async ({ params }: any) => {
           const consumer = await consumerTransport.consume({
@@ -357,19 +350,13 @@ function useVoiceChat() {
           }
         });
 
-        connectRecvTransport(
-          newSummoner.summonerId,
-          remoteProducerId,
-          params.id,
-          consumerTransport
-        );
+        connectRecvTransport(newSummoner.summonerId, remoteProducerId, consumerTransport);
       });
     };
 
     const connectRecvTransport = (
       newSummonerId: number,
       remoteProducerId: string,
-      remoteConsumerId: string,
       consumerTransport: TransportType
     ) => {
       if (!device) return;
@@ -379,7 +366,6 @@ function useVoiceChat() {
         {
           rtpCapabilities: device.rtpCapabilities,
           remoteProducerId,
-          remoteConsumerId,
         },
         async ({ params }: any) => {
           const consumer = await consumerTransport.consume({
