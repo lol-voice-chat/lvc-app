@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { SummonerType } from '../@type/summoner';
-import { useRecoilState, useSetRecoilState } from 'recoil';
-import { voiceChatInfoState, summonerState, gameStatusState } from '../@store/Recoil';
+import { useSetRecoilState } from 'recoil';
+import { summonerState, gameStatusState } from '../@store/atom';
 import { useNavigate } from 'react-router-dom';
 import { PATH } from '../const';
 import { IPC_KEY } from '../../const';
@@ -10,29 +10,31 @@ const { ipcRenderer } = window.require('electron');
 
 function Header() {
   const setGameStatus = useSetRecoilState(gameStatusState);
-  const [voiceChatInfo, setVoiceChatInfo] = useRecoilState(voiceChatInfoState);
   const setSummoner = useSetRecoilState(summonerState);
 
   const navigate = useNavigate();
 
   useEffect(() => {
+    let teamVoiceRoomName = null;
+
     ipcRenderer.once('on-league-client', (_, summoner: SummonerType) => {
       setSummoner(summoner);
     });
 
     ipcRenderer.once(IPC_KEY.TEAM_JOIN_ROOM, (_, { roomName }) => {
       setGameStatus('champ-select');
-      setVoiceChatInfo({ team: { roomName }, league: { roomName: null, teamName: null } });
-      navigate(PATH.VOICE_CHAT_ROOM);
+      teamVoiceRoomName = roomName;
+      navigate(PATH.VOICE_CHAT_ROOM, {
+        state: { team: { roomName } },
+      });
     });
 
     ipcRenderer.once(IPC_KEY.LEAGUE_JOIN_ROOM, (_, { roomName, teamName }) => {
-      if (roomName === voiceChatInfo.team.roomName) return;
+      if (roomName === teamVoiceRoomName) return;
 
       setGameStatus('loading');
-      setVoiceChatInfo({
-        team: voiceChatInfo.team,
-        league: { roomName, teamName },
+      navigate(PATH.VOICE_CHAT_ROOM, {
+        state: { league: { roomName, teamName } },
       });
     });
   }, []);

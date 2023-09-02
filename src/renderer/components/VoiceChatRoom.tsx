@@ -6,7 +6,7 @@ import {
   gameStatusState,
   myTeamSummonersState,
   summonerState,
-} from '../@store/Recoil';
+} from '../@store/atom';
 
 function VoiceChatRoom() {
   const gameStatus = useRecoilValue(gameStatusState);

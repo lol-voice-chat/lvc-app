@@ -3,19 +3,9 @@ import { atom } from 'recoil';
 
 type GameStatus = 'none' | 'champ-select' | 'loading' | 'in-game';
 
-type VoiceChatInfoType = {
-  team: { roomName: string | null };
-  league: { roomName: string | null; teamName: string | null };
-};
-
 export const gameStatusState = atom<GameStatus>({
   key: 'gameStatus',
   default: 'none',
-});
-
-export const voiceChatInfoState = atom<VoiceChatInfoType>({
-  key: 'voiceChatInfo',
-  default: { team: { roomName: null }, league: { roomName: null, teamName: null } },
 });
 
 export const summonerState = atom<SummonerType | null>({
