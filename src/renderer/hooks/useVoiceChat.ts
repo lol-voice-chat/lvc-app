@@ -1,6 +1,7 @@
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   enemySummonersState,
+  gameStatusState,
   myTeamSummonersState,
   summonerState,
   voiceChatInfoState,
@@ -21,24 +22,24 @@ import { IPC_KEY } from '../../const';
 const { ipcRenderer } = window.require('electron');
 
 function useVoiceChat() {
+  const setGameStatus = useSetRecoilState(gameStatusState);
   const voiceChatInfo = useRecoilValue(voiceChatInfoState);
   const summoner = useRecoilValue(summonerState);
   const [myTeamSummoners, setMyTeamSummoners] = useRecoilState(myTeamSummonersState);
   const [enemySummoners, setEnemySummoners] = useRecoilState(enemySummonersState);
 
   const onTeamVoiceChatRoom = () => {
-    if (!voiceChatInfo.teamRoomName || !summoner) return;
+    if (!summoner || !voiceChatInfo.team.roomName) return;
 
     const socket = io(PATH.SERVER_URL + '/team-voice-chat', { transports: ['websocket'] });
 
     let device: DeviceType | null = null;
     let producerTransport: TransportType | null = null;
     let localConsumertList: LocalConsumerTransportType[] = [];
-    const consumingList: string[] = [];
 
     socket.emit(
       'team-join-room',
-      { roomName: voiceChatInfo.teamRoomName, summoner },
+      { roomName: voiceChatInfo.team.roomName, summoner },
       ({ rtpCapabilities }) => {
         getUserAudio(rtpCapabilities);
       }
@@ -122,12 +123,9 @@ function useVoiceChat() {
     };
 
     const signalNewConsumerTransport = (remoteProducerId: string, newSummoner: SummonerType) => {
-      if (consumingList.includes(remoteProducerId)) return;
-
-      consumingList.push(remoteProducerId);
       setMyTeamSummoners([...(myTeamSummoners ?? []), newSummoner]);
 
-      socket.emit('create-consumer-transport');
+      socket.emit('create-consumer-transport', { remoteProducerId });
       socket.on('complete-create-consumer-transport', ({ params }) => {
         if (!device) return;
 
@@ -137,7 +135,7 @@ function useVoiceChat() {
           try {
             socket.emit('transport-recv-connect', {
               dtlsParameters,
-              remoteConsumerId: params.id,
+              remoteProducerId,
             });
             callback();
           } catch (err) {
@@ -177,36 +175,59 @@ function useVoiceChat() {
             rtpParameters: params.rtpParameters,
           });
 
-          joinNewSummoner(newSummonerId, consumer.track, {
+          joinNewSummoner(consumer.track, {
+            summonerId: newSummonerId,
             remoteProducerId: remoteProducerId,
             remoteConsumerId: params.id,
             consumerTransport: consumerTransport,
             consumer: consumer,
           });
 
-          socket.emit('consumer-resume', { remoteConsumerId: params.id });
+          socket.emit('consumer-resume', { remoteProducerId });
         }
       );
     };
 
     const joinNewSummoner = (
-      newSummonerId: number,
       track: MediaStreamTrack,
       consumerTransport: LocalConsumerTransportType
     ) => {
       localConsumertList.push(consumerTransport);
 
-      const newSummoner = document.getElementById(newSummonerId.toString());
+      const newSummoner = document.getElementById(consumerTransport.summonerId.toString());
       const newSummonerSpeeker = document.createElement('audio');
       newSummonerSpeeker.setAttribute('autoplay', 'true');
       newSummoner?.appendChild(newSummonerSpeeker);
       newSummonerSpeeker.srcObject = new MediaStream([track]);
     };
 
-    /* 챔피언 선택창 떠남 */
+    /* 팀원 나감 */
+    socket.on('inform-exit-in-game', ({ summonerId }) => {
+      localConsumertList = localConsumertList.filter((localConsumer) => {
+        if (localConsumer.summonerId === summonerId) {
+          localConsumer.consumer.close();
+          localConsumer.consumerTransport.close();
+          return false;
+        }
+        return true;
+      });
+      setMyTeamSummoners(
+        myTeamSummoners?.filter((summoner) => summoner.summonerId !== summonerId) ?? null
+      );
+    });
+
+    /* 게임 중 방 떠남 */
+    ipcRenderer.once(IPC_KEY.EXIT_IN_GAME, () => {
+      disconnectVoiceChat();
+    });
+
+    /* 챔피언 선택창에서 닷지 */
     ipcRenderer.once(IPC_KEY.EXIT_CHAMP_SELECT, () => {
       socket.emit('exit-champ-select');
+      disconnectVoiceChat();
+    });
 
+    const disconnectVoiceChat = () => {
       socket.disconnect();
       producerTransport?.close();
       localConsumertList.map((localConsumer) => {
@@ -214,20 +235,29 @@ function useVoiceChat() {
         localConsumer.consumerTransport.close();
       });
       window.location.replace('');
-    });
+    };
   };
 
-  const onLeagueVoiceChatRoom = (roomName: string, teamName: string) => {
+  const onLeagueVoiceChatRoom = () => {
+    if (!voiceChatInfo.league.roomName || !voiceChatInfo.league.teamName) return;
+
     const socket = io(PATH.SERVER_URL + '/league-voice-chat', { transports: ['websocket'] });
 
     let device: DeviceType | null = null;
     let producerTransport: TransportType | null = null;
     let localConsumertList: LocalConsumerTransportType[] = [];
-    const consumingList: string[] = [];
 
-    socket.emit('league-join-room', { roomName, teamName, summoner }, ({ rtpCapabilities }) => {
-      getUserAudio(rtpCapabilities);
-    });
+    socket.emit(
+      'league-join-room',
+      {
+        roomName: voiceChatInfo.league.roomName,
+        teamName: voiceChatInfo.league.teamName,
+        summoner,
+      },
+      ({ rtpCapabilities }) => {
+        getUserAudio(rtpCapabilities);
+      }
+    );
 
     const getUserAudio = (deviceLoadParam: RtpCapabilities) => {
       navigator.mediaDevices
@@ -307,12 +337,9 @@ function useVoiceChat() {
     };
 
     const signalNewConsumerTransport = (remoteProducerId: string, newSummoner: SummonerType) => {
-      if (consumingList.includes(remoteProducerId)) return;
-
-      consumingList.push(remoteProducerId);
       setEnemySummoners([...(enemySummoners ?? []), newSummoner]);
 
-      socket.emit('create-consumer-transport');
+      socket.emit('create-consumer-transport', { remoteProducerId });
       socket.on('complete-create-consumer-transport', ({ params }) => {
         if (!device) return;
 
@@ -322,7 +349,7 @@ function useVoiceChat() {
           try {
             socket.emit('transport-recv-connect', {
               dtlsParameters,
-              remoteConsumerId: params.id,
+              remoteProducerId,
             });
             callback();
           } catch (err) {
@@ -362,30 +389,64 @@ function useVoiceChat() {
             rtpParameters: params.rtpParameters,
           });
 
-          joinNewSummoner(newSummonerId, consumer.track, {
+          joinNewSummoner(consumer.track, {
+            summonerId: newSummonerId,
             remoteProducerId: remoteProducerId,
             remoteConsumerId: params.id,
             consumerTransport: consumerTransport,
             consumer: consumer,
           });
 
-          socket.emit('consumer-resume', { remoteConsumerId: params.id });
+          socket.emit('consumer-resume', { remoteProducerId });
         }
       );
     };
 
     const joinNewSummoner = (
-      newSummonerId: number,
       track: MediaStreamTrack,
       consumerTransport: LocalConsumerTransportType
     ) => {
       localConsumertList.push(consumerTransport);
 
-      const newSummoner = document.getElementById(newSummonerId.toString());
+      const newSummoner = document.getElementById(consumerTransport.summonerId.toString());
       const newSummonerSpeeker = document.createElement('audio');
       newSummonerSpeeker.setAttribute('autoplay', 'true');
       newSummoner?.appendChild(newSummonerSpeeker);
       newSummonerSpeeker.srcObject = new MediaStream([track]);
+    };
+
+    socket.on('inform-exit-in-game', ({ summonerId }) => {
+      localConsumertList = localConsumertList.filter((localConsumer) => {
+        if (localConsumer.summonerId === summonerId) {
+          localConsumer.consumer.close();
+          localConsumer.consumerTransport.close();
+          return false;
+        }
+        return true;
+      });
+      setEnemySummoners(
+        enemySummoners?.filter((summoner) => summoner.summonerId !== summonerId) ?? null
+      );
+    });
+
+    ipcRenderer.once(IPC_KEY.START_IN_GAME, () => {
+      socket.emit('start-in-game');
+      disconnectVoiceChat();
+      setGameStatus('in-game');
+    });
+
+    ipcRenderer.once(IPC_KEY.EXIT_IN_GAME, () => {
+      disconnectVoiceChat();
+    });
+
+    const disconnectVoiceChat = () => {
+      socket.disconnect();
+      producerTransport?.close();
+      localConsumertList.map((localConsumer) => {
+        localConsumer.consumer.close();
+        localConsumer.consumerTransport.close();
+      });
+      window.location.replace('');
     };
   };
 

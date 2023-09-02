@@ -8,6 +8,7 @@ export type TransportType = Transport<AppData>;
 export type LocalProducerType = { id: string } & SummonerType;
 
 export type LocalConsumerTransportType = {
+  summonerId: number;
   remoteProducerId: string;
   remoteConsumerId: string;
   consumer: Consumer<AppData>;

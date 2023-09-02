@@ -1,12 +1,15 @@
 import React, { useEffect } from 'react';
 import useVoiceChat from '../hooks/useVoiceChat';
 import { useRecoilValue } from 'recoil';
-import { enemySummonersState, myTeamSummonersState, summonerState } from '../@store/Recoil';
-import { IPC_KEY } from '../../const';
-
-const { ipcRenderer } = window.require('electron');
+import {
+  enemySummonersState,
+  gameStatusState,
+  myTeamSummonersState,
+  summonerState,
+} from '../@store/Recoil';
 
 function VoiceChatRoom() {
+  const gameStatus = useRecoilValue(gameStatusState);
   const summoner = useRecoilValue(summonerState);
   const myTeamSummoners = useRecoilValue(myTeamSummonersState);
   const enemySummoners = useRecoilValue(enemySummonersState);
@@ -15,11 +18,11 @@ function VoiceChatRoom() {
 
   useEffect(() => {
     onTeamVoiceChatRoom();
-
-    ipcRenderer.once(IPC_KEY.LEAGUE_JOIN_ROOM, (_, { roomName, teamName }) => {
-      onLeagueVoiceChatRoom(roomName, teamName);
-    });
   }, []);
+
+  useEffect(() => {
+    gameStatus === 'loading' && onLeagueVoiceChatRoom();
+  }, [gameStatus]);
 
   return (
     <>
