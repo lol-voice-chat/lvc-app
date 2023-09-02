@@ -30,7 +30,7 @@ function useVoiceChat() {
   const { state } = useLocation();
 
   const onTeamVoiceChatRoom = () => {
-    if (!summoner || !state?.team.roomName) return;
+    if (!summoner || state?.team.roomName) return;
 
     const roomName = state.team.roomName;
     const socket = io(PATH.SERVER_URL + '/team-voice-chat', { transports: ['websocket'] });
