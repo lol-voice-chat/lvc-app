@@ -32,13 +32,14 @@ function useVoiceChat() {
   const onTeamVoiceChatRoom = () => {
     if (!summoner || !state?.team.roomName) return;
 
+    const roomName = state.team.roomName;
     const socket = io(PATH.SERVER_URL + '/team-voice-chat', { transports: ['websocket'] });
 
     let device: DeviceType | null = null;
     let producerTransport: TransportType | null = null;
     let localConsumertList: LocalConsumerTransportType[] = [];
 
-    socket.emit('team-join-room', { roomName: state.roomName, summoner }, ({ rtpCapabilities }) => {
+    socket.emit('team-join-room', { roomName, summoner }, ({ rtpCapabilities }) => {
       getUserAudio(rtpCapabilities);
     });
 
@@ -235,23 +236,17 @@ function useVoiceChat() {
   const onLeagueVoiceChatRoom = () => {
     if (!state?.league.roomName || !state?.league.teamName) return;
 
+    const roomName = state.league.roomName;
+    const teamName = state.league.teamName;
     const socket = io(PATH.SERVER_URL + '/league-voice-chat', { transports: ['websocket'] });
 
     let device: DeviceType | null = null;
     let producerTransport: TransportType | null = null;
     let localConsumertList: LocalConsumerTransportType[] = [];
 
-    socket.emit(
-      'league-join-room',
-      {
-        roomName: state.league.roomName,
-        teamName: state.league.teamName,
-        summoner,
-      },
-      ({ rtpCapabilities }) => {
-        getUserAudio(rtpCapabilities);
-      }
-    );
+    socket.emit('league-join-room', { roomName, teamName, summoner }, ({ rtpCapabilities }) => {
+      getUserAudio(rtpCapabilities);
+    });
 
     const getUserAudio = (deviceLoadParam: RtpCapabilities) => {
       navigator.mediaDevices
