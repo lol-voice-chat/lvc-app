@@ -27,6 +27,8 @@ function Header() {
     });
 
     ipcRenderer.once(IPC_KEY.LEAGUE_JOIN_ROOM, (_, { roomName, teamName }) => {
+      if (roomName === voiceChatInfo.team.roomName) return;
+
       setGameStatus('loading');
       setVoiceChatInfo({
         team: voiceChatInfo.team,

@@ -209,6 +209,10 @@ function useVoiceChat() {
       );
     });
 
+    ipcRenderer.once(IPC_KEY.START_IN_GAME, () => {
+      setGameStatus('in-game');
+    });
+
     /* 인게임 방 떠남 */
     ipcRenderer.once(IPC_KEY.EXIT_IN_GAME, () => {
       disconnectVoiceChat();
