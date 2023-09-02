@@ -4,10 +4,6 @@ import { WebContents } from 'electron';
 import { IPC_KEY } from '../../const/index';
 import { LCU_ENDPOINT, PHASE } from '../const';
 
-type Team = {
-  summonerId: string;
-};
-
 type GameflowData = {
   gameClient: {
     running: boolean;
@@ -15,8 +11,8 @@ type GameflowData = {
   };
   phase: string;
   gameData: {
-    teamOne: Team[];
-    teamTwo: Team[];
+    teamOne: [];
+    teamTwo: [];
   };
 };
 
@@ -44,7 +40,7 @@ export const leagueHandler = async (webContents: WebContents) => {
     return data.phase === PHASE.CHAMP_SELECT;
   }
 
-  function joinTeamVoiceRoom(myTeam: Team[]) {
+  function joinTeamVoiceRoom(myTeam: []) {
     const roomName: string = createVoiceRoomName(myTeam);
     webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName });
     isJoinedRoom = true;
@@ -95,9 +91,9 @@ export const leagueHandler = async (webContents: WebContents) => {
     isStartedGameLoading = true;
   }
 
-  async function getTeamName(teamOne: Team[]) {
+  async function getTeamName(teamOne: []) {
     const { summonerId } = await league(LCU_ENDPOINT.SUMMONER_URL);
-    const foundSummoner = teamOne.find((summoner) => summoner.summonerId === summonerId);
+    const foundSummoner = teamOne.find((summoner: any) => summoner.summonerId === summonerId);
     return foundSummoner ? 'teamOne' : 'teamTwo';
   }
 
@@ -148,7 +144,7 @@ export const leagueHandler = async (webContents: WebContents) => {
   }
 };
 
-function createVoiceRoomName(team: Team[]) {
-  const summonerIds: string[] = team.map((summoner: Team) => summoner.summonerId);
+function createVoiceRoomName(team: []) {
+  const summonerIds: string[] = team.map((summoner: any) => summoner.summonerId);
   return summonerIds.join('');
 }
