@@ -4,8 +4,7 @@ import {
   gameStatusState,
   myTeamSummonersState,
   summonerState,
-  voiceChatInfoState,
-} from '../@store/Recoil';
+} from '../@store/atom';
 import * as mediasoup from 'mediasoup-client';
 import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
 import { io } from 'socket.io-client';
@@ -18,18 +17,20 @@ import {
 } from '../@type/webRtc';
 import { SummonerType } from '../@type/summoner';
 import { IPC_KEY } from '../../const';
+import { useLocation } from 'react-router-dom';
 
 const { ipcRenderer } = window.require('electron');
 
 function useVoiceChat() {
   const setGameStatus = useSetRecoilState(gameStatusState);
-  const voiceChatInfo = useRecoilValue(voiceChatInfoState);
   const summoner = useRecoilValue(summonerState);
   const [myTeamSummoners, setMyTeamSummoners] = useRecoilState(myTeamSummonersState);
   const [enemySummoners, setEnemySummoners] = useRecoilState(enemySummonersState);
 
+  const { state } = useLocation();
+
   const onTeamVoiceChatRoom = () => {
-    if (!summoner || !voiceChatInfo.team.roomName) return;
+    if (!summoner || !state?.team.roomName) return;
 
     const socket = io(PATH.SERVER_URL + '/team-voice-chat', { transports: ['websocket'] });
 
@@ -37,13 +38,9 @@ function useVoiceChat() {
     let producerTransport: TransportType | null = null;
     let localConsumertList: LocalConsumerTransportType[] = [];
 
-    socket.emit(
-      'team-join-room',
-      { roomName: voiceChatInfo.team.roomName, summoner },
-      ({ rtpCapabilities }) => {
-        getUserAudio(rtpCapabilities);
-      }
-    );
+    socket.emit('team-join-room', { roomName: state.roomName, summoner }, ({ rtpCapabilities }) => {
+      getUserAudio(rtpCapabilities);
+    });
 
     const getUserAudio = (deviceLoadParam: RtpCapabilities) => {
       navigator.mediaDevices
@@ -236,7 +233,7 @@ function useVoiceChat() {
   };
 
   const onLeagueVoiceChatRoom = () => {
-    if (!voiceChatInfo.league.roomName || !voiceChatInfo.league.teamName) return;
+    if (!state?.league.roomName || !state?.league.teamName) return;
 
     const socket = io(PATH.SERVER_URL + '/league-voice-chat', { transports: ['websocket'] });
 
@@ -247,8 +244,8 @@ function useVoiceChat() {
     socket.emit(
       'league-join-room',
       {
-        roomName: voiceChatInfo.league.roomName,
-        teamName: voiceChatInfo.league.teamName,
+        roomName: state.league.roomName,
+        teamName: state.league.teamName,
         summoner,
       },
       ({ rtpCapabilities }) => {
