@@ -5,3 +5,8 @@ export const IPC_KEY = {
   EXIT_IN_GAME: 'exit-in-game',
   START_IN_GAME: 'start-in-game',
 };
+
+export const STORE_KEY = {
+  TEAM_VOICE_ROOM_NAME: 'team-voice-room-name',
+  LEAGUE_VOICE_ROOM_NAME: 'league-voice-room-name',
+};

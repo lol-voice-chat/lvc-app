@@ -2,6 +2,7 @@ import { app, BrowserWindow } from 'electron';
 import { leagueHandler } from './league/leagueHandler';
 import { onLeagueClientUx, SummonerInfo } from './league/onLeagueClientUx';
 import electronReload from 'electron-reload';
+import onElectronStore from './store';
 
 if (process.env.NODE_ENV === 'development') {
   electronReload(__dirname, {});
@@ -43,3 +44,5 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+
+onElectronStore();
