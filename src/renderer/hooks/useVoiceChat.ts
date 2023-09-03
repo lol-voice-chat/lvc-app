@@ -16,8 +16,8 @@ import {
   TransportType,
 } from '../@type/webRtc';
 import { SummonerType } from '../@type/summoner';
-import { IPC_KEY } from '../../const';
-import { useLocation } from 'react-router-dom';
+import { IPC_KEY, STORE_KEY } from '../../const';
+import electronStore from '../@store/electron';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -27,20 +27,17 @@ function useVoiceChat() {
   const [myTeamSummoners, setMyTeamSummoners] = useRecoilState(myTeamSummonersState);
   const [enemySummoners, setEnemySummoners] = useRecoilState(enemySummonersState);
 
-  const { state } = useLocation();
-
   const onTeamVoiceChatRoom = () => {
-    if (!summoner || !state?.team.roomName) return;
-
-    const roomName = state.team.roomName;
     const socket = io(PATH.SERVER_URL + '/team-voice-chat', { transports: ['websocket'] });
 
     let device: DeviceType | null = null;
     let producerTransport: TransportType | null = null;
     let localConsumertList: LocalConsumerTransportType[] = [];
 
-    socket.emit('team-join-room', { roomName, summoner }, ({ rtpCapabilities }) => {
-      getUserAudio(rtpCapabilities);
+    electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
+      socket.emit('team-join-room', { roomName, summoner }, ({ rtpCapabilities }) => {
+        getUserAudio(rtpCapabilities);
+      });
     });
 
     const getUserAudio = (deviceLoadParam: RtpCapabilities) => {
@@ -234,18 +231,16 @@ function useVoiceChat() {
   };
 
   const onLeagueVoiceChatRoom = () => {
-    if (!state?.league?.roomName || !state?.league?.teamName) return;
-
-    const roomName = state.league.roomName;
-    const teamName = state.league.teamName;
     const socket = io(PATH.SERVER_URL + '/league-voice-chat', { transports: ['websocket'] });
 
     let device: DeviceType | null = null;
     let producerTransport: TransportType | null = null;
     let localConsumertList: LocalConsumerTransportType[] = [];
 
-    socket.emit('league-join-room', { roomName, teamName, summoner }, ({ rtpCapabilities }) => {
-      getUserAudio(rtpCapabilities);
+    electronStore.get(STORE_KEY.LEAGUE_VOICE_ROOM_NAME).then(({ roomName, teamName }) => {
+      socket.emit('league-join-room', { roomName, teamName, summoner }, ({ rtpCapabilities }) => {
+        getUserAudio(rtpCapabilities);
+      });
     });
 
     const getUserAudio = (deviceLoadParam: RtpCapabilities) => {

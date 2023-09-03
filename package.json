@@ -6,6 +6,7 @@
   "author": "lvc-app-authors",
   "description": "lol voice chat app",
   "homepage": "./",
+  "sideEffects": false,
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -14,6 +15,7 @@
     "@types/node": "^16.18.46",
     "@types/react": "^18.2.21",
     "@types/react-dom": "^18.2.7",
+    "electron-store": "^8.1.0",
     "league-connect": "^6.0.0-rc12",
     "mediasoup-client": "^3.6.100",
     "react": "^18.2.0",
@@ -52,6 +54,7 @@
     ]
   },
   "devDependencies": {
+    "assert": "^2.0.0",
     "concurrently": "^8.2.1",
     "electron": "^26.1.0",
     "electron-reload": "^2.0.0-alpha.1",

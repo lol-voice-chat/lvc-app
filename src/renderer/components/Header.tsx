@@ -4,7 +4,8 @@ import { useSetRecoilState } from 'recoil';
 import { summonerState, gameStatusState } from '../@store/atom';
 import { useNavigate } from 'react-router-dom';
 import { PATH } from '../const';
-import { IPC_KEY } from '../../const';
+import { IPC_KEY, STORE_KEY } from '../../const';
+import electronStore from '../@store/electron';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -15,26 +16,22 @@ function Header() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    let teamVoiceRoomName = null;
-
     ipcRenderer.once('on-league-client', (_, summoner: SummonerType) => {
       setSummoner(summoner);
     });
 
     ipcRenderer.once(IPC_KEY.TEAM_JOIN_ROOM, (_, { roomName }) => {
       setGameStatus('champ-select');
-      teamVoiceRoomName = roomName;
-      navigate(PATH.VOICE_CHAT_ROOM, {
-        state: { team: { roomName } },
-      });
+      electronStore.set(STORE_KEY.TEAM_VOICE_ROOM_NAME, roomName);
+      navigate(PATH.VOICE_CHAT_ROOM);
     });
 
     ipcRenderer.once(IPC_KEY.LEAGUE_JOIN_ROOM, (_, { roomName, teamName }) => {
-      if (roomName === teamVoiceRoomName) return;
+      electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((teamVoiceRoomName) => {
+        if (teamVoiceRoomName === roomName) return;
 
-      setGameStatus('loading');
-      navigate(PATH.VOICE_CHAT_ROOM, {
-        state: { league: { roomName, teamName } },
+        setGameStatus('loading');
+        electronStore.set(STORE_KEY.LEAGUE_VOICE_ROOM_NAME, { roomName, teamName });
       });
     });
   }, []);
