@@ -1,5 +1,6 @@
 import { app, BrowserWindow } from 'electron';
-import { leagueHandler } from './league/leagueHandler';
+// import { leagueHandler } from './league/leagueHandler';
+import { leagueHandler } from './league/leagueHandler.v3';
 import { onLeagueClientUx, SummonerInfo } from './league/onLeagueClientUx';
 import electronReload from 'electron-reload';
 import onElectronStore from './store';
@@ -25,6 +26,7 @@ const createWindow = () => {
   mainWindow.webContents.on('did-finish-load', async () => {
     const summoner: SummonerInfo = await onLeagueClientUx();
     mainWindow.webContents.send('on-league-client', summoner);
+
     await leagueHandler(mainWindow.webContents);
   });
 };
