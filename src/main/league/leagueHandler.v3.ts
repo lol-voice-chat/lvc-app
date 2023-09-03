@@ -24,15 +24,13 @@ export const leagueHandler = async (webContents: WebContents) => {
 
   await checkCurrentLeagueEntryPoint(webContents);
 
-  ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, (data) => {
+  ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, async (data) => {
     if (!isJoinedRoom) {
       const roomName: string = createVoiceRoomName(data.myTeam);
       webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName });
       isJoinedRoom = true;
     }
-  });
 
-  ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, async (data) => {
     if (await isCloseChampionSelectionWindow(data.timer.phase)) {
       webContents.send(IPC_KEY.EXIT_CHAMP_SELECT);
       isJoinedRoom = false;
