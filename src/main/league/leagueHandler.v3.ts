@@ -25,7 +25,7 @@ export const leagueHandler = async (webContents: WebContents) => {
   await checkCurrentLeagueEntryPoint(webContents);
 
   ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, async (data) => {
-    if (!isJoinedRoom) {
+    if (data.timer.phase === 'BAN_PICK' && !isJoinedRoom) {
       const roomName: string = createVoiceRoomName(data.myTeam);
       webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName });
       isJoinedRoom = true;
@@ -39,8 +39,8 @@ export const leagueHandler = async (webContents: WebContents) => {
 
   async function isCloseChampionSelectionWindow(phase: string) {
     const gameflowPhase = await league(LCU_ENDPOINT.GAMEFLOW_PHASE_URL);
-    const isNotChampionSelectionWindow = gameflowPhase === PHASE.NONE || PHASE.LOBBY;
-    return isJoinedRoom && phase === '' && isNotChampionSelectionWindow;
+    const isNotChampSelect: boolean = gameflowPhase === PHASE.NONE || gameflowPhase === PHASE.LOBBY;
+    return isJoinedRoom && phase === '' && isNotChampSelect;
   }
 
   ws.subscribe(LCU_ENDPOINT.GAMEFLOW_URL, async (data) => {
