@@ -41,7 +41,8 @@ export const leagueHandler = async (webContents: WebContents) => {
 
   async function isCloseChampionSelectionWindow(phase: string) {
     const gameflowPhase = await league(LCU_ENDPOINT.GAMEFLOW_PHASE_URL);
-    return isJoinedRoom && phase === '' && gameflowPhase === PHASE.NONE;
+    const isNotChampionSelectionWindow = gameflowPhase === PHASE.NONE || PHASE.LOBBY;
+    return isJoinedRoom && phase === '' && isNotChampionSelectionWindow;
   }
 
   ws.subscribe(LCU_ENDPOINT.GAMEFLOW_URL, async (data) => {

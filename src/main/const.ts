@@ -7,6 +7,7 @@ export const LCU_ENDPOINT = {
 
 export const PHASE = {
   NONE: 'None',
+  LOBBY: 'Lobby',
   CHAMP_SELECT: 'ChampSelect',
   IN_GAME: 'InProgress',
 };
