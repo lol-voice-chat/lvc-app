@@ -12,7 +12,7 @@ import { DeviceType, ConsumerTransportType, TransportType } from '../@type/webRt
 import { SummonerType } from '../@type/summoner';
 import { IPC_KEY, STORE_KEY } from '../../const';
 import electronStore from '../@store/electron';
-import { initSocket } from '../utils/socket';
+import { connectSocket } from '../utils/socket';
 import { Socket } from 'socket.io-client';
 
 const { ipcRenderer } = window.require('electron');
@@ -172,7 +172,7 @@ function useVoiceChat() {
   };
 
   const onTeamVoiceRoom = () => {
-    const socket = initSocket('/team-voice-chat');
+    const socket = connectSocket('/team-voice-chat');
 
     let device: DeviceType | null = null;
     let producerTransport: TransportType | null = null;
@@ -226,7 +226,7 @@ function useVoiceChat() {
   };
 
   const onLeagueVoiceRoom = () => {
-    const socket = initSocket('/league-voice-chat');
+    const socket = connectSocket('/league-voice-chat');
 
     let device: DeviceType | null = null;
     let producerTransport: TransportType | null = null;
