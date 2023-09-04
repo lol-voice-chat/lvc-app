@@ -21,6 +21,7 @@ function Header() {
     });
 
     ipcRenderer.once(IPC_KEY.TEAM_JOIN_ROOM, (_, { roomName }) => {
+      console.log(roomName);
       setGameStatus('champ-select');
       electronStore.set(STORE_KEY.TEAM_VOICE_ROOM_NAME, roomName);
       navigate(PATH.VOICE_CHAT_ROOM);
@@ -28,6 +29,7 @@ function Header() {
 
     ipcRenderer.once(IPC_KEY.LEAGUE_JOIN_ROOM, (_, { roomName, teamName }) => {
       electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((teamVoiceRoomName) => {
+        console.log(teamVoiceRoomName, roomName);
         if (teamVoiceRoomName === roomName) return;
 
         setGameStatus('loading');

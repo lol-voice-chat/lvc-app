@@ -7,17 +7,13 @@ import {
 } from '../@store/atom';
 import * as mediasoup from 'mediasoup-client';
 import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
-import { io } from 'socket.io-client';
 import { PATH } from '../const';
-import {
-  DeviceType,
-  LocalConsumerTransportType,
-  LocalProducerType,
-  TransportType,
-} from '../@type/webRtc';
+import { DeviceType, ConsumerTransportType, TransportType } from '../@type/webRtc';
 import { SummonerType } from '../@type/summoner';
 import { IPC_KEY, STORE_KEY } from '../../const';
 import electronStore from '../@store/electron';
+import { initSocket } from '../utils/socket';
+import { Socket } from 'socket.io-client';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -27,20 +23,14 @@ function useVoiceChat() {
   const [myTeamSummoners, setMyTeamSummoners] = useRecoilState(myTeamSummonersState);
   const [enemySummoners, setEnemySummoners] = useRecoilState(enemySummonersState);
 
-  const onTeamVoiceChatRoom = () => {
-    const socket = io(PATH.SERVER_URL + '/team-voice-chat', { transports: ['websocket'] });
-
-    let device: DeviceType | null = null;
-    let producerTransport: TransportType | null = null;
-    let localConsumertList: LocalConsumerTransportType[] = [];
-
-    electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
-      socket.emit('team-join-room', { roomName, summoner }, ({ rtpCapabilities }) => {
-        getUserAudio(rtpCapabilities);
-      });
-    });
-
-    const getUserAudio = (deviceLoadParam: RtpCapabilities) => {
+  const connectVoiceChat = (
+    socket: Socket,
+    device: DeviceType | null,
+    rtpCapabilities: RtpCapabilities,
+    producerTransport: TransportType | null,
+    consumerTransportList: ConsumerTransportType[]
+  ) => {
+    const getUserAudio = () => {
       navigator.mediaDevices
         .getUserMedia({
           audio: {
@@ -49,9 +39,10 @@ function useVoiceChat() {
             autoGainControl: false,
           },
         })
-        .then(async (mediaStream) => createDevice(mediaStream, deviceLoadParam))
+        .then(async (mediaStream) => createDevice(mediaStream, rtpCapabilities))
         .catch((err) => console.log('미디어 권한 에러', err));
     };
+    getUserAudio();
 
     const createDevice = (mediaStream: MediaStream, routerRtpCapabilities: RtpCapabilities) => {
       device = new mediasoup.Device();
@@ -102,15 +93,12 @@ function useVoiceChat() {
         .catch((err) => console.log('프로듀스 메서드 에러', err));
     };
 
-    socket.on(
-      'new-producer',
-      ({ id, summonerId, displayName, profileImage }: LocalProducerType) => {
-        signalNewConsumerTransport(id, { summonerId, displayName, profileImage });
-      }
-    );
+    socket.on('new-producer', ({ id, summonerId, displayName, profileImage }) => {
+      signalNewConsumerTransport(id, { summonerId, displayName, profileImage });
+    });
 
     const getProducers = () => {
-      socket.emit('get-producers', (producers: LocalProducerType[]) => {
+      socket.emit('get-producers', (producers) => {
         producers.forEach(({ id, summonerId, displayName, profileImage }) => {
           signalNewConsumerTransport(id, { summonerId, displayName, profileImage });
         });
@@ -143,7 +131,7 @@ function useVoiceChat() {
     };
 
     const connectRecvTransport = (
-      newSummonerId: number,
+      summonerId: number,
       remoteProducerId: string,
       consumerTransport: TransportType
     ) => {
@@ -163,38 +151,45 @@ function useVoiceChat() {
             rtpParameters: params.rtpParameters,
           });
 
-          joinNewSummoner(consumer.track, {
-            summonerId: newSummonerId,
-            remoteProducerId: remoteProducerId,
+          consumerTransportList.push({
+            summonerId,
+            remoteProducerId,
             remoteConsumerId: params.id,
-            consumerTransport: consumerTransport,
-            consumer: consumer,
+            consumer,
+            consumerTransport,
           });
+
+          const newSummoner = document.getElementById(summonerId.toString());
+          const newSummonerSpeeker = document.createElement('audio');
+          newSummonerSpeeker.setAttribute('autoplay', 'true');
+          newSummoner?.appendChild(newSummonerSpeeker);
+          newSummonerSpeeker.srcObject = new MediaStream([consumer.track]);
 
           socket.emit('consumer-resume', { remoteProducerId });
         }
       );
     };
+  };
 
-    const joinNewSummoner = (
-      track: MediaStreamTrack,
-      consumerTransport: LocalConsumerTransportType
-    ) => {
-      localConsumertList.push(consumerTransport);
+  const onTeamVoiceRoom = () => {
+    const socket = initSocket('/team-voice-chat');
 
-      const newSummoner = document.getElementById(consumerTransport.summonerId.toString());
-      const newSummonerSpeeker = document.createElement('audio');
-      newSummonerSpeeker.setAttribute('autoplay', 'true');
-      newSummoner?.appendChild(newSummonerSpeeker);
-      newSummonerSpeeker.srcObject = new MediaStream([track]);
-    };
+    let device: DeviceType | null = null;
+    let producerTransport: TransportType | null = null;
+    let consumerTransportList: ConsumerTransportType[] = [];
+
+    electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
+      socket.emit('team-join-room', { roomName, summoner }, ({ rtpCapabilities }) => {
+        connectVoiceChat(socket, device, rtpCapabilities, producerTransport, consumerTransportList);
+      });
+    });
 
     /* 팀원 나감 */
     socket.on('inform-exit-in-game', ({ summonerId }) => {
-      localConsumertList = localConsumertList.filter((localConsumer) => {
-        if (localConsumer.summonerId === summonerId) {
-          localConsumer.consumer.close();
-          localConsumer.consumerTransport.close();
+      consumerTransportList = consumerTransportList.filter((consumerTransport) => {
+        if (consumerTransport.summonerId === summonerId) {
+          consumerTransport.consumer.close();
+          consumerTransport.consumerTransport.close();
           return false;
         }
         return true;
@@ -222,181 +217,32 @@ function useVoiceChat() {
     const disconnectVoiceChat = () => {
       socket.disconnect();
       producerTransport?.close();
-      localConsumertList.map((localConsumer) => {
-        localConsumer.consumer.close();
-        localConsumer.consumerTransport.close();
+      consumerTransportList.map(({ consumer, consumerTransport }) => {
+        consumer.close();
+        consumerTransport.close();
       });
-      window.location.replace('');
+      window.location.replace(PATH.HOME);
     };
   };
 
-  const onLeagueVoiceChatRoom = () => {
-    const socket = io(PATH.SERVER_URL + '/league-voice-chat', { transports: ['websocket'] });
+  const onLeagueVoiceRoom = () => {
+    const socket = initSocket('/league-voice-chat');
 
     let device: DeviceType | null = null;
     let producerTransport: TransportType | null = null;
-    let localConsumertList: LocalConsumerTransportType[] = [];
+    let consumerTransportList: ConsumerTransportType[] = [];
 
     electronStore.get(STORE_KEY.LEAGUE_VOICE_ROOM_NAME).then(({ roomName, teamName }) => {
       socket.emit('league-join-room', { roomName, teamName, summoner }, ({ rtpCapabilities }) => {
-        getUserAudio(rtpCapabilities);
+        connectVoiceChat(socket, device, rtpCapabilities, producerTransport, consumerTransportList);
       });
     });
 
-    const getUserAudio = (deviceLoadParam: RtpCapabilities) => {
-      navigator.mediaDevices
-        .getUserMedia({
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: false,
-            autoGainControl: false,
-          },
-        })
-        .then(async (mediaStream) => createDevice(mediaStream, deviceLoadParam))
-        .catch((err) => console.log('미디어 권한 에러', err));
-    };
-
-    const createDevice = (mediaStream: MediaStream, routerRtpCapabilities: RtpCapabilities) => {
-      device = new mediasoup.Device();
-      device
-        .load({ routerRtpCapabilities })
-        .then(() => createSendTransport(mediaStream.getAudioTracks()[0]))
-        .catch((err) => console.log('디바이스 로드 에러', err));
-    };
-
-    const createSendTransport = (audioTrack: MediaStreamTrack) => {
-      socket.emit('create-producer-transport', ({ params }: any) => {
-        if (!device) return;
-
-        producerTransport = device.createSendTransport(params);
-
-        producerTransport.on('connect', ({ dtlsParameters }, callback, errback) => {
-          try {
-            socket.emit('transport-connect', { dtlsParameters });
-            callback();
-          } catch (err) {
-            errback(err as Error);
-          }
-        });
-        producerTransport.on('produce', ({ kind, rtpParameters }, callback, errback) => {
-          try {
-            socket.emit('transport-produce', { kind, rtpParameters }, ({ id, producersExist }) => {
-              callback({ id });
-              producersExist && getProducers();
-            });
-          } catch (err) {
-            errback(err as Error);
-          }
-        });
-
-        connectSendTransport(audioTrack);
-      });
-    };
-
-    const connectSendTransport = async (audioTrack: MediaStreamTrack) => {
-      if (!producerTransport || !audioTrack) return console.log('프로듀서 or 오디오 없음');
-
-      producerTransport
-        .produce({ track: audioTrack })
-        .then((audioProducer) => {
-          audioProducer.on('trackended', () => console.log('audio track ended'));
-          audioProducer.on('transportclose', () => console.log('audio transport ended'));
-        })
-        .catch((err) => console.log('프로듀스 메서드 에러', err));
-    };
-
-    socket.on(
-      'new-producer',
-      ({ id, summonerId, displayName, profileImage }: LocalProducerType) => {
-        signalNewConsumerTransport(id, { summonerId, displayName, profileImage });
-      }
-    );
-
-    const getProducers = () => {
-      socket.emit('get-producers', (producers: LocalProducerType[]) => {
-        producers.forEach(({ id, summonerId, displayName, profileImage }) => {
-          signalNewConsumerTransport(id, { summonerId, displayName, profileImage });
-        });
-      });
-    };
-
-    const signalNewConsumerTransport = (remoteProducerId: string, newSummoner: SummonerType) => {
-      setEnemySummoners([...(enemySummoners ?? []), newSummoner]);
-
-      socket.emit('create-consumer-transport', { remoteProducerId });
-      socket.on('complete-create-consumer-transport', ({ params }) => {
-        if (!device) return;
-
-        const consumerTransport = device.createRecvTransport(params);
-
-        consumerTransport.on('connect', ({ dtlsParameters }, callback, errback) => {
-          try {
-            socket.emit('transport-recv-connect', {
-              dtlsParameters,
-              remoteProducerId,
-            });
-            callback();
-          } catch (err) {
-            errback(err as Error);
-          }
-        });
-
-        connectRecvTransport(newSummoner.summonerId, remoteProducerId, consumerTransport);
-      });
-    };
-
-    const connectRecvTransport = (
-      newSummonerId: number,
-      remoteProducerId: string,
-      consumerTransport: TransportType
-    ) => {
-      if (!device) return;
-
-      socket.emit(
-        'consume',
-        {
-          rtpCapabilities: device.rtpCapabilities,
-          remoteProducerId,
-        },
-        async ({ params }: any) => {
-          const consumer = await consumerTransport.consume({
-            id: params.id,
-            producerId: params.producerId,
-            kind: params.kind,
-            rtpParameters: params.rtpParameters,
-          });
-
-          joinNewSummoner(consumer.track, {
-            summonerId: newSummonerId,
-            remoteProducerId: remoteProducerId,
-            remoteConsumerId: params.id,
-            consumerTransport: consumerTransport,
-            consumer: consumer,
-          });
-
-          socket.emit('consumer-resume', { remoteProducerId });
-        }
-      );
-    };
-
-    const joinNewSummoner = (
-      track: MediaStreamTrack,
-      consumerTransport: LocalConsumerTransportType
-    ) => {
-      localConsumertList.push(consumerTransport);
-
-      const newSummoner = document.getElementById(consumerTransport.summonerId.toString());
-      const newSummonerSpeeker = document.createElement('audio');
-      newSummonerSpeeker.setAttribute('autoplay', 'true');
-      newSummoner?.appendChild(newSummonerSpeeker);
-      newSummonerSpeeker.srcObject = new MediaStream([track]);
-    };
-
     socket.on('inform-exit-in-game', ({ summonerId }) => {
-      localConsumertList = localConsumertList.filter((localConsumer) => {
-        if (localConsumer.summonerId === summonerId) {
-          localConsumer.consumer.close();
-          localConsumer.consumerTransport.close();
+      consumerTransportList = consumerTransportList.filter((consumerTransport) => {
+        if (consumerTransport.summonerId === summonerId) {
+          consumerTransport.consumer.close();
+          consumerTransport.consumerTransport.close();
           return false;
         }
         return true;
@@ -419,14 +265,14 @@ function useVoiceChat() {
     const disconnectVoiceChat = () => {
       socket.disconnect();
       producerTransport?.close();
-      localConsumertList.map((localConsumer) => {
+      consumerTransportList.map((localConsumer) => {
         localConsumer.consumer.close();
         localConsumer.consumerTransport.close();
       });
     };
   };
 
-  return { onTeamVoiceChatRoom, onLeagueVoiceChatRoom };
+  return { onTeamVoiceRoom, onLeagueVoiceRoom };
 }
 
 export default useVoiceChat;

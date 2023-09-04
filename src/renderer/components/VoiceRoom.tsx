@@ -8,20 +8,20 @@ import {
   summonerState,
 } from '../@store/atom';
 
-function VoiceChatRoom() {
+function VoiceRoom() {
   const gameStatus = useRecoilValue(gameStatusState);
   const summoner = useRecoilValue(summonerState);
   const myTeamSummoners = useRecoilValue(myTeamSummonersState);
   const enemySummoners = useRecoilValue(enemySummonersState);
 
-  const { onTeamVoiceChatRoom, onLeagueVoiceChatRoom } = useVoiceChat();
+  const { onTeamVoiceRoom, onLeagueVoiceRoom } = useVoiceChat();
 
   useEffect(() => {
-    onTeamVoiceChatRoom();
+    onTeamVoiceRoom();
   }, []);
 
   useEffect(() => {
-    gameStatus === 'loading' && onLeagueVoiceChatRoom();
+    gameStatus === 'loading' && onLeagueVoiceRoom();
   }, [gameStatus]);
 
   return (
@@ -65,4 +65,4 @@ function VoiceChatRoom() {
   );
 }
 
-export default VoiceChatRoom;
+export default VoiceRoom;
