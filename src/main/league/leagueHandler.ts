@@ -1,8 +1,8 @@
-import { createWebSocketConnection, LeagueWebSocket } from 'league-connect';
 import league from './league';
 import { WebContents } from 'electron';
 import { IPC_KEY } from '../../const/index';
 import { LCU_ENDPOINT, PHASE } from '../const';
+import { LeagueWebSocket, createWebSocketConnection } from 'league-connect';
 
 type GameflowData = {
   gameClient: {
@@ -16,38 +16,21 @@ type GameflowData = {
   };
 };
 
-export const leagueHandler = async (webContents: WebContents) => {
+export const leagueHandler = async (webContents: WebContents, summonerId: string) => {
   const ws: LeagueWebSocket = await createWebSocketConnection();
   let isJoinedRoom = false;
   let isStartedGameLoading = false;
   let isStartedInGame = false;
 
-  const gameflowData: GameflowData = await league(LCU_ENDPOINT.GAMEFLOW_URL);
+  await checkCurrentLeagueEntryPoint(webContents, summonerId);
 
-  //챔피언 선택
-  if (isChampionSelectionWindow(gameflowData)) {
-    const { myTeam } = await league(LCU_ENDPOINT.CHAMP_SELECT_URL);
-    joinTeamVoiceRoom(myTeam);
-  } else {
-    ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, (data) => {
-      if (!isJoinedRoom) {
-        joinTeamVoiceRoom(data.myTeam);
-      }
-    });
-  }
-
-  function isChampionSelectionWindow(data: GameflowData) {
-    return data.phase === PHASE.CHAMP_SELECT;
-  }
-
-  function joinTeamVoiceRoom(myTeam: []) {
-    const roomName: string = createVoiceRoomName(myTeam);
-    webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName });
-    isJoinedRoom = true;
-  }
-
-  //챔피언선택 종료
   ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, async (data) => {
+    if (data.timer.phase === 'BAN_PICK' && !isJoinedRoom) {
+      const roomName: string = createVoiceRoomName(data.myTeam);
+      webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName });
+      isJoinedRoom = true;
+    }
+
     if (await isCloseChampionSelectionWindow(data.timer.phase)) {
       webContents.send(IPC_KEY.EXIT_CHAMP_SELECT);
       isJoinedRoom = false;
@@ -56,52 +39,36 @@ export const leagueHandler = async (webContents: WebContents) => {
 
   async function isCloseChampionSelectionWindow(phase: string) {
     const gameflowPhase = await league(LCU_ENDPOINT.GAMEFLOW_PHASE_URL);
-    return isJoinedRoom && phase === '' && gameflowPhase === PHASE.NONE;
+    const isNotChampSelect: boolean = gameflowPhase === PHASE.NONE || gameflowPhase === PHASE.LOBBY;
+    return isJoinedRoom && phase === '' && isNotChampSelect;
   }
 
-  //게임로딩
-  if (isGameLoadingWindow(gameflowData)) {
-    if (!isJoinedRoom) {
-      const { myTeam } = await league(LCU_ENDPOINT.CHAMP_SELECT_URL);
-      joinTeamVoiceRoom(myTeam);
+  ws.subscribe(LCU_ENDPOINT.GAMEFLOW_URL, async (data) => {
+    if (isGameLoadingWindow(data) && !isStartedGameLoading) {
+      const { teamOne, teamTwo } = data.gameData;
+
+      const teamOneVoiceRoomName: string = createVoiceRoomName(teamOne);
+      const teamTwoVoiceRoomName: string = createVoiceRoomName(teamTwo);
+      const roomName = teamOneVoiceRoomName + teamTwoVoiceRoomName;
+      const myTeamVoiceRoomName: string = await getMyTeamRoomName(teamOne, teamTwo, summonerId);
+
+      webContents.send(IPC_KEY.LEAGUE_JOIN_ROOM, { roomName, teamName: `${myTeamVoiceRoomName}` });
+      isStartedGameLoading = true;
     }
 
-    await joinLeagueVoiceRoom(gameflowData);
-  } else {
-    ws.subscribe(LCU_ENDPOINT.GAMEFLOW_URL, async (data) => {
-      if (isGameLoadingWindow(data)) {
-        await joinLeagueVoiceRoom(data);
-      }
-    });
-  }
-
-  function isGameLoadingWindow(data: GameflowData) {
-    return data.phase === PHASE.IN_GAME && !data.gameClient.visible && !isStartedGameLoading;
-  }
-
-  async function joinLeagueVoiceRoom(data: GameflowData) {
-    const { teamOne, teamTwo } = data.gameData;
-
-    const teamOneVoiceRoomName: string = createVoiceRoomName(teamOne);
-    const teamTwoVoiceRoomName: string = createVoiceRoomName(teamTwo);
-    const roomName = teamOneVoiceRoomName + teamTwoVoiceRoomName;
-
-    const teamName: string = await getTeamName(teamOne);
-    webContents.send(IPC_KEY.LEAGUE_JOIN_ROOM, { roomName, teamName });
-    isStartedGameLoading = true;
-  }
-
-  async function getTeamName(teamOne: []) {
-    const { summonerId } = await league(LCU_ENDPOINT.SUMMONER_URL);
-    const foundSummoner = teamOne.find((summoner: any) => summoner.summonerId === summonerId);
-    return foundSummoner ? 'teamOne' : 'teamTwo';
-  }
-
-  //게임로딩 종료
-  ws.subscribe(LCU_ENDPOINT.GAMEFLOW_URL, (data) => {
     if (isCloseGameLoadingWindow(data)) {
       webContents.send(IPC_KEY.EXIT_IN_GAME);
       isStartedGameLoading = false;
+    }
+
+    if (isInGameWindow(data) && !isStartedInGame) {
+      webContents.send(IPC_KEY.START_IN_GAME);
+      isStartedInGame = true;
+    }
+
+    if (isCloseInGameWindow(data)) {
+      webContents.send(IPC_KEY.EXIT_IN_GAME);
+      isStartedInGame = false;
     }
   });
 
@@ -109,42 +76,61 @@ export const leagueHandler = async (webContents: WebContents) => {
     return data.phase === PHASE.NONE && !data.gameClient.visible && isStartedGameLoading;
   }
 
-  //인게임
-  if (isStartInGame(gameflowData)) {
-    if (!isJoinedRoom) {
-      const { myTeam } = await league(LCU_ENDPOINT.CHAMP_SELECT_URL);
-      joinTeamVoiceRoom(myTeam);
-    }
-
-    webContents.send(IPC_KEY.START_IN_GAME);
-    isStartedInGame = true;
-  } else {
-    ws.subscribe(LCU_ENDPOINT.GAMEFLOW_URL, async (data) => {
-      if (isStartInGame(data)) {
-        webContents.send(IPC_KEY.START_IN_GAME);
-        isStartedInGame = true;
-      }
-    });
-  }
-
-  function isStartInGame(data: GameflowData) {
-    return data.phase === PHASE.IN_GAME && data.gameClient.visible && !isStartedInGame;
-  }
-
-  //인게임 종료
-  ws.subscribe(LCU_ENDPOINT.GAMEFLOW_URL, async (data) => {
-    if (isCloseInGame(data)) {
-      webContents.send(IPC_KEY.EXIT_IN_GAME);
-      isStartedInGame = false;
-    }
-  });
-
-  function isCloseInGame(data: GameflowData) {
+  function isCloseInGameWindow(data: GameflowData) {
     return data.phase === PHASE.NONE && data.gameClient.visible && isStartedInGame;
   }
 };
 
+async function checkCurrentLeagueEntryPoint(
+  webContents: WebContents,
+  summonerId: string
+): Promise<void> {
+  const gameflowData: GameflowData = await league(LCU_ENDPOINT.GAMEFLOW_URL);
+
+  if (gameflowData.phase === PHASE.CHAMP_SELECT) {
+    const { myTeam } = await league(LCU_ENDPOINT.CHAMP_SELECT_URL);
+    const roomName: string = createVoiceRoomName(myTeam);
+    webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName });
+    return;
+  }
+
+  if (isGameLoadingWindow(gameflowData)) {
+    const { teamOne, teamTwo } = gameflowData.gameData;
+
+    const teamOneVoiceRoomName: string = createVoiceRoomName(teamOne);
+    const teamTwoVoiceRoomName: string = createVoiceRoomName(teamTwo);
+    const roomName = teamOneVoiceRoomName + teamTwoVoiceRoomName;
+
+    const myTeamVoiceRoomName: string = await getMyTeamRoomName(teamOne, teamTwo, summonerId);
+    webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName: myTeamVoiceRoomName });
+    webContents.send(IPC_KEY.LEAGUE_JOIN_ROOM, { roomName, teamName: `${myTeamVoiceRoomName}` });
+    return;
+  }
+
+  if (isInGameWindow(gameflowData)) {
+    const { teamOne, teamTwo } = gameflowData.gameData;
+
+    const myTeamVoiceRoomName = await getMyTeamRoomName(teamOne, teamTwo, summonerId);
+    webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName: myTeamVoiceRoomName });
+    webContents.send(IPC_KEY.START_IN_GAME);
+    return;
+  }
+}
+
+function isGameLoadingWindow(data: GameflowData) {
+  return data.phase === PHASE.IN_GAME && !data.gameClient.visible;
+}
+
+function isInGameWindow(data: GameflowData) {
+  return data.phase === PHASE.IN_GAME && data.gameClient.visible;
+}
+
+async function getMyTeamRoomName(teamOne: [], teamTwo: [], summonerId: string) {
+  const foundSummoner = teamOne.find((summoner: any) => summoner.summonerId === summonerId);
+  return createVoiceRoomName(foundSummoner ? teamOne : teamTwo);
+}
+
 function createVoiceRoomName(team: []) {
-  const summonerIds: string[] = team.map((summoner: any) => summoner.summonerId);
+  const summonerIds: string[] = team.map((summoner: any) => summoner.summonerId).sort();
   return summonerIds.join('');
 }
