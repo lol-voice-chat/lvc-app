@@ -16,11 +16,12 @@ type GameflowData = {
   };
 };
 
+let isJoinedRoom = false;
+let isStartedGameLoading = false;
+let isStartedInGame = false;
+
 export const leagueHandler = async (webContents: WebContents, summonerId: string) => {
   const ws: LeagueWebSocket = await createWebSocketConnection();
-  let isJoinedRoom = false;
-  let isStartedGameLoading = false;
-  let isStartedInGame = false;
 
   await checkCurrentLeagueEntryPoint(webContents, summonerId);
 
@@ -91,6 +92,7 @@ async function checkCurrentLeagueEntryPoint(
     const { myTeam } = await league(LCU_ENDPOINT.CHAMP_SELECT_URL);
     const roomName: string = createVoiceRoomName(myTeam);
     webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName });
+    isJoinedRoom = true;
     return;
   }
 
@@ -104,6 +106,7 @@ async function checkCurrentLeagueEntryPoint(
     const myTeamVoiceRoomName: string = await getMyTeamRoomName(teamOne, teamTwo, summonerId);
     webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName: myTeamVoiceRoomName });
     webContents.send(IPC_KEY.LEAGUE_JOIN_ROOM, { roomName, teamName: `${myTeamVoiceRoomName}` });
+    isStartedGameLoading = true;
     return;
   }
 
@@ -113,6 +116,7 @@ async function checkCurrentLeagueEntryPoint(
     const myTeamVoiceRoomName = await getMyTeamRoomName(teamOne, teamTwo, summonerId);
     webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName: myTeamVoiceRoomName });
     webContents.send(IPC_KEY.START_IN_GAME);
+    isStartedInGame = true;
     return;
   }
 }
