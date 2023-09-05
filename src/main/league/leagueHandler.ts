@@ -20,7 +20,7 @@ let isJoinedRoom = false;
 let isStartedGameLoading = false;
 let isStartedInGame = false;
 
-export const leagueHandler = async (webContents: WebContents, summonerId: string) => {
+export const leagueHandler = async (webContents: WebContents, summonerId: number) => {
   const ws: LeagueWebSocket = await createWebSocketConnection();
 
   await checkCurrentLeagueEntryPoint(webContents, summonerId);
@@ -84,7 +84,7 @@ export const leagueHandler = async (webContents: WebContents, summonerId: string
 
 async function checkCurrentLeagueEntryPoint(
   webContents: WebContents,
-  summonerId: string
+  summonerId: number
 ): Promise<void> {
   const gameflowData: GameflowData = await league(LCU_ENDPOINT.GAMEFLOW_URL);
 
@@ -129,12 +129,12 @@ function isInGameWindow(data: GameflowData) {
   return data.phase === PHASE.IN_GAME && data.gameClient.visible;
 }
 
-async function getMyTeamRoomName(teamOne: [], teamTwo: [], summonerId: string) {
+async function getMyTeamRoomName(teamOne: [], teamTwo: [], summonerId: number) {
   const foundSummoner = teamOne.find((summoner: any) => summoner.summonerId === summonerId);
   return createVoiceRoomName(foundSummoner ? teamOne : teamTwo);
 }
 
 function createVoiceRoomName(team: []) {
-  const summonerIds: string[] = team.map((summoner: any) => summoner.summonerId).sort();
-  return summonerIds.join('');
+  const summonerIds: number[] = team.map((summoner: any) => summoner.summonerId).sort();
+  return summonerIds.join('').toString();
 }
