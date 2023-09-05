@@ -2,7 +2,7 @@ import league from './league';
 import { LCU_ENDPOINT } from '../const';
 
 export type SummonerInfo = {
-  summonerId: string;
+  summonerId: number;
   displayName: string;
   profileImage: string;
 };
