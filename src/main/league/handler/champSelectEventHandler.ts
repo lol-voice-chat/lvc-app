@@ -38,7 +38,7 @@ export const handle = async (
     }
 
     const championInfo: ChampionInfo = await getChampionInfo(summoner, data.myTeam);
-    webContents.send(IPC_KEY.CHAMPION_INFO, championInfo);
+    webContents.send(IPC_KEY.CHAMP_INFO, championInfo);
 
     const isCloseWindow = await isCloseChampionSelectionWindow(data.timer.phase);
     if (isCloseWindow) {
