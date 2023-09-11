@@ -1,12 +1,19 @@
 import React from 'react';
 import { RecoilRoot } from 'recoil';
 import Router from './router';
+import GlobalStyle from './globalStyle';
+import Helmets from './helmets';
 
 function App() {
   return (
-    <RecoilRoot>
-      <Router />
-    </RecoilRoot>
+    <>
+      <Helmets />
+
+      <RecoilRoot>
+        <GlobalStyle />
+        <Router />
+      </RecoilRoot>
+    </>
   );
 }
 

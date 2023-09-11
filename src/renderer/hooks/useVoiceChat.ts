@@ -9,7 +9,7 @@ import * as mediasoup from 'mediasoup-client';
 import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
 import { PATH } from '../const';
 import { DeviceType, ConsumerTransportType, TransportType } from '../@type/webRtc';
-import { SummonerType } from '../@type/summoner';
+import { SummonerStatsType, SummonerType } from '../@type/summoner';
 import { IPC_KEY, STORE_KEY } from '../../const';
 import electronStore from '../@store/electron';
 import { connectSocket } from '../utils/socket';
@@ -93,19 +93,61 @@ function useVoiceChat() {
         .catch((err) => console.log('프로듀스 메서드 에러', err));
     };
 
-    socket.on('new-producer', ({ id, summonerId, displayName, profileImage }) => {
-      signalNewConsumerTransport(id, { summonerId, displayName, profileImage });
-    });
+    socket.on(
+      'new-producer',
+      ({
+        id,
+        summonerId,
+        displayName,
+        profileImage,
+        odds,
+        winCount,
+        failCount,
+        summonerStatsList,
+      }) => {
+        signalNewConsumerTransport(id, {
+          summonerId,
+          displayName,
+          profileImage,
+          odds,
+          winCount,
+          failCount,
+          summonerStatsList,
+        });
+      }
+    );
 
     const getProducers = () => {
       socket.emit('get-producers', (producers) => {
-        producers.forEach(({ id, summonerId, displayName, profileImage }) => {
-          signalNewConsumerTransport(id, { summonerId, displayName, profileImage });
-        });
+        producers.forEach(
+          ({
+            id,
+            summonerId,
+            displayName,
+            profileImage,
+            odds,
+            winCount,
+            failCount,
+            summonerStatsList,
+          }) => {
+            signalNewConsumerTransport(id, {
+              summonerId,
+              displayName,
+              profileImage,
+              odds,
+              winCount,
+              failCount,
+              summonerStatsList,
+            });
+          }
+        );
       });
     };
 
-    const signalNewConsumerTransport = (remoteProducerId: string, newSummoner: SummonerType) => {
+    const signalNewConsumerTransport = (
+      remoteProducerId: string,
+      newSummoner: SummonerType & SummonerStatsType
+    ) => {
       setMyTeamSummoners([...(myTeamSummoners ?? []), newSummoner]);
 
       socket.emit('create-consumer-transport', { remoteProducerId });
