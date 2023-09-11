@@ -93,54 +93,15 @@ function useVoiceChat() {
         .catch((err) => console.log('프로듀스 메서드 에러', err));
     };
 
-    socket.on(
-      'new-producer',
-      ({
-        id,
-        summonerId,
-        displayName,
-        profileImage,
-        odds,
-        winCount,
-        failCount,
-        summonerStatsList,
-      }) => {
-        signalNewConsumerTransport(id, {
-          summonerId,
-          displayName,
-          profileImage,
-          odds,
-          winCount,
-          failCount,
-          summonerStatsList,
-        });
-      }
-    );
+    socket.on('new-producer', ({ id, summoner }) => {
+      signalNewConsumerTransport(id, summoner);
+    });
 
     const getProducers = () => {
       socket.emit('get-producers', (producers) => {
-        producers.forEach(
-          ({
-            id,
-            summonerId,
-            displayName,
-            profileImage,
-            odds,
-            winCount,
-            failCount,
-            summonerStatsList,
-          }) => {
-            signalNewConsumerTransport(id, {
-              summonerId,
-              displayName,
-              profileImage,
-              odds,
-              winCount,
-              failCount,
-              summonerStatsList,
-            });
-          }
-        );
+        producers.forEach(({ id, summoner }) => {
+          signalNewConsumerTransport(id, summoner);
+        });
       });
     };
 
