@@ -19,7 +19,7 @@ function SummonerVoiceBlock(props: { summoner: SummonerType & SummonerStatsType 
       <S.ProfileImg src={props.summoner.profileImage} />
 
       <S.NameTag>
-        <p id="displayName">{selectedChampInfo?.championIcon ?? props.summoner.displayName}</p>
+        <p id="displayName">{props.summoner.displayName}</p>
         <RankBadge size={15} tierImg="img/dummy_rank.png" tier="P3" />
       </S.NameTag>
       <S.TitleTag>

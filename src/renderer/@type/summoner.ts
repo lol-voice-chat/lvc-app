@@ -2,6 +2,8 @@ export type SummonerType = {
   summonerId: number;
   displayName: string;
   profileImage: string;
+  rankTier: string;
+  statusMessage: string;
 };
 
 export type SummonerStatsType = {
