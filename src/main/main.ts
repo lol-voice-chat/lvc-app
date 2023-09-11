@@ -26,7 +26,7 @@ const createWindow = () => {
     const summoner: SummonerInfo = await onLeagueClientUx();
     mainWindow.webContents.send('on-league-client', summoner);
 
-    await leagueHandler(mainWindow.webContents, summoner.summonerId);
+    await leagueHandler(mainWindow.webContents, summoner);
   });
 };
 
