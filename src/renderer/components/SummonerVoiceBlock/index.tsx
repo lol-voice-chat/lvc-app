@@ -15,6 +15,7 @@ function SummonerVoiceBlock(props: { summoner: SummonerType & SummonerStatsType 
 
   return (
     <S.SummonerBlock id={props.summoner.summonerId.toString()}>
+      {/* todo: 마이크 소리 감지 센서 */}
       <S.ProfileImg src={props.summoner.profileImage} />
 
       <S.NameTag>
@@ -26,6 +27,7 @@ function SummonerVoiceBlock(props: { summoner: SummonerType & SummonerStatsType 
         <div id="questionCircle">?</div>
       </S.TitleTag>
 
+      {/* todo: 오디오 컨트롤러 기능 추가 */}
       <S.SoundBox />
 
       <S.AverageGameData>
