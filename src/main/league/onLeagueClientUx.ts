@@ -16,7 +16,7 @@ type SummonerStats = {
 
 export type SummonerInfo = {
   summonerId: number;
-  name: string;
+  displayName: string;
   profileImage: string;
   statusMessage: string;
   rankTier: string;
@@ -43,7 +43,7 @@ export const onLeagueClientUx = async () => {
 
   const summoner: SummonerInfo = {
     summonerId: leagueClient.summonerId,
-    name: leagueClient.gameName,
+    displayName: leagueClient.gameName,
     profileImage,
     statusMessage: leagueClient.statusMessage,
     rankTier,
@@ -73,7 +73,7 @@ function createRankTierName(leagueClient: LeagueClientData) {
       rating = 5;
   }
 
-  return leagueClient.lol.rankedLeagueTier[0] + rating?.toString();
+  return leagueClient.lol.rankedLeagueTier.charAt(0) + rating?.toString();
 }
 
 async function getSummonerStatsList() {
