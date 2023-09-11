@@ -9,8 +9,8 @@ const { ipcRenderer } = window.require('electron');
 function SummonerVoiceBlock(props: { summoner: SummonerType & SummonerStatsType }) {
   const [selectedChampInfo, setSelectedChampInfo] = useState<ChampionInfoType | null>(null);
 
-  ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, selectedChamp: ChampionInfoType) => {
-    setSelectedChampInfo(selectedChamp);
+  ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
+    setSelectedChampInfo(championInfo);
   });
 
   return (

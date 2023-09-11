@@ -87,7 +87,8 @@ video {
   padding: 0;
   border: 0;
   vertical-align: baseline;
-
+}
+body {
   * {
     font-family: 'Inter', sans-serif;
     font-weight: ${FONT.SEMI_BOLD};
