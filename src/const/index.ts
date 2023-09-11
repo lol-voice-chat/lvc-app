@@ -5,6 +5,7 @@ export const IPC_KEY = {
   EXIT_IN_GAME: 'exit-in-game',
   START_IN_GAME: 'start-in-game',
   CHAMP_ICON: 'champ-icon',
+  CHAMP_INFO: '',
 };
 
 export const STORE_KEY = {
