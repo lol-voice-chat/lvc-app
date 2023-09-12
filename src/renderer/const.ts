@@ -11,6 +11,7 @@ export const PALETTE = {
   WHITE_1: '#F2F3F5',
   RED: '#E05262',
   BLUE: '#698DE7',
+  YELLOW: '#F4E55C',
 };
 
 export const FONT = {

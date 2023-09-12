@@ -36,6 +36,7 @@ type LeagueClientData = {
 
 export const onLeagueClientUx = async () => {
   const leagueClient: LeagueClientData = await league(LCU_ENDPOINT.CHAT_ME_URL);
+  console.log(leagueClient);
 
   const rankTier: string = createRankTierName(leagueClient);
   const profileImage: string = `https://ddragon-webp.lolmath.net/latest/img/profileicon/${leagueClient.icon}.webp`;
@@ -84,6 +85,7 @@ async function getSummonerStatsList() {
   const pvpMatchList = matchHistoryList.games.games.filter(
     (game: any) => game.gameType !== 'CUSTOM_GAME'
   );
+  console.log(pvpMatchList);
 
   const summonerStatsList = pvpMatchList.map((game: any) => {
     const participant = game.participants[0];

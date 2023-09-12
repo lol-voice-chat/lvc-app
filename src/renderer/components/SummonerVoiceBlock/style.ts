@@ -9,7 +9,7 @@ export const SummonerBlock = styled.div`
   position: relative;
 
   width: 250px;
-  height: 550px;
+  height: 560px;
 
   border-radius: 10px;
 
@@ -54,7 +54,7 @@ export const TitleTag = styled.div`
   #titleName {
     margin: 10px 0;
 
-    font-size: 14.5px;
+    font-size: 14px;
     color: ${PALETTE.GRAY_1};
   }
 
@@ -75,9 +75,30 @@ export const TitleTag = styled.div`
 `;
 
 export const SoundBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
   width: 100%;
 
   border-bottom: 1px solid #484b52;
+
+  #audio-ctrl {
+    display: flex;
+    justify-content: space-between;
+    width: 80%;
+    margin-bottom: 10px;
+
+    img {
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+    }
+    div {
+      width: 75%;
+    }
+  }
 `;
 
 export const AverageGameData = styled.div`
@@ -98,7 +119,7 @@ export const AverageGameData = styled.div`
     margin: 3.5px 0;
 
     p {
-      font-size: 15.5px;
+      font-size: 15px;
       color: ${PALETTE.GRAY_1};
     }
     #value {

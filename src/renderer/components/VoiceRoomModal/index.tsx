@@ -10,9 +10,32 @@ import {
 import * as S from './style';
 import SummonerVoiceBlock from '../SummonerVoiceBlock';
 
+const summoner = {
+  summonerId: 12212,
+  displayName: '붕붕띠 1호',
+  profileImage: '',
+  rankTier: 'D3',
+  statusMessage: '이잉ㅇ',
+  odds: 50,
+  winCount: 10,
+  failCount: 10,
+  summonerStatsList: [
+    { championIcon: '', kda: '1/2/3', isVictory: true },
+    { championIcon: '', kda: '1/2/3', isVictory: true },
+    { championIcon: '', kda: '1/2/3', isVictory: true },
+    { championIcon: '', kda: '1/2/3', isVictory: true },
+    { championIcon: '', kda: '1/2/3', isVictory: true },
+    { championIcon: '', kda: '1/2/3', isVictory: true },
+    { championIcon: '', kda: '1/2/3', isVictory: true },
+    { championIcon: '', kda: '1/2/3', isVictory: true },
+    { championIcon: '', kda: '1/2/3', isVictory: true },
+    { championIcon: '', kda: '1/2/3', isVictory: true },
+  ],
+};
+
 function VoiceRoomModal() {
   const gameStatus = useRecoilValue(gameStatusState);
-  const summoner = useRecoilValue(summonerState);
+  // const summoner = useRecoilValue(summonerState);
   const myTeamSummoners = useRecoilValue(myTeamSummonersState);
   const enemySummoners = useRecoilValue(enemySummonersState);
 
