@@ -11,10 +11,10 @@ export const SummonerBlock = styled.div`
   width: 250px;
   height: 560px;
 
+  margin: 40px 20px 0 20px;
   border-radius: 10px;
 
   background-color: ${PALETTE.BLACK_1};
-
   box-shadow: 0 5px 18px -7px rgba(0, 0, 0, 0.2);
 `;
 
@@ -101,7 +101,7 @@ export const SoundBox = styled.div`
   }
 `;
 
-export const AverageGameData = styled.div<{ isValue: boolean }>`
+export const AverageGameData = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -123,7 +123,7 @@ export const AverageGameData = styled.div<{ isValue: boolean }>`
       color: ${PALETTE.GRAY_1};
     }
     #value {
-      color: ${({ isValue }) => (isValue ? PALETTE.WHITE_1 : PALETTE.GRAY_1)};
+      color: ${PALETTE.WHITE_1};
     }
   }
 `;
@@ -216,17 +216,18 @@ export const KDAList = styled.div`
   row-gap: 7px;
 
   div {
-    position: relative;
-
     display: flex;
+    justify-content: center;
     align-items: center;
+
+    position: relative;
 
     height: 25px;
     width: 95px;
   }
 
   p {
-    margin-left: 37px;
+    margin-left: 24px;
 
     font-weight: ${FONT.MEDIUM};
     font-size: 14px;
