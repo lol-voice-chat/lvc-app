@@ -64,7 +64,10 @@ function SummonerVoiceBlock(props: { summoner: SummonerType & SummonerStatsType 
           </S.Text>
 
           <S.ProgressBar>
-            <progress value={props.summoner.winCount} max={20} />
+            <progress
+              value={props.summoner.winCount}
+              max={props.summoner.winCount + props.summoner.failCount}
+            />
             <p id="win">{props.summoner.winCount}W</p>
             <p id="lose">{props.summoner.failCount}L</p>
           </S.ProgressBar>
