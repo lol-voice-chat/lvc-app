@@ -5,7 +5,7 @@ import onElectronStore from './store';
 
 let mainWindow: BrowserWindow;
 
-const createWindow = async () => {
+const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 1346,
     height: 779,
@@ -17,20 +17,20 @@ const createWindow = async () => {
 
   mainWindow.loadURL('http://localhost:3000');
 
-  const { summoner, pvpMatchlist } = await onLeagueClientUx();
   mainWindow.webContents.on('did-finish-load', async () => {
+    const { summoner, pvpMatchlist } = await onLeagueClientUx();
     mainWindow.webContents.send('on-league-client', summoner);
 
     await leagueHandler(mainWindow.webContents, summoner, pvpMatchlist);
   });
 };
 
-app.whenReady().then(async () => {
-  await createWindow();
+app.whenReady().then(() => {
+  createWindow();
 
-  app.on('activate', async () => {
+  app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      await createWindow();
+      createWindow();
     }
   });
 });
