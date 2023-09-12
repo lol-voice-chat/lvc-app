@@ -1,16 +1,11 @@
 import { app, BrowserWindow } from 'electron';
 import { leagueHandler } from './league/leagueHandler';
-import { onLeagueClientUx, SummonerInfo } from './league/onLeagueClientUx';
-import electronReload from 'electron-reload';
+import { onLeagueClientUx } from './league/onLeagueClientUx';
 import onElectronStore from './store';
-
-if (process.env.NODE_ENV === 'development') {
-  electronReload(__dirname, {});
-}
 
 let mainWindow: BrowserWindow;
 
-const createWindow = () => {
+const createWindow = async () => {
   mainWindow = new BrowserWindow({
     width: 1346,
     height: 779,
@@ -22,20 +17,20 @@ const createWindow = () => {
 
   mainWindow.loadURL('http://localhost:3000');
 
+  const { summoner, pvpMatchlist } = await onLeagueClientUx();
   mainWindow.webContents.on('did-finish-load', async () => {
-    const summoner: SummonerInfo = await onLeagueClientUx();
     mainWindow.webContents.send('on-league-client', summoner);
 
-    await leagueHandler(mainWindow.webContents, summoner);
+    await leagueHandler(mainWindow.webContents, summoner, pvpMatchlist);
   });
 };
 
 app.whenReady().then(async () => {
-  createWindow();
+  await createWindow();
 
-  app.on('activate', () => {
+  app.on('activate', async () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
+      await createWindow();
     }
   });
 });

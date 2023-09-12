@@ -3,15 +3,15 @@ import { GameflowData } from '../leagueHandler';
 import { LCU_ENDPOINT, PHASE } from '../../const';
 import { voiceRoomNameGenerator } from '../common/voiceRoomNameGenerator';
 import { IPC_KEY } from '../../../const/index';
-import { SummonerInfo } from '../onLeagueClientUx';
 import { LeagueWebSocket } from 'league-connect';
+import { SummonerData } from '../onLeagueClientUx';
 
 let isStartedInGame = false;
 
 export const handle = (
   gameflowData: GameflowData,
   webContents: WebContents,
-  summoner: SummonerInfo,
+  summoner: SummonerData,
   ws: LeagueWebSocket
 ) => {
   const { summonerId } = summoner;
