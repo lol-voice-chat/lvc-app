@@ -41,7 +41,7 @@ function SummonerVoiceBlock(props: { summoner: SummonerType & SummonerStatsType 
         </div>
       </S.SoundBox>
 
-      <S.AverageGameData>
+      <S.AverageGameData isValue={selectedChampInfo?.kda === '전적 없음'}>
         <div>
           <p>KDA</p>
           <p id="value">{selectedChampInfo?.kda}</p>
@@ -57,30 +57,39 @@ function SummonerVoiceBlock(props: { summoner: SummonerType & SummonerStatsType 
       </S.AverageGameData>
 
       <S.GameRecord>
-        <S.WinningPercentage>
-          <S.Text>
-            <p>승률</p>
-            <p id="value">{props.summoner.odds}%</p>
-          </S.Text>
+        {/* 이번 시즌 전적이 없을 경우 예외 처리 */}
 
-          <S.ProgressBar>
-            <progress
-              value={props.summoner.winCount}
-              max={props.summoner.winCount + props.summoner.failCount}
-            />
-            <p id="win">{props.summoner.winCount}승</p>
-            <p id="fail">{props.summoner.failCount}패</p>
-          </S.ProgressBar>
+        {props.summoner.statsList.length !== 0 ? (
+          <S.WinningPercentage>
+            <S.Text>
+              <p>승률</p>
+              <p id="value">{props.summoner.odds}%</p>
+            </S.Text>
 
-          <S.KDAList>
-            {props.summoner.statsList?.map((summonerStats) => (
-              <div style={{ backgroundColor: summonerStats.isWin ? '#2C334A' : '#50383B' }}>
-                <img src={summonerStats.championIcon} alt="챔피언 아이콘" />
-                <p>{summonerStats.kda}</p>
-              </div>
-            ))}
-          </S.KDAList>
-        </S.WinningPercentage>
+            <S.ProgressBar>
+              <progress
+                value={props.summoner.winCount}
+                max={props.summoner.winCount + props.summoner.failCount}
+              />
+              <p id="win">{props.summoner.winCount}W</p>
+              <p id="fail">{props.summoner.failCount}L</p>
+            </S.ProgressBar>
+
+            <S.KDAList>
+              {props.summoner.statsList.map((summonerStats) => (
+                <div style={{ backgroundColor: summonerStats.isWin ? '#2C334A' : '#50383B' }}>
+                  <img src={summonerStats.championIcon} alt="챔피언 아이콘" />
+                  <p>{summonerStats.kda}</p>
+                </div>
+              ))}
+            </S.KDAList>
+          </S.WinningPercentage>
+        ) : (
+          <div id="warning-box">
+            <img src="img/warning_icon.svg" alt="주의 아이콘" />
+            <p>전적이 없습니다.</p>
+          </div>
+        )}
       </S.GameRecord>
     </S.SummonerBlock>
   );

@@ -101,7 +101,7 @@ export const SoundBox = styled.div`
   }
 `;
 
-export const AverageGameData = styled.div`
+export const AverageGameData = styled.div<{ isValue: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -123,7 +123,7 @@ export const AverageGameData = styled.div`
       color: ${PALETTE.GRAY_1};
     }
     #value {
-      color: ${PALETTE.WHITE_1};
+      color: ${({ isValue }) => (isValue ? PALETTE.WHITE_1 : PALETTE.GRAY_1)};
     }
   }
 `;
@@ -133,6 +133,22 @@ export const GameRecord = styled.div`
   flex-direction: column;
 
   width: 80%;
+
+  #warning-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    img {
+      width: 27%;
+      height: auto;
+      margin: 17px;
+    }
+    p {
+      font-size: 16.5px;
+      color: ${PALETTE.GRAY_1};
+    }
+  }
 `;
 
 export const WinningPercentage = styled.div`
@@ -187,7 +203,7 @@ export const ProgressBar = styled.div`
   #win {
     left: 6px;
   }
-  #lose {
+  #fail {
     right: 6px;
   }
 `;
