@@ -224,7 +224,7 @@ function useVoiceChat() {
         consumer.close();
         consumerTransport.close();
       });
-      window.location.replace(PATH.HOME);
+      window.location.reload();
     };
   };
 
