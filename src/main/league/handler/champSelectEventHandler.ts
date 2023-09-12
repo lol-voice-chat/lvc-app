@@ -1,4 +1,4 @@
-import { LCU_ENDPOINT, PHASE } from '../../const';
+import { LCU_ENDPOINT, PHASE, CHAMPIONS } from '../../const';
 import league from '../common/league';
 import { WebContents } from 'electron';
 import { IPC_KEY } from '../../../const/index';
@@ -79,13 +79,15 @@ function getChampData(summoner: SummonerData, myTeam: any[], pvpMatchlist: any[]
     ? `https://lolcdn.darkintaqt.com/cdn/champion/${championId}/tile`
     : profileImage;
 
+  const championName: string = CHAMPIONS[championId.toString()];
+
   if (champCount === 0) {
     const championData: ChampionData = {
       championIcon: championIcon,
-      name: 'test',
-      kda: '데이터 없음',
-      totalDamage: '데이터 없음',
-      totalMinionsKilled: '데이터 없음',
+      name: championName,
+      kda: '전적 없음',
+      totalDamage: '전적 없음',
+      totalMinionsKilled: '전적 없음',
     };
 
     return championData;
@@ -93,7 +95,7 @@ function getChampData(summoner: SummonerData, myTeam: any[], pvpMatchlist: any[]
 
   const championData: ChampionData = {
     championIcon: championIcon,
-    name: 'test',
+    name: championName,
     kda: `${(champKill / champCount).toFixed(1)}/${(champDeath / champCount).toFixed(1)}/${(
       champAssists / champCount
     ).toFixed(1)}`,
