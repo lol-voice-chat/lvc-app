@@ -7,7 +7,10 @@ export interface SummonerData {
   profileImage: string;
   tier: string;
   statusMessage: string;
-  summonerStats: SummonerStats;
+  odds: number;
+  winCount: number;
+  failCount: number;
+  statsList: StatsData[];
 }
 
 interface LeagueClientData {
@@ -25,7 +28,7 @@ interface LeagueClientData {
 interface StatsData {
   championIcon: string;
   kda: string;
-  isVictory: boolean;
+  isWin: boolean;
 }
 
 interface SummonerStats {
@@ -53,7 +56,10 @@ export const onLeagueClientUx = async () => {
     profileImage,
     tier,
     statusMessage: leagueClientData.statusMessage,
-    summonerStats,
+    odds: summonerStats.odds,
+    winCount: summonerStats.winCount,
+    failCount: summonerStats.failCount,
+    statsList: summonerStats.statsList,
   };
 
   return { summoner, pvpMatchlist };
@@ -95,7 +101,7 @@ function getSummonerStats(pvpMatchlist: any[]) {
     const stats: StatsData = {
       championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${participant.championId}/tile`,
       kda: `${participant.stats.kills}/${participant.stats.deaths}/${participant.stats.assists}`,
-      isVictory: participant.stats.win,
+      isWin: participant.stats.win,
     };
 
     if (participant.stats.win) {
