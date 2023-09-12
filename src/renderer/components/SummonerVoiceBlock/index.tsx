@@ -41,18 +41,18 @@ function SummonerVoiceBlock(props: { summoner: SummonerType & SummonerStatsType 
         </div>
       </S.SoundBox>
 
-      <S.AverageGameData isValue={selectedChampInfo?.kda === '전적 없음'}>
+      <S.AverageGameData>
         <div>
           <p>KDA</p>
-          <p id="value">{selectedChampInfo?.kda}</p>
+          <p id="value">{selectedChampInfo?.kda ?? '-'}</p>
         </div>
         <div>
           <p>평균피해량</p>
-          <p id="value">{selectedChampInfo?.totalDamage}</p>
+          <p id="value">{selectedChampInfo?.totalDamage ?? '-'}</p>
         </div>
         <div>
           <p>평균 CS</p>
-          <p id="value">{selectedChampInfo?.totalMinionsKilled}</p>
+          <p id="value">{selectedChampInfo?.totalMinionsKilled ?? '-'}</p>
         </div>
       </S.AverageGameData>
 
