@@ -11,8 +11,8 @@ type ChampionData = {
   championIcon: string;
   name: string;
   kda: string;
-  totalDamage: number;
-  totalMinionsKilled: number;
+  totalDamage: string;
+  totalMinionsKilled: string;
 };
 
 let isJoinedRoom = false;
@@ -64,28 +64,41 @@ function getChampData(summoner: SummonerData, myTeam: any[], pvpMatchlist: any[]
   const { championId } = myTeam.find((summoner: any) => summoner.summonerId === summonerId);
 
   pvpMatchlist.forEach((game: any) => {
-    game.participants
-      .filter((summoner: any) => summoner.championId === championId)
-      .forEach((summoner: any) => {
-        champKill += summoner.stats.kills;
-        champDeath += summoner.stats.deaths;
-        champAssists += summoner.stats.assists;
-        totalDamage += summoner.stats.totalDamageDealtToChampions;
-        totalMinionsKilled += summoner.stats.totalMinionsKilled;
-        champCount++;
-      });
+    const participant = game.participants[0];
+    if (participant.championId === championId) {
+      champKill += participant.stats.kills;
+      champDeath += participant.stats.deaths;
+      champAssists += participant.stats.assists;
+      totalDamage += participant.stats.totalDamageDealtToChampions;
+      totalMinionsKilled += participant.stats.totalMinionsKilled;
+      champCount++;
+    }
   });
 
   const championIcon = championId
     ? `https://lolcdn.darkintaqt.com/cdn/champion/${championId}/tile`
     : profileImage;
 
+  if (champCount === 0) {
+    const championData: ChampionData = {
+      championIcon: championIcon,
+      name: 'test',
+      kda: '데이터 없음',
+      totalDamage: '데이터 없음',
+      totalMinionsKilled: '데이터 없음',
+    };
+
+    return championData;
+  }
+
   const championData: ChampionData = {
     championIcon: championIcon,
     name: 'test',
-    kda: `${champKill / champCount}/${champDeath / champCount}/${champAssists / champCount}`,
-    totalDamage: totalDamage / champCount,
-    totalMinionsKilled: totalMinionsKilled / champCount,
+    kda: `${(champKill / champCount).toFixed(1)}/${(champDeath / champCount).toFixed(1)}/${(
+      champAssists / champCount
+    ).toFixed(1)}`,
+    totalDamage: Math.floor(totalDamage / champCount).toString(),
+    totalMinionsKilled: (totalMinionsKilled / champCount).toFixed(1),
   };
 
   return championData;

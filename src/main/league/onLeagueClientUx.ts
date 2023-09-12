@@ -70,7 +70,7 @@ function getTier(leagueClientData: LeagueClientData) {
   const displayTier: string = rankedLeagueTier[0];
 
   if (rankedLeagueDivision === 'NA' && rankedLeagueTier === '') {
-    return 'Unranked';
+    return 'Unrank';
   }
 
   switch (rankedLeagueDivision) {
