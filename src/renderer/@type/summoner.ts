@@ -2,7 +2,7 @@ export type SummonerType = {
   summonerId: number;
   displayName: string;
   profileImage: string;
-  rankTier: string;
+  tier: string;
   statusMessage: string;
 };
 
@@ -10,7 +10,7 @@ export type SummonerStatsType = {
   odds: number;
   winCount: number;
   failCount: number;
-  summonerStatsList: { championIcon: string; kda: string; isVictory: boolean }[];
+  statsList: { championIcon: string; kda: string; isWin: boolean }[];
 };
 
 export type ChampionInfoType = {
