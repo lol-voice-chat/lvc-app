@@ -4,10 +4,10 @@ import { WebContents } from 'electron';
 import { IPC_KEY } from '../../../const/index';
 import { voiceRoomNameGenerator } from '../common/voiceRoomNameGenerator';
 import { LeagueWebSocket } from 'league-connect';
-import { SummonerInfo } from '../onLeagueClientUx';
+import { SummonerData } from '../onLeagueClientUx';
 import { GameflowData } from '../leagueHandler';
 
-type ChampionInfo = {
+type ChampionData = {
   championIcon: string;
   name: string;
   kda: string;
@@ -20,8 +20,9 @@ let isJoinedRoom = false;
 export const handle = async (
   gameflowData: GameflowData,
   webContents: WebContents,
-  summoner: SummonerInfo,
-  ws: LeagueWebSocket
+  summoner: SummonerData,
+  ws: LeagueWebSocket,
+  pvpMatchlist: any[]
 ) => {
   if (gameflowData.phase === PHASE.CHAMP_SELECT) {
     const { myTeam } = await league(LCU_ENDPOINT.CHAMP_SELECT_URL);
@@ -37,8 +38,10 @@ export const handle = async (
       isJoinedRoom = true;
     }
 
-    const championInfo: ChampionInfo = await getChampionInfo(summoner, data.myTeam);
-    webContents.send(IPC_KEY.CHAMP_INFO, championInfo);
+    if (data.timer.phase === 'BAN_PICK') {
+      const championData: ChampionData = getChampData(summoner, data.myTeam, pvpMatchlist);
+      webContents.send(IPC_KEY.CHAMP_INFO, championData);
+    }
 
     const isCloseWindow = await isCloseChampionSelectionWindow(data.timer.phase);
     if (isCloseWindow) {
@@ -48,13 +51,8 @@ export const handle = async (
   });
 };
 
-async function getChampionInfo(summoner: SummonerInfo, myTeam: any[]) {
+function getChampData(summoner: SummonerData, myTeam: any[], pvpMatchlist: any[]) {
   const { summonerId, profileImage } = summoner;
-
-  const matchHistoryList = await league(LCU_ENDPOINT.MATCH_HISTORY);
-  const pvpMatchList = matchHistoryList.games.games.filter(
-    (game: any) => game.gameType !== 'CUSTOM_GAME'
-  );
 
   let champKill = 0;
   let champDeath = 0;
@@ -65,7 +63,7 @@ async function getChampionInfo(summoner: SummonerInfo, myTeam: any[]) {
 
   const { championId } = myTeam.find((summoner: any) => summoner.summonerId === summonerId);
 
-  pvpMatchList.forEach((game: any) => {
+  pvpMatchlist.forEach((game: any) => {
     game.participants
       .filter((summoner: any) => summoner.championId === championId)
       .forEach((summoner: any) => {
@@ -82,7 +80,7 @@ async function getChampionInfo(summoner: SummonerInfo, myTeam: any[]) {
     ? `https://lolcdn.darkintaqt.com/cdn/champion/${championId}/tile`
     : profileImage;
 
-  const championInfo: ChampionInfo = {
+  const championData: ChampionData = {
     championIcon: championIcon,
     name: 'test',
     kda: `${champKill / champCount}/${champDeath / champCount}/${champAssists / champCount}`,
@@ -90,7 +88,7 @@ async function getChampionInfo(summoner: SummonerInfo, myTeam: any[]) {
     totalMinionsKilled: totalMinionsKilled / champCount,
   };
 
-  return championInfo;
+  return championData;
 }
 
 async function isCloseChampionSelectionWindow(phase: string) {

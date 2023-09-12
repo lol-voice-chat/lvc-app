@@ -1,29 +1,16 @@
 import league from '../league/common/league';
 import { LCU_ENDPOINT } from '../const';
 
-type StatsInfo = {
-  championIcon: string;
-  kda: string;
-  isVictory: boolean;
-};
-
-type SummonerStats = {
-  odds: number;
-  winCount: number;
-  failCount: number;
-  summonerStatsList: StatsInfo[];
-};
-
-export type SummonerInfo = {
+export interface SummonerData {
   summonerId: number;
   displayName: string;
   profileImage: string;
+  tier: string;
   statusMessage: string;
-  rankTier: string;
   summonerStats: SummonerStats;
-};
+}
 
-type LeagueClientData = {
+interface LeagueClientData {
   gameName: string;
   icon: number;
   lol: {
@@ -31,65 +18,81 @@ type LeagueClientData = {
     rankedLeagueTier: string;
   };
   statusMessage: string;
+  puuid: string;
   summonerId: number;
-};
+}
+
+interface StatsData {
+  championIcon: string;
+  kda: string;
+  isVictory: boolean;
+}
+
+interface SummonerStats {
+  odds: number;
+  winCount: number;
+  failCount: number;
+  statsList: StatsData[];
+}
 
 export const onLeagueClientUx = async () => {
-  const leagueClient: LeagueClientData = await league(LCU_ENDPOINT.CHAT_ME_URL);
-  console.log(leagueClient);
+  const leagueClientData: LeagueClientData = await league(LCU_ENDPOINT.CHAT_ME_URL);
 
-  const rankTier: string = createRankTierName(leagueClient);
-  const profileImage: string = `https://ddragon-webp.lolmath.net/latest/img/profileicon/${leagueClient.icon}.webp`;
-  const summonerStats: SummonerStats = await getSummonerStatsList();
+  const tier: string = getTier(leagueClientData);
+  const profileImage: string = `https://ddragon-webp.lolmath.net/latest/img/profileicon/${leagueClientData.icon}.webp`;
 
-  const summoner: SummonerInfo = {
-    summonerId: leagueClient.summonerId,
-    displayName: leagueClient.gameName,
+  const matchlistUrl = `/lol-match-history/v1/products/lol/${leagueClientData.puuid}/matches?begIndex=0&endIndex=100`;
+  const matchlist = await league(matchlistUrl);
+  const pvpMatchlist = matchlist.games.games.filter((game: any) => game.gameType !== 'CUSTOM_GAME');
+
+  const summonerStats: SummonerStats = getSummonerStats(pvpMatchlist);
+
+  const summoner: SummonerData = {
+    summonerId: leagueClientData.summonerId,
+    displayName: leagueClientData.gameName,
     profileImage,
-    statusMessage: leagueClient.statusMessage,
-    rankTier,
+    tier,
+    statusMessage: leagueClientData.statusMessage,
     summonerStats,
   };
 
-  return summoner;
+  return { summoner, pvpMatchlist };
 };
 
-function createRankTierName(leagueClient: LeagueClientData) {
-  let rating: number | null = null;
+function getTier(leagueClientData: LeagueClientData) {
+  const { rankedLeagueDivision, rankedLeagueTier } = leagueClientData.lol;
+  const displayTier: string = rankedLeagueTier[0];
 
-  switch (leagueClient.lol.rankedLeagueDivision) {
-    case 'I':
-      rating = 1;
-      break;
-    case 'II':
-      rating = 2;
-      break;
-    case 'III':
-      rating = 3;
-      break;
-    case 'IV':
-      rating = 4;
-      break;
-    case 'V':
-      rating = 5;
+  if (rankedLeagueDivision === 'NA' && rankedLeagueTier === '') {
+    return 'Unranked';
   }
 
-  return leagueClient.lol.rankedLeagueTier.charAt(0) + rating?.toString();
+  switch (rankedLeagueDivision) {
+    case 'I':
+      return displayTier + 1;
+    case 'II':
+      return displayTier + 2;
+    case 'III':
+      return displayTier + 3;
+    case 'IV':
+      return displayTier + 4;
+    case 'V':
+      return displayTier + 5;
+    default:
+      throw new Error('잘못된 랭크입니다.');
+  }
 }
 
-async function getSummonerStatsList() {
+function getSummonerStats(pvpMatchlist: any[]) {
   let winCount = 0;
   let failCount = 0;
 
-  const matchHistoryList = await league(LCU_ENDPOINT.MATCH_HISTORY);
-  const pvpMatchList = matchHistoryList.games.games.filter(
-    (game: any) => game.gameType !== 'CUSTOM_GAME'
-  );
-  console.log(pvpMatchList);
+  const recentPvpMatchlist = pvpMatchlist.slice(0, 10);
 
-  const summonerStatsList = pvpMatchList.map((game: any) => {
+  const statsList: StatsData[] = recentPvpMatchlist.map((game: any) => {
     const participant = game.participants[0];
-    const stats: StatsInfo = {
+
+    const stats: StatsData = {
       championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${participant.championId}/tile`,
       kda: `${participant.stats.kills}/${participant.stats.deaths}/${participant.stats.assists}`,
       isVictory: participant.stats.win,
@@ -104,7 +107,7 @@ async function getSummonerStatsList() {
     return stats;
   });
 
-  const odds = (winCount / pvpMatchList.length) * 100;
-  const summonerStats: SummonerStats = { odds, winCount, failCount, summonerStatsList };
+  const odds = (winCount / recentPvpMatchlist.length) * 100;
+  const summonerStats: SummonerStats = { odds, winCount, failCount, statsList };
   return summonerStats;
 }

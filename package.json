@@ -60,7 +60,6 @@
     "assert": "^2.0.0",
     "concurrently": "^8.2.1",
     "electron": "^26.1.0",
-    "electron-reload": "^2.0.0-alpha.1",
     "wait-on": "^7.0.1"
   }
 }

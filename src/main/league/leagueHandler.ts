@@ -5,7 +5,7 @@ import * as champSelectEventHandler from '../league/handler/champSelectEventHand
 import * as gameLoadingEventHandler from '../league/handler/gameLoadingEventHandler';
 import * as inProgressEventHandler from '../league/handler/inProgressEventHandler';
 import { LeagueWebSocket, createWebSocketConnection } from 'league-connect';
-import { SummonerInfo } from './onLeagueClientUx';
+import { SummonerData } from './onLeagueClientUx';
 
 export type GameflowData = {
   gameClient: {
@@ -19,11 +19,15 @@ export type GameflowData = {
   };
 };
 
-export const leagueHandler = async (webContents: WebContents, summoner: SummonerInfo) => {
+export const leagueHandler = async (
+  webContents: WebContents,
+  summoner: SummonerData,
+  pvpMatchlist: any[]
+) => {
   const ws: LeagueWebSocket = await createWebSocketConnection();
   const gameflowData: GameflowData = await league(LCU_ENDPOINT.GAMEFLOW_URL);
 
-  champSelectEventHandler.handle(gameflowData, webContents, summoner, ws);
+  champSelectEventHandler.handle(gameflowData, webContents, summoner, ws, pvpMatchlist);
   gameLoadingEventHandler.handle(gameflowData, webContents, summoner, ws);
   inProgressEventHandler.handle(gameflowData, webContents, summoner, ws);
 };
