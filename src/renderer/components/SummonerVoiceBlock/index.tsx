@@ -18,7 +18,7 @@ function SummonerVoiceBlock(props: { summoner: SummonerType & SummonerStatsType 
   return (
     <S.SummonerBlock id={props.summoner.summonerId.toString()}>
       {/* todo: 마이크 소리 감지 센서 */}
-      <S.ProfileImg src={props.summoner.profileImage} />
+      <S.ProfileImg src={selectedChampInfo?.championIcon ?? props.summoner.profileImage} />
 
       <S.NameTag>
         <p id="displayName">{props.summoner.displayName}</p>
@@ -44,15 +44,15 @@ function SummonerVoiceBlock(props: { summoner: SummonerType & SummonerStatsType 
       <S.AverageGameData>
         <div>
           <p>KDA</p>
-          <p id="value">{selectedChampInfo?.kda ?? '-'}</p>
+          <p id="value">{selectedChampInfo?.kda}</p>
         </div>
         <div>
           <p>평균피해량</p>
-          <p id="value">{selectedChampInfo?.totalDamage ?? '-'}</p>
+          <p id="value">{selectedChampInfo?.totalDamage}</p>
         </div>
         <div>
           <p>평균 CS</p>
-          <p id="value">{selectedChampInfo?.totalMinionsKilled ?? '-'}</p>
+          <p id="value">{selectedChampInfo?.totalMinionsKilled}</p>
         </div>
       </S.AverageGameData>
 
@@ -68,8 +68,8 @@ function SummonerVoiceBlock(props: { summoner: SummonerType & SummonerStatsType 
               value={props.summoner.winCount}
               max={props.summoner.winCount + props.summoner.failCount}
             />
-            <p id="win">{props.summoner.winCount}W</p>
-            <p id="lose">{props.summoner.failCount}L</p>
+            <p id="win">{props.summoner.winCount}승</p>
+            <p id="fail">{props.summoner.failCount}패</p>
           </S.ProgressBar>
 
           <S.KDAList>
