@@ -7,7 +7,6 @@ import {
 } from '../@store/atom';
 import * as mediasoup from 'mediasoup-client';
 import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
-import { PATH } from '../const';
 import { DeviceType, ConsumerTransportType, TransportType } from '../@type/webRtc';
 import { SummonerStatsType, SummonerType } from '../@type/summoner';
 import { IPC_KEY, STORE_KEY } from '../../const';
