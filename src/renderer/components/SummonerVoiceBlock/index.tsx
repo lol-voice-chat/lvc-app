@@ -22,7 +22,7 @@ function SummonerVoiceBlock(props: { summoner: SummonerType & SummonerStatsType 
 
       <S.NameTag>
         <p id="displayName">{props.summoner.displayName}</p>
-        <RankBadge size={15} tierImg="img/dummy_rank.png" tier={props.summoner.rankTier} />
+        <RankBadge size={15} tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
       </S.NameTag>
       <S.TitleTag>
         <p id="titleName">드레곤 슬레이어</p>
@@ -70,8 +70,8 @@ function SummonerVoiceBlock(props: { summoner: SummonerType & SummonerStatsType 
           </S.ProgressBar>
 
           <S.KDAList>
-            {props.summoner.summonerStatsList?.map((summonerStats) => (
-              <div style={{ backgroundColor: summonerStats.isVictory ? '#2C334A' : '#50383B' }}>
+            {props.summoner.statsList?.map((summonerStats) => (
+              <div style={{ backgroundColor: summonerStats.isWin ? '#2C334A' : '#50383B' }}>
                 <img src={summonerStats.championIcon} alt="챔피언 아이콘" />
                 <p>{summonerStats.kda}</p>
               </div>
