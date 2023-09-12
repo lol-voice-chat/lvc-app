@@ -4,19 +4,20 @@ import { PALETTE } from '../../const';
 
 function RankBadge(props: { size: number; tierImg: string; tier: string }) {
   return (
-    <Badge size={props.size}>
-      <img src={props.tierImg} alt="티어 배지 이미지" />
+    <Badge size={props.size} tier={props.tier}>
+      {props.tier !== 'Unrank' && <img src={props.tierImg} alt="티어 배지 이미지" />}
       <p>{props.tier}</p>
     </Badge>
   );
 }
 
-const Badge = styled.div<{ size }>`
+const Badge = styled.div<{ size: number; tier: string }>`
   display: flex;
   justify-content: center;
   align-items: center;
 
-  padding: 0 ${(p) => p.size / 1.5}px;
+  padding: ${({ size, tier }) =>
+    tier === 'Unrank' ? `${size / 2.5}px ${size / 1.5}px` : `0 ${size / 1.5}px`};
 
   border-radius: ${(p) => p.size * 2}px;
 
@@ -29,7 +30,7 @@ const Badge = styled.div<{ size }>`
 
   p {
     font-size: ${(p) => p.size}px;
-    padding-left: ${(p) => p.size / 3}px;
+    padding-left: ${({ size, tier }) => (tier === 'Unrank' ? '0' : `${size / 3}px`)};
 
     color: ${PALETTE.WHITE_1};
   }
