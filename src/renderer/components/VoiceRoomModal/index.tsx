@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import useVoiceChat from '../../hooks/useVoiceChat';
 import { useRecoilValue } from 'recoil';
 import {
@@ -28,7 +28,7 @@ const { ipcRenderer } = window.require('electron');
 // };
 
 function VoiceRoomModal() {
-  const selectedChampionMap: Map<number, ChampionInfoType> = new Map();
+  let selectedChampionMap: Map<number, ChampionInfoType> = new Map();
 
   const teamSocket = useContext(TeamSocketContext);
 
@@ -47,7 +47,6 @@ function VoiceRoomModal() {
     ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
       selectedChampionMap.set(championInfo.summonerId, championInfo);
       teamSocket?.emit('champion-info', championInfo);
-      console.log(teamSocket);
     });
 
     teamSocket?.on('champion-info', (championInfo) => {
@@ -69,7 +68,7 @@ function VoiceRoomModal() {
         <SummonerVoiceBlock
           isMine={true}
           summoner={summoner}
-          selectedChampInfo={selectedChampionMap.get(summoner.summonerId) ?? null}
+          selectedChampionMap={selectedChampionMap}
         />
       )}
 
@@ -78,7 +77,7 @@ function VoiceRoomModal() {
           key={summoner.summonerId}
           isMine={false}
           summoner={summoner}
-          selectedChampInfo={selectedChampionMap.get(summoner.summonerId) ?? null}
+          selectedChampionMap={selectedChampionMap}
         />
       ))}
     </S.Background>

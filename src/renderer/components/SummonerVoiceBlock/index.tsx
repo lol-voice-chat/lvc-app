@@ -9,10 +9,12 @@ import { userStreamState } from '../../@store/atom';
 import { TeamSocketContext } from '../../utils/socket';
 
 function SummonerVoiceBlock(props: {
-  summoner: SummonerType & SummonerStatsType;
-  selectedChampInfo: ChampionInfoType | null;
   isMine: boolean;
+  summoner: SummonerType & SummonerStatsType;
+  selectedChampionMap: Map<number, ChampionInfoType>;
 }) {
+  const selectedChampion = props.selectedChampionMap.get(props.summoner.summonerId);
+
   const teamSocket = useContext(TeamSocketContext);
 
   const userStream = useRecoilValue(userStreamState);
@@ -41,7 +43,6 @@ function SummonerVoiceBlock(props: {
 
   useEffect(() => {
     if (!props.isMine) return;
-
     teamSocket?.emit('mic-visualizer', { summonerId: props.summoner.summonerId, visualizerVolume });
   }, [visualizerVolume]);
 
@@ -49,12 +50,12 @@ function SummonerVoiceBlock(props: {
     <S.SummonerBlock id={props.summoner.summonerId.toString()}>
       <S.ProfileImg
         visualize={visualizerVolume > 20}
-        src={props.selectedChampInfo?.championIcon ?? props.summoner.profileImage}
+        src={selectedChampion?.championIcon ?? props.summoner.profileImage}
       />
 
       <S.NameTag>
         <p id="displayName">{props.summoner.displayName}</p>
-        <RankBadge size={15} tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
+        <RankBadge size={14} tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
       </S.NameTag>
       <S.TitleTag>
         <p id="titleName">드레곤 슬레이어</p>
@@ -76,15 +77,15 @@ function SummonerVoiceBlock(props: {
       <S.AverageGameData>
         <div>
           <p>KDA</p>
-          <p id="value">{props.selectedChampInfo?.kda ?? '-'}</p>
+          <p id="value">{selectedChampion?.kda ?? '-'}</p>
         </div>
         <div>
           <p>평균피해량</p>
-          <p id="value">{props.selectedChampInfo?.totalDamage ?? '-'}</p>
+          <p id="value">{selectedChampion?.totalDamage ?? '-'}</p>
         </div>
         <div>
           <p>평균 CS</p>
-          <p id="value">{props.selectedChampInfo?.totalMinionsKilled ?? '-'}</p>
+          <p id="value">{selectedChampion?.totalMinionsKilled ?? '-'}</p>
         </div>
       </S.AverageGameData>
 
@@ -107,8 +108,11 @@ function SummonerVoiceBlock(props: {
             </S.ProgressBar>
 
             <S.KDAList>
-              {props.summoner.statsList.map((summonerStats) => (
-                <div style={{ backgroundColor: summonerStats.isWin ? '#2C334A' : '#50383B' }}>
+              {props.summoner.statsList.map((summonerStats, idx) => (
+                <div
+                  key={idx}
+                  style={{ backgroundColor: summonerStats.isWin ? '#2C334A' : '#50383B' }}
+                >
                   <img src={summonerStats.championIcon} alt="챔피언 아이콘" />
                   <p>{summonerStats.kda}</p>
                 </div>
