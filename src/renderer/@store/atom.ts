@@ -1,5 +1,16 @@
+import { Socket } from 'socket.io-client';
 import { SummonerStatsType, SummonerType } from '../@type/summoner';
 import { atom } from 'recoil';
+
+export const teamSocketState = atom<Socket | null>({
+  key: 'teamSocket',
+  default: null,
+});
+
+export const userStreamState = atom<MediaStream | null>({
+  key: 'userStream',
+  default: null,
+});
 
 type GameStatus = 'none' | 'champ-select' | 'loading' | 'in-game';
 

@@ -18,7 +18,7 @@ export const SummonerBlock = styled.div`
   box-shadow: 0 5px 18px -7px rgba(0, 0, 0, 0.2);
 `;
 
-export const ProfileImg = styled.img`
+export const ProfileImg = styled.img<{ visualize: boolean }>`
   position: absolute;
   top: -50px;
 
@@ -26,6 +26,7 @@ export const ProfileImg = styled.img`
   height: 100px;
 
   border-radius: 50%;
+  border: 3.5px solid ${({ visualize }) => (visualize ? '#50a361' : 'transparent')};
 
   box-shadow: 0 5px 18px -7px rgba(0, 0, 0, 0.3);
 `;
