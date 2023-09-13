@@ -12,15 +12,13 @@ import { DeviceType, ConsumerTransportType, TransportType } from '../@type/webRt
 import { SummonerStatsType, SummonerType } from '../@type/summoner';
 import { IPC_KEY, STORE_KEY } from '../../const';
 import electronStore from '../@store/electron';
-import { TeamSocketContext, connectSocket } from '../utils/socket';
+import { connectSocket } from '../utils/socket';
 import { Socket } from 'socket.io-client';
 import { useContext } from 'react';
 
 const { ipcRenderer } = window.require('electron');
 
 function useVoiceChat() {
-  const teamSocket = useContext(TeamSocketContext);
-
   const setGameStatus = useSetRecoilState(gameStatusState);
   const userStream = useRecoilValue(userStreamState);
   const summoner = useRecoilValue(summonerState);
@@ -168,26 +166,20 @@ function useVoiceChat() {
   };
 
   const onTeamVoiceRoom = () => {
-    if (!teamSocket) return;
+    const socket = connectSocket('/team-voice-chat');
 
     let device: DeviceType | null = null;
     let producerTransport: TransportType | null = null;
     let consumerTransportList: ConsumerTransportType[] = [];
 
     electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
-      teamSocket.emit('team-join-room', { roomName, summoner }, ({ rtpCapabilities }) => {
-        connectVoiceChat(
-          teamSocket,
-          device,
-          rtpCapabilities,
-          producerTransport,
-          consumerTransportList
-        );
+      socket.emit('team-join-room', { roomName, summoner }, ({ rtpCapabilities }) => {
+        connectVoiceChat(socket, device, rtpCapabilities, producerTransport, consumerTransportList);
       });
     });
 
     /* 팀원 나감 */
-    teamSocket.on('inform-exit-in-game', ({ summonerId }) => {
+    socket.on('inform-exit-in-game', ({ summonerId }) => {
       consumerTransportList = consumerTransportList.filter((consumerTransport) => {
         if (consumerTransport.summonerId === summonerId) {
           consumerTransport.consumer.close();
@@ -212,12 +204,12 @@ function useVoiceChat() {
 
     /* 챔피언 선택창에서 닷지 */
     ipcRenderer.once(IPC_KEY.EXIT_CHAMP_SELECT, () => {
-      teamSocket.emit('exit-champ-select');
+      socket.emit('exit-champ-select');
       disconnectVoiceChat();
     });
 
     const disconnectVoiceChat = () => {
-      teamSocket.disconnect();
+      socket.disconnect();
       producerTransport?.close();
       consumerTransportList.map(({ consumer, consumerTransport }) => {
         consumer.close();

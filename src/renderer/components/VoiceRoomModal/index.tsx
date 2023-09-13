@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import useVoiceChat from '../../hooks/useVoiceChat';
 import { useRecoilValue } from 'recoil';
 import {
@@ -9,29 +9,8 @@ import {
 } from '../../@store/atom';
 import * as S from './style';
 import SummonerVoiceBlock from '../SummonerVoiceBlock';
-import { ChampionInfoType, SummonerStatsType, SummonerType } from '../../@type/summoner';
-import { IPC_KEY } from '../../../const';
-import { TeamSocketContext } from '../../utils/socket';
-
-const { ipcRenderer } = window.require('electron');
-
-// const summoner: SummonerType & SummonerStatsType = {
-//   summonerId: 13122,
-//   displayName: '붕붕띠띠시발',
-//   profileImage: '',
-//   odds: 22,
-//   winCount: 12,
-//   failCount: 1,
-//   tier: 'P2',
-//   statusMessage: 'sdd',
-//   statsList: [{ championIcon: '', kda: '', isWin: true }],
-// };
 
 function VoiceRoomModal() {
-  let selectedChampionMap: Map<number, ChampionInfoType> = new Map();
-
-  const teamSocket = useContext(TeamSocketContext);
-
   const gameStatus = useRecoilValue(gameStatusState);
   const summoner = useRecoilValue(summonerState);
   const myTeamSummoners = useRecoilValue(myTeamSummonersState);
@@ -44,41 +23,15 @@ function VoiceRoomModal() {
   }, []);
 
   useEffect(() => {
-    ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
-      selectedChampionMap.set(championInfo.summonerId, championInfo);
-      teamSocket?.emit('champion-info', championInfo);
-    });
-
-    teamSocket?.on('champion-info', (championInfo) => {
-      selectedChampionMap.set(championInfo.summonerId, championInfo);
-    });
-
-    return () => {
-      ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
-    };
-  }, [teamSocket]);
-
-  useEffect(() => {
     gameStatus === 'loading' && onLeagueVoiceRoom();
   }, [gameStatus]);
 
   return (
     <S.Background>
-      {summoner && (
-        <SummonerVoiceBlock
-          isMine={true}
-          summoner={summoner}
-          selectedChampionMap={selectedChampionMap}
-        />
-      )}
+      {summoner && <SummonerVoiceBlock isMine={true} summoner={summoner} />}
 
       {myTeamSummoners?.map((summoner) => (
-        <SummonerVoiceBlock
-          key={summoner.summonerId}
-          isMine={false}
-          summoner={summoner}
-          selectedChampionMap={selectedChampionMap}
-        />
+        <SummonerVoiceBlock key={summoner.summonerId} isMine={false} summoner={summoner} />
       ))}
     </S.Background>
   );
