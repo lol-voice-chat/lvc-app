@@ -15,23 +15,23 @@ import { IPC_KEY } from '../../../const';
 
 const { ipcRenderer } = window.require('electron');
 
-const summoner: SummonerType & SummonerStatsType = {
-  summonerId: 13122,
-  displayName: '붕붕띠띠시발',
-  profileImage: '',
-  odds: 22,
-  winCount: 12,
-  failCount: 1,
-  tier: 'P2',
-  statusMessage: 'sdd',
-  statsList: [{ championIcon: '', kda: '', isWin: true }],
-};
+// const summoner: SummonerType & SummonerStatsType = {
+//   summonerId: 13122,
+//   displayName: '붕붕띠띠시발',
+//   profileImage: '',
+//   odds: 22,
+//   winCount: 12,
+//   failCount: 1,
+//   tier: 'P2',
+//   statusMessage: 'sdd',
+//   statsList: [{ championIcon: '', kda: '', isWin: true }],
+// };
 
 function VoiceRoomModal() {
   const selectedChampionMap: Map<number, ChampionInfoType> = new Map();
 
   const gameStatus = useRecoilValue(gameStatusState);
-  // const summoner = useRecoilValue(summonerState);
+  const summoner = useRecoilValue(summonerState);
   const myTeamSummoners = useRecoilValue(myTeamSummonersState);
   const enemySummoners = useRecoilValue(enemySummonersState);
   const teamSocket = useRecoilValue(teamSocketState);
