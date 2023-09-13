@@ -14,7 +14,6 @@ import { IPC_KEY, STORE_KEY } from '../../const';
 import electronStore from '../@store/electron';
 import { connectSocket } from '../utils/socket';
 import { Socket } from 'socket.io-client';
-import { useContext } from 'react';
 
 const { ipcRenderer } = window.require('electron');
 
