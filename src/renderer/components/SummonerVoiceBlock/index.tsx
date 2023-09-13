@@ -18,57 +18,62 @@ function SummonerVoiceBlock(props: {
   summoner: SummonerType & SummonerStatsType;
 }) {
   let selectedChampionMap: Map<number, ChampionInfoType> = new Map();
-  const selectedChampion = selectedChampionMap.get(props.summoner.summonerId);
 
   const userStream = useRecoilValue(userStreamState);
 
   const [managementSocket, setManagementSocket] = useState<Socket | null>(null);
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
+  const [selectedChampion, setSelectedChampion] = useState<ChampionInfoType | null>(null);
 
   useEffect(() => {
-    const newManagementSocket = connectSocket('team-voice-chat/manage');
+    const newManagementSocket = connectSocket('/team-voice-chat/manage');
     setManagementSocket(newManagementSocket);
 
     electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
       newManagementSocket.emit('team-manage-join-room', roomName);
     });
 
-    ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
-      selectedChampionMap.set(championInfo.summonerId, championInfo);
-      newManagementSocket.emit('champion-info', championInfo);
-    });
+    let visualizerInterval;
 
-    newManagementSocket.on('champion-info', (championInfo) => {
-      selectedChampionMap.set(championInfo.summonerId, championInfo);
-    });
+    if (props.isMine) {
+      ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
+        selectedChampionMap.set(championInfo.summonerId, championInfo);
+        setSelectedChampion(championInfo);
+        newManagementSocket.emit('champion-info', championInfo);
+      });
 
-    newManagementSocket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
-      if (summonerId === props.summoner.summonerId) {
-        setVisualizerVolume(visualizerVolume);
+      if (userStream) {
+        visualizerInterval = setInterval(() => {
+          micVolumeHandler(userStream, setVisualizerVolume);
+        }, 1000);
       }
-    });
+    } else {
+      newManagementSocket.on('champion-info', (championInfo) => {
+        selectedChampionMap.set(championInfo.summonerId, championInfo);
+        setSelectedChampion(championInfo);
+      });
 
-    let volumeCheckingInterval;
-    if (props.isMine && userStream) {
-      volumeCheckingInterval = setInterval(() => {
-        micVolumeHandler(userStream, setVisualizerVolume);
-      }, 1000);
+      newManagementSocket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
+        if (summonerId === props.summoner.summonerId) {
+          setVisualizerVolume(visualizerVolume);
+        }
+      });
     }
 
     return () => {
-      clearInterval(volumeCheckingInterval);
+      clearInterval(visualizerInterval);
       ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
       newManagementSocket.disconnect();
     };
   }, []);
 
   useEffect(() => {
-    if (!props.isMine || !managementSocket) return;
-
-    managementSocket.emit('mic-visualizer', {
-      summonerId: props.summoner.summonerId,
-      visualizerVolume,
-    });
+    if (props.isMine) {
+      managementSocket?.emit('mic-visualizer', {
+        summonerId: props.summoner.summonerId,
+        visualizerVolume,
+      });
+    }
   }, [visualizerVolume]);
 
   return (
