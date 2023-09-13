@@ -1,21 +1,28 @@
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { SummonerStatsType, SummonerType } from '../../@type/summoner';
-import { useRecoilState, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { summonerState, gameStatusState, userStreamState } from '../../@store/atom';
 import { IPC_KEY, STORE_KEY } from '../../../const';
 import electronStore from '../../@store/electron';
 import VoiceRoomModal from '../VoiceRoomModal';
 import { getUserAudioStream } from '../../utils/audio';
+import { TeamSocketContext } from '../../utils/socket';
 
 const { ipcRenderer } = window.require('electron');
 
 function Navigator() {
+  const teamSocket = useContext(TeamSocketContext);
+
   const [gameStatus, setGameStatus] = useRecoilState(gameStatusState);
   const setSummoner = useSetRecoilState(summonerState);
   const setUserStream = useSetRecoilState(userStreamState);
 
   useEffect(() => {
     getUserAudioStream().then((stream) => setUserStream(stream));
+
+    window.addEventListener('beforeunload', () => {
+      teamSocket?.disconnect();
+    });
 
     ipcRenderer.once('on-league-client', (_, summoner: SummonerType & SummonerStatsType) => {
       setSummoner(summoner);
@@ -34,6 +41,10 @@ function Navigator() {
         electronStore.set(STORE_KEY.LEAGUE_VOICE_ROOM_NAME, { roomName, teamName });
       });
     });
+
+    return () => {
+      teamSocket?.disconnect();
+    };
   }, []);
 
   return <>{gameStatus !== 'none' && <VoiceRoomModal />}</>;

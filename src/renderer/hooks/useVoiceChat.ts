@@ -225,10 +225,6 @@ function useVoiceChat() {
       });
       window.location.reload();
     };
-
-    return () => {
-      teamSocket.disconnect();
-    };
   };
 
   const onLeagueVoiceRoom = () => {
