@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import useVoiceChat from '../../hooks/useVoiceChat';
 import { useRecoilValue } from 'recoil';
 import {
@@ -6,12 +6,12 @@ import {
   gameStatusState,
   myTeamSummonersState,
   summonerState,
-  teamSocketState,
 } from '../../@store/atom';
 import * as S from './style';
 import SummonerVoiceBlock from '../SummonerVoiceBlock';
 import { ChampionInfoType, SummonerStatsType, SummonerType } from '../../@type/summoner';
 import { IPC_KEY } from '../../../const';
+import { TeamSocketContext } from '../../utils/socket';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -30,20 +30,24 @@ const { ipcRenderer } = window.require('electron');
 function VoiceRoomModal() {
   const selectedChampionMap: Map<number, ChampionInfoType> = new Map();
 
+  const teamSocket = useContext(TeamSocketContext);
+
   const gameStatus = useRecoilValue(gameStatusState);
   const summoner = useRecoilValue(summonerState);
   const myTeamSummoners = useRecoilValue(myTeamSummonersState);
   const enemySummoners = useRecoilValue(enemySummonersState);
-  const teamSocket = useRecoilValue(teamSocketState);
 
   const { onTeamVoiceRoom, onLeagueVoiceRoom } = useVoiceChat();
 
   useEffect(() => {
     onTeamVoiceRoom();
+  }, []);
 
+  useEffect(() => {
     ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
       selectedChampionMap.set(championInfo.summonerId, championInfo);
       teamSocket?.emit('champion-info', championInfo);
+      console.log(teamSocket);
     });
 
     teamSocket?.on('champion-info', (championInfo) => {
@@ -53,7 +57,7 @@ function VoiceRoomModal() {
     return () => {
       ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
     };
-  }, []);
+  }, [teamSocket]);
 
   useEffect(() => {
     gameStatus === 'loading' && onLeagueVoiceRoom();

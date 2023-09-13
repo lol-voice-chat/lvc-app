@@ -4,7 +4,6 @@ import {
   gameStatusState,
   myTeamSummonersState,
   summonerState,
-  teamSocketState,
   userStreamState,
 } from '../@store/atom';
 import * as mediasoup from 'mediasoup-client';
@@ -13,18 +12,20 @@ import { DeviceType, ConsumerTransportType, TransportType } from '../@type/webRt
 import { SummonerStatsType, SummonerType } from '../@type/summoner';
 import { IPC_KEY, STORE_KEY } from '../../const';
 import electronStore from '../@store/electron';
-import { connectSocket } from '../utils/socket';
+import { TeamSocketContext, connectSocket } from '../utils/socket';
 import { Socket } from 'socket.io-client';
+import { useContext } from 'react';
 
 const { ipcRenderer } = window.require('electron');
 
 function useVoiceChat() {
+  const teamSocket = useContext(TeamSocketContext);
+
   const setGameStatus = useSetRecoilState(gameStatusState);
   const userStream = useRecoilValue(userStreamState);
   const summoner = useRecoilValue(summonerState);
   const [myTeamSummoners, setMyTeamSummoners] = useRecoilState(myTeamSummonersState);
   const [enemySummoners, setEnemySummoners] = useRecoilState(enemySummonersState);
-  const setTeamSocket = useSetRecoilState(teamSocketState);
 
   const connectVoiceChat = (
     socket: Socket,
@@ -167,21 +168,26 @@ function useVoiceChat() {
   };
 
   const onTeamVoiceRoom = () => {
-    const socket = connectSocket('/team-voice-chat');
-    socket.connected && setTeamSocket(socket);
+    if (!teamSocket) return;
 
     let device: DeviceType | null = null;
     let producerTransport: TransportType | null = null;
     let consumerTransportList: ConsumerTransportType[] = [];
 
     electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
-      socket.emit('team-join-room', { roomName, summoner }, ({ rtpCapabilities }) => {
-        connectVoiceChat(socket, device, rtpCapabilities, producerTransport, consumerTransportList);
+      teamSocket.emit('team-join-room', { roomName, summoner }, ({ rtpCapabilities }) => {
+        connectVoiceChat(
+          teamSocket,
+          device,
+          rtpCapabilities,
+          producerTransport,
+          consumerTransportList
+        );
       });
     });
 
     /* 팀원 나감 */
-    socket.on('inform-exit-in-game', ({ summonerId }) => {
+    teamSocket.on('inform-exit-in-game', ({ summonerId }) => {
       consumerTransportList = consumerTransportList.filter((consumerTransport) => {
         if (consumerTransport.summonerId === summonerId) {
           consumerTransport.consumer.close();
@@ -206,18 +212,22 @@ function useVoiceChat() {
 
     /* 챔피언 선택창에서 닷지 */
     ipcRenderer.once(IPC_KEY.EXIT_CHAMP_SELECT, () => {
-      socket.emit('exit-champ-select');
+      teamSocket.emit('exit-champ-select');
       disconnectVoiceChat();
     });
 
     const disconnectVoiceChat = () => {
-      socket.disconnect();
+      teamSocket.disconnect();
       producerTransport?.close();
       consumerTransportList.map(({ consumer, consumerTransport }) => {
         consumer.close();
         consumerTransport.close();
       });
       window.location.reload();
+    };
+
+    return () => {
+      teamSocket.disconnect();
     };
   };
 
