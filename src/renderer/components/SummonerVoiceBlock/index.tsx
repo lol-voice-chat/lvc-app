@@ -1,19 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import * as S from './style';
 import RankBadge from '../@common/RankBadge';
 import { ChampionInfoType, SummonerStatsType, SummonerType } from '../../@type/summoner';
 import VolumeSlider from '../@common/VolumeSlider';
 import { micVolumeHandler } from '../../utils/audio';
 import { useRecoilValue } from 'recoil';
-import { teamSocketState, userStreamState } from '../../@store/atom';
+import { userStreamState } from '../../@store/atom';
+import { TeamSocketContext } from '../../utils/socket';
 
 function SummonerVoiceBlock(props: {
   summoner: SummonerType & SummonerStatsType;
   selectedChampInfo: ChampionInfoType | null;
   isMine: boolean;
 }) {
+  const teamSocket = useContext(TeamSocketContext);
+
   const userStream = useRecoilValue(userStreamState);
-  const teamSocket = useRecoilValue(teamSocketState);
 
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
 
