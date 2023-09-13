@@ -14,6 +14,7 @@ export type SummonerStatsType = {
 };
 
 export type ChampionInfoType = {
+  summonerId: number;
   championIcon: string;
   name: string;
   kda: string;

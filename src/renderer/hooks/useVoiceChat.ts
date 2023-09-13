@@ -4,6 +4,8 @@ import {
   gameStatusState,
   myTeamSummonersState,
   summonerState,
+  teamSocketState,
+  userStreamState,
 } from '../@store/atom';
 import * as mediasoup from 'mediasoup-client';
 import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
@@ -18,38 +20,29 @@ const { ipcRenderer } = window.require('electron');
 
 function useVoiceChat() {
   const setGameStatus = useSetRecoilState(gameStatusState);
+  const userStream = useRecoilValue(userStreamState);
   const summoner = useRecoilValue(summonerState);
   const [myTeamSummoners, setMyTeamSummoners] = useRecoilState(myTeamSummonersState);
   const [enemySummoners, setEnemySummoners] = useRecoilState(enemySummonersState);
+  const setTeamSocket = useSetRecoilState(teamSocketState);
 
   const connectVoiceChat = (
     socket: Socket,
     device: DeviceType | null,
-    rtpCapabilities: RtpCapabilities,
+    routerRtpCapabilities: RtpCapabilities,
     producerTransport: TransportType | null,
     consumerTransportList: ConsumerTransportType[]
   ) => {
-    const getUserAudio = () => {
-      navigator.mediaDevices
-        .getUserMedia({
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: false,
-            autoGainControl: false,
-          },
-        })
-        .then(async (mediaStream) => createDevice(mediaStream, rtpCapabilities))
-        .catch((err) => console.log('미디어 권한 에러', err));
-    };
-    getUserAudio();
+    const createDevice = () => {
+      if (!userStream) return;
 
-    const createDevice = (mediaStream: MediaStream, routerRtpCapabilities: RtpCapabilities) => {
       device = new mediasoup.Device();
       device
         .load({ routerRtpCapabilities })
-        .then(() => createSendTransport(mediaStream.getAudioTracks()[0]))
+        .then(() => createSendTransport(userStream.getAudioTracks()[0]))
         .catch((err) => console.log('디바이스 로드 에러', err));
     };
+    createDevice();
 
     const createSendTransport = (audioTrack: MediaStreamTrack) => {
       socket.emit('create-producer-transport', ({ params }: any) => {
@@ -175,6 +168,7 @@ function useVoiceChat() {
 
   const onTeamVoiceRoom = () => {
     const socket = connectSocket('/team-voice-chat');
+    socket.connected && setTeamSocket(socket);
 
     let device: DeviceType | null = null;
     let producerTransport: TransportType | null = null;

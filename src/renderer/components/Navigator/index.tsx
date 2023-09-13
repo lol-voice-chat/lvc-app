@@ -1,18 +1,22 @@
 import React, { useEffect } from 'react';
 import { SummonerStatsType, SummonerType } from '../../@type/summoner';
 import { useRecoilState, useSetRecoilState } from 'recoil';
-import { summonerState, gameStatusState } from '../../@store/atom';
+import { summonerState, gameStatusState, userStreamState } from '../../@store/atom';
 import { IPC_KEY, STORE_KEY } from '../../../const';
 import electronStore from '../../@store/electron';
 import VoiceRoomModal from '../VoiceRoomModal';
+import { getUserAudioStream } from '../../utils/audio';
 
 const { ipcRenderer } = window.require('electron');
 
 function Navigator() {
   const [gameStatus, setGameStatus] = useRecoilState(gameStatusState);
   const setSummoner = useSetRecoilState(summonerState);
+  const setUserStream = useSetRecoilState(userStreamState);
 
   useEffect(() => {
+    getUserAudioStream().then((stream) => setUserStream(stream));
+
     ipcRenderer.once('on-league-client', (_, summoner: SummonerType & SummonerStatsType) => {
       setSummoner(summoner);
     });
