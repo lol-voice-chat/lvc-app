@@ -1,7 +1,7 @@
 import league from '../league/common/league';
 import { LCU_ENDPOINT, RANK_DIVISION } from '../const';
 
-interface SummonerData {
+export interface SummonerData {
   summonerId: number;
   displayName: string;
   profileImage: string;
