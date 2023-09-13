@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as S from './style';
 import RankBadge from '../@common/RankBadge';
 import { ChampionInfoType, SummonerStatsType, SummonerType } from '../../@type/summoner';
@@ -6,23 +6,43 @@ import VolumeSlider from '../@common/VolumeSlider';
 import { micVolumeHandler } from '../../utils/audio';
 import { useRecoilValue } from 'recoil';
 import { userStreamState } from '../../@store/atom';
-import { TeamSocketContext } from '../../utils/socket';
+import { IPC_KEY, STORE_KEY } from '../../../const';
+import { connectSocket } from '../../utils/socket';
+import { Socket } from 'socket.io-client';
+import electronStore from '../../@store/electron';
+
+const { ipcRenderer } = window.require('electron');
 
 function SummonerVoiceBlock(props: {
   isMine: boolean;
   summoner: SummonerType & SummonerStatsType;
-  selectedChampionMap: Map<number, ChampionInfoType>;
 }) {
-  const selectedChampion = props.selectedChampionMap.get(props.summoner.summonerId);
-
-  const teamSocket = useContext(TeamSocketContext);
+  let selectedChampionMap: Map<number, ChampionInfoType> = new Map();
+  const selectedChampion = selectedChampionMap.get(props.summoner.summonerId);
 
   const userStream = useRecoilValue(userStreamState);
 
+  const [managementSocket, setManagementSocket] = useState<Socket | null>(null);
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
 
   useEffect(() => {
-    teamSocket?.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
+    const newManagementSocket = connectSocket('team-voice-chat/manage');
+    setManagementSocket(newManagementSocket);
+
+    electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
+      newManagementSocket.emit('team-manage-join-room', roomName);
+    });
+
+    ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
+      selectedChampionMap.set(championInfo.summonerId, championInfo);
+      newManagementSocket.emit('champion-info', championInfo);
+    });
+
+    newManagementSocket.on('champion-info', (championInfo) => {
+      selectedChampionMap.set(championInfo.summonerId, championInfo);
+    });
+
+    newManagementSocket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
       if (summonerId === props.summoner.summonerId) {
         setVisualizerVolume(visualizerVolume);
       }
@@ -37,13 +57,18 @@ function SummonerVoiceBlock(props: {
 
     return () => {
       clearInterval(volumeCheckingInterval);
-      teamSocket?.removeAllListeners('mic-visualizer');
+      ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
+      newManagementSocket.disconnect();
     };
-  }, [userStream]);
+  }, []);
 
   useEffect(() => {
-    if (!props.isMine) return;
-    teamSocket?.emit('mic-visualizer', { summonerId: props.summoner.summonerId, visualizerVolume });
+    if (!props.isMine || !managementSocket) return;
+
+    managementSocket.emit('mic-visualizer', {
+      summonerId: props.summoner.summonerId,
+      visualizerVolume,
+    });
   }, [visualizerVolume]);
 
   return (
