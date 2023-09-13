@@ -8,6 +8,7 @@ import { SummonerData } from '../onLeagueClientUx';
 import { GameflowData } from '../leagueHandler';
 
 type ChampionData = {
+  summonerId: number;
   championIcon: string;
   name: string;
   kda: string;
@@ -83,6 +84,7 @@ function getChampData(summoner: SummonerData, myTeam: any[], pvpMatchlist: any[]
 
   if (champCount === 0) {
     const championData: ChampionData = {
+      summonerId,
       championIcon: championIcon,
       name: championName,
       kda: '전적 없음',
@@ -94,6 +96,7 @@ function getChampData(summoner: SummonerData, myTeam: any[], pvpMatchlist: any[]
   }
 
   const championData: ChampionData = {
+    summonerId,
     championIcon: championIcon,
     name: championName,
     kda: `${(champKill / champCount).toFixed(1)}/${(champDeath / champCount).toFixed(1)}/${(

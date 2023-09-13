@@ -12,6 +12,18 @@ export const PHASE = {
   IN_GAME: 'InProgress',
 };
 
+type RankDivisionType = {
+  [key: string]: number;
+};
+
+export const RANK_DIVISION: RankDivisionType = {
+  I: 1,
+  II: 2,
+  III: 3,
+  IV: 4,
+  V: 5,
+};
+
 type ChampionsType = {
   [key: string]: string;
 };

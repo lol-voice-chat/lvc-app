@@ -18,10 +18,10 @@ const createWindow = () => {
   mainWindow.loadURL('http://localhost:3000');
 
   mainWindow.webContents.on('did-finish-load', async () => {
-    const { summoner, pvpMatchlist } = await onLeagueClientUx();
+    const { summoner, pvpMatchList } = await onLeagueClientUx();
     mainWindow.webContents.send('on-league-client', summoner);
 
-    await leagueHandler(mainWindow.webContents, summoner, pvpMatchlist);
+    await leagueHandler(mainWindow.webContents, summoner, pvpMatchList);
   });
 };
 

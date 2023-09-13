@@ -1,7 +1,7 @@
 import league from '../league/common/league';
-import { LCU_ENDPOINT } from '../const';
+import { LCU_ENDPOINT, RANK_DIVISION } from '../const';
 
-export interface SummonerData {
+interface SummonerData {
   summonerId: number;
   displayName: string;
   profileImage: string;
@@ -42,18 +42,13 @@ export const onLeagueClientUx = async () => {
   const leagueClientData: LeagueClientData = await league(LCU_ENDPOINT.CHAT_ME_URL);
 
   const tier: string = getTier(leagueClientData);
-  const profileImage: string = `https://ddragon-webp.lolmath.net/latest/img/profileicon/${leagueClientData.icon}.webp`;
-
-  const matchlistUrl = `/lol-match-history/v1/products/lol/${leagueClientData.puuid}/matches?begIndex=0&endIndex=100`;
-  const matchlist = await league(matchlistUrl);
-  const pvpMatchlist = matchlist.games.games.filter((game: any) => game.gameType !== 'CUSTOM_GAME');
-
-  const summonerStats: SummonerStats = getSummonerStats(pvpMatchlist);
+  const pvpMatchList = await getPvpMatchList(leagueClientData.puuid);
+  const summonerStats: SummonerStats = getSummonerStats(pvpMatchList);
 
   const summoner: SummonerData = {
     summonerId: leagueClientData.summonerId,
     displayName: leagueClientData.gameName,
-    profileImage,
+    profileImage: `https://ddragon-webp.lolmath.net/latest/img/profileicon/${leagueClientData.icon}.webp`,
     tier,
     statusMessage: leagueClientData.statusMessage,
     odds: summonerStats.odds,
@@ -62,7 +57,7 @@ export const onLeagueClientUx = async () => {
     statsList: summonerStats.statsList,
   };
 
-  return { summoner, pvpMatchlist };
+  return { summoner, pvpMatchList };
 };
 
 function getTier(leagueClientData: LeagueClientData) {
@@ -73,20 +68,13 @@ function getTier(leagueClientData: LeagueClientData) {
     return 'Unrank';
   }
 
-  switch (rankedLeagueDivision) {
-    case 'I':
-      return displayTier + 1;
-    case 'II':
-      return displayTier + 2;
-    case 'III':
-      return displayTier + 3;
-    case 'IV':
-      return displayTier + 4;
-    case 'V':
-      return displayTier + 5;
-    default:
-      throw new Error('잘못된 랭크입니다.');
-  }
+  return displayTier + RANK_DIVISION[rankedLeagueDivision];
+}
+
+async function getPvpMatchList(puuid: string) {
+  const matchListUrl = `/lol-match-history/v1/products/lol/${puuid}/matches?begIndex=0&endIndex=100`;
+  const matchList = await league(matchListUrl);
+  return matchList.games.games.filter((game: any) => game.gameType !== 'CUSTOM_GAME');
 }
 
 function getSummonerStats(pvpMatchlist: any[]) {
@@ -97,7 +85,6 @@ function getSummonerStats(pvpMatchlist: any[]) {
 
   const statsList: StatsData[] = recentPvpMatchlist.map((game: any) => {
     const participant = game.participants[0];
-
     const stats: StatsData = {
       championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${participant.championId}/tile`,
       kda: `${participant.stats.kills}/${participant.stats.deaths}/${participant.stats.assists}`,
