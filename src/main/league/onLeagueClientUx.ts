@@ -41,7 +41,6 @@ interface SummonerStats {
 export const onLeagueClientUx = async () => {
   const leagueClientData: LeagueClientData = await getLeagueClientData();
 
-  console.log(leagueClientData);
   const tier: string = getTier(leagueClientData);
   const pvpMatchList = await getPvpMatchList(leagueClientData.puuid);
   const summonerStats: SummonerStats = getSummonerStats(pvpMatchList);
