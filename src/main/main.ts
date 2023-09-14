@@ -20,7 +20,6 @@ const createWindow = () => {
   mainWindow.webContents.on('did-finish-load', async () => {
     const { summoner, pvpMatchList } = await onLeagueClientUx();
     mainWindow.webContents.send('on-league-client', summoner);
-
     await leagueHandler(mainWindow.webContents, summoner, pvpMatchList);
   });
 };
