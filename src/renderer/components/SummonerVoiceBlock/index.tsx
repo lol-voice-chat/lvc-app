@@ -93,12 +93,8 @@ function SummonerVoiceBlock(props: {
   const handleClickMuteSpeaker = () => {
     userStream?.getAudioTracks().forEach((track) => (track.enabled = !track.enabled));
 
-    if (isSpeakerMute) {
-      setSpeakerBeforeMuteVolume(speakerVolume);
-      setSpeakerVolume(0.7);
-    } else {
-      setSpeakerVolume(0);
-    }
+    setSpeakerBeforeMuteVolume(speakerVolume);
+    setSpeakerVolume(isSpeakerMute ? speakerBeforeMuteVolume : 0);
     setIsSpeakerMute((curMute) => !curMute);
   };
 
@@ -135,7 +131,7 @@ function SummonerVoiceBlock(props: {
             )}
           </div>
           <VolumeSlider audiotype="speaker" volume={speakerVolume} setVolume={setSpeakerVolume} />
-          {/* <audio id={props.summoner.summonerId.toString() + 'speaker'} autoPlay /> */}
+          <audio id={props.summoner.summonerId.toString() + 'speaker'} autoPlay />
         </div>
       </S.SoundBox>
 

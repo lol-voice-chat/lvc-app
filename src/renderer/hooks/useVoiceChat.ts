@@ -152,11 +152,12 @@ function useVoiceChat() {
             consumerTransport,
           });
 
-          const summonerBlock = document.getElementById(summonerId.toString());
-          const speakerBlock = document.createElement('audio');
-          speakerBlock.setAttribute('autoPlay', 'true');
-          summonerBlock?.appendChild(speakerBlock);
-          speakerBlock.srcObject = new MediaStream([consumer.track]);
+          const newSummonerAudio = document.getElementById(
+            summonerId.toString() + 'speaker'
+          ) as HTMLAudioElement;
+
+          console.log(newSummonerAudio);
+          newSummonerAudio.srcObject = new MediaStream([consumer.track]);
 
           socket.emit('consumer-resume', { remoteProducerId });
         }
