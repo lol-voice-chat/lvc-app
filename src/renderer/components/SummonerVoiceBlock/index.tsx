@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as S from './style';
 import RankBadge from '../@common/RankBadge';
 import { ChampionInfoType, SummonerStatsType, SummonerType } from '../../@type/summoner';
@@ -19,15 +19,19 @@ function SummonerVoiceBlock(props: {
 }) {
   let selectedChampionMap: Map<number, ChampionInfoType> = new Map();
 
+  let managementSocket = useRef<Socket | null>(null);
+
   const userStream = useRecoilValue(userStreamState);
 
-  const [managementSocket, setManagementSocket] = useState<Socket | null>(null);
+  const [micVolume, setMicVolume] = useState(0);
+  const [speakerVolume, setSpeakerVolume] = useState(0);
+  const [isSpeakerMute, setIsSpeakerMute] = useState(false);
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
   const [selectedChampion, setSelectedChampion] = useState<ChampionInfoType | null>(null);
 
   useEffect(() => {
     const newManagementSocket = connectSocket('/team-voice-chat/manage');
-    setManagementSocket(newManagementSocket);
+    managementSocket.current = newManagementSocket;
 
     electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
       newManagementSocket.emit('team-manage-join-room', roomName);
@@ -69,12 +73,25 @@ function SummonerVoiceBlock(props: {
 
   useEffect(() => {
     if (props.isMine) {
-      managementSocket?.emit('mic-visualizer', {
+      managementSocket.current?.emit('mic-visualizer', {
         summonerId: props.summoner.summonerId,
         visualizerVolume,
       });
     }
   }, [visualizerVolume]);
+
+  useEffect(() => {
+    const speaker = document.getElementById(
+      props.summoner.summonerId.toString() + 'speaker'
+    ) as HTMLAudioElement;
+
+    speaker.volume = speakerVolume;
+  }, [speakerVolume]);
+
+  const handleClickMuteSpeaker = () => {
+    userStream?.getAudioTracks().forEach((track) => (track.enabled = !track.enabled));
+    setIsSpeakerMute((curMute) => !curMute);
+  };
 
   return (
     <S.SummonerBlock id={props.summoner.summonerId.toString()}>
@@ -92,19 +109,29 @@ function SummonerVoiceBlock(props: {
         <div id="questionCircle">?</div>
       </S.TitleTag>
 
-      {/* todo: 오디오 컨트롤러 기능 추가 */}
+      {/* todo: 마이크 컨트롤러 기능 추가 */}
       <S.SoundBox>
-        {/* <div id="audio-ctrl">
-          <img src="img/mic_icon.svg" alt="마이크 아이콘" />
-          <VolumeSlider buttonType="square" volume={volume} setVolume={setVolume} />
-        </div>
+        {props.isMine && (
+          <div id="audio-ctrl">
+            <img src="img/mic_icon.svg" alt="마이크 아이콘" />
+            <VolumeSlider audiotype="mic" volume={micVolume} setVolume={setMicVolume} />
+          </div>
+        )}
         <div id="audio-ctrl">
-          <img src="img/headset_icon.svg" alt="헤드셋 아이콘" />
-          <VolumeSlider buttonType="circle" volume={volume} setVolume={setVolume} />
-        </div> */}
+          <div onClick={handleClickMuteSpeaker}>
+            {!isSpeakerMute ? (
+              <img src="img/headset_icon.svg" alt="헤드셋 아이콘" />
+            ) : (
+              <img src="img/headset_mute_icon.svg" alt="헤드셋 무음 아이콘" />
+            )}
+          </div>
+          <VolumeSlider audiotype="speaker" volume={speakerVolume} setVolume={setSpeakerVolume} />
+          <audio id={props.summoner.summonerId.toString() + 'speaker'} autoPlay />
+        </div>
       </S.SoundBox>
 
       <S.AverageGameData>
+        {!props.isMine && <p id="name">{selectedChampion?.name ?? '-'}</p>}
         <div>
           <p>KDA</p>
           <p id="value">{selectedChampion?.kda ?? '-'}</p>

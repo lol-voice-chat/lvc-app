@@ -15,23 +15,25 @@ function Navigator() {
   const setUserStream = useSetRecoilState(userStreamState);
 
   useEffect(() => {
-    getUserAudioStream().then((stream) => setUserStream(stream));
-
     ipcRenderer.once('on-league-client', (_, summoner: SummonerType & SummonerStatsType) => {
       setSummoner(summoner);
     });
 
-    ipcRenderer.once(IPC_KEY.TEAM_JOIN_ROOM, (_, { roomName }) => {
-      setGameStatus('champ-select');
-      electronStore.set(STORE_KEY.TEAM_VOICE_ROOM_NAME, roomName);
-    });
+    getUserAudioStream().then((stream) => {
+      setUserStream(stream);
 
-    ipcRenderer.once(IPC_KEY.LEAGUE_JOIN_ROOM, (_, { roomName, teamName }) => {
-      electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((teamVoiceRoomName) => {
-        if (teamVoiceRoomName === roomName) return;
+      ipcRenderer.on(IPC_KEY.TEAM_JOIN_ROOM, (_, { roomName }) => {
+        setGameStatus('champ-select');
+        electronStore.set(STORE_KEY.TEAM_VOICE_ROOM_NAME, roomName);
+      });
 
-        setGameStatus('loading');
-        electronStore.set(STORE_KEY.LEAGUE_VOICE_ROOM_NAME, { roomName, teamName });
+      ipcRenderer.once(IPC_KEY.LEAGUE_JOIN_ROOM, (_, { roomName, teamName }) => {
+        electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((teamVoiceRoomName) => {
+          if (teamVoiceRoomName === roomName) return;
+
+          setGameStatus('loading');
+          electronStore.set(STORE_KEY.LEAGUE_VOICE_ROOM_NAME, { roomName, teamName });
+        });
       });
     });
   }, []);
