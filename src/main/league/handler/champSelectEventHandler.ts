@@ -59,7 +59,7 @@ function getChampData(summoner: SummonerData, myTeam: any[], pvpMatchlist: any[]
   let champDeath = 0;
   let champAssists = 0;
   let totalDamage = 0;
-  let totalMinionsKilled = 0;
+  let totalCs = 0;
   let champCount = 0;
 
   const { championId } = myTeam.find((summoner: any) => summoner.summonerId === summonerId);
@@ -71,7 +71,7 @@ function getChampData(summoner: SummonerData, myTeam: any[], pvpMatchlist: any[]
       champDeath += participant.stats.deaths;
       champAssists += participant.stats.assists;
       totalDamage += participant.stats.totalDamageDealtToChampions;
-      totalMinionsKilled += participant.stats.totalMinionsKilled;
+      totalCs += participant.stats.totalMinionsKilled + participant.stats.neutralMinionsKilled;
       champCount++;
     }
   });
@@ -105,7 +105,7 @@ function getChampData(summoner: SummonerData, myTeam: any[], pvpMatchlist: any[]
     ${getAverage(champAssists, champCount)}
     `,
     totalDamage: Math.floor(totalDamage / champCount).toString(),
-    totalMinionsKilled: getAverage(totalMinionsKilled, champCount),
+    totalMinionsKilled: getAverage(totalCs, champCount),
   };
 
   return championData;
