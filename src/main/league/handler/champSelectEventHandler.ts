@@ -16,8 +16,6 @@ type ChampionData = {
   totalMinionsKilled: string;
 };
 
-let isJoinedRoom = false;
-
 export const handle = async (
   gameflowData: GameflowData,
   webContents: WebContents,
@@ -25,6 +23,8 @@ export const handle = async (
   ws: LeagueWebSocket,
   pvpMatchlist: any[]
 ) => {
+  let isJoinedRoom = false;
+
   if (gameflowData.phase === PHASE.CHAMP_SELECT) {
     const { myTeam } = await league(LCU_ENDPOINT.CHAMP_SELECT_URL);
     const roomName = voiceRoomNameGenerator(myTeam);
@@ -44,7 +44,7 @@ export const handle = async (
       webContents.send(IPC_KEY.CHAMP_INFO, championData);
     }
 
-    const isCloseWindow = await isCloseChampionSelectionWindow(data.timer.phase);
+    const isCloseWindow = await isCloseChampionSelectionWindow(data.timer.phase, isJoinedRoom);
     if (isCloseWindow) {
       webContents.send(IPC_KEY.EXIT_CHAMP_SELECT);
       isJoinedRoom = false;
@@ -99,17 +99,28 @@ function getChampData(summoner: SummonerData, myTeam: any[], pvpMatchlist: any[]
     summonerId,
     championIcon: championIcon,
     name: championName,
-    kda: `${(champKill / champCount).toFixed(1)}/${(champDeath / champCount).toFixed(1)}/${(
-      champAssists / champCount
-    ).toFixed(1)}`,
+    kda: `
+    ${getAverage(champKill, champCount)}/
+    ${getAverage(champDeath, champCount)}/
+    ${getAverage(champAssists, champCount)}
+    `,
     totalDamage: Math.floor(totalDamage / champCount).toString(),
-    totalMinionsKilled: (totalMinionsKilled / champCount).toFixed(1),
+    totalMinionsKilled: getAverage(totalMinionsKilled, champCount),
   };
 
   return championData;
 }
 
-async function isCloseChampionSelectionWindow(phase: string) {
+function getAverage(champInfo: number, champCount: number) {
+  const info: string = (champInfo / champCount).toFixed(1).toString();
+  if (info.split('.')[1] === '0') {
+    return info.split('.')[0];
+  }
+
+  return info;
+}
+
+async function isCloseChampionSelectionWindow(phase: string, isJoinedRoom: boolean) {
   const gameflowPhase = await league(LCU_ENDPOINT.GAMEFLOW_PHASE_URL);
   const isNotChampSelect: boolean = gameflowPhase === PHASE.NONE || gameflowPhase === PHASE.LOBBY;
   return isJoinedRoom && phase === '' && isNotChampSelect;

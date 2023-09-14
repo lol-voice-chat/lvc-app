@@ -6,14 +6,14 @@ import { IPC_KEY } from '../../../const/index';
 import { LeagueWebSocket } from 'league-connect';
 import { SummonerData } from '../onLeagueClientUx';
 
-let isStartedInGame = false;
-
 export const handle = (
   gameflowData: GameflowData,
   webContents: WebContents,
   summoner: SummonerData,
   ws: LeagueWebSocket
 ) => {
+  let isStartedInGame = false;
+
   const { summonerId } = summoner;
   if (isInGameWindow(gameflowData)) {
     const { teamOne, teamTwo } = gameflowData.gameData;
@@ -32,7 +32,7 @@ export const handle = (
       isStartedInGame = true;
     }
 
-    if (isCloseInGameWindow(data)) {
+    if (isCloseInGameWindow(data) && isStartedInGame) {
       webContents.send(IPC_KEY.EXIT_IN_GAME);
       isStartedInGame = false;
     }
@@ -44,5 +44,5 @@ function isInGameWindow(data: GameflowData) {
 }
 
 function isCloseInGameWindow(data: GameflowData) {
-  return data.phase === PHASE.NONE && data.gameClient.visible && isStartedInGame;
+  return data.phase === PHASE.NONE && data.gameClient.visible;
 }
