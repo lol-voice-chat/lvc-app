@@ -96,7 +96,7 @@ export const SoundBox = styled.div`
       height: 30px;
       cursor: pointer;
     }
-    div {
+    #volume-slider {
       width: 75%;
     }
   }

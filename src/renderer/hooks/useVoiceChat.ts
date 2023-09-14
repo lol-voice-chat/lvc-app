@@ -152,12 +152,10 @@ function useVoiceChat() {
             consumerTransport,
           });
 
-          const newSummoner = document.getElementById(summonerId.toString());
-          const newSummonerSpeeker = document.createElement('audio');
-          newSummonerSpeeker.setAttribute('autoplay', 'true');
-          newSummoner?.appendChild(newSummonerSpeeker);
-          newSummonerSpeeker.srcObject = new MediaStream([consumer.track]);
-
+          const newSummonerAudio = document.getElementById(
+            summonerId.toString() + 'speaker'
+          ) as HTMLAudioElement;
+          newSummonerAudio.srcObject = new MediaStream([consumer.track]);
           socket.emit('consumer-resume', { remoteProducerId });
         }
       );
