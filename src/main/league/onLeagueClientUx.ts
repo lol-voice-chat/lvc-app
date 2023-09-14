@@ -39,8 +39,9 @@ interface SummonerStats {
 }
 
 export const onLeagueClientUx = async () => {
-  const leagueClientData: LeagueClientData = await league(LCU_ENDPOINT.CHAT_ME_URL);
+  const leagueClientData: LeagueClientData = await getLeagueClientData();
 
+  console.log(leagueClientData);
   const tier: string = getTier(leagueClientData);
   const pvpMatchList = await getPvpMatchList(leagueClientData.puuid);
   const summonerStats: SummonerStats = getSummonerStats(pvpMatchList);
@@ -59,6 +60,18 @@ export const onLeagueClientUx = async () => {
 
   return { summoner, pvpMatchList };
 };
+
+async function getLeagueClientData(): Promise<LeagueClientData> {
+  return new Promise(async (resolve) => {
+    let interval = setInterval(async function () {
+      const leagueClientData: LeagueClientData = await league(LCU_ENDPOINT.CHAT_ME_URL);
+      if (leagueClientData.gameName !== '') {
+        clearInterval(interval);
+        resolve(leagueClientData);
+      }
+    }, 1000);
+  });
+}
 
 function getTier(leagueClientData: LeagueClientData) {
   const { rankedLeagueDivision, rankedLeagueTier } = leagueClientData.lol;
