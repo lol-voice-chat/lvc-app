@@ -28,6 +28,8 @@ export const ProfileImg = styled.img<{ visualize: boolean }>`
   border-radius: 50%;
   border: 3.5px solid ${({ visualize }) => (visualize ? '#50a361' : 'transparent')};
 
+  /* transition: border 0.1; */
+
   box-shadow: 0 5px 18px -7px rgba(0, 0, 0, 0.3);
 `;
 
