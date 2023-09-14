@@ -29,56 +29,56 @@ function SummonerVoiceBlock(props: {
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
   const [selectedChampion, setSelectedChampion] = useState<ChampionInfoType | null>(null);
 
-  useEffect(() => {
-    const newManagementSocket = connectSocket('/team-voice-chat/manage');
-    managementSocket.current = newManagementSocket;
+  // useEffect(() => {
+  //   const socket = connectSocket('/team-voice-chat/manage');
+  //   managementSocket.current = socket;
 
-    electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
-      newManagementSocket.emit('team-manage-join-room', roomName);
-    });
+  //   electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
+  //     socket.emit('team-manage-join-room', roomName);
+  //   });
 
-    let visualizerInterval;
+  //   let visualizerInterval;
 
-    if (props.isMine) {
-      ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
-        selectedChampionMap.set(championInfo.summonerId, championInfo);
-        setSelectedChampion(championInfo);
-        newManagementSocket.emit('champion-info', championInfo);
-      });
+  //   if (props.isMine) {
+  //     ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
+  //       selectedChampionMap.set(championInfo.summonerId, championInfo);
+  //       setSelectedChampion(championInfo);
+  //       socket.emit('champion-info', championInfo);
+  //     });
 
-      if (userStream) {
-        visualizerInterval = setInterval(() => {
-          micVolumeHandler(userStream, setVisualizerVolume);
-        }, 1000);
-      }
-    } else {
-      newManagementSocket.on('champion-info', (championInfo) => {
-        selectedChampionMap.set(championInfo.summonerId, championInfo);
-        setSelectedChampion(championInfo);
-      });
+  //     if (userStream) {
+  //       visualizerInterval = setInterval(() => {
+  //         micVolumeHandler(userStream, setVisualizerVolume);
+  //       }, 1000);
+  //     }
+  //   } else {
+  //     socket.on('champion-info', (championInfo) => {
+  //       selectedChampionMap.set(championInfo.summonerId, championInfo);
+  //       setSelectedChampion(championInfo);
+  //     });
 
-      newManagementSocket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
-        if (summonerId === props.summoner.summonerId) {
-          setVisualizerVolume(visualizerVolume);
-        }
-      });
-    }
+  //     socket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
+  //       if (summonerId === props.summoner.summonerId) {
+  //         setVisualizerVolume(visualizerVolume);
+  //       }
+  //     });
+  //   }
 
-    return () => {
-      clearInterval(visualizerInterval);
-      ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
-      newManagementSocket.disconnect();
-    };
-  }, []);
+  //   return () => {
+  //     clearInterval(visualizerInterval);
+  //     ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
+  //     socket.disconnect();
+  //   };
+  // }, []);
 
-  useEffect(() => {
-    if (props.isMine) {
-      managementSocket.current?.emit('mic-visualizer', {
-        summonerId: props.summoner.summonerId,
-        visualizerVolume,
-      });
-    }
-  }, [visualizerVolume]);
+  // useEffect(() => {
+  //   if (props.isMine) {
+  //     managementSocket.current?.emit('mic-visualizer', {
+  //       summonerId: props.summoner.summonerId,
+  //       visualizerVolume,
+  //     });
+  //   }
+  // }, [visualizerVolume]);
 
   useEffect(() => {
     const speaker = document.getElementById(
@@ -86,11 +86,18 @@ function SummonerVoiceBlock(props: {
     ) as HTMLAudioElement;
 
     speaker.volume = speakerVolume;
+
+    if (speakerVolume === 0) {
+      setIsSpeakerMute(true);
+    } else {
+      setIsSpeakerMute(false);
+    }
   }, [speakerVolume]);
 
   const handleClickMuteSpeaker = () => {
     userStream?.getAudioTracks().forEach((track) => (track.enabled = !track.enabled));
     setIsSpeakerMute((curMute) => !curMute);
+    setSpeakerVolume(0);
   };
 
   return (
