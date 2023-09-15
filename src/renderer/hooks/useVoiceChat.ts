@@ -165,8 +165,8 @@ function useVoiceChat() {
     };
   };
 
-  const onTeamVoiceRoom = (socket: Socket) => {
-    // const socket = connectSocket('/team-voice-chat');
+  const onTeamVoiceRoom = () => {
+    const socket = connectSocket('/team-voice-chat');
 
     let device: DeviceType | null = null;
     let producerTransport: TransportType | null = null;
