@@ -6,7 +6,6 @@ export const IPC_KEY = {
   START_IN_GAME: 'start-in-game',
   CHAMP_INFO: 'champion-info',
   MUTE_ALL_SPEAKER: 'mute-all-speaker',
-  SUCCESS_TEAM_VOICE: 'success-team-voice',
 };
 
 export const STORE_KEY = {
