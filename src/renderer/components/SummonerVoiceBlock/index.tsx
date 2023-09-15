@@ -4,17 +4,18 @@ import RankBadge from '../@common/RankBadge';
 import { ChampionInfoType, SummonerStatsType, SummonerType } from '../../@type/summoner';
 import VolumeSlider from '../@common/VolumeSlider';
 import { micVolumeHandler } from '../../utils/audio';
-import { IPC_KEY } from '../../../const';
+import { IPC_KEY, STORE_KEY } from '../../../const';
 import { useRecoilValue } from 'recoil';
 import { userStreamState } from '../../@store/atom';
 import { Socket } from 'socket.io-client';
+import { connectSocket } from '../../utils/socket';
+import electronStore from '../../@store/electron';
 
 const { ipcRenderer } = window.require('electron');
 
 function SummonerVoiceBlock(props: {
   isMine: boolean;
   summoner: SummonerType & SummonerStatsType;
-  managementSocket: Socket | null;
 }) {
   const userStream = useRecoilValue(userStreamState);
 
@@ -40,45 +41,53 @@ function SummonerVoiceBlock(props: {
   // }, []);
 
   useEffect(() => {
-    if (props.isMine) {
-      ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
-        setSelectedChampion(championInfo);
-        console.log('보냄', championInfo);
-        props.managementSocket?.emit('champion-info', championInfo);
+    ipcRenderer.once(IPC_KEY.CONNECT_MANAGE_SOCKET, () => {
+      const socket = connectSocket('/team-voice-chat/manage');
+
+      electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
+        socket.emit('team-manage-join-room', roomName);
       });
-      // ipcRenderer.on(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER, () => {
-      //   if (isMuteSpeaker) {
-      //     userStream?.getAudioTracks().forEach((track) => (track.enabled = true));
-      //     setIsMuteSpeaker(false);
-      //     setIsMuteMic(false);
-      //   }
-      // });
-    } else {
-      props.managementSocket?.on('champion-info', (championInfo: ChampionInfoType) => {
-        console.log('받음', championInfo);
-        if (props.summoner.summonerId === championInfo.summonerId) {
+
+      if (props.isMine) {
+        ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
           setSelectedChampion(championInfo);
-        }
-      });
-      //   props.managementSocket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
-      //     if (summonerId === props.summoner.summonerId) {
-      //       setVisualizerVolume(visualizerVolume);
-      //     }
-      //   });
-      //   ipcRenderer.on(IPC_KEY.MUTE_ALL_SPEAKER, ({ isMuteSummonerSpeaker }) => {
-      //     if (!isMuteSummonerSpeaker && !isMuteSpeaker) {
-      //       setBeforeMuteSpeakerVolume(speakerVolume);
-      //       setSpeakerVolume(0);
-      //     }
-      //     if (isMuteSummonerSpeaker) {
-      //       setSpeakerVolume(beforeMuteSpeakerVolume);
-      //     }
-      //     setIsMuteSpeaker(!isMuteSummonerSpeaker);
-      //   });
-    }
+          console.log('보냄', championInfo);
+          socket.emit('champion-info', championInfo);
+        });
+        // ipcRenderer.on(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER, () => {
+        //   if (isMuteSpeaker) {
+        //     userStream?.getAudioTracks().forEach((track) => (track.enabled = true));
+        //     setIsMuteSpeaker(false);
+        //     setIsMuteMic(false);
+        //   }
+        // });
+      } else {
+        socket.on('champion-info', (championInfo: ChampionInfoType) => {
+          console.log('받음', championInfo);
+          if (props.summoner.summonerId === championInfo.summonerId) {
+            setSelectedChampion(championInfo);
+          }
+        });
+        //   props.managementSocket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
+        //     if (summonerId === props.summoner.summonerId) {
+        //       setVisualizerVolume(visualizerVolume);
+        //     }
+        //   });
+        //   ipcRenderer.on(IPC_KEY.MUTE_ALL_SPEAKER, ({ isMuteSummonerSpeaker }) => {
+        //     if (!isMuteSummonerSpeaker && !isMuteSpeaker) {
+        //       setBeforeMuteSpeakerVolume(speakerVolume);
+        //       setSpeakerVolume(0);
+        //     }
+        //     if (isMuteSummonerSpeaker) {
+        //       setSpeakerVolume(beforeMuteSpeakerVolume);
+        //     }
+        //     setIsMuteSpeaker(!isMuteSummonerSpeaker);
+        //   });
+      }
+    });
 
     return () => {
-      ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
+      // ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
       // ipcRenderer.removeAllListeners(IPC_KEY.MUTE_ALL_SPEAKER);
       // ipcRenderer.removeAllListeners(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER);
     };
