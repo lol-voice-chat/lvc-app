@@ -1,4 +1,4 @@
-import league from '../common/league';
+import league from '../utils/league';
 import { LCU_ENDPOINT, RANK_DIVISION } from '../const';
 
 export interface SummonerData {
@@ -38,11 +38,29 @@ interface StatsData {
   isWin: boolean;
 }
 
+export interface MatchHistoryData {
+  gameType: string;
+  participants: ParticipantData[];
+}
+
+export interface ParticipantData {
+  championId: number;
+  stats: {
+    assists: number;
+    deaths: number;
+    kills: number;
+    totalDamageDealtToChampions: number;
+    totalMinionsKilled: number;
+    neutralMinionsKilled: number;
+    win: boolean;
+  };
+}
+
 export const onLeagueClientUx = async () => {
   const leagueClientData: LeagueClientData = await getLeagueClientData();
 
   const tier: string = getTier(leagueClientData);
-  const pvpMatchList = await getPvpMatchList(leagueClientData.puuid);
+  const pvpMatchList: MatchHistoryData[] = await getPvpMatchList(leagueClientData.puuid);
   const summonerStats: SummonerStats = getSummonerStats(pvpMatchList);
 
   const summoner: SummonerData = {
@@ -87,17 +105,17 @@ function getTier(leagueClientData: LeagueClientData) {
 async function getPvpMatchList(puuid: string) {
   const matchListUrl = `/lol-match-history/v1/products/lol/${puuid}/matches?begIndex=0&endIndex=100`;
   const matchList = await league(matchListUrl);
-  return matchList.games.games.filter((game: any) => game.gameType !== 'CUSTOM_GAME');
+  return matchList.games.games.filter((game: MatchHistoryData) => game.gameType !== 'CUSTOM_GAME');
 }
 
-function getSummonerStats(pvpMatchlist: any[]) {
+function getSummonerStats(pvpMatchlist: MatchHistoryData[]) {
   let winCount = 0;
   let failCount = 0;
 
   const recentPvpMatchlist = pvpMatchlist.slice(0, 10);
 
-  const statsList: StatsData[] = recentPvpMatchlist.map((game: any) => {
-    const participant = game.participants[0];
+  const statsList: StatsData[] = recentPvpMatchlist.map((game: MatchHistoryData) => {
+    const participant: ParticipantData = game.participants[0];
     const stats: StatsData = {
       championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${participant.championId}/tile`,
       kda: `${participant.stats.kills}/${participant.stats.deaths}/${participant.stats.assists}`,
