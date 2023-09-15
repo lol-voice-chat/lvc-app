@@ -43,14 +43,14 @@ function SummonerVoiceBlock(props: {
   useEffect(() => {
     ipcRenderer.once(IPC_KEY.CONNECT_MANAGE_SOCKET, () => {
       const socket = connectSocket('/team-voice-chat/manage');
-
       electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
-        socket.emit('team-manage-join-room', roomName);
+        socket.emit('team-manage-join-room', { roomName, displayName: props.summoner.displayName });
       });
 
       if (props.isMine) {
         ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
           setSelectedChampion(championInfo);
+          console.log(championInfo);
           socket.emit('champion-info', championInfo);
         });
         // ipcRenderer.on(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER, () => {
