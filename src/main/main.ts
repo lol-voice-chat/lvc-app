@@ -29,10 +29,6 @@ ipcMain.on(IPC_KEY.MUTE_ALL_SPEAKER, (event) => {
   event.reply(IPC_KEY.MUTE_ALL_SPEAKER);
 });
 
-ipcMain.on(IPC_KEY.SUCCESS_TEAM_VOICE, (event) => {
-  event.reply(IPC_KEY.SUCCESS_TEAM_VOICE);
-});
-
 app.whenReady().then(() => {
   createWindow();
 
