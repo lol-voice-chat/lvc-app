@@ -157,9 +157,7 @@ function useVoiceChat() {
           ) as HTMLAudioElement;
           newSummonerAudio.srcObject = new MediaStream([consumer.track]);
 
-          socket.emit('consumer-resume', { remoteProducerId }, () => {
-            ipcRenderer.send(IPC_KEY.SUCCESS_TEAM_VOICE);
-          });
+          socket.emit('consumer-resume', { remoteProducerId });
         }
       );
     };

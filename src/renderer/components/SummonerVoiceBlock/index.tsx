@@ -31,53 +31,53 @@ function SummonerVoiceBlock(props: {
   const [selectedChampion, setSelectedChampion] = useState<ChampionInfoType | null>(null);
 
   useEffect(() => {
-    ipcRenderer.once(IPC_KEY.SUCCESS_TEAM_VOICE, () => {
-      const socket = connectSocket('/team-voice-chat/manage');
-      managementSocket.current = socket;
+    const socket = connectSocket('/team-voice-chat/manage');
+    managementSocket.current = socket;
 
-      electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
-        socket.emit('team-manage-join-room', roomName);
-      });
-
-      let visualizerInterval;
-
-      if (props.isMine) {
-        ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
-          selectedChampionMap.set(championInfo.summonerId, championInfo);
-          setSelectedChampion(championInfo);
-          socket.emit('champion-info', championInfo);
-        });
-
-        if (userStream) {
-          visualizerInterval = setInterval(() => {
-            micVolumeHandler(userStream, setVisualizerVolume);
-          }, 1000);
-        }
-      } else {
-        socket.on('champion-info', (championInfo) => {
-          selectedChampionMap.set(championInfo.summonerId, championInfo);
-          setSelectedChampion(championInfo);
-        });
-
-        socket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
-          if (summonerId === props.summoner.summonerId) {
-            setVisualizerVolume(visualizerVolume);
-          }
-        });
-
-        ipcRenderer.on(IPC_KEY.MUTE_ALL_SPEAKER, () => {
-          muteSpeaker();
-        });
-      }
-
-      return () => {
-        clearInterval(visualizerInterval);
-        ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
-        ipcRenderer.removeAllListeners(IPC_KEY.MUTE_ALL_SPEAKER);
-        socket.disconnect();
-      };
+    electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
+      socket.emit('team-manage-join-room', roomName);
     });
   }, []);
+
+  useEffect(() => {
+    let visualizerInterval;
+
+    if (props.isMine) {
+      ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
+        selectedChampionMap.set(championInfo.summonerId, championInfo);
+        setSelectedChampion(championInfo);
+        managementSocket.current?.emit('champion-info', championInfo);
+      });
+
+      if (userStream) {
+        visualizerInterval = setInterval(() => {
+          micVolumeHandler(userStream, setVisualizerVolume);
+        }, 1000);
+      }
+    } else {
+      managementSocket.current?.on('champion-info', (championInfo) => {
+        selectedChampionMap.set(championInfo.summonerId, championInfo);
+        setSelectedChampion(championInfo);
+      });
+
+      managementSocket.current?.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
+        if (summonerId === props.summoner.summonerId) {
+          setVisualizerVolume(visualizerVolume);
+        }
+      });
+
+      ipcRenderer.on(IPC_KEY.MUTE_ALL_SPEAKER, () => {
+        muteSpeaker();
+      });
+    }
+
+    return () => {
+      clearInterval(visualizerInterval);
+      ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
+      ipcRenderer.removeAllListeners(IPC_KEY.MUTE_ALL_SPEAKER);
+      managementSocket.current?.disconnect();
+    };
+  }, [managementSocket]);
 
   useEffect(() => {
     if (props.isMine) {
@@ -169,7 +169,7 @@ function SummonerVoiceBlock(props: {
       </S.SoundBox>
 
       <S.AverageGameData>
-        <p id="name">{selectedChampion?.name ?? '아칼리'}</p>
+        <p id="name">{selectedChampion?.name ?? '-'}</p>
         <div>
           <p>KDA</p>
           <p id="value">{selectedChampion?.kda ?? '-'}</p>
