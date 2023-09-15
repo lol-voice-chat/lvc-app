@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import useVoiceChat from '../../hooks/useVoiceChat';
 import { useRecoilValue } from 'recoil';
 import {
@@ -9,6 +9,10 @@ import {
 } from '../../@store/atom';
 import * as S from './style';
 import SummonerVoiceBlock from '../SummonerVoiceBlock';
+import { connectSocket } from '../../utils/socket';
+import { Socket } from 'socket.io-client';
+import electronStore from '../../@store/electron';
+import { STORE_KEY } from '../../../const';
 
 function VoiceRoomModal() {
   const gameStatus = useRecoilValue(gameStatusState);
@@ -16,10 +20,23 @@ function VoiceRoomModal() {
   const myTeamSummoners = useRecoilValue(myTeamSummonersState);
   const enemySummoners = useRecoilValue(enemySummonersState);
 
+  const [managementSocket, setManagementSocket] = useState<Socket | null>(null);
+
   const { onTeamVoiceRoom, onLeagueVoiceRoom } = useVoiceChat();
 
   useEffect(() => {
     onTeamVoiceRoom();
+
+    const socket = connectSocket('/team-voice-chat/manage');
+    setManagementSocket(socket);
+
+    electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
+      socket.emit('team-manage-join-room', roomName);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   useEffect(() => {
@@ -28,11 +45,20 @@ function VoiceRoomModal() {
 
   return (
     <S.Background>
-      {summoner && <SummonerVoiceBlock isMine={true} summoner={summoner} />}
+      {summoner && managementSocket && (
+        <SummonerVoiceBlock isMine={true} summoner={summoner} managementSocket={managementSocket} />
+      )}
 
-      {myTeamSummoners?.map((summoner) => (
-        <SummonerVoiceBlock key={summoner.summonerId} isMine={false} summoner={summoner} />
-      ))}
+      {myTeamSummoners?.map(
+        (summoner) =>
+          managementSocket && (
+            <SummonerVoiceBlock
+              isMine={false}
+              summoner={summoner}
+              managementSocket={managementSocket}
+            />
+          )
+      )}
     </S.Background>
   );
 }
