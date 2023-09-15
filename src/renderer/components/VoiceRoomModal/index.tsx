@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useVoiceChat from '../../hooks/useVoiceChat';
 import { useRecoilValue } from 'recoil';
 import {
@@ -37,7 +37,7 @@ function VoiceRoomModal() {
         socket.emit('team-manage-join-room', roomName);
       });
     });
-  }, []);
+  }, [setManagementSocket]);
 
   useEffect(() => {
     gameStatus === 'loading' && onLeagueVoiceRoom();
