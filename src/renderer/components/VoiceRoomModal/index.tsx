@@ -22,14 +22,14 @@ function VoiceRoomModal() {
   const myTeamSummoners = useRecoilValue(myTeamSummonersState);
   const enemySummoners = useRecoilValue(enemySummonersState);
 
-  const [managementSocket, setManagementSocket] = useState<Socket | null>(null);
+  // const [managementSocket, setManagementSocket] = useState<Socket | null>(null);
 
   const { onTeamVoiceRoom, onLeagueVoiceRoom } = useVoiceChat();
 
   useEffect(() => {
     const teamVoiceRoomSocket = connectSocket('/team-voice-chat');
     onTeamVoiceRoom(teamVoiceRoomSocket);
-    setManagementSocket(teamVoiceRoomSocket);
+    // setManagementSocket(teamVoiceRoomSocket);
 
     // ipcRenderer.once(IPC_KEY.CONNECT_MANAGE_SOCKET, () => {
     //   const socket = connectSocket('/team-voice-chat/manage');
@@ -39,7 +39,10 @@ function VoiceRoomModal() {
     //     socket.emit('team-manage-join-room', roomName);
     //   });
     // });
-  }, [setManagementSocket]);
+    return () => {
+      teamVoiceRoomSocket.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     gameStatus === 'loading' && onLeagueVoiceRoom();
@@ -47,20 +50,11 @@ function VoiceRoomModal() {
 
   return (
     <S.Background>
-      {summoner && managementSocket && (
-        <SummonerVoiceBlock isMine={true} summoner={summoner} managementSocket={managementSocket} />
-      )}
+      {summoner && <SummonerVoiceBlock isMine={true} summoner={summoner} />}
 
-      {myTeamSummoners?.map(
-        (summoner) =>
-          managementSocket && (
-            <SummonerVoiceBlock
-              isMine={false}
-              summoner={summoner}
-              managementSocket={managementSocket}
-            />
-          )
-      )}
+      {myTeamSummoners?.map((summoner) => (
+        <SummonerVoiceBlock isMine={false} summoner={summoner} />
+      ))}
     </S.Background>
   );
 }
