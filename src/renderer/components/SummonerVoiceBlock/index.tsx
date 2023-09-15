@@ -1,25 +1,22 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as S from './style';
 import RankBadge from '../@common/RankBadge';
 import { ChampionInfoType, SummonerStatsType, SummonerType } from '../../@type/summoner';
 import VolumeSlider from '../@common/VolumeSlider';
 import { micVolumeHandler } from '../../utils/audio';
-import { IPC_KEY, STORE_KEY } from '../../../const';
-import { connectSocket } from '../../utils/socket';
-import { Socket } from 'socket.io-client';
-import electronStore from '../../@store/electron';
+import { IPC_KEY } from '../../../const';
 import { useRecoilValue } from 'recoil';
 import { userStreamState } from '../../@store/atom';
+import { Socket } from 'socket.io-client';
 
 const { ipcRenderer } = window.require('electron');
 
 function SummonerVoiceBlock(props: {
   isMine: boolean;
   summoner: SummonerType & SummonerStatsType;
+  managementSocket: Socket;
 }) {
   let selectedChampionMap: Map<number, ChampionInfoType> = new Map();
-
-  let managementSocket = useRef<Socket | null>(null);
 
   const userStream = useRecoilValue(userStreamState);
 
@@ -31,22 +28,13 @@ function SummonerVoiceBlock(props: {
   const [selectedChampion, setSelectedChampion] = useState<ChampionInfoType | null>(null);
 
   useEffect(() => {
-    const socket = connectSocket('/team-voice-chat/manage');
-    managementSocket.current = socket;
-
-    electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
-      socket.emit('team-manage-join-room', roomName);
-    });
-  }, []);
-
-  useEffect(() => {
     let visualizerInterval;
 
     if (props.isMine) {
       ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
         selectedChampionMap.set(championInfo.summonerId, championInfo);
         setSelectedChampion(championInfo);
-        managementSocket.current?.emit('champion-info', championInfo);
+        props.managementSocket.emit('champion-info', championInfo);
       });
 
       if (userStream) {
@@ -55,12 +43,12 @@ function SummonerVoiceBlock(props: {
         }, 1000);
       }
     } else {
-      managementSocket.current?.on('champion-info', (championInfo) => {
+      props.managementSocket.on('champion-info', (championInfo) => {
         selectedChampionMap.set(championInfo.summonerId, championInfo);
         setSelectedChampion(championInfo);
       });
 
-      managementSocket.current?.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
+      props.managementSocket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
         if (summonerId === props.summoner.summonerId) {
           setVisualizerVolume(visualizerVolume);
         }
@@ -75,18 +63,18 @@ function SummonerVoiceBlock(props: {
       clearInterval(visualizerInterval);
       ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
       ipcRenderer.removeAllListeners(IPC_KEY.MUTE_ALL_SPEAKER);
-      managementSocket.current?.disconnect();
+      props.managementSocket.disconnect();
     };
-  }, [managementSocket]);
+  }, []);
 
   useEffect(() => {
     if (props.isMine) {
-      managementSocket.current?.emit('mic-visualizer', {
+      props.managementSocket.emit('mic-visualizer', {
         summonerId: props.summoner.summonerId,
         visualizerVolume,
       });
     }
-  }, [visualizerVolume]);
+  }, []);
 
   const handleChangeSpeakerVolume = (speakerVolume: number) => {
     const speaker = document.getElementById(
