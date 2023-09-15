@@ -1,11 +1,11 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { PALETTE } from '../../const';
 
 type VolumeSliderPropsType = {
   audiotype: 'speaker' | 'mic';
   volume: number;
-  setVolume: Dispatch<SetStateAction<number>>;
+  handleChangeVolume: (volume: number) => void;
 };
 
 function VolumeSlider(props: VolumeSliderPropsType) {
@@ -19,9 +19,9 @@ function VolumeSlider(props: VolumeSliderPropsType) {
         step={0.02}
         value={props.volume}
         onChange={(event) => {
-          props.setVolume(event.target.valueAsNumber);
+          props.handleChangeVolume(event.target.valueAsNumber);
         }}
-      ></input>
+      />
     </Slider>
   );
 }
@@ -32,7 +32,6 @@ const Slider = styled.div<{ volume: number; audiotype: 'speaker' | 'mic' }>`
   #volume-box {
     position: absolute;
     top: ${({ audiotype }) => (audiotype === 'speaker' ? '-20px' : '-23px')};
-    left: ${({ volume }) => volume}px;
   }
 
   input[type='range'] {
