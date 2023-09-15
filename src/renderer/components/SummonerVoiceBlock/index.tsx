@@ -27,69 +27,74 @@ function SummonerVoiceBlock(props: {
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
   const [selectedChampion, setSelectedChampion] = useState<ChampionInfoType | null>(null);
 
-  // useEffect(() => {
-  //   let visualizerInterval;
+  useEffect(() => {
+    let visualizerInterval;
 
-  //   if (props.isMine) {
-  //     ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
-  //       selectedChampionMap.set(championInfo.summonerId, championInfo);
-  //       setSelectedChampion(championInfo);
-  //       // props.managementSocket.emit('champion-info', championInfo);
-  //     });
+    if (userStream && props.isMine) {
+      visualizerInterval = setInterval(() => {
+        micVolumeHandler(userStream, setVisualizerVolume);
+      }, 1000);
+    }
 
-  //     ipcRenderer.on(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER, () => {
-  //       if (isMuteSpeaker) {
-  //         userStream?.getAudioTracks().forEach((track) => (track.enabled = true));
-  //         setIsMuteSpeaker(false);
-  //         setIsMuteMic(false);
-  //       }
-  //     });
+    return () => {
+      clearInterval(visualizerInterval);
+    };
+  }, []);
 
-  //     if (userStream) {
-  //       visualizerInterval = setInterval(() => {
-  //         micVolumeHandler(userStream, setVisualizerVolume);
-  //       }, 1000);
-  //     }
-  //   } else {
-  //     props.managementSocket.on('champion-info', (championInfo) => {
-  //       selectedChampionMap.set(championInfo.summonerId, championInfo);
-  //       setSelectedChampion(championInfo);
-  //     });
+  useEffect(() => {
+    if (props.isMine) {
+      ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
+        selectedChampionMap.set(championInfo.summonerId, championInfo);
+        setSelectedChampion(championInfo);
+        props.managementSocket.emit('champion-info', championInfo);
+      });
 
-  //     props.managementSocket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
-  //       if (summonerId === props.summoner.summonerId) {
-  //         setVisualizerVolume(visualizerVolume);
-  //       }
-  //     });
+      ipcRenderer.on(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER, () => {
+        if (isMuteSpeaker) {
+          userStream?.getAudioTracks().forEach((track) => (track.enabled = true));
+          setIsMuteSpeaker(false);
+          setIsMuteMic(false);
+        }
+      });
+    } else {
+      props.managementSocket.on('champion-info', (championInfo) => {
+        selectedChampionMap.set(championInfo.summonerId, championInfo);
+        setSelectedChampion(championInfo);
+      });
 
-  //     ipcRenderer.on(IPC_KEY.MUTE_ALL_SPEAKER, ({ isMuteSummonerSpeaker }) => {
-  //       if (!isMuteSummonerSpeaker && !isMuteSpeaker) {
-  //         setBeforeMuteSpeakerVolume(speakerVolume);
-  //         setSpeakerVolume(0);
-  //       }
-  //       if (isMuteSummonerSpeaker) {
-  //         setSpeakerVolume(beforeMuteSpeakerVolume);
-  //       }
-  //       setIsMuteSpeaker(!isMuteSummonerSpeaker);
-  //     });
-  //   }
+      props.managementSocket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
+        if (summonerId === props.summoner.summonerId) {
+          setVisualizerVolume(visualizerVolume);
+        }
+      });
 
-  //   return () => {
-  //     clearInterval(visualizerInterval);
-  //     ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
-  //     ipcRenderer.removeAllListeners(IPC_KEY.MUTE_ALL_SPEAKER);
-  //     ipcRenderer.removeAllListeners(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER);
-  //   };
-  // }, []);
+      ipcRenderer.on(IPC_KEY.MUTE_ALL_SPEAKER, ({ isMuteSummonerSpeaker }) => {
+        if (!isMuteSummonerSpeaker && !isMuteSpeaker) {
+          setBeforeMuteSpeakerVolume(speakerVolume);
+          setSpeakerVolume(0);
+        }
+        if (isMuteSummonerSpeaker) {
+          setSpeakerVolume(beforeMuteSpeakerVolume);
+        }
+        setIsMuteSpeaker(!isMuteSummonerSpeaker);
+      });
+    }
 
-  // useEffect(() => {
-  //   if (props.isMine) {
-  //     props.managementSocket.emit('mic-visualizer', {
-  //       summonerId: props.summoner.summonerId,
-  //       visualizerVolume,
-  //     });
-  //   }
-  // }, [visualizerVolume]);
+    return () => {
+      ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
+      ipcRenderer.removeAllListeners(IPC_KEY.MUTE_ALL_SPEAKER);
+      ipcRenderer.removeAllListeners(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (props.isMine) {
+      props.managementSocket.emit('mic-visualizer', {
+        summonerId: props.summoner.summonerId,
+        visualizerVolume,
+      });
+    }
+  }, [visualizerVolume]);
 
   const handleChangeSpeakerVolume = (speakerVolume: number) => {
     const speaker = document.getElementById(
