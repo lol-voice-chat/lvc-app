@@ -29,6 +29,10 @@ ipcMain.on(IPC_KEY.MUTE_ALL_SPEAKER, (event) => {
   event.reply(IPC_KEY.MUTE_ALL_SPEAKER);
 });
 
+ipcMain.on(IPC_KEY.CONNECT_MANAGE_SOCKET, (event) => {
+  event.reply(IPC_KEY.CONNECT_MANAGE_SOCKET);
+});
+
 app.whenReady().then(() => {
   createWindow();
 
