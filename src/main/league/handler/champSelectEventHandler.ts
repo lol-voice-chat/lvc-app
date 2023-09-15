@@ -1,8 +1,8 @@
 import { LCU_ENDPOINT, PHASE, CHAMPIONS } from '../../const';
-import league from '../common/league';
+import league from '../../common/league';
 import { WebContents } from 'electron';
 import { IPC_KEY } from '../../../const/index';
-import { voiceRoomNameGenerator } from '../common/voiceRoomNameGenerator';
+import { voiceRoomNameGenerator } from '../../common/voiceRoomNameGenerator';
 import { LeagueWebSocket } from 'league-connect';
 import { SummonerData } from '../onLeagueClientUx';
 import { GameflowData } from '../leagueHandler';

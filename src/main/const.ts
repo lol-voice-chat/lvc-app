@@ -24,16 +24,6 @@ export const RANK_DIVISION: RankDivisionType = {
   V: 5,
 };
 
-export const LEAGUE_TITLE = {
-  test1: { title: '찌질이', description: '100판중 항복유도를 가장 많이 했습니다.' },
-  test2: { title: '리신', description: '100판중 시야점수가 가장 낮습니다.' },
-  test3: { title: '부자', description: '100판중 획득한 골드가 가장 많습니다.' },
-  test4: { title: '포탑 철거반', description: '100판중 포탑을 가장 많이 킬했습니다.' },
-  test5: { title: '문도 박사', description: '100판중 치유량이 가장 높습니다.' },
-  test6: { title: '베어그릴스', description: '100판중 살아남은 시간이 가장 깁니다.' },
-  test7: { title: '카정 마스터', description: '100판중 카정을 제일 많이 했습니다.' },
-};
-
 type ChampionsType = {
   [key: string]: string;
 };
