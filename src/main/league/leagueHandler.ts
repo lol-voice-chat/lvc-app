@@ -40,7 +40,6 @@ export const leagueHandler = async (
   inProgressEvent(webContents, ws, isStartedInGame);
 };
 
-//앱 키자마자 phase 확인
 async function handleLeaguePhase(
   gameflowData: GameflowData,
   webContents: WebContents,
