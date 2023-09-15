@@ -1,11 +1,10 @@
 import { LCU_ENDPOINT, PHASE, CHAMPIONS } from '../../const';
-import league from '../../common/league';
+import league from '../../utils/league';
 import { WebContents } from 'electron';
 import { IPC_KEY } from '../../../const/index';
-import { voiceRoomNameGenerator } from '../../common/voiceRoomNameGenerator';
+import { voiceRoomNameGenerator } from '../../utils/voiceRoomNameGenerator';
 import { LeagueWebSocket } from 'league-connect';
-import { SummonerData } from '../onLeagueClientUx';
-import { GameflowData } from '../leagueHandler';
+import { MatchHistoryData, SummonerData } from '../onLeagueClientUx';
 
 type ChampionData = {
   summonerId: number;
@@ -16,22 +15,13 @@ type ChampionData = {
   totalMinionsKilled: string;
 };
 
-export const handle = async (
-  gameflowData: GameflowData,
+export const champSelectEvent = async (
   webContents: WebContents,
   summoner: SummonerData,
   ws: LeagueWebSocket,
-  pvpMatchlist: any[]
+  pvpMatchlist: MatchHistoryData[],
+  isJoinedRoom: boolean
 ) => {
-  let isJoinedRoom = false;
-
-  if (gameflowData.phase === PHASE.CHAMP_SELECT) {
-    const { myTeam } = await league(LCU_ENDPOINT.CHAMP_SELECT_URL);
-    const roomName = voiceRoomNameGenerator(myTeam);
-    webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName });
-    isJoinedRoom = true;
-  }
-
   ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, async (data) => {
     if (data.timer.phase === 'BAN_PICK' && !isJoinedRoom) {
       const roomName: string = voiceRoomNameGenerator(data.myTeam);
@@ -52,7 +42,7 @@ export const handle = async (
   });
 };
 
-function getChampData(summoner: SummonerData, myTeam: any[], pvpMatchlist: any[]) {
+function getChampData(summoner: SummonerData, myTeam: any[], pvpMatchlist: MatchHistoryData[]) {
   const { summonerId, profileImage } = summoner;
 
   let champKill = 0;

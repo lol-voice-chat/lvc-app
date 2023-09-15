@@ -21,12 +21,17 @@ const createWindow = () => {
   mainWindow.webContents.on('did-finish-load', async () => {
     const { summoner, pvpMatchList } = await onLeagueClientUx();
     mainWindow.webContents.send('on-league-client', summoner);
+
     await leagueHandler(mainWindow.webContents, summoner, pvpMatchList);
   });
 };
 
-ipcMain.on(IPC_KEY.MUTE_ALL_SPEAKER, (event) => {
-  event.reply(IPC_KEY.MUTE_ALL_SPEAKER);
+ipcMain.on(IPC_KEY.MUTE_ALL_SPEAKER, (event, { isMuteSummonerSpeaker }) => {
+  event.reply(IPC_KEY.MUTE_ALL_SPEAKER, { isMuteSummonerSpeaker });
+});
+
+ipcMain.on(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER, (event) => {
+  event.reply(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER);
 });
 
 ipcMain.on(IPC_KEY.CONNECT_MANAGE_SOCKET, (event) => {
