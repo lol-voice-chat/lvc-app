@@ -1,7 +1,8 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import { leagueHandler } from './league/leagueHandler';
 import { onLeagueClientUx } from './league/onLeagueClientUx';
 import onElectronStore from './store';
+import { IPC_KEY } from '../const';
 
 let mainWindow: BrowserWindow;
 
@@ -23,6 +24,14 @@ const createWindow = () => {
     await leagueHandler(mainWindow.webContents, summoner, pvpMatchList);
   });
 };
+
+ipcMain.on(IPC_KEY.MUTE_ALL_SPEAKER, (event) => {
+  event.reply(IPC_KEY.MUTE_ALL_SPEAKER);
+});
+
+ipcMain.on(IPC_KEY.SUCCESS_TEAM_VOICE, (event) => {
+  event.reply(IPC_KEY.SUCCESS_TEAM_VOICE);
+});
 
 app.whenReady().then(() => {
   createWindow();

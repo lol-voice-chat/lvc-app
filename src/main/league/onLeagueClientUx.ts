@@ -1,4 +1,4 @@
-import league from '../league/common/league';
+import league from '../common/league';
 import { LCU_ENDPOINT, RANK_DIVISION } from '../const';
 
 export interface SummonerData {
@@ -25,17 +25,17 @@ interface LeagueClientData {
   summonerId: number;
 }
 
-interface StatsData {
-  championIcon: string;
-  kda: string;
-  isWin: boolean;
-}
-
 interface SummonerStats {
   odds: number;
   winCount: number;
   failCount: number;
   statsList: StatsData[];
+}
+
+interface StatsData {
+  championIcon: string;
+  kda: string;
+  isWin: boolean;
 }
 
 export const onLeagueClientUx = async () => {
@@ -61,9 +61,10 @@ export const onLeagueClientUx = async () => {
 };
 
 async function getLeagueClientData(): Promise<LeagueClientData> {
-  return new Promise(async (resolve) => {
+  return new Promise((resolve) => {
     let interval = setInterval(async function () {
       const leagueClientData: LeagueClientData = await league(LCU_ENDPOINT.CHAT_ME_URL);
+
       if (leagueClientData.gameName !== '') {
         clearInterval(interval);
         resolve(leagueClientData);

@@ -1,6 +1,6 @@
 import { GameflowData } from '../leagueHandler';
 import { LCU_ENDPOINT, PHASE } from '../../const';
-import { voiceRoomNameGenerator } from '../common/voiceRoomNameGenerator';
+import { voiceRoomNameGenerator } from '../../common/voiceRoomNameGenerator';
 import { WebContents } from 'electron';
 import { IPC_KEY } from '../../../const/index';
 import { LeagueWebSocket } from 'league-connect';

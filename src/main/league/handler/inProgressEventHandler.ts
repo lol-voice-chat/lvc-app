@@ -1,7 +1,7 @@
 import { WebContents } from 'electron';
 import { GameflowData } from '../leagueHandler';
 import { LCU_ENDPOINT, PHASE } from '../../const';
-import { voiceRoomNameGenerator } from '../common/voiceRoomNameGenerator';
+import { voiceRoomNameGenerator } from '../../common/voiceRoomNameGenerator';
 import { IPC_KEY } from '../../../const/index';
 import { LeagueWebSocket } from 'league-connect';
 import { SummonerData } from '../onLeagueClientUx';
