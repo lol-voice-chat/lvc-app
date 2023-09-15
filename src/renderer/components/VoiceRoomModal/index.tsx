@@ -28,6 +28,7 @@ function VoiceRoomModal() {
 
   useEffect(() => {
     const socket = connectSocket('/team-voice-chat');
+    onTeamVoiceRoom(socket);
     setManagementSocket(socket);
     // setManagementSocket(teamVoiceRoomSocket);
 
@@ -45,29 +46,22 @@ function VoiceRoomModal() {
   }, []);
 
   useEffect(() => {
-    managementSocket && onTeamVoiceRoom(managementSocket);
-  }, [managementSocket]);
-
-  useEffect(() => {
     gameStatus === 'loading' && onLeagueVoiceRoom();
   }, [gameStatus]);
 
   return (
     <S.Background>
-      {summoner && managementSocket && (
+      {summoner && (
         <SummonerVoiceBlock isMine={true} summoner={summoner} managementSocket={managementSocket} />
       )}
 
-      {myTeamSummoners?.map(
-        (summoner) =>
-          managementSocket && (
-            <SummonerVoiceBlock
-              isMine={false}
-              summoner={summoner}
-              managementSocket={managementSocket}
-            />
-          )
-      )}
+      {myTeamSummoners?.map((summoner) => (
+        <SummonerVoiceBlock
+          isMine={false}
+          summoner={summoner}
+          managementSocket={managementSocket}
+        />
+      ))}
     </S.Background>
   );
 }

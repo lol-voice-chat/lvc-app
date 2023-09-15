@@ -33,7 +33,6 @@ export const micVolumeHandler = (
     for (let i = 0; i < bufferLength; i++) {
       total += dataArray[i];
     }
-    // console.log(total / bufferLength);
     setVolume(total / bufferLength);
     requestAnimationFrame(updateMicVolume);
   };
