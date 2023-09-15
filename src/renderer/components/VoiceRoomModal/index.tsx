@@ -27,7 +27,8 @@ function VoiceRoomModal() {
   const { onTeamVoiceRoom, onLeagueVoiceRoom } = useVoiceChat();
 
   useEffect(() => {
-    const teamVoiceRoomSocket = onTeamVoiceRoom();
+    const teamVoiceRoomSocket = connectSocket('/team-voice-chat');
+    onTeamVoiceRoom(teamVoiceRoomSocket);
     setManagementSocket(teamVoiceRoomSocket);
 
     // ipcRenderer.once(IPC_KEY.CONNECT_MANAGE_SOCKET, () => {
@@ -38,7 +39,7 @@ function VoiceRoomModal() {
     //     socket.emit('team-manage-join-room', roomName);
     //   });
     // });
-  }, []);
+  }, [setManagementSocket]);
 
   useEffect(() => {
     gameStatus === 'loading' && onLeagueVoiceRoom();

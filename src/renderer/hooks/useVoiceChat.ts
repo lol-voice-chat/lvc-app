@@ -165,8 +165,8 @@ function useVoiceChat() {
     };
   };
 
-  const onTeamVoiceRoom = () => {
-    const socket = connectSocket('/team-voice-chat');
+  const onTeamVoiceRoom = (socket: Socket) => {
+    // const socket = connectSocket('/team-voice-chat');
 
     let device: DeviceType | null = null;
     let producerTransport: TransportType | null = null;
@@ -217,8 +217,6 @@ function useVoiceChat() {
       });
       window.location.reload();
     };
-
-    return socket;
   };
 
   const onLeagueVoiceRoom = () => {
