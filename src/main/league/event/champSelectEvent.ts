@@ -33,7 +33,9 @@ export const champSelectEvent = async (
 
     if (data.timer.phase === 'BAN_PICK') {
       const { summonerId, profileImage } = summoner;
-      const { championId } = data.myTeam.find((summoner: any) => summoner.summonerId === summoner);
+      const { championId } = data.myTeam.find(
+        (summoner: any) => summoner.summonerId === summonerId
+      );
 
       if (selectedChampionId !== championId) {
         const championData: ChampionData = getChampData(
