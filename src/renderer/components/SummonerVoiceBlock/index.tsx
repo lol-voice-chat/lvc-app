@@ -16,8 +16,6 @@ function SummonerVoiceBlock(props: {
   summoner: SummonerType & SummonerStatsType;
   managementSocket: Socket | null;
 }) {
-  let selectedChampionMap: Map<number, ChampionInfoType> = new Map();
-
   const userStream = useRecoilValue(userStreamState);
 
   const [speakerVolume, setSpeakerVolume] = useState(0.8);
@@ -27,25 +25,25 @@ function SummonerVoiceBlock(props: {
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
   const [selectedChampion, setSelectedChampion] = useState<ChampionInfoType | null>(null);
 
-  useEffect(() => {
-    let visualizerInterval;
+  // useEffect(() => {
+  //   let visualizerInterval;
 
-    if (userStream && props.isMine) {
-      visualizerInterval = setInterval(() => {
-        micVolumeHandler(userStream, setVisualizerVolume);
-      }, 1000);
-    }
+  //   if (userStream && props.isMine) {
+  //     visualizerInterval = setInterval(() => {
+  //       micVolumeHandler(userStream, setVisualizerVolume);
+  //     }, 1000);
+  //   }
 
-    return () => {
-      clearInterval(visualizerInterval);
-    };
-  }, []);
+  //   return () => {
+  //     clearInterval(visualizerInterval);
+  //   };
+  // }, []);
 
   useEffect(() => {
     if (props.isMine) {
       ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
-        selectedChampionMap.set(championInfo.summonerId, championInfo);
         setSelectedChampion(championInfo);
+        console.log('보냄', championInfo);
         props.managementSocket?.emit('champion-info', championInfo);
       });
       // ipcRenderer.on(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER, () => {
@@ -56,29 +54,31 @@ function SummonerVoiceBlock(props: {
       //   }
       // });
     } else {
-      props.managementSocket?.on('champion-info', (championInfo) => {
-        selectedChampionMap.set(championInfo.summonerId, championInfo);
-        setSelectedChampion(championInfo);
+      props.managementSocket?.on('champion-info', (championInfo: ChampionInfoType) => {
+        console.log('받음', championInfo);
+        if (props.summoner.summonerId === championInfo.summonerId) {
+          setSelectedChampion(championInfo);
+        }
       });
-      // props.managementSocket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
-      //   if (summonerId === props.summoner.summonerId) {
-      //     setVisualizerVolume(visualizerVolume);
-      //   }
-      // });
-      // ipcRenderer.on(IPC_KEY.MUTE_ALL_SPEAKER, ({ isMuteSummonerSpeaker }) => {
-      //   if (!isMuteSummonerSpeaker && !isMuteSpeaker) {
-      //     setBeforeMuteSpeakerVolume(speakerVolume);
-      //     setSpeakerVolume(0);
-      //   }
-      //   if (isMuteSummonerSpeaker) {
-      //     setSpeakerVolume(beforeMuteSpeakerVolume);
-      //   }
-      //   setIsMuteSpeaker(!isMuteSummonerSpeaker);
-      // });
+      //   props.managementSocket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
+      //     if (summonerId === props.summoner.summonerId) {
+      //       setVisualizerVolume(visualizerVolume);
+      //     }
+      //   });
+      //   ipcRenderer.on(IPC_KEY.MUTE_ALL_SPEAKER, ({ isMuteSummonerSpeaker }) => {
+      //     if (!isMuteSummonerSpeaker && !isMuteSpeaker) {
+      //       setBeforeMuteSpeakerVolume(speakerVolume);
+      //       setSpeakerVolume(0);
+      //     }
+      //     if (isMuteSummonerSpeaker) {
+      //       setSpeakerVolume(beforeMuteSpeakerVolume);
+      //     }
+      //     setIsMuteSpeaker(!isMuteSummonerSpeaker);
+      //   });
     }
 
     return () => {
-      // ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
+      ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
       // ipcRenderer.removeAllListeners(IPC_KEY.MUTE_ALL_SPEAKER);
       // ipcRenderer.removeAllListeners(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER);
     };

@@ -28,6 +28,7 @@ function VoiceRoomModal() {
 
   useEffect(() => {
     const socket = connectSocket('/team-voice-chat');
+    onTeamVoiceRoom(socket);
     setManagementSocket(socket);
     // setManagementSocket(teamVoiceRoomSocket);
 
@@ -43,10 +44,6 @@ function VoiceRoomModal() {
       socket.disconnect();
     };
   }, []);
-
-  useEffect(() => {
-    managementSocket && onTeamVoiceRoom(managementSocket);
-  }, [managementSocket]);
 
   useEffect(() => {
     gameStatus === 'loading' && onLeagueVoiceRoom();
