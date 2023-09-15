@@ -12,7 +12,9 @@ import SummonerVoiceBlock from '../SummonerVoiceBlock';
 import { connectSocket } from '../../utils/socket';
 import { Socket } from 'socket.io-client';
 import electronStore from '../../@store/electron';
-import { STORE_KEY } from '../../../const';
+import { IPC_KEY, STORE_KEY } from '../../../const';
+
+const { ipcRenderer } = window.require('electron');
 
 function VoiceRoomModal() {
   const gameStatus = useRecoilValue(gameStatusState);
@@ -24,19 +26,17 @@ function VoiceRoomModal() {
 
   const { onTeamVoiceRoom, onLeagueVoiceRoom } = useVoiceChat();
 
-  const onManageTeamVoiceSocket = () => {
-    const socket = connectSocket('/team-voice-chat/manage');
-    setManagementSocket(socket);
-
-    electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
-      socket.emit('team-manage-join-room', roomName);
-    });
-  };
-
   useEffect(() => {
     onTeamVoiceRoom();
 
-    onManageTeamVoiceSocket();
+    ipcRenderer.once(IPC_KEY.CONNECT_MANAGE_SOCKET, () => {
+      const socket = connectSocket('/team-voice-chat/manage');
+      setManagementSocket(socket);
+
+      electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
+        socket.emit('team-manage-join-room', roomName);
+      });
+    });
   }, []);
 
   useEffect(() => {

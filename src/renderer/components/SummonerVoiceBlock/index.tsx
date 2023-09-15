@@ -63,7 +63,6 @@ function SummonerVoiceBlock(props: {
       clearInterval(visualizerInterval);
       ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
       ipcRenderer.removeAllListeners(IPC_KEY.MUTE_ALL_SPEAKER);
-      props.managementSocket.disconnect();
     };
   }, []);
 
@@ -99,15 +98,14 @@ function SummonerVoiceBlock(props: {
   const handleClickMuteSpeaker = () => {
     if (props.isMine) {
       ipcRenderer.send(IPC_KEY.MUTE_ALL_SPEAKER);
-      handleClickMuteMic();
+      userStream?.getAudioTracks().forEach((track) => (track.enabled = isMicMute && isSpeakerMute));
+      setIsMicMute(!(isMicMute && isSpeakerMute));
     }
     muteSpeaker();
   };
 
   const handleClickMuteMic = () => {
-    userStream?.getAudioTracks().forEach((track) => {
-      track.enabled = !track.enabled;
-    });
+    userStream?.getAudioTracks().forEach((track) => (track.enabled = !track.enabled));
     setIsMicMute((curMute) => !curMute);
   };
 
