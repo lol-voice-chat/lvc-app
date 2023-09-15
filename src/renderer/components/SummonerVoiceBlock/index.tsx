@@ -74,7 +74,7 @@ function SummonerVoiceBlock(props: {
         visualizerVolume,
       });
     }
-  }, []);
+  }, [visualizerVolume]);
 
   const handleChangeSpeakerVolume = (speakerVolume: number) => {
     const speaker = document.getElementById(
