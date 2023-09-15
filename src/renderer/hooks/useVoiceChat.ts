@@ -79,6 +79,8 @@ function useVoiceChat() {
         .then((audioProducer) => {
           audioProducer.on('trackended', () => console.log('audio track ended'));
           audioProducer.on('transportclose', () => console.log('audio transport ended'));
+
+          ipcRenderer.send(IPC_KEY.CONNECT_MANAGE_SOCKET);
         })
         .catch((err) => console.log('프로듀스 메서드 에러', err));
     };
