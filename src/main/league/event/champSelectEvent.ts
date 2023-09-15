@@ -38,6 +38,7 @@ export const champSelectEvent = async (
       );
 
       if (selectedChampionId !== championId) {
+        selectedChampionId = championId;
         const championData: ChampionData = getChampData(
           summonerId,
           profileImage,

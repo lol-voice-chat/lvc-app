@@ -57,6 +57,9 @@ export interface ParticipantData {
 }
 
 export const onLeagueClientUx = async () => {
+  // const test = await league('/lol-game-client-chat/v1/buddies');
+  // console.log('test: ', test);
+
   const leagueClientData: LeagueClientData = await getLeagueClientData();
 
   const tier: string = getTier(leagueClientData);
