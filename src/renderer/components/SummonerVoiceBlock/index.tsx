@@ -31,7 +31,7 @@ function SummonerVoiceBlock(props: {
   const [selectedChampion, setSelectedChampion] = useState<ChampionInfoType | null>(null);
 
   useEffect(() => {
-    ipcRenderer.once('success-team-voice', () => {
+    ipcRenderer.once(IPC_KEY.SUCCESS_TEAM_VOICE, () => {
       const socket = connectSocket('/team-voice-chat/manage');
       managementSocket.current = socket;
 
