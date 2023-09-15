@@ -217,6 +217,8 @@ function useVoiceChat() {
       });
       window.location.reload();
     };
+
+    return socket;
   };
 
   const onLeagueVoiceRoom = () => {

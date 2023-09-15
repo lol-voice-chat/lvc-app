@@ -27,17 +27,18 @@ function VoiceRoomModal() {
   const { onTeamVoiceRoom, onLeagueVoiceRoom } = useVoiceChat();
 
   useEffect(() => {
-    onTeamVoiceRoom();
+    const teamVoiceRoomSocket = onTeamVoiceRoom();
+    setManagementSocket(teamVoiceRoomSocket);
 
-    ipcRenderer.once(IPC_KEY.CONNECT_MANAGE_SOCKET, () => {
-      const socket = connectSocket('/team-voice-chat/manage');
-      setManagementSocket(socket);
+    // ipcRenderer.once(IPC_KEY.CONNECT_MANAGE_SOCKET, () => {
+    //   const socket = connectSocket('/team-voice-chat/manage');
+    //   setManagementSocket(socket);
 
-      electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
-        socket.emit('team-manage-join-room', roomName);
-      });
-    });
-  }, [setManagementSocket]);
+    //   electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
+    //     socket.emit('team-manage-join-room', roomName);
+    //   });
+    // });
+  }, []);
 
   useEffect(() => {
     gameStatus === 'loading' && onLeagueVoiceRoom();
