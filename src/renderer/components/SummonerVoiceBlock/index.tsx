@@ -49,11 +49,11 @@ function SummonerVoiceBlock(props: {
       });
 
       if (props.isMine) {
-        // ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
-        //   setSelectedChampion(championInfo);
-        //   console.log('보냄', championInfo);
-        //   socket.emit('champion-info', championInfo);
-        // });
+        ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
+          setSelectedChampion(championInfo);
+          console.log('보냄', championInfo);
+          // socket.emit('champion-info', championInfo);
+        });
         // ipcRenderer.on(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER, () => {
         //   if (isMuteSpeaker) {
         //     userStream?.getAudioTracks().forEach((track) => (track.enabled = true));
