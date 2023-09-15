@@ -9,7 +9,7 @@ export const SummonerBlock = styled.div`
   position: relative;
 
   width: 250px;
-  height: 560px;
+  height: 550px;
 
   margin: 40px 20px 0 20px;
   border-radius: 10px;
@@ -77,9 +77,9 @@ export const TitleTag = styled.div`
   }
 `;
 
-export const SoundBox = styled.div`
+export const SoundBox = styled.div<{ isMine: boolean }>`
   display: flex;
-  flex-direction: column;
+  flex-direction: ${({ isMine }) => (isMine ? 'row' : 'column')};
   justify-content: center;
   align-items: center;
 
@@ -90,8 +90,8 @@ export const SoundBox = styled.div`
   #audio-ctrl {
     display: flex;
     justify-content: space-between;
-    width: 80%;
-    margin-bottom: 10px;
+    width: ${({ isMine }) => (isMine ? '' : '80%')};
+    margin: ${({ isMine }) => (isMine ? '0 7px 12px 10px' : '0 0 12px 0')};
 
     img {
       width: 30px;
@@ -111,7 +111,13 @@ export const AverageGameData = styled.div`
 
   width: 100%;
 
-  margin: 20px 0;
+  margin: 12px 0 20px 0;
+
+  #name {
+    font-size: 16px;
+    color: ${PALETTE.GRAY_1};
+    margin-bottom: 15px;
+  }
 
   div {
     display: flex;

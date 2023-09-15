@@ -155,8 +155,6 @@ function useVoiceChat() {
           const newSummonerAudio = document.getElementById(
             summonerId.toString() + 'speaker'
           ) as HTMLAudioElement;
-
-          console.log(newSummonerAudio);
           newSummonerAudio.srcObject = new MediaStream([consumer.track]);
 
           socket.emit('consumer-resume', { remoteProducerId });
