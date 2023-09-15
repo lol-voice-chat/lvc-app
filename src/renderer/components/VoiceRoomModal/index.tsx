@@ -54,20 +54,17 @@ function VoiceRoomModal() {
 
   return (
     <S.Background>
-      {summoner && managementSocket && (
+      {summoner && (
         <SummonerVoiceBlock isMine={true} summoner={summoner} managementSocket={managementSocket} />
       )}
 
-      {myTeamSummoners?.map(
-        (summoner) =>
-          managementSocket && (
-            <SummonerVoiceBlock
-              isMine={false}
-              summoner={summoner}
-              managementSocket={managementSocket}
-            />
-          )
-      )}
+      {myTeamSummoners?.map((summoner) => (
+        <SummonerVoiceBlock
+          isMine={false}
+          summoner={summoner}
+          managementSocket={managementSocket}
+        />
+      ))}
     </S.Background>
   );
 }

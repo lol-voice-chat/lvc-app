@@ -15,6 +15,8 @@ type ChampionData = {
   totalMinionsKilled: string;
 };
 
+let selectedChampionId: number;
+
 export const champSelectEvent = async (
   webContents: WebContents,
   summoner: SummonerData,
@@ -30,8 +32,18 @@ export const champSelectEvent = async (
     }
 
     if (data.timer.phase === 'BAN_PICK') {
-      const championData: ChampionData = getChampData(summoner, data.myTeam, pvpMatchlist);
-      webContents.send(IPC_KEY.CHAMP_INFO, championData);
+      const { summonerId, profileImage } = summoner;
+      const { championId } = data.myTeam.find((summoner: any) => summoner.summonerId === summoner);
+
+      if (selectedChampionId !== championId) {
+        const championData: ChampionData = getChampData(
+          summonerId,
+          profileImage,
+          championId,
+          pvpMatchlist
+        );
+        webContents.send(IPC_KEY.CHAMP_INFO, championData);
+      }
     }
 
     const isCloseWindow = await isCloseChampionSelectionWindow(data.timer.phase, isJoinedRoom);
@@ -42,17 +54,18 @@ export const champSelectEvent = async (
   });
 };
 
-function getChampData(summoner: SummonerData, myTeam: any[], pvpMatchlist: MatchHistoryData[]) {
-  const { summonerId, profileImage } = summoner;
-
+function getChampData(
+  summonerId: number,
+  profileImage: string,
+  championId: number,
+  pvpMatchlist: MatchHistoryData[]
+) {
   let champKill = 0;
   let champDeath = 0;
   let champAssists = 0;
   let totalDamage = 0;
   let totalCs = 0;
   let champCount = 0;
-
-  const { championId } = myTeam.find((summoner: any) => summoner.summonerId === summonerId);
 
   pvpMatchlist.forEach((game: any) => {
     const participant = game.participants[0];
