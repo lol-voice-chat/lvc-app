@@ -49,11 +49,11 @@ function SummonerVoiceBlock(props: {
       });
 
       if (props.isMine) {
-        ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
-          setSelectedChampion(championInfo);
-          console.log('보냄', championInfo);
-          socket.emit('champion-info', championInfo);
-        });
+        // ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
+        //   setSelectedChampion(championInfo);
+        //   console.log('보냄', championInfo);
+        //   socket.emit('champion-info', championInfo);
+        // });
         // ipcRenderer.on(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER, () => {
         //   if (isMuteSpeaker) {
         //     userStream?.getAudioTracks().forEach((track) => (track.enabled = true));
@@ -62,12 +62,12 @@ function SummonerVoiceBlock(props: {
         //   }
         // });
       } else {
-        socket.on('champion-info', (championInfo: ChampionInfoType) => {
-          console.log('받음', championInfo);
-          if (props.summoner.summonerId === championInfo.summonerId) {
-            setSelectedChampion(championInfo);
-          }
-        });
+        // socket.on('champion-info', (championInfo: ChampionInfoType) => {
+        //   console.log('받음', championInfo);
+        //   if (props.summoner.summonerId === championInfo.summonerId) {
+        //     setSelectedChampion(championInfo);
+        //   }
+        // });
         //   props.managementSocket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
         //     if (summonerId === props.summoner.summonerId) {
         //       setVisualizerVolume(visualizerVolume);
