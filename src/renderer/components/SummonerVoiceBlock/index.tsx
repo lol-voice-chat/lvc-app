@@ -31,50 +31,52 @@ function SummonerVoiceBlock(props: {
   const [selectedChampion, setSelectedChampion] = useState<ChampionInfoType | null>(null);
 
   useEffect(() => {
-    const socket = connectSocket('/team-voice-chat/manage');
-    managementSocket.current = socket;
+    ipcRenderer.once('success-team-voice', () => {
+      const socket = connectSocket('/team-voice-chat/manage');
+      managementSocket.current = socket;
 
-    electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
-      socket.emit('team-manage-join-room', roomName);
-    });
-
-    let visualizerInterval;
-
-    if (props.isMine) {
-      ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
-        selectedChampionMap.set(championInfo.summonerId, championInfo);
-        setSelectedChampion(championInfo);
-        socket.emit('champion-info', championInfo);
+      electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
+        socket.emit('team-manage-join-room', roomName);
       });
 
-      if (userStream) {
-        visualizerInterval = setInterval(() => {
-          micVolumeHandler(userStream, setVisualizerVolume);
-        }, 1000);
-      }
-    } else {
-      socket.on('champion-info', (championInfo) => {
-        selectedChampionMap.set(championInfo.summonerId, championInfo);
-        setSelectedChampion(championInfo);
-      });
+      let visualizerInterval;
 
-      socket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
-        if (summonerId === props.summoner.summonerId) {
-          setVisualizerVolume(visualizerVolume);
+      if (props.isMine) {
+        ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
+          selectedChampionMap.set(championInfo.summonerId, championInfo);
+          setSelectedChampion(championInfo);
+          socket.emit('champion-info', championInfo);
+        });
+
+        if (userStream) {
+          visualizerInterval = setInterval(() => {
+            micVolumeHandler(userStream, setVisualizerVolume);
+          }, 1000);
         }
-      });
+      } else {
+        socket.on('champion-info', (championInfo) => {
+          selectedChampionMap.set(championInfo.summonerId, championInfo);
+          setSelectedChampion(championInfo);
+        });
 
-      ipcRenderer.on(IPC_KEY.MUTE_ALL_SPEAKER, () => {
-        muteSpeaker();
-      });
-    }
+        socket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
+          if (summonerId === props.summoner.summonerId) {
+            setVisualizerVolume(visualizerVolume);
+          }
+        });
 
-    return () => {
-      clearInterval(visualizerInterval);
-      ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
-      ipcRenderer.removeAllListeners(IPC_KEY.MUTE_ALL_SPEAKER);
-      socket.disconnect();
-    };
+        ipcRenderer.on(IPC_KEY.MUTE_ALL_SPEAKER, () => {
+          muteSpeaker();
+        });
+      }
+
+      return () => {
+        clearInterval(visualizerInterval);
+        ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
+        ipcRenderer.removeAllListeners(IPC_KEY.MUTE_ALL_SPEAKER);
+        socket.disconnect();
+      };
+    });
   }, []);
 
   useEffect(() => {
