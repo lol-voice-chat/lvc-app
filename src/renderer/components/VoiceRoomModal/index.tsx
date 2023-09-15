@@ -28,7 +28,7 @@ function VoiceRoomModal() {
 
   return (
     <S.Background>
-      {summoner && <SummonerVoiceBlock isMine={false} summoner={summoner} />}
+      {summoner && <SummonerVoiceBlock isMine={true} summoner={summoner} />}
 
       {myTeamSummoners?.map((summoner) => (
         <SummonerVoiceBlock key={summoner.summonerId} isMine={false} summoner={summoner} />
