@@ -24,19 +24,19 @@ function VoiceRoomModal() {
 
   const { onTeamVoiceRoom, onLeagueVoiceRoom } = useVoiceChat();
 
-  useEffect(() => {
-    onTeamVoiceRoom();
-
+  const onManageTeamVoiceSocket = () => {
     const socket = connectSocket('/team-voice-chat/manage');
     setManagementSocket(socket);
 
     electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
       socket.emit('team-manage-join-room', roomName);
     });
+  };
 
-    return () => {
-      socket.disconnect();
-    };
+  useEffect(() => {
+    onTeamVoiceRoom();
+
+    onManageTeamVoiceSocket();
   }, []);
 
   useEffect(() => {
