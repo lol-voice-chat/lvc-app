@@ -33,13 +33,13 @@ function SummonerVoiceBlock(props: {
         setSelectedChampion(championInfo);
         props.managementSocket.emit('champion-info', championInfo);
       });
-      // ipcRenderer.on(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER, () => {
-      //   if (isMuteSpeaker) {
-      //     userStream?.getAudioTracks().forEach((track) => (track.enabled = true));
-      //     setIsMuteSpeaker(false);
-      //     setIsMuteMic(false);
-      //   }
-      // });
+      ipcRenderer.on(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER, () => {
+        if (isMuteSpeaker) {
+          userStream?.getAudioTracks().forEach((track) => (track.enabled = true));
+          setIsMuteSpeaker(false);
+          setIsMuteMic(false);
+        }
+      });
     } else {
       props.managementSocket.on('champion-info', (championInfo: ChampionInfoType) => {
         if (props.summoner.summonerId === championInfo.summonerId) {
@@ -51,22 +51,22 @@ function SummonerVoiceBlock(props: {
           setVisualizerVolume(visualizerVolume);
         }
       });
-      //   ipcRenderer.on(IPC_KEY.MUTE_ALL_SPEAKER, ({ isMuteSummonerSpeaker }) => {
-      //     if (!isMuteSummonerSpeaker && !isMuteSpeaker) {
-      //       setBeforeMuteSpeakerVolume(speakerVolume);
-      //       setSpeakerVolume(0);
-      //     }
-      //     if (isMuteSummonerSpeaker) {
-      //       setSpeakerVolume(beforeMuteSpeakerVolume);
-      //     }
-      //     setIsMuteSpeaker(!isMuteSummonerSpeaker);
-      //   });
+      ipcRenderer.on(IPC_KEY.MUTE_ALL_SPEAKER, ({ isMuteSummonerSpeaker }) => {
+        if (!isMuteSummonerSpeaker && !isMuteSpeaker) {
+          setBeforeMuteSpeakerVolume(speakerVolume);
+          setSpeakerVolume(0);
+        }
+        if (isMuteSummonerSpeaker) {
+          setSpeakerVolume(beforeMuteSpeakerVolume);
+        }
+        setIsMuteSpeaker(!isMuteSummonerSpeaker);
+      });
     }
 
     return () => {
       ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
-      // ipcRenderer.removeAllListeners(IPC_KEY.MUTE_ALL_SPEAKER);
-      // ipcRenderer.removeAllListeners(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER);
+      ipcRenderer.removeAllListeners(IPC_KEY.MUTE_ALL_SPEAKER);
+      ipcRenderer.removeAllListeners(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER);
     };
   }, []);
 
