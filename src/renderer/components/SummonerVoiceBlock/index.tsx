@@ -32,7 +32,7 @@ function SummonerVoiceBlock(props: {
     const socket = connectSocket('/team-voice-chat/manage');
 
     electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
-      socket.emit('team-manage-join-room', roomName);
+      socket.emit('team-manage-join-room', { roomName, displayName: props.summoner.summonerId });
       // managementSocket.current = socket;
     });
 
