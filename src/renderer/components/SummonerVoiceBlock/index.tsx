@@ -33,16 +33,13 @@ function SummonerVoiceBlock(props: {
 
     electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
       socket.emit('team-manage-join-room', roomName);
-      managementSocket.current = socket;
+      // managementSocket.current = socket;
     });
-  }, []);
 
-  useEffect(() => {
     if (props.isMine) {
       ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
         setSelectedChampion(championInfo);
-        console.log(managementSocket.current);
-        managementSocket.current?.emit('champion-info', championInfo);
+        socket.emit('champion-info', championInfo);
       });
       // ipcRenderer.on(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER, () => {
       //   if (isMuteSpeaker) {
@@ -52,13 +49,13 @@ function SummonerVoiceBlock(props: {
       //   }
       // });
     } else {
-      managementSocket.current?.on('champion-info', (championInfo: ChampionInfoType) => {
+      socket.on('champion-info', (championInfo: ChampionInfoType) => {
         if (props.summoner.summonerId === championInfo.summonerId) {
           setSelectedChampion(championInfo);
         }
       });
-      managementSocket.current?.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
-        if (summonerId === props.summoner.summonerId) {
+      socket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
+        if (props.summoner.summonerId === summonerId) {
           setVisualizerVolume(visualizerVolume);
         }
       });
@@ -79,7 +76,7 @@ function SummonerVoiceBlock(props: {
       // ipcRenderer.removeAllListeners(IPC_KEY.MUTE_ALL_SPEAKER);
       // ipcRenderer.removeAllListeners(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER);
     };
-  }, [managementSocket]);
+  }, []);
 
   useEffect(() => {
     let visualizerInterval;
@@ -92,14 +89,14 @@ function SummonerVoiceBlock(props: {
     return () => clearInterval(visualizerInterval);
   }, [userStream]);
 
-  useEffect(() => {
-    if (props.isMine) {
-      managementSocket.current?.emit('mic-visualizer', {
-        summonerId: props.summoner.summonerId,
-        visualizerVolume,
-      });
-    }
-  }, [visualizerVolume]);
+  // useEffect(() => {
+  //   if (props.isMine) {
+  //     managementSocket.current?.emit('mic-visualizer', {
+  //       summonerId: props.summoner.summonerId,
+  //       visualizerVolume,
+  //     });
+  //   }
+  // }, [visualizerVolume]);
 
   const handleChangeSpeakerVolume = (speakerVolume: number) => {
     const speaker = document.getElementById(
