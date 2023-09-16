@@ -62,6 +62,7 @@ async function handleLeaguePhase(
 
     const foundSummoner = teamOne.find((summoner: any) => summoner.summonerId === summonerId);
     const myTeamVoiceRoomName: string = voiceRoomNameGenerator(foundSummoner ? teamOne : teamTwo);
+
     webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName: myTeamVoiceRoomName });
     webContents.send(IPC_KEY.LEAGUE_JOIN_ROOM, { roomName, teamName: `${myTeamVoiceRoomName}` });
     isStartedGameLoading = true;
@@ -73,6 +74,7 @@ async function handleLeaguePhase(
 
     const foundSummoner = teamOne.find((summoner: any) => summoner.summonerId === summonerId);
     const myTeamVoiceRoomName: string = voiceRoomNameGenerator(foundSummoner ? teamOne : teamTwo);
+
     webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName: myTeamVoiceRoomName });
     webContents.send(IPC_KEY.START_IN_GAME);
     isStartedInGame = true;

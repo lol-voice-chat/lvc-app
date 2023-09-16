@@ -3,6 +3,7 @@ export const LCU_ENDPOINT = {
   GAMEFLOW_PHASE_URL: '/lol-gameflow/v1/gameflow-phase',
   CHAMP_SELECT_URL: '/lol-champ-select/v1/session',
   CHAT_ME_URL: '/lol-chat/v1/me',
+  FRIENDS_URL: '/lol-game-client-chat/v1/buddies',
 };
 
 export const PHASE = {
