@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import useVoiceChat from '../../hooks/useVoiceChat';
 import { useRecoilValue } from 'recoil';
 import {
@@ -9,12 +9,6 @@ import {
 } from '../../@store/atom';
 import * as S from './style';
 import SummonerVoiceBlock from '../SummonerVoiceBlock';
-import { connectSocket } from '../../utils/socket';
-import { Socket } from 'socket.io-client';
-import electronStore from '../../@store/electron';
-import { IPC_KEY, STORE_KEY } from '../../../const';
-
-const { ipcRenderer } = window.require('electron');
 
 function VoiceRoomModal() {
   const gameStatus = useRecoilValue(gameStatusState);

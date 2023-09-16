@@ -14,12 +14,13 @@ import { IPC_KEY, STORE_KEY } from '../../const';
 import electronStore from '../@store/electron';
 import { connectSocket } from '../utils/socket';
 import { Socket } from 'socket.io-client';
+import { getUserAudioStream } from '../utils/audio';
 
 const { ipcRenderer } = window.require('electron');
 
 function useVoiceChat() {
   const setGameStatus = useSetRecoilState(gameStatusState);
-  const userStream = useRecoilValue(userStreamState);
+  const [userStream, setUserStream] = useRecoilState(userStreamState);
   const summoner = useRecoilValue(summonerState);
   const [myTeamSummoners, setMyTeamSummoners] = useRecoilState(myTeamSummonersState);
   const [enemySummoners, setEnemySummoners] = useRecoilState(enemySummonersState);
@@ -27,17 +28,16 @@ function useVoiceChat() {
   const connectVoiceChat = (
     socket: Socket,
     device: DeviceType | null,
+    stream: MediaStream,
     routerRtpCapabilities: RtpCapabilities,
     producerTransport: TransportType | null,
     consumerTransportList: ConsumerTransportType[]
   ) => {
     const createDevice = () => {
-      if (!userStream) return;
-
       device = new mediasoup.Device();
       device
         .load({ routerRtpCapabilities })
-        .then(() => createSendTransport(userStream.getAudioTracks()[0]))
+        .then(() => createSendTransport(stream.getAudioTracks()[0]))
         .catch((err) => console.log('디바이스 로드 에러', err));
     };
     createDevice();
@@ -173,8 +173,20 @@ function useVoiceChat() {
     let consumerTransportList: ConsumerTransportType[] = [];
 
     electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
-      socket.emit('team-join-room', { roomName, summoner }, ({ rtpCapabilities }) => {
-        connectVoiceChat(socket, device, rtpCapabilities, producerTransport, consumerTransportList);
+      getUserAudioStream().then((stream) => {
+        if (stream) {
+          socket.emit('team-join-room', { roomName, summoner }, ({ rtpCapabilities }) => {
+            connectVoiceChat(
+              socket,
+              device,
+              stream,
+              rtpCapabilities,
+              producerTransport,
+              consumerTransportList
+            );
+          });
+          setUserStream(stream);
+        }
       });
     });
 
@@ -227,9 +239,18 @@ function useVoiceChat() {
     let consumerTransportList: ConsumerTransportType[] = [];
 
     electronStore.get(STORE_KEY.LEAGUE_VOICE_ROOM_NAME).then(({ roomName, teamName }) => {
-      socket.emit('league-join-room', { roomName, teamName, summoner }, ({ rtpCapabilities }) => {
-        connectVoiceChat(socket, device, rtpCapabilities, producerTransport, consumerTransportList);
-      });
+      if (userStream) {
+        socket.emit('league-join-room', { roomName, teamName, summoner }, ({ rtpCapabilities }) => {
+          connectVoiceChat(
+            socket,
+            device,
+            userStream,
+            rtpCapabilities,
+            producerTransport,
+            consumerTransportList
+          );
+        });
+      }
     });
 
     socket.on('inform-exit-in-game', ({ summonerId }) => {
