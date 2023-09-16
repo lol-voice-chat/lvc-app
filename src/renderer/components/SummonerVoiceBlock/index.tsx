@@ -19,7 +19,7 @@ function SummonerVoiceBlock(props: {
 }) {
   const userStream = useRecoilValue(userStreamState);
 
-  const managementSocket = useRef<Socket | null>(null);
+  let managementSocket = useRef<Socket | null>(null);
 
   const [speakerVolume, setSpeakerVolume] = useState(0.8);
   const [beforeMuteSpeakerVolume, setBeforeMuteSpeakerVolume] = useState(0.8);
@@ -41,6 +41,7 @@ function SummonerVoiceBlock(props: {
     if (props.isMine) {
       ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
         setSelectedChampion(championInfo);
+        console.log(managementSocket.current);
         managementSocket.current?.emit('champion-info', championInfo);
       });
       // ipcRenderer.on(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER, () => {
@@ -93,7 +94,6 @@ function SummonerVoiceBlock(props: {
 
   useEffect(() => {
     if (props.isMine) {
-      console.log('볼륨 ㅈㄴ 보내는 중~', managementSocket.current);
       managementSocket.current?.emit('mic-visualizer', {
         summonerId: props.summoner.summonerId,
         visualizerVolume,
