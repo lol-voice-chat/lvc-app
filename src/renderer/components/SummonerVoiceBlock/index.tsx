@@ -16,10 +16,9 @@ const { ipcRenderer } = window.require('electron');
 function SummonerVoiceBlock(props: {
   isMine: boolean;
   summoner: SummonerType & SummonerStatsType;
+  managementSocket: Socket;
 }) {
   const userStream = useRecoilValue(userStreamState);
-
-  let managementSocket = useRef<Socket | null>(null);
 
   const [speakerVolume, setSpeakerVolume] = useState(0.8);
   const [beforeMuteSpeakerVolume, setBeforeMuteSpeakerVolume] = useState(0.8);
@@ -29,17 +28,10 @@ function SummonerVoiceBlock(props: {
   const [selectedChampion, setSelectedChampion] = useState<ChampionInfoType | null>(null);
 
   useEffect(() => {
-    const socket = connectSocket('/team-voice-chat/manage');
-
-    electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
-      socket.emit('team-manage-join-room', { roomName, displayName: props.summoner.summonerId });
-      // managementSocket.current = socket;
-    });
-
     if (props.isMine) {
       ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
         setSelectedChampion(championInfo);
-        socket.emit('champion-info', championInfo);
+        props.managementSocket.emit('champion-info', championInfo);
       });
       // ipcRenderer.on(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER, () => {
       //   if (isMuteSpeaker) {
@@ -49,7 +41,7 @@ function SummonerVoiceBlock(props: {
       //   }
       // });
     } else {
-      socket.on('champion-info', (championInfo: ChampionInfoType) => {
+      props.managementSocket.on('champion-info', (championInfo: ChampionInfoType) => {
         if (props.summoner.summonerId === championInfo.summonerId) {
           setSelectedChampion(championInfo);
         }
