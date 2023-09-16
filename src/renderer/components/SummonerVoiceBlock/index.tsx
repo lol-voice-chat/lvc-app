@@ -54,11 +54,11 @@ function SummonerVoiceBlock(props: {
           setSelectedChampion(championInfo);
         }
       });
-      socket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
-        if (props.summoner.summonerId === summonerId) {
-          setVisualizerVolume(visualizerVolume);
-        }
-      });
+      // socket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
+      //   if (props.summoner.summonerId === summonerId) {
+      //     setVisualizerVolume(visualizerVolume);
+      //   }
+      // });
       //   ipcRenderer.on(IPC_KEY.MUTE_ALL_SPEAKER, ({ isMuteSummonerSpeaker }) => {
       //     if (!isMuteSummonerSpeaker && !isMuteSpeaker) {
       //       setBeforeMuteSpeakerVolume(speakerVolume);
