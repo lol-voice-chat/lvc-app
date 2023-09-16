@@ -61,9 +61,10 @@ export const onLeagueClientUx = async () => {
   const leagueClientData: LeagueClientData = await getLeagueClientData();
 
   const tier: string = getTier(leagueClientData);
-  const [pvpMatchList, friendData] = await Promise.all([
+  const [pvpMatchList, friendData, phase] = await Promise.all([
     getPvpMatchList(leagueClientData.puuid),
     league(LCU_ENDPOINT.FRIENDS_URL),
+    league(LCU_ENDPOINT.GAMEFLOW_PHASE_URL),
   ]);
 
   const summonerStats: SummonerStats = getSummonerStats(pvpMatchList);

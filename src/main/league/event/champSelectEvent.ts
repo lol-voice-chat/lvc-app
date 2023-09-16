@@ -15,7 +15,7 @@ type ChampionData = {
   totalMinionsKilled: string;
 };
 
-let selectedChampionId: number;
+let selectedChampionId: number = 0;
 
 export const champSelectEvent = async (
   webContents: WebContents,
