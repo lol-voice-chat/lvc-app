@@ -46,11 +46,11 @@ function SummonerVoiceBlock(props: {
           setSelectedChampion(championInfo);
         }
       });
-      // socket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
-      //   if (props.summoner.summonerId === summonerId) {
-      //     setVisualizerVolume(visualizerVolume);
-      //   }
-      // });
+      props.managementSocket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
+        if (props.summoner.summonerId === summonerId) {
+          setVisualizerVolume(visualizerVolume);
+        }
+      });
       //   ipcRenderer.on(IPC_KEY.MUTE_ALL_SPEAKER, ({ isMuteSummonerSpeaker }) => {
       //     if (!isMuteSummonerSpeaker && !isMuteSpeaker) {
       //       setBeforeMuteSpeakerVolume(speakerVolume);
@@ -81,14 +81,14 @@ function SummonerVoiceBlock(props: {
     return () => clearInterval(visualizerInterval);
   }, [userStream]);
 
-  // useEffect(() => {
-  //   if (props.isMine) {
-  //     managementSocket.current?.emit('mic-visualizer', {
-  //       summonerId: props.summoner.summonerId,
-  //       visualizerVolume,
-  //     });
-  //   }
-  // }, [visualizerVolume]);
+  useEffect(() => {
+    if (props.isMine) {
+      props.managementSocket.emit('mic-visualizer', {
+        summonerId: props.summoner.summonerId,
+        visualizerVolume,
+      });
+    }
+  }, [visualizerVolume]);
 
   const handleChangeSpeakerVolume = (speakerVolume: number) => {
     const speaker = document.getElementById(
