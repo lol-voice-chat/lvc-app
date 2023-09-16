@@ -11,7 +11,7 @@ export interface SummonerData {
   winCount: number;
   failCount: number;
   statsList: StatsData[];
-  friendNames: string[];
+  // friendNames: string[];
 }
 
 interface LeagueClientData {
@@ -78,7 +78,7 @@ export const onLeagueClientUx = async () => {
     winCount: summonerStats.winCount,
     failCount: summonerStats.failCount,
     statsList: summonerStats.statsList,
-    friendNames: friendData,
+    // friendNames: friendData,
   };
 
   return { summoner, pvpMatchList };
