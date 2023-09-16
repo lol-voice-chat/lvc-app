@@ -11,6 +11,7 @@ export interface SummonerData {
   winCount: number;
   failCount: number;
   statsList: StatsData[];
+  friendNames: string[];
 }
 
 interface LeagueClientData {
@@ -57,13 +58,14 @@ export interface ParticipantData {
 }
 
 export const onLeagueClientUx = async () => {
-  // const test = await league('/lol-game-client-chat/v1/buddies');
-  // console.log('test: ', test);
-
   const leagueClientData: LeagueClientData = await getLeagueClientData();
 
   const tier: string = getTier(leagueClientData);
-  const pvpMatchList: MatchHistoryData[] = await getPvpMatchList(leagueClientData.puuid);
+  const [pvpMatchList, friendData] = await Promise.all([
+    getPvpMatchList(leagueClientData.puuid),
+    league(LCU_ENDPOINT.FRIENDS_URL),
+  ]);
+
   const summonerStats: SummonerStats = getSummonerStats(pvpMatchList);
 
   const summoner: SummonerData = {
@@ -76,6 +78,7 @@ export const onLeagueClientUx = async () => {
     winCount: summonerStats.winCount,
     failCount: summonerStats.failCount,
     statsList: summonerStats.statsList,
+    friendNames: friendData,
   };
 
   return { summoner, pvpMatchList };
