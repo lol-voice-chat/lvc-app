@@ -1,7 +1,7 @@
 import league from '../utils/league';
-import { LCU_ENDPOINT, PHASE } from '../constants';
+import { LCU_ENDPOINT } from '../constants';
 import { plainToInstance } from 'class-transformer';
-import { LeagueClient, MatchHistory, MatchHistoryData, Friend } from './models';
+import { LeagueClient, MatchHistory, SummonerStats, Friend } from './models';
 
 export interface SummonerData {
   summonerId: number;
@@ -12,19 +12,6 @@ export interface SummonerData {
   summonerStats: SummonerStats;
   // friendDataList: FriendData[];
   // phase: string;
-}
-
-interface SummonerStats {
-  odds: number;
-  winCount: number;
-  failCount: number;
-  statsList: StatsData[];
-}
-
-interface StatsData {
-  championIcon: string;
-  kda: string;
-  isWin: boolean;
 }
 
 interface FriendData {
@@ -39,12 +26,11 @@ export const onLeagueClientUx = async () => {
   const [matchHistoryJson, friendListJson, phase]: [string, any[], string] = await Promise.all([
     league(matchHistoryUrl),
     league(LCU_ENDPOINT.FRIENDS_URL),
-    league(LCU_ENDPOINT.GAMEFLOW_PHASE_URL),
+    league(LCU_ENDPOINT.GAMEFLOW_URL),
   ]);
 
   const matchHistory: MatchHistory = plainToInstance(MatchHistory, matchHistoryJson);
   const summonerStats: SummonerStats = matchHistory.getSummonerStats();
-  const pvpMatchList: MatchHistoryData[] = matchHistory.getPvpMatchList();
 
   // const friendList: Friend[] = plainToInstance(Friend, friendListJson);
   // const friendDataList: FriendData[] = friendList.map((friend: Friend) => friend.getData());
@@ -60,7 +46,7 @@ export const onLeagueClientUx = async () => {
     // phase: phase === PHASE.CHAMP_SELECT || phase === PHASE.IN_GAME ? '게임중' : '온라인',
   };
 
-  return { summoner, pvpMatchList };
+  return { summoner, matchHistory, phase };
 };
 
 async function getLeagueClient(): Promise<LeagueClient> {

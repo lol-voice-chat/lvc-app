@@ -1,7 +1,8 @@
 import { app, BrowserWindow } from 'electron';
-import { leagueHandler } from './league/leagueHandler';
+import { LeagueHandler } from './league/LeagueHandler.v2';
 import { onLeagueClientUx } from './league/onLeagueClientUx';
 import onElectronStore from './store';
+import { LeagueWebSocket, createWebSocketConnection } from 'league-connect';
 
 let mainWindow: BrowserWindow;
 
@@ -18,10 +19,12 @@ const createWindow = () => {
   mainWindow.loadURL('http://localhost:3000');
 
   mainWindow.webContents.on('did-finish-load', async () => {
-    const { summoner, pvpMatchList } = await onLeagueClientUx();
+    const { summoner, matchHistory, phase } = await onLeagueClientUx();
     mainWindow.webContents.send('on-league-client', summoner);
 
-    await leagueHandler(mainWindow.webContents, summoner, pvpMatchList);
+    const ws: LeagueWebSocket = await createWebSocketConnection();
+    const leagueHandler: LeagueHandler = new LeagueHandler(mainWindow.webContents, ws, summoner);
+    await leagueHandler.handle(phase, matchHistory);
   });
 };
 
