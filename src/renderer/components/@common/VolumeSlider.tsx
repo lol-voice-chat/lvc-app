@@ -19,6 +19,7 @@ function VolumeSlider(props: VolumeSliderPropsType) {
         step={0.02}
         value={props.volume}
         onChange={(event) => {
+          console.log(event.target.valueAsNumber);
           props.handleChangeVolume(event.target.valueAsNumber);
         }}
       />
@@ -32,6 +33,9 @@ const Slider = styled.div<{ volume: number; audiotype: 'speaker' | 'mic' }>`
   #volume-box {
     position: absolute;
     top: ${({ audiotype }) => (audiotype === 'speaker' ? '-20px' : '-23px')};
+    left: calc(${({ volume }) => volume}% - 15 * ${({ volume }) => volume / 100}%);
+    width: 30px;
+    height: auto;
   }
 
   input[type='range'] {

@@ -14,7 +14,7 @@ import { IPC_KEY, STORE_KEY } from '../../const';
 import electronStore from '../@store/electron';
 import { connectSocket } from '../utils/socket';
 import { Socket } from 'socket.io-client';
-import { getUserAudioStream } from '../utils/audio';
+import { getSummonerSpeaker, getUserAudioStream } from '../utils/audio';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -154,9 +154,7 @@ function useVoiceChat() {
             consumerTransport,
           });
 
-          const newSummonerAudio = document.getElementById(
-            summonerId.toString() + 'speaker'
-          ) as HTMLAudioElement;
+          const newSummonerAudio = getSummonerSpeaker(summonerId);
           newSummonerAudio.srcObject = new MediaStream([consumer.track]);
 
           socket.emit('consumer-resume', { remoteProducerId });

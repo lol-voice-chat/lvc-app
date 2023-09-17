@@ -28,7 +28,7 @@ export const ProfileImg = styled.img<{ visualize: boolean }>`
   border-radius: 50%;
   border: 3.5px solid ${({ visualize }) => (visualize ? '#50a361' : 'transparent')};
 
-  /* transition: border 0.1; */
+  transition: border-color 0.1s;
 
   box-shadow: 0 5px 18px -7px rgba(0, 0, 0, 0.3);
 `;
@@ -77,9 +77,9 @@ export const TitleTag = styled.div`
   }
 `;
 
-export const SoundBox = styled.div<{ isMine: boolean }>`
+export const SoundBox = styled.div`
   display: flex;
-  flex-direction: ${({ isMine }) => (isMine ? 'row' : 'column')};
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 
@@ -87,13 +87,20 @@ export const SoundBox = styled.div<{ isMine: boolean }>`
 
   border-bottom: 1px solid #484b52;
 
-  #audio-ctrl {
+  #mic-button {
+    width: 30px;
+    height: 30px;
+    margin: 0 0 12px 0;
+    cursor: pointer;
+  }
+
+  #speaker-ctrl {
     display: flex;
     justify-content: space-between;
-    width: ${({ isMine }) => (isMine ? '' : '80%')};
-    margin: ${({ isMine }) => (isMine ? '0 7px 12px 10px' : '0 0 12px 0')};
+    width: 80%;
+    margin: 0 0 12px 0;
 
-    img {
+    #speaker-button {
       width: 30px;
       height: 30px;
       cursor: pointer;
