@@ -1,3 +1,12 @@
+interface GameData {
+  games: MatchHistoryData[];
+}
+
+export interface MatchHistoryData {
+  gameType: string;
+  participants: ParticipantData[];
+}
+
 interface ParticipantData {
   championId: number;
   stats: {
@@ -9,15 +18,6 @@ interface ParticipantData {
     neutralMinionsKilled: number;
     win: boolean;
   };
-}
-
-export interface MatchHistoryData {
-  gameType: string;
-  participants: ParticipantData[];
-}
-
-interface GameData {
-  games: MatchHistoryData[];
 }
 
 const RECENT_PVP_MATCH_LENGTH = 10;
