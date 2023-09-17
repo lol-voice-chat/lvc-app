@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useVoiceChat from '../../hooks/useVoiceChat';
 import { useRecoilValue } from 'recoil';
 import {
@@ -16,6 +16,7 @@ import { Socket } from 'socket.io-client';
 
 function VoiceRoomModal() {
   const gameStatus = useRecoilValue(gameStatusState);
+
   const summoner = useRecoilValue(summonerState);
   const myTeamSummoners = useRecoilValue(myTeamSummonersState);
   const enemySummoners = useRecoilValue(enemySummonersState);
@@ -27,11 +28,10 @@ function VoiceRoomModal() {
   useEffect(() => {
     onTeamVoiceRoom();
 
-    const socket = connectSocket('/team-voice-chat/manage');
-
     electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
-      setManagementSocket(socket);
+      const socket = connectSocket('/team-voice-chat/manage');
       socket.emit('team-manage-join-room', roomName);
+      setManagementSocket(socket);
     });
   }, []);
 
@@ -41,18 +41,25 @@ function VoiceRoomModal() {
 
   return (
     <S.Background>
-      {summoner && managementSocket && (
-        <SummonerVoiceBlock isMine={true} summoner={summoner} managementSocket={managementSocket} />
-      )}
+      {managementSocket && (
+        <>
+          {summoner && (
+            <SummonerVoiceBlock
+              isMine={true}
+              summoner={summoner}
+              managementSocket={managementSocket}
+            />
+          )}
 
-      {managementSocket &&
-        myTeamSummoners?.map((summoner) => (
-          <SummonerVoiceBlock
-            isMine={false}
-            summoner={summoner}
-            managementSocket={managementSocket}
-          />
-        ))}
+          {myTeamSummoners?.map((summoner) => (
+            <SummonerVoiceBlock
+              isMine={false}
+              summoner={summoner}
+              managementSocket={managementSocket}
+            />
+          ))}
+        </>
+      )}
     </S.Background>
   );
 }

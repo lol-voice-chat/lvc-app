@@ -1,14 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as S from './style';
 import RankBadge from '../@common/RankBadge';
 import { ChampionInfoType, SummonerStatsType, SummonerType } from '../../@type/summoner';
 import VolumeSlider from '../@common/VolumeSlider';
-import { micVolumeHandler } from '../../utils/audio';
-import { IPC_KEY, STORE_KEY } from '../../../const';
+import { getSummonerSpeaker, micVolumeHandler } from '../../utils/audio';
+import { IPC_KEY } from '../../../const';
 import { useRecoilValue } from 'recoil';
 import { userStreamState } from '../../@store/atom';
-import { connectSocket } from '../../utils/socket';
-import electronStore from '../../@store/electron';
 import { Socket } from 'socket.io-client';
 
 const { ipcRenderer } = window.require('electron');
@@ -18,27 +16,22 @@ function SummonerVoiceBlock(props: {
   summoner: SummonerType & SummonerStatsType;
   managementSocket: Socket;
 }) {
-  const userStream = useRecoilValue(userStreamState);
+  // 선택한 챔피언 정보
+  const [selectedChampion, setSelectedChampion] = useState<ChampionInfoType | null>(null);
 
+  // 스피커, 마이크 정보
+  const userStream = useRecoilValue(userStreamState);
   const [speakerVolume, setSpeakerVolume] = useState(0.8);
   const [beforeMuteSpeakerVolume, setBeforeMuteSpeakerVolume] = useState(0.8);
   const [isMuteSpeaker, setIsMuteSpeaker] = useState(false);
   const [isMuteMic, setIsMuteMic] = useState(false);
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
-  const [selectedChampion, setSelectedChampion] = useState<ChampionInfoType | null>(null);
 
   useEffect(() => {
     if (props.isMine) {
       ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
         setSelectedChampion(championInfo);
         props.managementSocket.emit('champion-info', championInfo);
-      });
-      ipcRenderer.on(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER, () => {
-        if (isMuteSpeaker) {
-          userStream?.getAudioTracks().forEach((track) => (track.enabled = true));
-          setIsMuteSpeaker(false);
-          setIsMuteMic(false);
-        }
       });
     } else {
       props.managementSocket.on('champion-info', (championInfo: ChampionInfoType) => {
@@ -51,28 +44,15 @@ function SummonerVoiceBlock(props: {
           setVisualizerVolume(visualizerVolume);
         }
       });
-      ipcRenderer.on(IPC_KEY.MUTE_ALL_SPEAKER, ({ isMuteSummonerSpeaker }) => {
-        if (!isMuteSummonerSpeaker && !isMuteSpeaker) {
-          setBeforeMuteSpeakerVolume(speakerVolume);
-          setSpeakerVolume(0);
-        }
-        if (isMuteSummonerSpeaker) {
-          setSpeakerVolume(beforeMuteSpeakerVolume);
-        }
-        setIsMuteSpeaker(!isMuteSummonerSpeaker);
-      });
     }
 
     return () => {
       ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
-      ipcRenderer.removeAllListeners(IPC_KEY.MUTE_ALL_SPEAKER);
-      ipcRenderer.removeAllListeners(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER);
     };
   }, []);
 
   useEffect(() => {
     let visualizerInterval;
-
     if (userStream && props.isMine) {
       visualizerInterval = setInterval(() => {
         micVolumeHandler(userStream, setVisualizerVolume);
@@ -91,34 +71,22 @@ function SummonerVoiceBlock(props: {
   }, [visualizerVolume]);
 
   const handleChangeSpeakerVolume = (speakerVolume: number) => {
-    const speaker = document.getElementById(
-      props.summoner.summonerId.toString() + 'speaker'
-    ) as HTMLAudioElement;
-
+    const speaker = getSummonerSpeaker(props.summoner.summonerId);
     speaker.volume = speakerVolume;
     setSpeakerVolume(speakerVolume);
     setIsMuteSpeaker(speakerVolume === 0);
   };
 
   const handleClickMuteSpeaker = () => {
-    if (props.isMine) {
-      ipcRenderer.send(IPC_KEY.MUTE_ALL_SPEAKER, { isMuteSummonerSpeaker: isMuteSpeaker });
-      userStream?.getAudioTracks().forEach((track) => (track.enabled = isMuteMic && isMuteSpeaker));
-      setIsMuteMic(!(isMuteMic && isMuteSpeaker));
-    }
-    if (!isMuteSpeaker) {
-      setBeforeMuteSpeakerVolume(speakerVolume);
-      setSpeakerVolume(0);
+    if (isMuteSpeaker) {
+      handleChangeSpeakerVolume(beforeMuteSpeakerVolume);
     } else {
-      setSpeakerVolume(beforeMuteSpeakerVolume);
-      !props.isMine && ipcRenderer.send(IPC_KEY.MUTE_OFF_SUMMONER_SPEAKER);
+      setBeforeMuteSpeakerVolume(speakerVolume);
+      handleChangeSpeakerVolume(0);
     }
-    setIsMuteSpeaker((curMute) => !curMute);
   };
 
   const handleClickMuteMic = () => {
-    if (isMuteSpeaker) return handleClickMuteSpeaker();
-
     userStream?.getAudioTracks().forEach((track) => (track.enabled = !track.enabled));
     setIsMuteMic((curMute) => !curMute);
   };
@@ -126,7 +94,7 @@ function SummonerVoiceBlock(props: {
   return (
     <S.SummonerBlock id={props.summoner.summonerId.toString()}>
       <S.ProfileImg
-        visualize={visualizerVolume > 20}
+        visualize={!isMuteSpeaker && visualizerVolume > 20}
         src={selectedChampion?.championIcon ?? props.summoner.profileImage}
       />
 
@@ -139,30 +107,30 @@ function SummonerVoiceBlock(props: {
         <div id="questionCircle">?</div>
       </S.TitleTag>
 
-      <S.SoundBox isMine={props.isMine}>
-        {props.isMine && (
-          <div id="audio-ctrl" onClick={handleClickMuteMic}>
-            <img
-              src={!isMuteMic ? 'img/mic_icon.svg' : 'img/mic_mute_icon.svg'}
-              alt="마이크 아이콘"
-            />
-          </div>
-        )}
-        <div id="audio-ctrl">
+      <S.SoundBox>
+        {props.isMine ? (
           <img
-            onClick={handleClickMuteSpeaker}
-            src={!isMuteSpeaker ? 'img/headset_icon.svg' : 'img/headset_mute_icon.svg'}
-            alt="헤드셋 아이콘"
+            id="mic-button"
+            src={!isMuteMic ? 'img/mic_icon.svg' : 'img/mic_mute_icon.svg'}
+            onClick={handleClickMuteMic}
+            alt="마이크 아이콘"
           />
-          {!props.isMine && (
+        ) : (
+          <div id="speaker-ctrl">
+            <img
+              id="speaker-button"
+              src={!isMuteSpeaker ? 'img/headset_icon.svg' : 'img/headset_mute_icon.svg'}
+              onClick={handleClickMuteSpeaker}
+              alt="헤드셋 아이콘"
+            />
             <VolumeSlider
               audiotype="speaker"
               volume={speakerVolume}
               handleChangeVolume={handleChangeSpeakerVolume}
             />
-          )}
-          <audio id={props.summoner.summonerId.toString() + 'speaker'} autoPlay />
-        </div>
+            <audio id={props.summoner.summonerId.toString() + 'speaker'} autoPlay />
+          </div>
+        )}
       </S.SoundBox>
 
       <S.AverageGameData>

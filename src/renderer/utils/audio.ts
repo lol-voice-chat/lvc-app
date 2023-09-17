@@ -5,11 +5,9 @@ export const getUserAudioStream = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: true,
     });
-
     return stream;
   } catch (err) {
     console.log('유저 미디어 스트림 획득 실패', err);
-
     return null;
   }
 };
@@ -37,4 +35,9 @@ export const micVolumeHandler = (
     requestAnimationFrame(updateMicVolume);
   };
   updateMicVolume();
+};
+
+export const getSummonerSpeaker = (summonerId: number) => {
+  const speaker = document.getElementById(summonerId.toString() + 'speaker') as HTMLAudioElement;
+  return speaker;
 };
