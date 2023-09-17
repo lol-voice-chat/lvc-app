@@ -1,5 +1,5 @@
 import { WebContents } from 'electron';
-import { LCU_ENDPOINT, PHASE } from '../../const';
+import { LCU_ENDPOINT, PHASE } from '../../constants';
 import { IPC_KEY } from '../../../const/index';
 import { LeagueWebSocket } from 'league-connect';
 
