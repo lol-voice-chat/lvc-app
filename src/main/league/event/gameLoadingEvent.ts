@@ -1,4 +1,4 @@
-import { LCU_ENDPOINT, PHASE } from '../../const';
+import { LCU_ENDPOINT, PHASE } from '../../constants';
 import { voiceRoomNameGenerator } from '../../utils/voiceRoomNameGenerator';
 import { WebContents } from 'electron';
 import { IPC_KEY } from '../../../const/index';
