@@ -9,12 +9,9 @@ export interface SummonerData {
   profileImage: string;
   tier: string;
   statusMessage: string;
-  odds: number;
-  winCount: number;
-  failCount: number;
-  statsList: StatsData[];
-  friendDataList: FriendData[];
-  phase: string;
+  summonerStats: SummonerStats;
+  // friendDataList: FriendData[];
+  // phase: string;
 }
 
 interface SummonerStats {
@@ -49,8 +46,8 @@ export const onLeagueClientUx = async () => {
   const summonerStats: SummonerStats = matchHistory.getSummonerStats();
   const pvpMatchList: MatchHistoryData[] = matchHistory.getPvpMatchList();
 
-  const friendList: Friend[] = plainToInstance(Friend, friendListJson);
-  const friendDataList: FriendData[] = friendList.map((friend: Friend) => friend.getData());
+  // const friendList: Friend[] = plainToInstance(Friend, friendListJson);
+  // const friendDataList: FriendData[] = friendList.map((friend: Friend) => friend.getData());
 
   const summoner: SummonerData = {
     summonerId: leagueClient.summonerId,
@@ -58,12 +55,9 @@ export const onLeagueClientUx = async () => {
     profileImage: leagueClient.getProfileImage(),
     tier: leagueClient.getTier(),
     statusMessage: leagueClient.statusMessage,
-    odds: summonerStats.odds,
-    winCount: summonerStats.winCount,
-    failCount: summonerStats.failCount,
-    statsList: summonerStats.statsList,
-    friendDataList,
-    phase: phase === PHASE.CHAMP_SELECT || phase === PHASE.IN_GAME ? '게임중' : '온라인',
+    summonerStats,
+    // friendDataList,
+    // phase: phase === PHASE.CHAMP_SELECT || phase === PHASE.IN_GAME ? '게임중' : '온라인',
   };
 
   return { summoner, pvpMatchList };
