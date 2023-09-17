@@ -1,4 +1,4 @@
-import { SummonerStatsType, SummonerType } from '../@type/summoner';
+import { SummonerType } from '../@type/summoner';
 import { atom } from 'recoil';
 
 export const userStreamState = atom<MediaStream | null>({
@@ -13,12 +13,12 @@ export const gameStatusState = atom<GameStatus>({
   default: 'none',
 });
 
-export const summonerState = atom<(SummonerType & SummonerStatsType) | null>({
+export const summonerState = atom<SummonerType | null>({
   key: 'summoner',
   default: null,
 });
 
-export const myTeamSummonersState = atom<(SummonerType & SummonerStatsType)[] | null>({
+export const myTeamSummonersState = atom<SummonerType[] | null>({
   key: 'myTeamSummoners',
   default: null,
 });

@@ -4,9 +4,10 @@ export type SummonerType = {
   profileImage: string;
   tier: string;
   statusMessage: string;
+  summonerStats: SummonerStatsType;
 };
 
-export type SummonerStatsType = {
+type SummonerStatsType = {
   odds: number;
   winCount: number;
   failCount: number;

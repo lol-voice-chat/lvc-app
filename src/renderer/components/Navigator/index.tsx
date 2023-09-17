@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { SummonerStatsType, SummonerType } from '../../@type/summoner';
+import { SummonerType } from '../../@type/summoner';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import { summonerState, gameStatusState } from '../../@store/atom';
 import { IPC_KEY, STORE_KEY } from '../../../const';
@@ -13,7 +13,7 @@ function Navigator() {
   const setSummoner = useSetRecoilState(summonerState);
 
   useEffect(() => {
-    ipcRenderer.once('on-league-client', (_, summoner: SummonerType & SummonerStatsType) => {
+    ipcRenderer.once('on-league-client', (_, summoner: SummonerType) => {
       setSummoner(summoner);
     });
 

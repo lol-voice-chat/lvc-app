@@ -9,7 +9,7 @@ import {
 import * as mediasoup from 'mediasoup-client';
 import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
 import { DeviceType, ConsumerTransportType, TransportType } from '../@type/webRtc';
-import { SummonerStatsType, SummonerType } from '../@type/summoner';
+import { SummonerType } from '../@type/summoner';
 import { IPC_KEY, STORE_KEY } from '../../const';
 import electronStore from '../@store/electron';
 import { connectSocket } from '../utils/socket';
@@ -97,10 +97,7 @@ function useVoiceChat() {
       });
     };
 
-    const signalNewConsumerTransport = (
-      remoteProducerId: string,
-      newSummoner: SummonerType & SummonerStatsType
-    ) => {
+    const signalNewConsumerTransport = (remoteProducerId: string, newSummoner: SummonerType) => {
       setMyTeamSummoners([...(myTeamSummoners ?? []), newSummoner]);
 
       socket.emit('create-consumer-transport', { remoteProducerId });

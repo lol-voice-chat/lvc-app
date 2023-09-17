@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import * as S from './style';
 import RankBadge from '../@common/RankBadge';
-import { ChampionInfoType, SummonerStatsType, SummonerType } from '../../@type/summoner';
+import { ChampionInfoType, SummonerType } from '../../@type/summoner';
 import VolumeSlider from '../@common/VolumeSlider';
 import { getSummonerSpeaker, micVolumeHandler } from '../../utils/audio';
 import { IPC_KEY } from '../../../const';
@@ -13,7 +13,7 @@ const { ipcRenderer } = window.require('electron');
 
 function SummonerVoiceBlock(props: {
   isMine: boolean;
-  summoner: SummonerType & SummonerStatsType;
+  summoner: SummonerType;
   managementSocket: Socket;
 }) {
   // 선택한 챔피언 정보
@@ -151,24 +151,24 @@ function SummonerVoiceBlock(props: {
 
       <S.GameRecord>
         {/* 이번 시즌 전적이 없을 경우 알림창 */}
-        {props.summoner.statsList.length !== 0 ? (
+        {props.summoner.summonerStats.statsList.length !== 0 ? (
           <S.WinningPercentage>
             <S.Text>
               <p>승률</p>
-              <p id="value">{props.summoner.odds}%</p>
+              <p id="value">{props.summoner.summonerStats.odds}%</p>
             </S.Text>
 
             <S.ProgressBar>
               <progress
-                value={props.summoner.winCount}
-                max={props.summoner.winCount + props.summoner.failCount}
+                value={props.summoner.summonerStats.winCount}
+                max={props.summoner.summonerStats.winCount + props.summoner.summonerStats.failCount}
               />
-              <p id="win">{props.summoner.winCount}W</p>
-              <p id="fail">{props.summoner.failCount}L</p>
+              <p id="win">{props.summoner.summonerStats.winCount}W</p>
+              <p id="fail">{props.summoner.summonerStats.failCount}L</p>
             </S.ProgressBar>
 
             <S.KDAList>
-              {props.summoner.statsList.map((summonerStats, idx) => (
+              {props.summoner.summonerStats.statsList.map((summonerStats, idx) => (
                 <div
                   key={idx}
                   style={{ backgroundColor: summonerStats.isWin ? '#2C334A' : '#50383B' }}
