@@ -3,7 +3,7 @@ export const LCU_ENDPOINT = {
   GAMEFLOW_PHASE_URL: '/lol-gameflow/v1/gameflow-phase',
   CHAMP_SELECT_URL: '/lol-champ-select/v1/session',
   CHAT_ME_URL: '/lol-chat/v1/me',
-  FRIENDS_URL: '/lol-game-client-chat/v1/buddies',
+  FRIENDS_URL: '/lol-chat/v1/friends',
 };
 
 export const PHASE = {
@@ -11,18 +11,6 @@ export const PHASE = {
   LOBBY: 'Lobby',
   CHAMP_SELECT: 'ChampSelect',
   IN_GAME: 'InProgress',
-};
-
-type RankDivisionType = {
-  [key: string]: number;
-};
-
-export const RANK_DIVISION: RankDivisionType = {
-  I: 1,
-  II: 2,
-  III: 3,
-  IV: 4,
-  V: 5,
 };
 
 type ChampionsType = {

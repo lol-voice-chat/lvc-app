@@ -1,10 +1,11 @@
-import { LCU_ENDPOINT, PHASE, CHAMPIONS } from '../../const';
+import { LCU_ENDPOINT, PHASE, CHAMPIONS } from '../../constants';
 import league from '../../utils/league';
 import { WebContents } from 'electron';
 import { IPC_KEY } from '../../../const/index';
 import { voiceRoomNameGenerator } from '../../utils/voiceRoomNameGenerator';
 import { LeagueWebSocket } from 'league-connect';
-import { MatchHistoryData, SummonerData } from '../onLeagueClientUx';
+import { SummonerData } from '../onLeagueClientUx';
+import { MatchHistoryData } from '../models/MatchHistory';
 
 type ChampionData = {
   summonerId: number;

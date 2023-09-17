@@ -1,23 +1,14 @@
 import league from '../utils/league';
 import { WebContents } from 'electron';
-import { LCU_ENDPOINT, PHASE } from '../const';
+import { LCU_ENDPOINT } from '../constants';
 import { champSelectEvent, gameLoadingEvent, inProgressEvent } from './event';
 import { createWebSocketConnection } from 'league-connect';
-import { MatchHistoryData, SummonerData } from './onLeagueClientUx';
+import { SummonerData } from './onLeagueClientUx';
+import { MatchHistoryData } from './models/MatchHistory';
 import { voiceRoomNameGenerator } from '../utils/voiceRoomNameGenerator';
 import { IPC_KEY } from '../../const';
-
-interface GameflowData {
-  gameClient: {
-    running: boolean;
-    visible: boolean;
-  };
-  phase: string;
-  gameData: {
-    teamOne: [];
-    teamTwo: [];
-  };
-}
+import { Gameflow } from './models';
+import { plainToInstance } from 'class-transformer';
 
 let isJoinedRoom = false;
 let isStartedGameLoading = false;
@@ -33,19 +24,16 @@ export const leagueHandler = async (
     league(LCU_ENDPOINT.GAMEFLOW_URL),
   ]);
 
-  await handleLeaguePhase(gameflowData, webContents, summoner.summonerId);
+  const gameflow: Gameflow = plainToInstance(Gameflow, gameflowData);
+  await handleLeaguePhase(gameflow, webContents, summoner.summonerId);
 
   champSelectEvent(webContents, summoner, ws, pvpMatchlist, isJoinedRoom);
   gameLoadingEvent(webContents, summoner, ws, isStartedGameLoading);
   inProgressEvent(webContents, ws, isStartedInGame);
 };
 
-async function handleLeaguePhase(
-  gameflowData: GameflowData,
-  webContents: WebContents,
-  summonerId: number
-) {
-  if (gameflowData.phase === PHASE.CHAMP_SELECT) {
+async function handleLeaguePhase(gameflow: Gameflow, webContents: WebContents, summonerId: number) {
+  if (gameflow.isChampSelectPhase()) {
     const { myTeam } = await league(LCU_ENDPOINT.CHAMP_SELECT_URL);
     const roomName = voiceRoomNameGenerator(myTeam);
     webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName });
@@ -53,8 +41,8 @@ async function handleLeaguePhase(
     return;
   }
 
-  if (gameflowData.phase === PHASE.IN_GAME && !gameflowData.gameClient.visible) {
-    const { teamOne, teamTwo } = gameflowData.gameData;
+  if (gameflow.isGameLoadingPhase()) {
+    const { teamOne, teamTwo } = gameflow.gameData;
 
     const teamOneVoiceRoomName: string = voiceRoomNameGenerator(teamOne);
     const teamTwoVoiceRoomName: string = voiceRoomNameGenerator(teamTwo);
@@ -69,8 +57,8 @@ async function handleLeaguePhase(
     return;
   }
 
-  if (gameflowData.phase === PHASE.IN_GAME && gameflowData.gameClient.visible) {
-    const { teamOne, teamTwo } = gameflowData.gameData;
+  if (gameflow.isInGamePhase()) {
+    const { teamOne, teamTwo } = gameflow.gameData;
 
     const foundSummoner = teamOne.find((summoner: any) => summoner.summonerId === summonerId);
     const myTeamVoiceRoomName: string = voiceRoomNameGenerator(foundSummoner ? teamOne : teamTwo);
