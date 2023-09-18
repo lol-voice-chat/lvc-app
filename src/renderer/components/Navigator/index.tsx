@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { SummonerType } from '../../@type/summoner';
 import { useRecoilState, useSetRecoilState } from 'recoil';
-import { summonerState, gameStatusState, enemySummonersInfoState } from '../../@store/atom';
+import { summonerState, gameStatusState, enemyInfoListState } from '../../@store/atom';
 import { IPC_KEY, STORE_KEY } from '../../../const';
 import electronStore from '../../@store/electron';
 import VoiceRoomModal from '../VoiceRoomModal';
@@ -11,7 +11,7 @@ const { ipcRenderer } = window.require('electron');
 function Navigator() {
   const [gameStatus, setGameStatus] = useRecoilState(gameStatusState);
   const setSummoner = useSetRecoilState(summonerState);
-  const setEnemySummonersInfo = useSetRecoilState(enemySummonersInfoState);
+  const setEnemyInfoList = useSetRecoilState(enemyInfoListState);
 
   useEffect(() => {
     ipcRenderer.once('on-league-client', (_, summoner: SummonerType) => {
@@ -30,7 +30,7 @@ function Navigator() {
           if (teamVoiceRoomName === roomName) return;
 
           setGameStatus('loading');
-          setEnemySummonersInfo(enemySummonerDataList);
+          setEnemyInfoList(enemySummonerDataList);
           electronStore.set(STORE_KEY.LEAGUE_VOICE_ROOM_NAME, { roomName, teamName });
         });
       }
