@@ -33,7 +33,7 @@ export const ProfileImg = styled.img<{ visualize: boolean }>`
   box-shadow: 0 5px 18px -7px rgba(0, 0, 0, 0.3);
 `;
 
-export const NameTag = styled.div`
+export const NameTag = styled.div<{ font: string }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -43,7 +43,7 @@ export const NameTag = styled.div`
   padding-top: 24.5%;
 
   #displayName {
-    font-size: 16px;
+    font-size: ${({ font }) => font};
     color: ${PALETTE.WHITE_1};
   }
 `;
