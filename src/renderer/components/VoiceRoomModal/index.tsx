@@ -76,7 +76,6 @@ function VoiceRoomModal() {
         <>
           {leagueManagementSocket && (
             <S.LeagueBlockBundle>
-              {/* 적팀 소환사 */}
               <S.TeamBlocks isMyTeam={false}>
                 {enemySummoners?.map((enemy) => (
                   <SummonerLeagueVoiceBlock
@@ -88,7 +87,6 @@ function VoiceRoomModal() {
                 ))}
               </S.TeamBlocks>
 
-              {/* 우리팀 소환사 */}
               <S.TeamBlocks isMyTeam={true}>
                 {summoner && (
                   <SummonerLeagueVoiceBlock

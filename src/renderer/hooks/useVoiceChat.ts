@@ -85,12 +85,14 @@ function useVoiceChat() {
     };
 
     socket.on('new-producer', ({ id, summoner }) => {
+      console.log(summoner);
       signalNewConsumerTransport(id, summoner);
     });
 
     const getProducers = () => {
       socket.emit('get-producers', (producers) => {
         producers.forEach(({ id, summoner }) => {
+          console.log(summoner);
           signalNewConsumerTransport(id, summoner);
         });
       });

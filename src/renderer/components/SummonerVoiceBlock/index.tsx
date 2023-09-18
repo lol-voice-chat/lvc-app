@@ -98,7 +98,7 @@ function SummonerVoiceBlock(props: {
         src={selectedChampion?.championIcon ?? props.summoner.profileImage}
       />
 
-      <S.NameTag>
+      <S.NameTag font={props.summoner.displayName.length < 8 ? '16px' : '13px'}>
         <p id="displayName">{props.summoner.displayName}</p>
         <RankBadge size={14} tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
       </S.NameTag>
@@ -134,7 +134,7 @@ function SummonerVoiceBlock(props: {
       </S.SoundBox>
 
       <S.AverageGameData>
-        <p id="name">{selectedChampion?.name ?? '-'}</p>
+        <p id="name">{selectedChampion?.name ?? '챔피언 정보'}</p>
         <div>
           <p>KDA</p>
           <p id="value">{selectedChampion?.kda ?? '-'}</p>
