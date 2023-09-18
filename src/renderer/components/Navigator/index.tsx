@@ -32,8 +32,7 @@ function Navigator() {
     });
   }, []);
 
-  // return <>{gameStatus !== 'none' && <VoiceRoomModal />}</>;
-  return <VoiceRoomModal />;
+  return <>{gameStatus !== 'none' && <VoiceRoomModal />}</>;
 }
 
 export default Navigator;
