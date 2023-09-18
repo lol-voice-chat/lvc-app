@@ -41,7 +41,7 @@ function VoiceRoomModal() {
     if (gameStatus === 'loading') {
       onLeagueVoiceRoom();
 
-      electronStore.get(STORE_KEY.LEAGUE_VOICE_ROOM_NAME).then((roomName) => {
+      electronStore.get(STORE_KEY.LEAGUE_VOICE_ROOM_NAME).then(({ roomName }) => {
         const socket = connectSocket('/league-voice-chat/manage');
         socket.emit('league-manage-join-room', roomName);
         setLeagueManagementSocket(socket);
