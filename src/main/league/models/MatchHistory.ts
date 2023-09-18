@@ -139,6 +139,32 @@ export class MatchHistory {
     return championStats;
   }
 
+  getChampionKda(championId: number) {
+    let champKill = 0;
+    let champDeath = 0;
+    let champAssists = 0;
+    let champCount = 0;
+
+    this.games.games
+      .filter((game: MatchHistoryData) => game.gameType !== 'CUSTOM_GAME')
+      .forEach((game: MatchHistoryData) => {
+        const participant: ParticipantData = game.participants[0];
+
+        if (participant.championId === championId) {
+          champKill += participant.stats.kills;
+          champDeath += participant.stats.deaths;
+          champAssists += participant.stats.assists;
+          champCount++;
+        }
+      });
+
+    return `
+      ${this.getAverage(champKill, champCount)}/
+      ${this.getAverage(champDeath, champCount)}/
+      ${this.getAverage(champAssists, champCount)}
+      `;
+  }
+
   private getAverage(champInfo: number, champCount: number) {
     const info: string = (champInfo / champCount).toFixed(1).toString();
     if (info.split('.')[1] === '0') {
