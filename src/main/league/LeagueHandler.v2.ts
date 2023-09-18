@@ -68,15 +68,15 @@ export class LeagueHandler {
         isStartedGameLoading = false;
       }
 
-      if (this.isInGamePhase(data) && !isStartedInGame) {
-        this.webContents.send(IPC_KEY.START_IN_GAME);
-        isStartedInGame = true;
-      }
+      // if (this.isInGamePhase(data) && !isStartedInGame) {
+      //   this.webContents.send(IPC_KEY.START_IN_GAME);
+      //   isStartedInGame = true;
+      // }
 
-      if (this.isCloseInGameWindow(data)) {
-        this.webContents.send(IPC_KEY.EXIT_IN_GAME);
-        isStartedInGame = false;
-      }
+      // if (this.isCloseInGameWindow(data)) {
+      //   this.webContents.send(IPC_KEY.EXIT_IN_GAME);
+      //   isStartedInGame = false;
+      // }
     });
   }
 
