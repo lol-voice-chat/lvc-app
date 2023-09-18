@@ -26,6 +26,7 @@ function useVoiceChat() {
   const [enemySummoners, setEnemySummoners] = useRecoilState(enemySummonersState);
 
   const connectVoiceChat = (
+    isTeamVoiceChat: Boolean,
     socket: Socket,
     device: DeviceType | null,
     stream: MediaStream,
@@ -96,7 +97,9 @@ function useVoiceChat() {
     };
 
     const signalNewConsumerTransport = (remoteProducerId: string, newSummoner: SummonerType) => {
-      setMyTeamSummoners([...(myTeamSummoners ?? []), newSummoner]);
+      isTeamVoiceChat
+        ? setMyTeamSummoners([...(myTeamSummoners ?? []), newSummoner])
+        : setEnemySummoners([...(enemySummoners ?? []), newSummoner]);
 
       socket.emit('create-consumer-transport', { remoteProducerId });
       socket.on('complete-create-consumer-transport', ({ params }) => {
@@ -170,6 +173,7 @@ function useVoiceChat() {
         if (stream) {
           socket.emit('team-join-room', { roomName, summoner }, ({ rtpCapabilities }) => {
             connectVoiceChat(
+              true,
               socket,
               device,
               stream,
@@ -235,6 +239,7 @@ function useVoiceChat() {
       if (userStream) {
         socket.emit('league-join-room', { roomName, teamName, summoner }, ({ rtpCapabilities }) => {
           connectVoiceChat(
+            false,
             socket,
             device,
             userStream,
