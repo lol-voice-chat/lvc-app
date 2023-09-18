@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useVoiceChat from '../../hooks/useVoiceChat';
 import { useRecoilValue } from 'recoil';
 import {
@@ -13,6 +13,7 @@ import { connectSocket } from '../../utils/socket';
 import { STORE_KEY } from '../../../const';
 import electronStore from '../../@store/electron';
 import { Socket } from 'socket.io-client';
+import SummonerLeagueVoiceBlock from '../SummonerLeagueVoiceBlock';
 
 function VoiceRoomModal() {
   const gameStatus = useRecoilValue(gameStatusState);
@@ -21,7 +22,8 @@ function VoiceRoomModal() {
   const myTeamSummoners = useRecoilValue(myTeamSummonersState);
   const enemySummoners = useRecoilValue(enemySummonersState);
 
-  const [managementSocket, setManagementSocket] = useState<Socket | null>(null);
+  const [teamManagementSocket, setTeamManagementSocket] = useState<Socket | null>(null);
+  const [leagueManagementSocket, setLeagueManagementSocket] = useState<Socket | null>(null);
 
   const { onTeamVoiceRoom, onLeagueVoiceRoom } = useVoiceChat();
 
@@ -31,33 +33,79 @@ function VoiceRoomModal() {
     electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
       const socket = connectSocket('/team-voice-chat/manage');
       socket.emit('team-manage-join-room', roomName);
-      setManagementSocket(socket);
+      setTeamManagementSocket(socket);
     });
   }, []);
 
   useEffect(() => {
-    gameStatus === 'loading' && onLeagueVoiceRoom();
+    if (gameStatus === 'loading') {
+      onLeagueVoiceRoom();
+
+      electronStore.get(STORE_KEY.LEAGUE_VOICE_ROOM_NAME).then((roomName) => {
+        const socket = connectSocket('/league-voice-chat/manage');
+        socket.emit('league-manage-join-room', roomName);
+        setLeagueManagementSocket(socket);
+      });
+    }
   }, [gameStatus]);
 
   return (
     <S.Background>
-      {managementSocket && (
+      {gameStatus !== 'loading' ? (
         <>
-          {summoner && (
-            <SummonerVoiceBlock
-              isMine={true}
-              summoner={summoner}
-              managementSocket={managementSocket}
-            />
+          {teamManagementSocket && (
+            <>
+              {summoner && (
+                <SummonerVoiceBlock
+                  isMine={true}
+                  summoner={summoner}
+                  managementSocket={teamManagementSocket}
+                />
+              )}
+              {myTeamSummoners?.map((summoner) => (
+                <SummonerVoiceBlock
+                  isMine={false}
+                  summoner={summoner}
+                  managementSocket={teamManagementSocket}
+                />
+              ))}
+            </>
           )}
+        </>
+      ) : (
+        <>
+          {leagueManagementSocket && (
+            <S.LeagueBlockBundle>
+              {/* 적팀 소환사 */}
+              <S.TeamBlocks isMyTeam={false}>
+                {enemySummoners?.map((summoner) => (
+                  <SummonerLeagueVoiceBlock
+                    isMine={false}
+                    summoner={summoner}
+                    managementSocket={leagueManagementSocket}
+                  />
+                ))}
+              </S.TeamBlocks>
 
-          {myTeamSummoners?.map((summoner) => (
-            <SummonerVoiceBlock
-              isMine={false}
-              summoner={summoner}
-              managementSocket={managementSocket}
-            />
-          ))}
+              {/* 우리팀 소환사 */}
+              <S.TeamBlocks isMyTeam={true}>
+                {summoner && (
+                  <SummonerLeagueVoiceBlock
+                    isMine={true}
+                    summoner={summoner}
+                    managementSocket={leagueManagementSocket}
+                  />
+                )}
+                {myTeamSummoners?.map((summoner) => (
+                  <SummonerLeagueVoiceBlock
+                    isMine={false}
+                    summoner={summoner}
+                    managementSocket={leagueManagementSocket}
+                  />
+                ))}
+              </S.TeamBlocks>
+            </S.LeagueBlockBundle>
+          )}
         </>
       )}
     </S.Background>

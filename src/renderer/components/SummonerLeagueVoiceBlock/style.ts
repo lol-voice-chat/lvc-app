@@ -9,13 +9,22 @@ export const SummonerBlock = styled.div`
   position: relative;
 
   width: 230px;
-  height: 550px;
+  height: 210px;
 
-  margin: 40px 10px 0 10px;
+  margin: 0 10px 0 10px;
   border-radius: 10px;
 
   background-color: ${PALETTE.BLACK_1};
   box-shadow: 0 5px 18px -7px rgba(0, 0, 0, 0.2);
+
+  transition: height 0.2s ease-in-out;
+
+  &:hover {
+    &,
+    #summoner-info {
+      height: 400px;
+    }
+  }
 `;
 
 export const ProfileImg = styled.img<{ visualize: boolean }>`
@@ -31,6 +40,18 @@ export const ProfileImg = styled.img<{ visualize: boolean }>`
   transition: border-color 0.1s;
 
   box-shadow: 0 5px 18px -7px rgba(0, 0, 0, 0.3);
+`;
+
+export const SummonerInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 100%;
+  height: 200px;
+
+  overflow: hidden;
+  transition: height 0.2s ease-in-out;
 `;
 
 export const NameTag = styled.div`
@@ -85,8 +106,6 @@ export const SoundBox = styled.div`
 
   width: 100%;
 
-  border-bottom: 1px solid #484b52;
-
   #mic-button {
     width: 30px;
     height: 30px;
@@ -111,85 +130,22 @@ export const SoundBox = styled.div`
   }
 `;
 
-export const AverageGameData = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  width: 100%;
-
-  margin: 12px 0 20px 0;
-
-  #name {
-    font-size: 16px;
-    color: ${PALETTE.GRAY_1};
-    margin-bottom: 15px;
-  }
-
-  div {
-    display: flex;
-    justify-content: space-between;
-
-    width: 80%;
-
-    margin: 3.5px 0;
-
-    p {
-      font-size: 15px;
-      color: ${PALETTE.GRAY_1};
-    }
-    #value {
-      color: ${PALETTE.WHITE_1};
-    }
-  }
-`;
-
-export const GameRecord = styled.div`
-  display: flex;
-  flex-direction: column;
-
-  width: 80%;
-
-  #warning-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    img {
-      width: 27%;
-      height: auto;
-      margin: 17px;
-    }
-    p {
-      font-size: 16.5px;
-      color: ${PALETTE.GRAY_1};
-    }
-  }
-`;
-
-export const WinningPercentage = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-export const Text = styled.div`
+export const WinningPercentage = styled.div<{ odds: number }>`
   display: flex;
   justify-content: space-between;
+  align-items: center;
 
-  p {
-    font-size: 17px;
-    color: ${PALETTE.GRAY_1};
-  }
+  width: 85%;
 
-  #value {
-    color: ${PALETTE.RED};
+  #odds {
+    font-size: 13px;
+    color: ${({ odds }) => (odds < 50 ? PALETTE.RED : PALETTE.WHITE_1)};
   }
 `;
 
 export const ProgressBar = styled.div`
   position: relative;
-
-  margin: 10px 0;
+  width: 80%;
 
   progress {
     appearance: none;
@@ -257,5 +213,22 @@ export const KDAList = styled.div`
 
     height: 25px;
     width: 25px;
+  }
+`;
+
+export const AverageKDA = styled.div`
+  display: flex;
+  justify-content: space-between;
+
+  width: 80%;
+
+  margin: 15px 0;
+
+  p {
+    font-size: 15px;
+    color: ${PALETTE.GRAY_1};
+  }
+  #value {
+    color: ${PALETTE.WHITE_1};
   }
 `;
