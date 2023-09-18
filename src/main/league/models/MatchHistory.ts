@@ -158,11 +158,13 @@ export class MatchHistory {
         }
       });
 
-    return `
+    const kda: string = `
       ${this.getAverage(champKill, champCount)}/
       ${this.getAverage(champDeath, champCount)}/
       ${this.getAverage(champAssists, champCount)}
       `;
+
+    return kda;
   }
 
   private getAverage(champInfo: number, champCount: number) {

@@ -59,7 +59,6 @@ export class LeagueHandler {
     this.ws.subscribe(LCU_ENDPOINT.GAMEFLOW_URL, async (data) => {
       if (this.isGameLoadingPhase(data) && !isStartedGameLoading) {
         const { teamOne, teamTwo } = data.gameData;
-
         this.joinLeagueVoice(teamOne, teamTwo);
         isStartedGameLoading = true;
       }
@@ -92,7 +91,6 @@ export class LeagueHandler {
     if (this.isGameLoadingPhase(gameflow)) {
       const { teamOne, teamTwo } = gameflow.gameData;
       this.joinLeagueVoice(teamOne, teamTwo);
-
       isStartedGameLoading = true;
       return;
     }
@@ -152,10 +150,9 @@ export class LeagueHandler {
       (summoner: any) => summoner.summonerId === this.summoner.summonerId
     );
     const myTeam = foundSummoner ? teamOne : teamTwo;
-    const enemyTeam = foundSummoner ? teamTwo : teamOne;
 
-    let enemySummonerDataList = [];
-    enemyTeam.forEach((summoner: any) => {
+    let summonerDataList: { summonerId: any; championIcon: string; kda: string }[] = [];
+    teamOne.forEach((summoner: any) => {
       const matchHistoryUrl = `/lol-match-history/v1/products/lol/${summoner.puuid}/matches?begIndex=0&endIndex=100`;
       league(matchHistoryUrl).then((matchHistoryJson) => {
         const matchHistory: MatchHistory = plainToInstance(MatchHistory, matchHistoryJson);
@@ -166,13 +163,28 @@ export class LeagueHandler {
           kda: championKda,
         };
 
-        enemySummonerDataList.push(summonerData);
+        summonerDataList.push(summonerData);
+      });
+    });
+
+    teamTwo.forEach((summoner: any) => {
+      const matchHistoryUrl = `/lol-match-history/v1/products/lol/${summoner.puuid}/matches?begIndex=0&endIndex=100`;
+      league(matchHistoryUrl).then((matchHistoryJson) => {
+        const matchHistory: MatchHistory = plainToInstance(MatchHistory, matchHistoryJson);
+        const championKda: string = matchHistory.getChampionKda(summoner.championId);
+        const summonerData = {
+          summonerId: summoner.summonerId,
+          championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${summoner.championId}/tile`,
+          kda: championKda,
+        };
+
+        summonerDataList.push(summonerData);
       });
     });
 
     this.joinTeamVoice(myTeam);
 
     const teamName: string = voiceRoomNameGenerator(myTeam);
-    this.webContents.send(IPC_KEY.LEAGUE_JOIN_ROOM, { roomName, teamName });
+    this.webContents.send(IPC_KEY.LEAGUE_JOIN_ROOM, { roomName, teamName, summonerDataList });
   }
 }
