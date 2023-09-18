@@ -6,6 +6,7 @@ import league from '../utils/league';
 import { LCU_ENDPOINT } from '../constants';
 import { voiceRoomNameGenerator } from '../utils/voiceRoomNameGenerator';
 import { IPC_KEY } from '../../const';
+import { plainToInstance } from 'class-transformer';
 
 let isJoinedRoom = false;
 let isStartedGameLoading = false;
@@ -151,6 +152,24 @@ export class LeagueHandler {
       (summoner: any) => summoner.summonerId === this.summoner.summonerId
     );
     const myTeam = foundSummoner ? teamOne : teamTwo;
+    const enemyTeam = foundSummoner ? teamTwo : teamOne;
+
+    let enemySummonerDataList = [];
+    enemyTeam.forEach((summoner: any) => {
+      const matchHistoryUrl = `/lol-match-history/v1/products/lol/${summoner.puuid}/matches?begIndex=0&endIndex=100`;
+      league(matchHistoryUrl).then((matchHistoryJson) => {
+        const matchHistory: MatchHistory = plainToInstance(MatchHistory, matchHistoryJson);
+        const championKda: string = matchHistory.getChampionKda(summoner.championId);
+        const summonerData = {
+          summonerId: summoner.summonerId,
+          championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${summoner.championId}/tile`,
+          kda: championKda,
+        };
+
+        enemySummonerDataList.push(summonerData);
+      });
+    });
+
     this.joinTeamVoice(myTeam);
 
     const teamName: string = voiceRoomNameGenerator(myTeam);
