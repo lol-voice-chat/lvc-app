@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { SummonerType } from '../../@type/summoner';
 import { useRecoilState, useSetRecoilState } from 'recoil';
-import { summonerState, gameStatusState, enemyInfoListState } from '../../@store/atom';
+import { summonerState, gameStatusState, summonerInfoListState } from '../../@store/atom';
 import { IPC_KEY, STORE_KEY } from '../../../const';
 import electronStore from '../../@store/electron';
 import VoiceRoomModal from '../VoiceRoomModal';
@@ -11,7 +11,7 @@ const { ipcRenderer } = window.require('electron');
 function Navigator() {
   const [gameStatus, setGameStatus] = useRecoilState(gameStatusState);
   const setSummoner = useSetRecoilState(summonerState);
-  const setEnemyInfoList = useSetRecoilState(enemyInfoListState);
+  const setSummonerInfoList = useSetRecoilState(summonerInfoListState);
 
   useEffect(() => {
     ipcRenderer.once('on-league-client', (_, summoner: SummonerType) => {
@@ -23,18 +23,15 @@ function Navigator() {
       electronStore.set(STORE_KEY.TEAM_VOICE_ROOM_NAME, roomName);
     });
 
-    ipcRenderer.once(
-      IPC_KEY.LEAGUE_JOIN_ROOM,
-      (_, { roomName, teamName, enemySummonerDataList }) => {
-        electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((teamVoiceRoomName) => {
-          if (teamVoiceRoomName === roomName) return;
+    ipcRenderer.once(IPC_KEY.LEAGUE_JOIN_ROOM, (_, { roomName, teamName, summonerDataList }) => {
+      electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((teamVoiceRoomName) => {
+        if (teamVoiceRoomName === roomName) return;
 
-          setGameStatus('loading');
-          setEnemyInfoList(enemySummonerDataList);
-          electronStore.set(STORE_KEY.LEAGUE_VOICE_ROOM_NAME, { roomName, teamName });
-        });
-      }
-    );
+        setGameStatus('loading');
+        setSummonerInfoList(summonerDataList);
+        electronStore.set(STORE_KEY.LEAGUE_VOICE_ROOM_NAME, { roomName, teamName });
+      });
+    });
   }, []);
 
   return <>{gameStatus !== 'none' && <VoiceRoomModal />}</>;

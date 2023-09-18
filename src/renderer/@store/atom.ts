@@ -28,8 +28,9 @@ export const enemySummonersState = atom<SummonerType[] | null>({
   default: null,
 });
 
-export type enemyInfoType = { summonerId: number; championIcon: string; kda: string };
-export const enemyInfoListState = atom<enemyInfoType[] | null>({
-  key: 'enemyInfoList',
+export type SummonerInfoType = { summonerId: number; championIcon: string; kda: string };
+
+export const summonerInfoListState = atom<SummonerInfoType[] | null>({
+  key: 'summonerInfoList',
   default: null,
 });
