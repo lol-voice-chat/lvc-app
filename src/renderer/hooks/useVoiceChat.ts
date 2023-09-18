@@ -155,6 +155,7 @@ function useVoiceChat() {
           });
 
           const newSummonerAudio = getSummonerSpeaker(summonerId);
+          console.log(newSummonerAudio);
           newSummonerAudio.srcObject = new MediaStream([consumer.track]);
 
           socket.emit('consumer-resume', { remoteProducerId });

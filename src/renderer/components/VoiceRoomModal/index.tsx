@@ -79,7 +79,6 @@ function VoiceRoomModal() {
               <S.TeamBlocks isMyTeam={false}>
                 {enemySummoners?.map((enemy) => (
                   <SummonerLeagueVoiceBlock
-                    key={enemy.summonerId}
                     isMine={false}
                     summoner={enemy}
                     managementSocket={leagueManagementSocket}
@@ -97,7 +96,6 @@ function VoiceRoomModal() {
                 )}
                 {myTeamSummoners?.map((myTeam) => (
                   <SummonerLeagueVoiceBlock
-                    key={myTeam.summonerId}
                     isMine={false}
                     summoner={myTeam}
                     managementSocket={leagueManagementSocket}
