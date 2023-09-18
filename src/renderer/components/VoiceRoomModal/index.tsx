@@ -78,10 +78,10 @@ function VoiceRoomModal() {
             <S.LeagueBlockBundle>
               {/* 적팀 소환사 */}
               <S.TeamBlocks isMyTeam={false}>
-                {enemySummoners?.map((summoner) => (
+                {enemySummoners?.map((enemy) => (
                   <SummonerLeagueVoiceBlock
                     isMine={false}
-                    summoner={summoner}
+                    summoner={enemy}
                     managementSocket={leagueManagementSocket}
                   />
                 ))}
@@ -96,10 +96,10 @@ function VoiceRoomModal() {
                     managementSocket={leagueManagementSocket}
                   />
                 )}
-                {myTeamSummoners?.map((summoner) => (
+                {myTeamSummoners?.map((myTeam) => (
                   <SummonerLeagueVoiceBlock
                     isMine={false}
-                    summoner={summoner}
+                    summoner={myTeam}
                     managementSocket={leagueManagementSocket}
                   />
                 ))}
