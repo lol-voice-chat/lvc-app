@@ -141,6 +141,7 @@ function SummonerLeagueVoiceBlock(props: {
           <p>KDA</p>
           <p id="value">{summonerInfo?.kda}</p>
         </S.AverageKDA>
+
         <S.KDAList>
           {props.summoner.summonerStats.statsList.map((summonerStats, idx) => (
             <div key={idx} style={{ backgroundColor: summonerStats.isWin ? '#2C334A' : '#50383B' }}>
