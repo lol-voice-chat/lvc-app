@@ -158,6 +158,7 @@ export class LeagueHandler {
     );
     const myTeam = foundSummoner ? teamOne : teamTwo;
 
+    let summonerDataList: { summonerId: any; championIcon: string; kda: string }[] = [];
     const myTeamSummonerDataList = teamOne.map(async (summoner: any) => {
       const matchHistoryUrl = `/lol-match-history/v1/products/lol/${summoner.puuid}/matches?begIndex=0&endIndex=100`;
       const matchHistoryJson = await league(matchHistoryUrl);
@@ -168,6 +169,7 @@ export class LeagueHandler {
         championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${summoner.championId}/tile`,
         kda: championKda,
       };
+      summonerDataList.push(summonerData);
 
       return summonerData;
     });
@@ -182,14 +184,13 @@ export class LeagueHandler {
         championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${summoner.championId}/tile`,
         kda: championKda,
       };
+      summonerDataList.push(summonerData);
 
       return summonerData;
     });
 
-    const [myTeamSummoners, enemyTeamSummoners] = await Promise.all([
-      myTeamSummonerDataList,
-      enemyTeamSummonerDataList,
-    ]);
+    await Promise.all([myTeamSummonerDataList, enemyTeamSummonerDataList]);
+    console.log(summonerDataList);
 
     this.joinTeamVoice(myTeam);
 
@@ -197,7 +198,7 @@ export class LeagueHandler {
     this.webContents.send(IPC_KEY.LEAGUE_JOIN_ROOM, {
       roomName,
       teamName,
-      summonerDataList: myTeamSummoners.concat(enemyTeamSummoners),
+      summonerDataList,
     });
   }
 }
