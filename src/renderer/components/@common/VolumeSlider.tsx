@@ -19,7 +19,6 @@ function VolumeSlider(props: VolumeSliderPropsType) {
         step={0.02}
         value={props.volume}
         onChange={(event) => {
-          console.log(event.target.valueAsNumber);
           props.handleChangeVolume(event.target.valueAsNumber);
         }}
       />
