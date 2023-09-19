@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 import { FONT, PALETTE } from '../../const';
 
+export const LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH = '2000px';
+
 export const SummonerBlock = styled.div`
   display: flex;
   flex-direction: column;
@@ -11,7 +13,7 @@ export const SummonerBlock = styled.div`
   width: 230px;
   height: 210px;
 
-  margin: 0 10px 0 10px;
+  margin: 0 1vw;
   border-radius: 10px;
 
   background-color: ${PALETTE.BLACK_1};
@@ -23,6 +25,18 @@ export const SummonerBlock = styled.div`
     &,
     #summoner-info {
       height: 400px;
+    }
+  }
+
+  @media (min-width: ${LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    width: 300px;
+    height: 280px;
+    border-radius: 15px;
+    &:hover {
+      &,
+      #summoner-info {
+        height: 525px;
+      }
     }
   }
 `;
@@ -40,6 +54,13 @@ export const ProfileImg = styled.img<{ visualize: boolean }>`
   transition: border-color 0.1s;
 
   box-shadow: 0 5px 18px -7px rgba(0, 0, 0, 0.3);
+
+  @media (min-width: ${LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    top: -55px;
+    width: 110px;
+    height: 110px;
+    border: 5.5px solid ${({ visualize }) => (visualize ? '#50a361' : 'transparent')};
+  }
 `;
 
 export const SummonerInfo = styled.div`
@@ -52,27 +73,38 @@ export const SummonerInfo = styled.div`
 
   overflow: hidden;
   transition: height 0.2s ease-in-out;
+
+  @media (min-width: ${LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    height: 270px;
+  }
 `;
 
-export const NameTag = styled.div<{ size: string }>`
+export const NameTag = styled.div<{ length: number }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
 
   width: 75%;
-
   padding-top: 24.5%;
 
   #displayName {
-    font-size: ${({ size }) => size};
+    font-size: ${({ length }) => (length < 8 ? '16px' : '13px')};
     color: ${PALETTE.WHITE_1};
+  }
+
+  @media (min-width: ${LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    padding-top: 27.5%;
+
+    #displayName {
+      width: 60%;
+      font-size: ${({ length }) => (length < 8 ? '20px' : '13px')};
+    }
   }
 `;
 
 export const TitleTag = styled.div`
   display: flex;
   align-items: center;
-
   cursor: pointer;
 
   #titleName {
@@ -95,6 +127,18 @@ export const TitleTag = styled.div`
 
     font-size: 10.5px;
     color: ${PALETTE.GRAY_2};
+  }
+
+  @media (min-width: ${LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    #titleName {
+      font-size: 18px;
+    }
+    #questionCircle {
+      padding: 0.5px 5px;
+      margin-left: 8px;
+      border: 1.5px solid ${PALETTE.GRAY_2};
+      font-size: 13.5px;
+    }
   }
 `;
 
@@ -128,6 +172,24 @@ export const SoundBox = styled.div`
       width: 75%;
     }
   }
+
+  @media (min-width: ${LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    #mic-button {
+      width: 40px;
+      height: 40px;
+      margin: 0 0 16px 0;
+      cursor: pointer;
+    }
+    #speaker-ctrl {
+      margin: 0 0 16px 0;
+
+      #speaker-button {
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+      }
+    }
+  }
 `;
 
 export const WinningPercentage = styled.div<{ odds: number }>`
@@ -140,6 +202,12 @@ export const WinningPercentage = styled.div<{ odds: number }>`
   #odds {
     font-size: 13px;
     color: ${({ odds }) => (odds < 50 ? PALETTE.RED : PALETTE.WHITE_1)};
+  }
+
+  @media (min-width: ${LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    #odds {
+      font-size: 16px;
+    }
   }
 `;
 
@@ -178,6 +246,29 @@ export const ProgressBar = styled.div`
   #fail {
     right: 6px;
   }
+
+  @media (min-width: ${LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    margin: 15px 0;
+
+    progress {
+      height: 23px;
+    }
+    &::-webkit-progress-bar {
+      border-radius: 4px;
+    }
+    &::-webkit-progress-value {
+      border-radius: 4px 0 0 4px;
+    }
+    p {
+      font-size: 14px;
+    }
+    #win {
+      left: 8px;
+    }
+    #fail {
+      right: 8px;
+    }
+  }
 `;
 
 export const KDAList = styled.div`
@@ -214,6 +305,25 @@ export const KDAList = styled.div`
     height: 25px;
     width: 25px;
   }
+
+  @media (min-width: ${LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    grid-template-columns: repeat(2, 105px);
+    grid-template-rows: repeat(5, 30px);
+    column-gap: 45px;
+    row-gap: 10px;
+
+    div {
+      width: 105px;
+      height: 30px;
+    }
+    p {
+      font-size: 15px;
+    }
+    img {
+      height: 30px;
+      width: 30px;
+    }
+  }
 `;
 
 export const AverageKDA = styled.div`
@@ -221,7 +331,6 @@ export const AverageKDA = styled.div`
   justify-content: space-between;
 
   width: 80%;
-
   margin: 15px 0;
 
   p {
@@ -230,5 +339,12 @@ export const AverageKDA = styled.div`
   }
   #value {
     color: ${PALETTE.WHITE_1};
+  }
+
+  @media (min-width: ${LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    width: 255px;
+    p {
+      font-size: 17px;
+    }
   }
 `;

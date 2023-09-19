@@ -29,7 +29,6 @@ function Navigator() {
 
         setGameStatus('loading');
         setSummonerInfoList(summonerDataList);
-        console.log(summonerDataList);
         electronStore.set(STORE_KEY.LEAGUE_VOICE_ROOM_NAME, { roomName, teamName });
       });
     });
