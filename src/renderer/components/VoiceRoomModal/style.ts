@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { PALETTE } from '../../const';
+import { LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH } from '../SummonerLeagueVoiceBlock/style';
 
 export const Background = styled.div`
   display: flex;
@@ -18,10 +19,13 @@ export const LeagueBlockBundle = styled.div`
   align-items: center;
   justify-content: space-between;
 
-  width: 1250px;
   height: 670px;
-
   margin-top: 45px;
+
+  @media (min-width: ${LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    height: 900px;
+    margin-top: 25px;
+  }
 `;
 
 export const TeamBlocks = styled.div<{ isMyTeam: boolean }>`

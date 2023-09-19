@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { FONT, PALETTE } from '../../const';
 
-export const SUMMONER_BLOCK_RESPONSIVE_WIDTH = '2000px';
+const SUMMONER_BLOCK_RESPONSIVE_WIDTH = '2000px';
 
 export const SummonerBlock = styled.div`
   display: flex;
@@ -54,7 +54,6 @@ export const NameTag = styled.div<{ length: number }>`
   align-items: center;
 
   width: 75%;
-
   padding-top: 24.5%;
 
   #displayName {
@@ -65,7 +64,6 @@ export const NameTag = styled.div<{ length: number }>`
   @media (min-width: ${SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
     #displayName {
       width: 60%;
-
       font-size: ${({ length }) => (length < 8 ? '20px' : '13px')};
     }
   }
@@ -118,7 +116,6 @@ export const SoundBox = styled.div`
   align-items: center;
 
   width: 100%;
-
   border-bottom: 1px solid #484b52;
 
   #mic-button {

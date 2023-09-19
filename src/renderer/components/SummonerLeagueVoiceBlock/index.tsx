@@ -33,8 +33,6 @@ function SummonerLeagueVoiceBlock(props: {
       });
     }
 
-    console.log(summonerInfoList);
-
     summonerInfoList?.map((summonerInfo) => {
       if (props.summoner.summonerId === summonerInfo.summonerId) {
         console.log(summonerInfo);
@@ -91,7 +89,7 @@ function SummonerLeagueVoiceBlock(props: {
       />
 
       <S.SummonerInfo id="summoner-info">
-        <S.NameTag size={props.summoner.displayName.length < 8 ? '16px' : '13px'}>
+        <S.NameTag length={props.summoner.displayName.length}>
           <p id="displayName">{props.summoner.displayName}</p>
           <RankBadge size={'medium'} tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
         </S.NameTag>
