@@ -30,6 +30,13 @@ export class LeagueHandler {
     this.ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, async (data) => {
       if (data.timer.phase === 'BAN_PICK' && !isJoinedRoom) {
         this.joinTeamVoice(data.myTeam);
+
+        /*
+        랜덤 5개중에 첫번째걸 뽑아서
+
+        
+        */
+
         isJoinedRoom = true;
       }
 
@@ -59,7 +66,7 @@ export class LeagueHandler {
     this.ws.subscribe(LCU_ENDPOINT.GAMEFLOW_URL, async (data) => {
       if (this.isGameLoadingPhase(data) && !isStartedGameLoading) {
         const { teamOne, teamTwo } = data.gameData;
-        this.joinLeagueVoice(teamOne, teamTwo);
+        await this.joinLeagueVoice(teamOne, teamTwo);
         isStartedGameLoading = true;
       }
 
@@ -90,7 +97,7 @@ export class LeagueHandler {
 
     if (this.isGameLoadingPhase(gameflow)) {
       const { teamOne, teamTwo } = gameflow.gameData;
-      this.joinLeagueVoice(teamOne, teamTwo);
+      await this.joinLeagueVoice(teamOne, teamTwo);
       isStartedGameLoading = true;
       return;
     }
@@ -141,7 +148,7 @@ export class LeagueHandler {
     this.webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName });
   }
 
-  private joinLeagueVoice(teamOne: [], teamTwo: []) {
+  private async joinLeagueVoice(teamOne: [], teamTwo: []) {
     const teamOneVoiceRoomName: string = voiceRoomNameGenerator(teamOne);
     const teamTwoVoiceRoomName: string = voiceRoomNameGenerator(teamTwo);
     const roomName = teamOneVoiceRoomName + teamTwoVoiceRoomName;
@@ -151,40 +158,46 @@ export class LeagueHandler {
     );
     const myTeam = foundSummoner ? teamOne : teamTwo;
 
-    let summonerDataList: { summonerId: any; championIcon: string; kda: string }[] = [];
-    teamOne.forEach((summoner: any) => {
+    const myTeamSummonerDataList = teamOne.map(async (summoner: any) => {
       const matchHistoryUrl = `/lol-match-history/v1/products/lol/${summoner.puuid}/matches?begIndex=0&endIndex=100`;
-      league(matchHistoryUrl).then((matchHistoryJson) => {
-        const matchHistory: MatchHistory = plainToInstance(MatchHistory, matchHistoryJson);
-        const championKda: string = matchHistory.getChampionKda(summoner.championId);
-        const summonerData = {
-          summonerId: summoner.summonerId,
-          championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${summoner.championId}/tile`,
-          kda: championKda,
-        };
+      const matchHistoryJson = await league(matchHistoryUrl);
+      const matchHistory: MatchHistory = plainToInstance(MatchHistory, matchHistoryJson);
+      const championKda: string = matchHistory.getChampionKda(summoner.championId);
+      const summonerData = {
+        summonerId: summoner.summonerId,
+        championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${summoner.championId}/tile`,
+        kda: championKda,
+      };
 
-        summonerDataList.push(summonerData);
-      });
+      return summonerData;
     });
 
-    teamTwo.forEach((summoner: any) => {
+    const enemyTeamSummonerDataList = teamTwo.map(async (summoner: any) => {
       const matchHistoryUrl = `/lol-match-history/v1/products/lol/${summoner.puuid}/matches?begIndex=0&endIndex=100`;
-      league(matchHistoryUrl).then((matchHistoryJson) => {
-        const matchHistory: MatchHistory = plainToInstance(MatchHistory, matchHistoryJson);
-        const championKda: string = matchHistory.getChampionKda(summoner.championId);
-        const summonerData = {
-          summonerId: summoner.summonerId,
-          championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${summoner.championId}/tile`,
-          kda: championKda,
-        };
+      const matchHistoryJson = await league(matchHistoryUrl);
+      const matchHistory: MatchHistory = plainToInstance(MatchHistory, matchHistoryJson);
+      const championKda: string = matchHistory.getChampionKda(summoner.championId);
+      const summonerData = {
+        summonerId: summoner.summonerId,
+        championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${summoner.championId}/tile`,
+        kda: championKda,
+      };
 
-        summonerDataList.push(summonerData);
-      });
+      return summonerData;
     });
+
+    const [myTeamSummoners, enemyTeamSummoners] = await Promise.all([
+      myTeamSummonerDataList,
+      enemyTeamSummonerDataList,
+    ]);
 
     this.joinTeamVoice(myTeam);
 
     const teamName: string = voiceRoomNameGenerator(myTeam);
-    this.webContents.send(IPC_KEY.LEAGUE_JOIN_ROOM, { roomName, teamName, summonerDataList });
+    this.webContents.send(IPC_KEY.LEAGUE_JOIN_ROOM, {
+      roomName,
+      teamName,
+      summonerDataList: myTeamSummoners.concat(enemyTeamSummoners),
+    });
   }
 }
