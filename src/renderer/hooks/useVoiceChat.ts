@@ -1,7 +1,9 @@
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
+  LeagueTitleType,
   enemySummonersState,
   gameStatusState,
+  leagueTitleListState,
   myTeamSummonersState,
   summonerState,
   userStreamState,
@@ -21,9 +23,11 @@ const { ipcRenderer } = window.require('electron');
 function useVoiceChat() {
   const setGameStatus = useSetRecoilState(gameStatusState);
   const [userStream, setUserStream] = useRecoilState(userStreamState);
+
   const summoner = useRecoilValue(summonerState);
   const [myTeamSummoners, setMyTeamSummoners] = useRecoilState(myTeamSummonersState);
   const [enemySummoners, setEnemySummoners] = useRecoilState(enemySummonersState);
+  const setLeagueTitleList = useSetRecoilState(leagueTitleListState);
 
   const connectVoiceChat = (
     isTeamVoiceChat: Boolean,
@@ -85,14 +89,12 @@ function useVoiceChat() {
     };
 
     socket.on('new-producer', ({ id, summoner }) => {
-      console.log(summoner);
       signalNewConsumerTransport(id, summoner);
     });
 
     const getProducers = () => {
       socket.emit('get-producers', (producers) => {
         producers.forEach(({ id, summoner }) => {
-          console.log(summoner);
           signalNewConsumerTransport(id, summoner);
         });
       });
@@ -173,18 +175,27 @@ function useVoiceChat() {
     electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
       getUserAudioStream().then((stream) => {
         if (stream) {
-          socket.emit('team-join-room', { roomName, summoner }, ({ rtpCapabilities }) => {
-            connectVoiceChat(
-              true,
-              socket,
-              device,
-              stream,
-              rtpCapabilities,
-              producerTransport,
-              consumerTransportList
-            );
-          });
           setUserStream(stream);
+          socket.emit(
+            'team-join-room',
+            { roomName, summoner },
+            ({ rtpCapabilities, leagueTitleList }) => {
+              ipcRenderer.send('league-title', leagueTitleList);
+              ipcRenderer.once('league-title', (_, leagueTitleList: LeagueTitleType[]) => {
+                console.log(leagueTitleList);
+                setLeagueTitleList(leagueTitleList);
+                connectVoiceChat(
+                  true,
+                  socket,
+                  device,
+                  stream,
+                  rtpCapabilities,
+                  producerTransport,
+                  consumerTransportList
+                );
+              });
+            }
+          );
         }
       });
     });

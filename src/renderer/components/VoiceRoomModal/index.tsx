@@ -57,7 +57,7 @@ function VoiceRoomModal() {
             <>
               {summoner && (
                 <SummonerVoiceBlock
-                  isMine={true}
+                  isMine={false}
                   summoner={summoner}
                   managementSocket={teamManagementSocket}
                 />
@@ -94,13 +94,6 @@ function VoiceRoomModal() {
                     managementSocket={leagueManagementSocket}
                   />
                 )}
-                {myTeamSummoners?.map((myTeam) => (
-                  <SummonerLeagueVoiceBlock
-                    isMine={false}
-                    summoner={myTeam}
-                    managementSocket={leagueManagementSocket}
-                  />
-                ))}
               </S.TeamBlocks>
             </S.LeagueBlockBundle>
           )}

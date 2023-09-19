@@ -248,7 +248,7 @@ export const ProgressBar = styled.div`
   }
 
   @media (min-width: ${LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
-    margin: 15px 0;
+    margin: 10px 0;
 
     progress {
       height: 23px;
@@ -307,13 +307,13 @@ export const KDAList = styled.div`
   }
 
   @media (min-width: ${LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
-    grid-template-columns: repeat(2, 105px);
+    grid-template-columns: repeat(2, 115px);
     grid-template-rows: repeat(5, 30px);
-    column-gap: 45px;
+    column-gap: 25px;
     row-gap: 10px;
 
     div {
-      width: 105px;
+      width: 115px;
       height: 30px;
     }
     p {
@@ -342,9 +342,10 @@ export const AverageKDA = styled.div`
   }
 
   @media (min-width: ${LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    margin: 15px 0;
     width: 255px;
     p {
-      font-size: 17px;
+      font-size: 18px;
     }
   }
 `;
