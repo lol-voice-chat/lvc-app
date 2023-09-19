@@ -7,6 +7,7 @@ import { LCU_ENDPOINT } from '../constants';
 import { voiceRoomNameGenerator } from '../utils/voiceRoomNameGenerator';
 import { IPC_KEY } from '../../const';
 import { plainToInstance } from 'class-transformer';
+import { pickLeagueTitle } from './league-title';
 
 let isJoinedRoom = false;
 let isStartedGameLoading = false;
@@ -30,15 +31,10 @@ export class LeagueHandler {
     this.ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, async (data) => {
       if (data.timer.phase === 'BAN_PICK' && !isJoinedRoom) {
         this.joinTeamVoice(data.myTeam);
-
-        /*
-        랜덤 5개중에 첫번째걸 뽑아서
-
-        
-        */
-
         isJoinedRoom = true;
       }
+
+      pickLeagueTitle(data.myTeam);
 
       if (data.timer.phase === 'BAN_PICK') {
         const { championId } = data.myTeam.find(
@@ -143,12 +139,12 @@ export class LeagueHandler {
     return data.phase === 'None' && data.gameClient.visible && isStartedInGame;
   }
 
-  private joinTeamVoice(team: []) {
+  private joinTeamVoice(team: any[]) {
     const roomName: string = voiceRoomNameGenerator(team);
     this.webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName });
   }
 
-  private async joinLeagueVoice(teamOne: [], teamTwo: []) {
+  private async joinLeagueVoice(teamOne: any[], teamTwo: any[]) {
     const teamOneVoiceRoomName: string = voiceRoomNameGenerator(teamOne);
     const teamTwoVoiceRoomName: string = voiceRoomNameGenerator(teamTwo);
     const roomName = teamOneVoiceRoomName + teamTwoVoiceRoomName;
@@ -158,8 +154,9 @@ export class LeagueHandler {
     );
     const myTeam = foundSummoner ? teamOne : teamTwo;
 
-    let summonerDataList: { summonerId: any; championIcon: string; kda: string }[] = [];
-    const myTeamSummonerDataList = teamOne.map(async (summoner: any) => {
+    let summonerDataList: any[] = [];
+
+    for (const summoner of teamOne) {
       const matchHistoryUrl = `/lol-match-history/v1/products/lol/${summoner.puuid}/matches?begIndex=0&endIndex=100`;
       const matchHistoryJson = await league(matchHistoryUrl);
       const matchHistory: MatchHistory = plainToInstance(MatchHistory, matchHistoryJson);
@@ -170,11 +167,9 @@ export class LeagueHandler {
         kda: championKda,
       };
       summonerDataList.push(summonerData);
+    }
 
-      return summonerData;
-    });
-
-    const enemyTeamSummonerDataList = teamTwo.map(async (summoner: any) => {
+    for (const summoner of teamTwo) {
       const matchHistoryUrl = `/lol-match-history/v1/products/lol/${summoner.puuid}/matches?begIndex=0&endIndex=100`;
       const matchHistoryJson = await league(matchHistoryUrl);
       const matchHistory: MatchHistory = plainToInstance(MatchHistory, matchHistoryJson);
@@ -185,11 +180,8 @@ export class LeagueHandler {
         kda: championKda,
       };
       summonerDataList.push(summonerData);
+    }
 
-      return summonerData;
-    });
-
-    await Promise.all([myTeamSummonerDataList, enemyTeamSummonerDataList]);
     console.log(summonerDataList);
 
     this.joinTeamVoice(myTeam);
