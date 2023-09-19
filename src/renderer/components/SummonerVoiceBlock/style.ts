@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 import { FONT, PALETTE } from '../../const';
 
+export const SUMMONER_BLOCK_RESPONSIVE_WIDTH = '2000px';
+
 export const SummonerBlock = styled.div`
   display: flex;
   flex-direction: column;
@@ -11,11 +13,17 @@ export const SummonerBlock = styled.div`
   width: 230px;
   height: 550px;
 
-  margin: 40px 10px 0 10px;
+  margin: 40px 1vw 0 1vw;
   border-radius: 10px;
 
   background-color: ${PALETTE.BLACK_1};
   box-shadow: 0 5px 18px -7px rgba(0, 0, 0, 0.2);
+
+  @media (min-width: ${SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    width: 300px;
+    height: 670px;
+    border-radius: 15px;
+  }
 `;
 
 export const ProfileImg = styled.img<{ visualize: boolean }>`
@@ -31,9 +39,16 @@ export const ProfileImg = styled.img<{ visualize: boolean }>`
   transition: border-color 0.1s;
 
   box-shadow: 0 5px 18px -7px rgba(0, 0, 0, 0.3);
+
+  @media (min-width: ${SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    width: 110px;
+    height: 110px;
+    top: -55px;
+    border: 5.5px solid ${({ visualize }) => (visualize ? '#50a361' : 'transparent')};
+  }
 `;
 
-export const NameTag = styled.div<{ font: string }>`
+export const NameTag = styled.div<{ length: number }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -43,15 +58,22 @@ export const NameTag = styled.div<{ font: string }>`
   padding-top: 24.5%;
 
   #displayName {
-    font-size: ${({ font }) => font};
+    font-size: ${({ length }) => (length < 8 ? '16px' : '13px')};
     color: ${PALETTE.WHITE_1};
+  }
+
+  @media (min-width: ${SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    #displayName {
+      width: 60%;
+
+      font-size: ${({ length }) => (length < 8 ? '20px' : '13px')};
+    }
   }
 `;
 
 export const TitleTag = styled.div`
   display: flex;
   align-items: center;
-
   cursor: pointer;
 
   #titleName {
@@ -74,6 +96,18 @@ export const TitleTag = styled.div`
 
     font-size: 10.5px;
     color: ${PALETTE.GRAY_2};
+  }
+
+  @media (min-width: ${SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    #titleName {
+      font-size: 18px;
+    }
+    #questionCircle {
+      padding: 0.5px 5px;
+      margin-left: 8px;
+      border: 1.5px solid ${PALETTE.GRAY_2};
+      font-size: 13.5px;
+    }
   }
 `;
 
@@ -109,6 +143,25 @@ export const SoundBox = styled.div`
       width: 75%;
     }
   }
+
+  @media (min-width: ${SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    #mic-button {
+      width: 40px;
+      height: 40px;
+      margin: 0 0 16px 0;
+      cursor: pointer;
+    }
+
+    #speaker-ctrl {
+      margin: 0 0 16px 0;
+
+      #speaker-button {
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+      }
+    }
+  }
 `;
 
 export const AverageGameData = styled.div`
@@ -117,13 +170,12 @@ export const AverageGameData = styled.div`
   align-items: center;
 
   width: 100%;
-
   margin: 12px 0 20px 0;
 
   #name {
+    margin-bottom: 15px;
     font-size: 16px;
     color: ${PALETTE.GRAY_1};
-    margin-bottom: 15px;
   }
 
   div {
@@ -131,7 +183,6 @@ export const AverageGameData = styled.div`
     justify-content: space-between;
 
     width: 80%;
-
     margin: 3.5px 0;
 
     p {
@@ -140,6 +191,19 @@ export const AverageGameData = styled.div`
     }
     #value {
       color: ${PALETTE.WHITE_1};
+    }
+  }
+
+  @media (min-width: ${SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    #name {
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+    div {
+      margin: 5.5px 0;
+      p {
+        font-size: 17px;
+      }
     }
   }
 `;
@@ -165,6 +229,12 @@ export const GameRecord = styled.div`
       color: ${PALETTE.GRAY_1};
     }
   }
+
+  @media (min-width: ${SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    p {
+      font-size: 18.5px;
+    }
+  }
 `;
 
 export const WinningPercentage = styled.div`
@@ -184,11 +254,16 @@ export const Text = styled.div`
   #value {
     color: ${PALETTE.RED};
   }
+
+  @media (min-width: ${SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    p {
+      font-size: 23px;
+    }
+  }
 `;
 
 export const ProgressBar = styled.div`
   position: relative;
-
   margin: 10px 0;
 
   progress {
@@ -221,6 +296,29 @@ export const ProgressBar = styled.div`
   }
   #fail {
     right: 6px;
+  }
+
+  @media (min-width: ${SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    margin: 15px 0;
+
+    progress {
+      height: 23px;
+    }
+    &::-webkit-progress-bar {
+      border-radius: 4px;
+    }
+    &::-webkit-progress-value {
+      border-radius: 4px 0 0 4px;
+    }
+    p {
+      font-size: 14px;
+    }
+    #win {
+      left: 8px;
+    }
+    #fail {
+      right: 8px;
+    }
   }
 `;
 
@@ -257,5 +355,24 @@ export const KDAList = styled.div`
 
     height: 25px;
     width: 25px;
+  }
+
+  @media (min-width: ${SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    grid-template-columns: repeat(2, 105px);
+    grid-template-rows: repeat(5, 30px);
+    column-gap: 30px;
+    row-gap: 10px;
+
+    div {
+      width: 105px;
+      height: 30px;
+    }
+    p {
+      font-size: 15px;
+    }
+    img {
+      height: 30px;
+      width: 30px;
+    }
   }
 `;

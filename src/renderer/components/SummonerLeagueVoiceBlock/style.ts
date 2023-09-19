@@ -54,7 +54,7 @@ export const SummonerInfo = styled.div`
   transition: height 0.2s ease-in-out;
 `;
 
-export const NameTag = styled.div`
+export const NameTag = styled.div<{ size: string }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -64,7 +64,7 @@ export const NameTag = styled.div`
   padding-top: 24.5%;
 
   #displayName {
-    font-size: 16px;
+    font-size: ${({ size }) => size};
     color: ${PALETTE.WHITE_1};
   }
 `;

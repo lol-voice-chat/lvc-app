@@ -98,10 +98,11 @@ function SummonerVoiceBlock(props: {
         src={selectedChampion?.championIcon ?? props.summoner.profileImage}
       />
 
-      <S.NameTag font={props.summoner.displayName.length < 8 ? '16px' : '13px'}>
+      <S.NameTag length={props.summoner.displayName.length}>
         <p id="displayName">{props.summoner.displayName}</p>
-        <RankBadge size={14} tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
+        <RankBadge size={'medium'} tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
       </S.NameTag>
+
       <S.TitleTag>
         <p id="titleName">드레곤 슬레이어</p>
         <div id="questionCircle">?</div>
