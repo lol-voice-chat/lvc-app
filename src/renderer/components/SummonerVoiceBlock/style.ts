@@ -96,6 +96,9 @@ export const TitleTag = styled.div`
     color: ${PALETTE.GRAY_2};
   }
 
+  &:hover {
+  }
+
   @media (min-width: ${SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
     #titleName {
       font-size: 18px;
