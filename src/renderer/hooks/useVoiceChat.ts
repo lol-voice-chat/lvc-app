@@ -180,18 +180,19 @@ function useVoiceChat() {
             'team-join-room',
             { roomName, summoner },
             ({ rtpCapabilities, leagueTitleList }) => {
+              connectVoiceChat(
+                true,
+                socket,
+                device,
+                stream,
+                rtpCapabilities,
+                producerTransport,
+                consumerTransportList
+              );
               ipcRenderer.send('league-title', leagueTitleList);
               ipcRenderer.once('league-title', (_, leagueTitleList: LeagueTitleType[] | null) => {
+                socket.emit('league-title', leagueTitleList);
                 setLeagueTitleList(leagueTitleList);
-                connectVoiceChat(
-                  true,
-                  socket,
-                  device,
-                  stream,
-                  rtpCapabilities,
-                  producerTransport,
-                  consumerTransportList
-                );
               });
             }
           );
