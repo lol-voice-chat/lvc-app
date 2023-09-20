@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron';
 import league from '../utils/league';
+import { MatchData, fetchPvpMatchHistory } from './match-history';
 
 interface LeagueTitle {
   value: string;
@@ -10,7 +11,7 @@ interface LeagueTitle {
 
 interface SummonerMatchHistory {
   summonerId: number;
-  pvpMatchList: any[];
+  pvpMatchList: MatchData[];
 }
 
 export const pickLeagueTitle = (team: any[]) => {
@@ -20,12 +21,8 @@ export const pickLeagueTitle = (team: any[]) => {
     for (const summoner of team) {
       const summonerUrl = `/lol-summoner/v1/summoners/${summoner.summonerId}`;
       const { puuid } = await league(summonerUrl);
-      const matchHistoryUrl = `/lol-match-history/v1/products/lol/${puuid}/matches?begIndex=0&endIndex=100`;
 
-      const matchHistoryJson: any = await league(matchHistoryUrl);
-      const pvpMatchList: any[] = matchHistoryJson.games.games.filter(
-        (game: any) => game.gameType !== 'CUSTOM_GAME'
-      );
+      const pvpMatchList: MatchData[] = await fetchPvpMatchHistory(puuid);
 
       const summonerMatchHistory: SummonerMatchHistory = {
         summonerId: summoner.summonerId,
