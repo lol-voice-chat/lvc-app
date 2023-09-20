@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import { SummonerInfoType, summonerInfoListState, userStreamState } from '../../@store/atom';
+import {
+  LeagueTitleType,
+  SummonerInfoType,
+  leagueTitleListState,
+  summonerInfoListState,
+  userStreamState,
+} from '../../@store/atom';
 import { SummonerType } from '../../@type/summoner';
 import { Socket } from 'socket.io-client';
 import { getSummonerSpeaker, micVolumeHandler } from '../../utils/audio';
@@ -13,8 +19,11 @@ function SummonerLeagueVoiceBlock(props: {
   summoner: SummonerType;
   managementSocket: Socket;
 }) {
+  // 소환사 정보
   const summonerInfoList = useRecoilValue(summonerInfoListState);
   const [summonerInfo, setSummonerInfo] = useState<SummonerInfoType | null>(null);
+  const leagueTitleList = useRecoilValue(leagueTitleListState);
+  const [myLeagueTitle, setMyLeagueTitle] = useState<LeagueTitleType | null>(null);
 
   // 스피커, 마이크 정보
   const userStream = useRecoilValue(userStreamState);
@@ -35,8 +44,13 @@ function SummonerLeagueVoiceBlock(props: {
 
     summonerInfoList?.map((summonerInfo) => {
       if (props.summoner.summonerId === summonerInfo.summonerId) {
-        console.log(summonerInfo);
         return setSummonerInfo(summonerInfo);
+      }
+    });
+
+    leagueTitleList?.map((leagueTitle) => {
+      if (leagueTitle.summonerId === props.summoner.summonerId) {
+        return setMyLeagueTitle(leagueTitle);
       }
     });
   }, []);
@@ -95,7 +109,7 @@ function SummonerLeagueVoiceBlock(props: {
         </S.NameTag>
 
         <S.TitleTag>
-          <p id="titleName">드레곤 슬레이어</p>
+          <p id="titleName">{myLeagueTitle?.description ?? '소환사님의 칭호는...'}</p>
           <div id="questionCircle">?</div>
         </S.TitleTag>
 
