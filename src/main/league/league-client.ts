@@ -14,9 +14,7 @@ export interface Summoner {
 
 export const onLeagueClientUx = async () => {
   const currentSummoner: CurrentSummoner = await getCurrentSummoner();
-
   const pvpMatchList: MatchData[] = await fetchPvpMatchHistory(currentSummoner.puuid);
-
   const summonerStats: SummonerStats = getSummonerStats(pvpMatchList);
 
   const summoner: Summoner = {

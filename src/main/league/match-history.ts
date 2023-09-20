@@ -13,7 +13,7 @@ export interface MatchData {
   participants: ParticipantData[];
 }
 
-interface ParticipantData {
+export interface ParticipantData {
   championId: number;
   stats: {
     assists: number;
