@@ -47,11 +47,6 @@ function SummonerLeagueVoiceBlock(props: {
         return setSummonerInfo(summonerInfo);
       }
     });
-    leagueTitleList?.map((leagueTitle) => {
-      if (props.summoner.summonerId === leagueTitle.summonerId) {
-        return setMyLeagueTitle(leagueTitle);
-      }
-    });
   }, []);
 
   useEffect(() => {
@@ -93,6 +88,14 @@ function SummonerLeagueVoiceBlock(props: {
     userStream?.getAudioTracks().forEach((track) => (track.enabled = !track.enabled));
     setIsMuteMic((curMute) => !curMute);
   };
+
+  useEffect(() => {
+    leagueTitleList?.map((leagueTitle) => {
+      if (props.summoner.summonerId === leagueTitle.summonerId) {
+        return setMyLeagueTitle(leagueTitle);
+      }
+    });
+  }, [leagueTitleList]);
 
   return (
     <S.SummonerBlock id={props.summoner.summonerId.toString()}>
