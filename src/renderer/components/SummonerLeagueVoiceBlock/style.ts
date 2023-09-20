@@ -105,7 +105,6 @@ export const NameTag = styled.div<{ length: number }>`
 export const TitleTag = styled.div`
   display: flex;
   align-items: center;
-  cursor: pointer;
 
   #titleName {
     margin: 10px 0;
@@ -127,6 +126,8 @@ export const TitleTag = styled.div`
 
     font-size: 10.5px;
     color: ${PALETTE.GRAY_2};
+
+    cursor: pointer;
   }
 
   @media (min-width: ${LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
