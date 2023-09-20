@@ -180,9 +180,10 @@ function useVoiceChat() {
             'team-join-room',
             { roomName, summoner },
             ({ rtpCapabilities, leagueTitleList }) => {
+              console.log('받음', leagueTitleList);
               ipcRenderer.send('league-title', leagueTitleList);
               ipcRenderer.once('league-title', (_, leagueTitleList: LeagueTitleType[]) => {
-                console.log(leagueTitleList);
+                console.log('ipc 받음', leagueTitleList);
                 setLeagueTitleList(leagueTitleList);
                 connectVoiceChat(
                   true,
