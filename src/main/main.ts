@@ -1,8 +1,10 @@
 import { app, BrowserWindow } from 'electron';
 import { LeagueHandler } from './league/LeagueHandler.v2';
-import { onLeagueClientUx } from './league/onLeagueClientUx';
+import { onLeagueClientUx } from './league/league-client';
 import onElectronStore from './store';
-import { LeagueWebSocket, createWebSocketConnection } from 'league-connect';
+import { createWebSocketConnection } from 'league-connect';
+import league from './utils/league';
+import { LCU_ENDPOINT } from './constants';
 
 let mainWindow: BrowserWindow;
 
@@ -17,16 +19,23 @@ const createWindow = () => {
   });
 
   mainWindow.loadURL('http://localhost:3000');
+  handleLoadEvent();
+};
 
+function handleLoadEvent() {
   mainWindow.webContents.on('did-finish-load', async () => {
-    const { summoner, matchHistory, phase } = await onLeagueClientUx();
+    const { summoner, pvpMatchList } = await onLeagueClientUx();
     mainWindow.webContents.send('on-league-client', summoner);
 
-    const ws: LeagueWebSocket = await createWebSocketConnection();
+    const [ws, gameflow] = await Promise.all([
+      createWebSocketConnection(),
+      league(LCU_ENDPOINT.GAMEFLOW_URL),
+    ]);
+
     const leagueHandler: LeagueHandler = new LeagueHandler(mainWindow.webContents, ws, summoner);
-    await leagueHandler.handle(phase, matchHistory);
+    await leagueHandler.handle(gameflow, pvpMatchList);
   });
-};
+}
 
 app.whenReady().then(() => {
   createWindow();
