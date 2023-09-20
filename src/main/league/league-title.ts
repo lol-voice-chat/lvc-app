@@ -44,6 +44,7 @@ export const pickLeagueTitle = (team: any[]) => {
 
     const result: any[] = [];
     let leagueTitleIndex = 0;
+    let copySummonerMatchHistoryList = [...summonerMatchHistoryList];
 
     /**
      * 우리팀 소환사 수만큼 돌린다.
@@ -57,7 +58,7 @@ export const pickLeagueTitle = (team: any[]) => {
       leagueTitleIndex += 1;
 
       const array: any[] = [];
-      summonerMatchHistoryList.forEach((summonerMatchHistory: SummonerMatchHistory) => {
+      copySummonerMatchHistoryList.forEach((summonerMatchHistory: SummonerMatchHistory) => {
         let count = 0;
 
         //1. 소환사 pvp match를 돌면서 칭호 데이터값을 더한다.
@@ -91,6 +92,10 @@ export const pickLeagueTitle = (team: any[]) => {
           title: leagueTitle.title,
           description: leagueTitle.description,
         });
+
+        copySummonerMatchHistoryList = copySummonerMatchHistoryList.filter(
+          (summonerMatchHistory) => summonerMatchHistory.summonerId !== summoner.summonerId
+        );
       } else {
         const temp = array.sort((a, b) => b.count - a.count);
         const summoner = temp[temp.length - 1];
@@ -100,6 +105,10 @@ export const pickLeagueTitle = (team: any[]) => {
           title: leagueTitle.title,
           description: leagueTitle.description,
         });
+
+        copySummonerMatchHistoryList = copySummonerMatchHistoryList.filter(
+          (summonerMatchHistory) => summonerMatchHistory.summonerId !== summoner.summonerId
+        );
       }
     }
     console.log('최종 칭호 매칭: ', result);
