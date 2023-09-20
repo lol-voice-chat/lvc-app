@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import league from '../utils/league';
-import { MatchData, fetchPvpMatchHistory } from './match-history';
+import { MatchData, ParticipantData, fetchPvpMatchHistory } from './match-history';
 
 interface LeagueTitle {
   value: string;
@@ -16,6 +16,8 @@ interface SummonerMatchHistory {
 
 export const pickLeagueTitle = (team: any[]) => {
   ipcMain.on('league-title', async (event, leagueTitleList: LeagueTitle[]) => {
+    console.log('테스트');
+
     const summonerMatchHistoryList: SummonerMatchHistory[] = [];
 
     for (const summoner of team) {
@@ -23,7 +25,6 @@ export const pickLeagueTitle = (team: any[]) => {
       const { puuid } = await league(summonerUrl);
 
       const pvpMatchList: MatchData[] = await fetchPvpMatchHistory(puuid);
-
       const summonerMatchHistory: SummonerMatchHistory = {
         summonerId: summoner.summonerId,
         pvpMatchList,
@@ -42,10 +43,17 @@ export const pickLeagueTitle = (team: any[]) => {
         let count = 0;
 
         //각 소환사 100판 전적 돌면서
-        summonerMatchHistory.pvpMatchList.forEach((game: any) => {
-          const participant: any = game.participants[0];
+        summonerMatchHistory.pvpMatchList.forEach((match: MatchData) => {
+          const participant: ParticipantData = match.participants[0];
           //칭호 데이터를 더한다
-          count += participant.stats[leagueTitle.value];
+          let statsValue = participant.stats[leagueTitle.value as keyof ParticipantData['stats']];
+          if (statsValue) {
+            statsValue = 1;
+          } else {
+            statsValue = 0;
+          }
+
+          count += statsValue;
         });
 
         //summonerId

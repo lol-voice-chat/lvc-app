@@ -3,7 +3,9 @@ import { Summoner } from './league-client';
 import { CHAMPIONS } from '../constants';
 
 interface MatchHistory {
-  games: MatchData[];
+  games: {
+    games: MatchData[];
+  };
 }
 
 export interface MatchData {
@@ -11,7 +13,7 @@ export interface MatchData {
   participants: ParticipantData[];
 }
 
-interface ParticipantData {
+export interface ParticipantData {
   championId: number;
   stats: {
     assists: number;
@@ -67,7 +69,7 @@ export const fetchPvpMatchHistory = async (puuid: string) => {
 };
 
 function getPvpMatchList(matchHistory: MatchHistory): MatchData[] {
-  return matchHistory.games.filter((match: MatchData) => match.gameType !== 'CUSTOM_GAME');
+  return matchHistory.games.games.filter((match: MatchData) => match.gameType !== 'CUSTOM_GAME');
 }
 
 export const getSummonerStats = (pvpMatchList: MatchData[]) => {
