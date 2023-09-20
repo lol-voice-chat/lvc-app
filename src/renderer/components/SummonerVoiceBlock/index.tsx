@@ -48,12 +48,6 @@ function SummonerVoiceBlock(props: {
       });
     }
 
-    leagueTitleList?.map((leagueTitle) => {
-      if (props.summoner.summonerId === leagueTitle.summonerId) {
-        return setMyLeagueTitle(leagueTitle);
-      }
-    });
-
     return () => {
       ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
     };
@@ -77,6 +71,14 @@ function SummonerVoiceBlock(props: {
       });
     }
   }, [visualizerVolume]);
+
+  useEffect(() => {
+    leagueTitleList?.map((leagueTitle) => {
+      if (props.summoner.summonerId === leagueTitle.summonerId) {
+        return setMyLeagueTitle(leagueTitle);
+      }
+    });
+  }, [leagueTitleList]);
 
   const handleChangeSpeakerVolume = (speakerVolume: number) => {
     const speaker = getSummonerSpeaker(props.summoner.summonerId);
