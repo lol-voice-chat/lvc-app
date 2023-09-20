@@ -6,7 +6,7 @@ import VolumeSlider from '../@common/VolumeSlider';
 import { getSummonerSpeaker, micVolumeHandler } from '../../utils/audio';
 import { IPC_KEY } from '../../../const';
 import { useRecoilValue } from 'recoil';
-import { leagueTitleListState, userStreamState } from '../../@store/atom';
+import { LeagueTitleType, leagueTitleListState, userStreamState } from '../../@store/atom';
 import { Socket } from 'socket.io-client';
 
 const { ipcRenderer } = window.require('electron');
@@ -19,6 +19,7 @@ function SummonerVoiceBlock(props: {
   // 선택한 챔피언 정보
   const [selectedChampion, setSelectedChampion] = useState<ChampionInfoType | null>(null);
   const leagueTitleList = useRecoilValue(leagueTitleListState);
+  const [myLeagueTitle, setMyLeagueTitle] = useState<LeagueTitleType | null>(null);
 
   // 스피커, 마이크 정보
   const userStream = useRecoilValue(userStreamState);
@@ -27,8 +28,6 @@ function SummonerVoiceBlock(props: {
   const [isMuteSpeaker, setIsMuteSpeaker] = useState(false);
   const [isMuteMic, setIsMuteMic] = useState(false);
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
-
-  console.log(leagueTitleList);
 
   useEffect(() => {
     if (props.isMine) {
@@ -48,6 +47,12 @@ function SummonerVoiceBlock(props: {
         }
       });
     }
+
+    leagueTitleList?.map((leagueTitle) => {
+      if (leagueTitle.summonerId === props.summoner.summonerId) {
+        return setMyLeagueTitle(leagueTitle);
+      }
+    });
 
     return () => {
       ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
@@ -107,7 +112,7 @@ function SummonerVoiceBlock(props: {
       </S.NameTag>
 
       <S.TitleTag>
-        <p id="titleName">드레곤 슬레이어</p>
+        <p id="titleName">{myLeagueTitle?.title ?? '소환사님의 칭호는...'}</p>
         <div id="questionCircle">?</div>
       </S.TitleTag>
 
@@ -138,13 +143,13 @@ function SummonerVoiceBlock(props: {
       </S.SoundBox>
 
       <S.AverageGameData>
-        <p id="name">{selectedChampion?.name ?? '챔피언 정보'}</p>
+        <p id="name">{selectedChampion?.name ?? '선택한 챔피언'}</p>
         <div>
-          <p>KDA</p>
+          <p>평균 KDA</p>
           <p id="value">{selectedChampion?.kda ?? '-'}</p>
         </div>
         <div>
-          <p>평균피해량</p>
+          <p>평균 피해량</p>
           <p id="value">{selectedChampion?.totalDamage ?? '-'}</p>
         </div>
         <div>
