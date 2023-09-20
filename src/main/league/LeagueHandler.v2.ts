@@ -24,6 +24,7 @@ import {
 let isJoinedRoom = false;
 let isStartedGameLoading = false;
 let isStartedInGame = false;
+let isLeagueTitlePicked = false;
 let selectedChampionId: number = 0;
 
 export class LeagueHandler {
@@ -46,9 +47,12 @@ export class LeagueHandler {
         isJoinedRoom = true;
       }
 
-      pickLeagueTitle(data.myTeam);
-
       if (data.timer.phase === 'BAN_PICK') {
+        if (!isLeagueTitlePicked) {
+          pickLeagueTitle(data.myTeam);
+          isLeagueTitlePicked = true;
+        }
+
         const { championId } = data.myTeam.find(
           (summoner: any) => summoner.summonerId === this.summoner.summonerId
         );

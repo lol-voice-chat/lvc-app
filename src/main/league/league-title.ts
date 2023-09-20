@@ -16,8 +16,6 @@ interface SummonerMatchHistory {
 
 export const pickLeagueTitle = (team: any[]) => {
   ipcMain.on('league-title', async (event, leagueTitleList: LeagueTitle[]) => {
-    console.log('테스트');
-
     const summonerMatchHistoryList: SummonerMatchHistory[] = [];
 
     for (const summoner of team) {
@@ -66,16 +64,18 @@ export const pickLeagueTitle = (team: any[]) => {
       });
 
       if (leagueTitle.standard === 'max') {
-        array.sort((a, b) => a.count - b.count);
-        const goodSummoner = array[-1];
+        const temp = array.sort((a, b) => a.count - b.count);
+        const goodSummoner = temp[temp.length - 1];
+
         result.push({
           summonerId: goodSummoner.summonerId,
           title: leagueTitle.title,
           description: leagueTitle.description,
         });
       } else {
-        array.sort((a, b) => b.count - a.count);
-        const goodSummoner = array[-1];
+        const temp = array.sort((a, b) => b.count - a.count);
+        const goodSummoner = temp[temp.length - 1];
+
         result.push({
           summonerId: goodSummoner.summonerId,
           title: leagueTitle.title,
