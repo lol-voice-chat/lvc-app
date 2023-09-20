@@ -16,6 +16,8 @@ interface SummonerMatchHistory {
 
 export const pickLeagueTitle = (team: any[]) => {
   ipcMain.on('league-title', async (event, leagueTitleList: LeagueTitle[]) => {
+    console.log('테스트');
+
     const summonerMatchHistoryList: SummonerMatchHistory[] = [];
 
     for (const summoner of team) {

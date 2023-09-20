@@ -16,6 +16,7 @@ export const onLeagueClientUx = async () => {
   const currentSummoner: CurrentSummoner = await getCurrentSummoner();
 
   const pvpMatchList: MatchData[] = await fetchPvpMatchHistory(currentSummoner.puuid);
+
   const summonerStats: SummonerStats = getSummonerStats(pvpMatchList);
 
   const summoner: Summoner = {
@@ -35,7 +36,7 @@ async function getCurrentSummoner(): Promise<CurrentSummoner> {
     let interval = setInterval(async function () {
       const summoner: CurrentSummoner = await league(LCU_ENDPOINT.CHAT_ME_URL);
 
-      if (isEmptySummonerData(summoner)) {
+      if (!isEmptySummonerData(summoner)) {
         clearInterval(interval);
         resolve(summoner);
       }

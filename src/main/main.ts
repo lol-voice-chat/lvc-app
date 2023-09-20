@@ -19,6 +19,7 @@ const createWindow = () => {
   });
 
   mainWindow.loadURL('http://localhost:3000');
+
   handleLoadEvent();
 };
 
