@@ -38,8 +38,9 @@ export const pickLeagueTitle = (team: any[]) => {
 
     const result: any[] = [];
     let summonerCount = 0;
-    while (summonerCount === summonerMatchHistoryList.length - 1) {
+    while (summonerCount !== summonerMatchHistoryList.length - 1) {
       const leagueTitle = leagueTitleList[summonerCount];
+      summonerCount++;
       const array: any[] = [];
 
       summonerMatchHistoryList.forEach((summonerMatchHistory: SummonerMatchHistory) => {
@@ -48,6 +49,7 @@ export const pickLeagueTitle = (team: any[]) => {
         //각 소환사 100판 전적 돌면서
         summonerMatchHistory.pvpMatchList.forEach((match: MatchData) => {
           const participant: ParticipantData = match.participants[0];
+
           //칭호 데이터를 더한다
           let statsValue = participant.stats[leagueTitle.value as keyof ParticipantData['stats']];
           if (statsValue) {
@@ -71,6 +73,7 @@ export const pickLeagueTitle = (team: any[]) => {
       if (leagueTitle.standard === 'max') {
         const temp = array.sort((a, b) => a.count - b.count);
         const goodSummoner = temp[temp.length - 1];
+        console.log('good: ', goodSummoner);
 
         result.push({
           summonerId: goodSummoner.summonerId,
@@ -80,6 +83,7 @@ export const pickLeagueTitle = (team: any[]) => {
       } else {
         const temp = array.sort((a, b) => b.count - a.count);
         const goodSummoner = temp[temp.length - 1];
+        console.log('good: ', goodSummoner);
 
         result.push({
           summonerId: goodSummoner.summonerId,
@@ -87,8 +91,6 @@ export const pickLeagueTitle = (team: any[]) => {
           description: leagueTitle.description,
         });
       }
-
-      summonerCount++;
     }
 
     event.reply('league-title', result);
