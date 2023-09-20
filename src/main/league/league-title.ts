@@ -16,6 +16,11 @@ interface SummonerMatchHistory {
 
 export const pickLeagueTitle = (team: any[]) => {
   ipcMain.on('league-title', async (event, leagueTitleList: LeagueTitle[]) => {
+    if (team.length <= 1) {
+      event.reply('league-title', null);
+      return;
+    }
+
     const summonerMatchHistoryList: SummonerMatchHistory[] = [];
 
     for (const summoner of team) {
@@ -32,11 +37,11 @@ export const pickLeagueTitle = (team: any[]) => {
     }
 
     const result: any[] = [];
-    //칭호 돌면서
-    leagueTitleList.forEach((leagueTitle: LeagueTitle) => {
+    let summonerCount = 0;
+    while (summonerCount === summonerMatchHistoryList.length - 1) {
+      const leagueTitle = leagueTitleList[summonerCount];
       const array: any[] = [];
 
-      //소환사 전적 돌면서
       summonerMatchHistoryList.forEach((summonerMatchHistory: SummonerMatchHistory) => {
         let count = 0;
 
@@ -82,8 +87,11 @@ export const pickLeagueTitle = (team: any[]) => {
           description: leagueTitle.description,
         });
       }
-    });
+
+      summonerCount++;
+    }
 
     event.reply('league-title', result);
+    return;
   });
 };

@@ -16,9 +16,26 @@ export interface MatchData {
 export interface ParticipantData {
   championId: number;
   stats: {
+    /**
+     * 조기 항복 유도 여부
+     */
+    causedEarlySurrender: boolean;
+
+    doubleKills: number;
     assists: number;
     deaths: number;
     kills: number;
+    totalHeal: number;
+
+    /**
+     * 시야 점수
+     */
+    visionScore: number;
+
+    /**
+     * 타워 킬 횟수
+     */
+    turretKills: number;
 
     /**
      * 총 피해량
@@ -177,6 +194,10 @@ export const getChampionKda = (pvpMatchList: MatchData[], championId: number) =>
       champCount++;
     }
   });
+
+  if (champCount === 0) {
+    return '전적없음';
+  }
 
   const kda: string = `
       ${getStatsDataAverage(champKill, champCount)}/

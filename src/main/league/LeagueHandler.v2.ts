@@ -177,10 +177,6 @@ export class LeagueHandler {
       summonerDataList.push(summonerData);
     }
 
-    console.log(summonerDataList);
-
-    this.joinTeamVoice(myTeam);
-
     const teamName: string = voiceRoomNameGenerator(myTeam);
     this.webContents.send(IPC_KEY.LEAGUE_JOIN_ROOM, {
       roomName,
