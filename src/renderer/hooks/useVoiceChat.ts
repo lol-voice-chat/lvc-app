@@ -250,17 +250,22 @@ function useVoiceChat() {
 
     electronStore.get(STORE_KEY.LEAGUE_VOICE_ROOM_NAME).then(({ roomName, teamName }) => {
       if (userStream) {
-        socket.emit('league-join-room', { roomName, teamName, summoner }, ({ rtpCapabilities }) => {
-          connectVoiceChat(
-            false,
-            socket,
-            device,
-            userStream,
-            rtpCapabilities,
-            producerTransport,
-            consumerTransportList
-          );
-        });
+        socket.emit(
+          'league-join-room',
+          { roomName, teamName, summoner },
+          ({ rtpCapabilities, leagueTitleList }) => {
+            setLeagueTitleList(leagueTitleList);
+            connectVoiceChat(
+              false,
+              socket,
+              device,
+              userStream,
+              rtpCapabilities,
+              producerTransport,
+              consumerTransportList
+            );
+          }
+        );
       }
     });
 
