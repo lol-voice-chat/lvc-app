@@ -49,7 +49,7 @@ function SummonerVoiceBlock(props: {
     }
 
     leagueTitleList?.map((leagueTitle) => {
-      if (leagueTitle.summonerId === props.summoner.summonerId) {
+      if (props.summoner.summonerId === leagueTitle.summonerId) {
         return setMyLeagueTitle(leagueTitle);
       }
     });
@@ -112,8 +112,14 @@ function SummonerVoiceBlock(props: {
       </S.NameTag>
 
       <S.TitleTag>
-        <p id="titleName">{myLeagueTitle?.title ?? '소환사님의 칭호는...'}</p>
-        <div id="questionCircle">?</div>
+        {myLeagueTitle ? (
+          <>
+            <p id="titleName">{myLeagueTitle.title}</p>
+            <div id="questionCircle">?</div>
+          </>
+        ) : (
+          <p id="titleName">소환사님의 칭호는...</p>
+        )}
       </S.TitleTag>
 
       <S.SoundBox>

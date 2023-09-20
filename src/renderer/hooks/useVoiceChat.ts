@@ -181,7 +181,7 @@ function useVoiceChat() {
             { roomName, summoner },
             ({ rtpCapabilities, leagueTitleList }) => {
               ipcRenderer.send('league-title', leagueTitleList);
-              ipcRenderer.once('league-title', (_, leagueTitleList: LeagueTitleType[]) => {
+              ipcRenderer.once('league-title', (_, leagueTitleList: LeagueTitleType[] | null) => {
                 setLeagueTitleList(leagueTitleList);
                 connectVoiceChat(
                   true,
