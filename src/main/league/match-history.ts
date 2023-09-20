@@ -80,7 +80,7 @@ export interface ChampionStats {
 const RECENT_PVP_MATCH_COUNT = 10;
 
 export const fetchPvpMatchHistory = async (puuid: string) => {
-  const url = `/lol-match-history/v1/products/lol/${puuid}/matches?begIndex=0&endIndex=100`;
+  const url = `/lol-match-history/v1/products/lol/${puuid}/matches?begIndex=0&endIndex=49`;
   const matchHistory: MatchHistory = await league(url);
   return getPvpMatchList(matchHistory);
 };
