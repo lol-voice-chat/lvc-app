@@ -106,12 +106,12 @@ function SummonerLeagueVoiceBlock(props: {
 
       <S.SummonerInfo id="summoner-info">
         <S.NameTag length={props.summoner.displayName.length}>
-          <p id="displayName">{props.summoner.displayName}</p>
+          <p id="display-name">{props.summoner.displayName}</p>
           <RankBadge size={'medium'} tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
         </S.NameTag>
 
         <S.TitleTag>
-          {/* {myLeagueTitle ? (
+          {myLeagueTitle ? (
             <>
               <p id="title-name">{myLeagueTitle.title}</p>
               <div id="question-circle">
@@ -124,17 +124,7 @@ function SummonerLeagueVoiceBlock(props: {
             </>
           ) : (
             <p id="title-name">소환사님의 칭호는...</p>
-          )} */}
-          <>
-            <p id="title-name">드레곤 슬레이어</p>
-            <div id="question-circle">
-              ?
-              <S.TitleDescription id="title-description">
-                <p id="name">드레곤 슬레이어</p>
-                <p id="description">앙기모띠띠띠띠띠띠ㅣ오오오옹</p>
-              </S.TitleDescription>
-            </div>
-          </>
+          )}
         </S.TitleTag>
 
         <S.SoundBox>
@@ -163,31 +153,46 @@ function SummonerLeagueVoiceBlock(props: {
           )}
         </S.SoundBox>
 
-        <S.WinningPercentage odds={props.summoner.summonerStats.odds}>
-          <S.ProgressBar>
-            <progress
-              value={props.summoner.summonerStats.winCount}
-              max={props.summoner.summonerStats.winCount + props.summoner.summonerStats.failCount}
-            />
-            <p id="win">{props.summoner.summonerStats.winCount}W</p>
-            <p id="fail">{props.summoner.summonerStats.failCount}L</p>
-          </S.ProgressBar>
-          <p id="odds">{props.summoner.summonerStats.odds}%</p>
-        </S.WinningPercentage>
+        {props.summoner.summonerStats.statsList.length !== 0 ? (
+          <>
+            <S.WinningPercentage odds={props.summoner.summonerStats.odds}>
+              <S.ProgressBar>
+                <progress
+                  value={props.summoner.summonerStats.winCount}
+                  max={
+                    props.summoner.summonerStats.winCount + props.summoner.summonerStats.failCount
+                  }
+                />
+                <p id="win">{props.summoner.summonerStats.winCount}W</p>
+                <p id="fail">{props.summoner.summonerStats.failCount}L</p>
+              </S.ProgressBar>
+              <p id="odds">{props.summoner.summonerStats.odds}%</p>
+            </S.WinningPercentage>
 
-        <S.AverageKDA>
-          <p>KDA</p>
-          <p id="value">{summonerInfo?.kda}</p>
-        </S.AverageKDA>
+            <S.AverageKDA>
+              <p>KDA</p>
+              <p id="value">{summonerInfo?.kda}</p>
+            </S.AverageKDA>
 
-        <S.KDAList>
-          {props.summoner.summonerStats.statsList.map((summonerStats, idx) => (
-            <div key={idx} style={{ backgroundColor: summonerStats.isWin ? '#2C334A' : '#50383B' }}>
-              <img src={summonerStats.championIcon} alt="챔피언 아이콘" />
-              <p>{summonerStats.kda}</p>
-            </div>
-          ))}
-        </S.KDAList>
+            <S.KDAList>
+              {props.summoner.summonerStats.statsList.map((summonerStats, idx) => (
+                <div
+                  key={idx}
+                  style={{ backgroundColor: summonerStats.isWin ? '#2C334A' : '#50383B' }}
+                >
+                  <img src={summonerStats.championIcon} alt="챔피언 아이콘" />
+                  <p>{summonerStats.kda}</p>
+                </div>
+              ))}
+            </S.KDAList>
+          </>
+        ) : (
+          <div id="warning-box">
+            <p>전적이 없습니다.</p>
+            <img src="img/warning_icon.svg" alt="위험 아이콘" />
+            <p id="warning-text">( 현재시즌 솔로랭크 전적이 없습니다 )</p>
+          </div>
+        )}
       </S.SummonerInfo>
     </S.SummonerBlock>
   );

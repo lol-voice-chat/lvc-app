@@ -260,7 +260,6 @@ export const AverageGameData = styled.div`
 export const GameRecord = styled.div`
   display: flex;
   flex-direction: column;
-
   width: 80%;
 
   #warning-box {
