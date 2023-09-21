@@ -3,27 +3,23 @@ import { LeagueWebSocket } from 'league-connect';
 import { Summoner } from './league-client';
 import league from '../utils/league';
 import { LCU_ENDPOINT } from '../constants';
-import { voiceRoomNameGenerator } from '../utils/voiceRoomNameGenerator';
 import { IPC_KEY } from '../../const';
 import { pickLeagueTitle } from './league-title';
-import {
-  MatchData,
-  getChampionStats,
-  fetchPvpMatchHistory,
-  getChampionKda,
-  ChampionStats,
-} from './match-history';
+import { MatchData, getChampionStats, ChampionStats } from './match-history';
 import {
   Gameflow,
   isChampselectPhase,
   isCloseGameLoadingWindow,
   isGameLoadingPhase,
   isInGamePhase,
+  isCloseInGameWIndow,
 } from './game-flow';
+import { Team } from './Team';
 
 let isJoinedRoom = false;
 let isStartedGameLoading = false;
 let isStartedInGame = false;
+let isEndGame = false;
 let isLeagueTitlePicked = false;
 let selectedChampionId: number = 0;
 
@@ -88,15 +84,24 @@ export class LeagueHandler {
         isStartedGameLoading = false;
       }
 
-      // if (this.isInGamePhase(data) && !isStartedInGame) {
-      //   this.webContents.send(IPC_KEY.START_IN_GAME);
-      //   isStartedInGame = true;
-      // }
+      if (isInGamePhase(data) && !isStartedInGame) {
+        const timeout = setTimeout(() => {
+          console.log('다시 팀원보이스로 변경');
+          this.webContents.send(IPC_KEY.START_IN_GAME);
+          isStartedInGame = true;
+        }, 150000);
+        clearTimeout(timeout);
+      }
 
-      // if (this.isCloseInGameWindow(data) && isStartedInGame) {
-      //   this.webContents.send(IPC_KEY.EXIT_IN_GAME);
-      //   isStartedInGame = false;
-      // }
+      if (isCloseInGameWIndow(data) && isStartedInGame) {
+        this.webContents.send(IPC_KEY.EXIT_IN_GAME);
+        isStartedInGame = false;
+      }
+
+      if (data.phase === 'WaitingForStats' && !isEndGame) {
+        this.webContents.send(IPC_KEY.EXIT_IN_GAME);
+        isEndGame = true;
+      }
     });
   }
 
@@ -118,10 +123,9 @@ export class LeagueHandler {
     if (isInGamePhase(gameflow)) {
       const { teamOne, teamTwo } = gameflow.gameData;
 
-      const foundSummoner = teamOne.find(
-        (summoner: any) => summoner.summonerId === this.summoner.summonerId
-      );
-      const myTeam = foundSummoner ? teamOne : teamTwo;
+      const oneTeam = new Team(teamOne);
+      const summoner = oneTeam.findBySummonerId(this.summoner.summonerId);
+      const myTeam = summoner ? teamOne : teamTwo;
       this.joinTeamVoice(myTeam);
 
       this.webContents.send(IPC_KEY.START_IN_GAME);
@@ -136,48 +140,29 @@ export class LeagueHandler {
     return isJoinedRoom && phase === '' && isNotChampSelect;
   }
 
-  private joinTeamVoice(team: any[]) {
-    const roomName: string = voiceRoomNameGenerator(team);
+  private joinTeamVoice(myTeam: []) {
+    const team = new Team(myTeam);
+    const roomName = team.createVoiceRoomName();
     this.webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName });
   }
 
-  private async joinLeagueVoice(teamOne: any[], teamTwo: any[]) {
-    const teamOneVoiceRoomName: string = voiceRoomNameGenerator(teamOne);
-    const teamTwoVoiceRoomName: string = voiceRoomNameGenerator(teamTwo);
-    const roomName = teamOneVoiceRoomName + teamTwoVoiceRoomName;
+  private async joinLeagueVoice(teamOneData: [], teamTwoData: []) {
+    const teamOne = new Team(teamOneData);
+    const teamTwo = new Team(teamTwoData);
 
-    const foundSummoner = teamOne.find(
-      (summoner: any) => summoner.summonerId === this.summoner.summonerId
-    );
-    const myTeam = foundSummoner ? teamOne : teamTwo;
+    const roomName = teamOne.createVoiceRoomName() + teamTwo.createVoiceRoomName();
 
-    let summonerDataList: any[] = [];
+    const summoner = teamOne.findBySummonerId(this.summoner.summonerId);
+    const myTeam = summoner ? teamOne : teamTwo;
+    const teamName = myTeam.createVoiceRoomName();
 
-    for (const summoner of teamOne) {
-      const pvpMatchList = await fetchPvpMatchHistory(summoner.puuid);
-      const championKda: string = getChampionKda(pvpMatchList, summoner.championId);
-      const summonerData = {
-        summonerId: summoner.summonerId,
-        championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${summoner.championId}/tile`,
-        kda: championKda,
-      };
+    const [teamOneSummonerChampionKdaList, teamTwoSummonerChampionKdaList] = await Promise.all([
+      teamOne.getSummonerChampionKdaList(),
+      teamTwo.getSummonerChampionKdaList(),
+    ]);
+    const summonerDataList = teamOneSummonerChampionKdaList.concat(teamTwoSummonerChampionKdaList);
 
-      summonerDataList.push(summonerData);
-    }
-
-    for (const summoner of teamTwo) {
-      const pvpMatchList = await fetchPvpMatchHistory(summoner.puuid);
-      const championKda: string = getChampionKda(pvpMatchList, summoner.championId);
-      const summonerData = {
-        summonerId: summoner.summonerId,
-        championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${summoner.championId}/tile`,
-        kda: championKda,
-      };
-
-      summonerDataList.push(summonerData);
-    }
-
-    const teamName: string = voiceRoomNameGenerator(myTeam);
+    this.webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName: teamName });
     this.webContents.send(IPC_KEY.LEAGUE_JOIN_ROOM, {
       roomName,
       teamName,
