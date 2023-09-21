@@ -1,5 +1,11 @@
 import { Summoner } from './Summoner';
 
+export interface SummonerChampionData {
+  summonerId: number;
+  championIcon: string;
+  kda: string;
+}
+
 export class Team {
   private summoners: Summoner[];
 
