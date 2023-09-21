@@ -35,6 +35,10 @@ function VoiceRoomModal() {
       socket.emit('team-manage-join-room', roomName);
       setTeamManagementSocket(socket);
     });
+
+    return () => {
+      teamManagementSocket?.disconnect();
+    };
   }, []);
 
   useEffect(() => {
@@ -46,7 +50,13 @@ function VoiceRoomModal() {
         socket.emit('league-manage-join-room', roomName);
         setLeagueManagementSocket(socket);
       });
+    } else if (gameStatus === 'in-game') {
+      leagueManagementSocket?.disconnect();
     }
+
+    return () => {
+      leagueManagementSocket?.disconnect();
+    };
   }, [gameStatus]);
 
   return (
@@ -56,7 +66,7 @@ function VoiceRoomModal() {
           {teamManagementSocket && (
             <>
               {summoner && (
-                <SummonerLeagueVoiceBlock
+                <SummonerVoiceBlock
                   isMine={true}
                   summoner={summoner}
                   managementSocket={teamManagementSocket}
