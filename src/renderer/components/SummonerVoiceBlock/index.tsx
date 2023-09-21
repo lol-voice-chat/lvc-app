@@ -109,18 +109,24 @@ function SummonerVoiceBlock(props: {
       />
 
       <S.NameTag length={props.summoner.displayName.length}>
-        <p id="displayName">{props.summoner.displayName}</p>
+        <p id="display-name">{props.summoner.displayName}</p>
         <RankBadge size={'medium'} tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
       </S.NameTag>
 
       <S.TitleTag>
         {myLeagueTitle ? (
           <>
-            <p id="titleName">{myLeagueTitle.title}</p>
-            <div id="questionCircle">?</div>
+            <p id="title-name">{myLeagueTitle.title}</p>
+            <div id="question-circle">
+              ?
+              <S.TitleDescription id="title-description">
+                <p id="name">{myLeagueTitle.title}</p>
+                <p id="description">{myLeagueTitle.description}</p>
+              </S.TitleDescription>
+            </div>
           </>
         ) : (
-          <p id="titleName">소환사님의 칭호는...</p>
+          <p id="title-name">소환사님의 칭호는...</p>
         )}
       </S.TitleTag>
 

@@ -56,13 +56,13 @@ export const NameTag = styled.div<{ length: number }>`
   width: 75%;
   padding-top: 24.5%;
 
-  #displayName {
+  #display-name {
     font-size: ${({ length }) => (length < 8 ? '16px' : '13px')};
     color: ${PALETTE.WHITE_1};
   }
 
   @media (min-width: ${SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
-    #displayName {
+    #display-name {
       width: 60%;
       font-size: ${({ length }) => (length < 8 ? '20px' : '13px')};
     }
@@ -72,16 +72,17 @@ export const NameTag = styled.div<{ length: number }>`
 export const TitleTag = styled.div`
   display: flex;
   align-items: center;
-  cursor: pointer;
 
-  #titleName {
+  #title-name {
     margin: 10px 0;
 
     font-size: 14px;
     color: ${PALETTE.GRAY_1};
   }
 
-  #questionCircle {
+  #question-circle {
+    position: relative;
+
     display: flex;
     justify-content: center;
     align-items: center;
@@ -94,20 +95,68 @@ export const TitleTag = styled.div`
 
     font-size: 10.5px;
     color: ${PALETTE.GRAY_2};
-  }
+    cursor: pointer;
 
-  &:hover {
+    &:hover {
+      color: ${PALETTE.GRAY_1};
+      border-color: ${PALETTE.GRAY_1};
+
+      #title-description {
+        display: flex;
+      }
+    }
   }
 
   @media (min-width: ${SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
-    #titleName {
+    #title-name {
       font-size: 18px;
     }
-    #questionCircle {
+    #question-circle {
       padding: 0.5px 5px;
       margin-left: 8px;
       border: 1.5px solid ${PALETTE.GRAY_2};
       font-size: 13.5px;
+    }
+  }
+`;
+
+export const TitleDescription = styled.div`
+  position: absolute;
+  top: 20px;
+  right: -70px;
+
+  display: none;
+  flex-direction: column;
+
+  width: 120px;
+  padding: 10px;
+  border-radius: 5px;
+
+  background-color: #111214;
+  box-shadow: 0 5px 18px -7px rgba(0, 0, 0, 0.3);
+
+  #name {
+    font-size: 13px;
+    color: ${PALETTE.WHITE_1};
+    margin-bottom: 5px;
+  }
+  #description {
+    font-weight: ${FONT.REGULAR};
+    font-size: 11px;
+    color: #878f9a;
+  }
+
+  @media (min-width: ${SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
+    top: 30px;
+    width: 140px;
+    border-radius: 6.5px;
+
+    #name {
+      font-size: 16px;
+      margin-bottom: 7px;
+    }
+    #description {
+      font-size: 14px;
     }
   }
 `;
