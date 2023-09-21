@@ -111,7 +111,7 @@ function SummonerLeagueVoiceBlock(props: {
         </S.NameTag>
 
         <S.TitleTag>
-          {myLeagueTitle ? (
+          {/* {myLeagueTitle ? (
             <>
               <p id="title-name">{myLeagueTitle.title}</p>
               <div id="question-circle">
@@ -124,7 +124,17 @@ function SummonerLeagueVoiceBlock(props: {
             </>
           ) : (
             <p id="title-name">소환사님의 칭호는...</p>
-          )}
+          )} */}
+          <>
+            <p id="title-name">드레곤 슬레이어</p>
+            <div id="question-circle">
+              ?
+              <S.TitleDescription id="title-description">
+                <p id="name">드레곤 슬레이어</p>
+                <p id="description">앙기모띠띠띠띠띠띠ㅣ오오오옹</p>
+              </S.TitleDescription>
+            </div>
+          </>
         </S.TitleTag>
 
         <S.SoundBox>

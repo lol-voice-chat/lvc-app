@@ -108,12 +108,13 @@ export const TitleTag = styled.div`
 
   #title-name {
     margin: 10px 0;
-
     font-size: 14px;
     color: ${PALETTE.GRAY_1};
   }
 
   #question-circle {
+    position: relative;
+
     display: flex;
     justify-content: center;
     align-items: center;
@@ -126,8 +127,13 @@ export const TitleTag = styled.div`
 
     font-size: 10.5px;
     color: ${PALETTE.GRAY_2};
-
     cursor: pointer;
+
+    &:hover {
+      #title-description {
+        display: flex;
+      }
+    }
   }
 
   @media (min-width: ${LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
@@ -145,8 +151,9 @@ export const TitleTag = styled.div`
 
 export const TitleDescription = styled.div`
   position: absolute;
+  z-index: 1;
   top: 20px;
-  right: -70px;
+  right: -50px;
 
   display: none;
   flex-direction: column;

@@ -56,7 +56,7 @@ function VoiceRoomModal() {
           {teamManagementSocket && (
             <>
               {summoner && (
-                <SummonerVoiceBlock
+                <SummonerLeagueVoiceBlock
                   isMine={true}
                   summoner={summoner}
                   managementSocket={teamManagementSocket}
