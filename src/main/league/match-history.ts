@@ -188,6 +188,7 @@ export const getChampionKda = (pvpMatchList: MatchData[], championId: number) =>
     const participant: ParticipantData = match.participants[0];
 
     if (participant.championId === championId) {
+      console.log('전적있음: ', championId);
       champKill += participant.stats.kills;
       champDeath += participant.stats.deaths;
       champAssists += participant.stats.assists;

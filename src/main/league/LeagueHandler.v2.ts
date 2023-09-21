@@ -14,7 +14,7 @@ import {
   isInGamePhase,
   isCloseInGameWIndow,
 } from './game-flow';
-import { Team } from './Team';
+import { SummonerChampionData, Team } from './Team';
 
 let isJoinedRoom = false;
 let isStartedGameLoading = false;
@@ -86,7 +86,6 @@ export class LeagueHandler {
 
       if (isInGamePhase(data) && !isStartedInGame) {
         const timeout = setTimeout(() => {
-          console.log('다시 팀원보이스로 변경');
           this.webContents.send(IPC_KEY.START_IN_GAME);
           isStartedInGame = true;
         }, 150000);
@@ -123,8 +122,8 @@ export class LeagueHandler {
     if (isInGamePhase(gameflow)) {
       const { teamOne, teamTwo } = gameflow.gameData;
 
-      const oneTeam = new Team(teamOne);
-      const summoner = oneTeam.findBySummonerId(this.summoner.summonerId);
+      const teamOneSummoners = new Team(teamOne);
+      const summoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
       const myTeam = summoner ? teamOne : teamTwo;
       this.joinTeamVoice(myTeam);
 
@@ -156,11 +155,15 @@ export class LeagueHandler {
     const myTeam = summoner ? teamOne : teamTwo;
     const teamName = myTeam.createVoiceRoomName();
 
-    const [teamOneSummonerChampionKdaList, teamTwoSummonerChampionKdaList] = await Promise.all([
+    const [teamOneSummonerChampionKdaList, teamTwoSummonerChampionKdaList]: [
+      SummonerChampionData[],
+      SummonerChampionData[]
+    ] = await Promise.all([
       teamOne.getSummonerChampionKdaList(),
       teamTwo.getSummonerChampionKdaList(),
     ]);
     const summonerDataList = teamOneSummonerChampionKdaList.concat(teamTwoSummonerChampionKdaList);
+    console.log('챔피언 kda: ', summonerDataList);
 
     this.webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName: teamName });
     this.webContents.send(IPC_KEY.LEAGUE_JOIN_ROOM, {
