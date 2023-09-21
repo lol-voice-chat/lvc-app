@@ -74,9 +74,9 @@ export class LeagueHandler {
 
     this.ws.subscribe(LCU_ENDPOINT.GAMEFLOW_URL, async (data) => {
       if (isGameLoadingPhase(data) && !isStartedGameLoading) {
+        isStartedGameLoading = true;
         const { teamOne, teamTwo } = data.gameData;
         await this.joinLeagueVoice(teamOne, teamTwo);
-        isStartedGameLoading = true;
       }
 
       if (isCloseGameLoadingWindow(data) && isStartedGameLoading) {

@@ -13,6 +13,7 @@ export class Summoner {
 
   constructor(summoner: SummonerType) {
     this.summonerId = summoner.summonerId;
+    console.log(summoner.championId);
     this.championId = summoner.championId;
     this.puuid = summoner.puuid;
   }
