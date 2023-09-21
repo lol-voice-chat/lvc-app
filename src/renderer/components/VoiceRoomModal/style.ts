@@ -19,6 +19,7 @@ export const LeagueBlockBundle = styled.div`
   align-items: center;
   justify-content: space-between;
 
+  /* width: ; */
   height: 670px;
   margin-top: 45px;
 
