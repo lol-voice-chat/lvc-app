@@ -1,4 +1,6 @@
 export type SummonerType = {
+  id: string;
+  puuid: string;
   summonerId: number;
   displayName: string;
   profileImage: string;
@@ -10,8 +12,8 @@ export type SummonerType = {
 };
 
 export type FriendProfileType = {
+  id: string;
   puuid: string;
-  summonerId: number;
   profileImage: string;
   displayName: string;
   status: string;
