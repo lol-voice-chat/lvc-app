@@ -1,13 +1,26 @@
-import { SummonerType } from '../../../@type/summoner';
 import RankBadge from '../../@common/RankBadge';
 import * as _ from './style';
 import React, { useState } from 'react';
 
-function SummonerProfile(props: { summoner: SummonerType | null; isBackground: boolean }) {
+type SummonerProfileType = {
+  profileImage: string;
+  displayName: string;
+  statusMessage: string;
+  tier: string;
+};
+
+function SummonerProfile(props: {
+  summoner: SummonerProfileType | null;
+  isBackground: boolean;
+  handleClickSummonerProfile: (displayName: string) => void;
+}) {
   const [statusMessageHover, setStatusMessageHover] = useState(false);
 
   return (
-    <_.ProfileContainer isBackground={props.isBackground}>
+    <_.ProfileContainer
+      isBackground={props.isBackground}
+      onClick={() => props.handleClickSummonerProfile(props.summoner?.displayName ?? '')}
+    >
       {props.summoner ? (
         <>
           <img id="profile-icon" src={props.summoner.profileImage} alt="소환사 프로필" />

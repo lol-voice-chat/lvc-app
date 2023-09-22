@@ -3,7 +3,10 @@ import * as _ from './style';
 import UserIconWithStatus from '../@common/UserIconWithStatus';
 import { FriendProfileType } from '../../@type/summoner';
 
-function SummonerFriendList(props: { friendProfileList: FriendProfileType[] | null }) {
+function SummonerFriendList(props: {
+  friendProfileList: FriendProfileType[] | null;
+  handleClickSummonerBlock: (summonerId: number, puuid: string) => void;
+}) {
   const [initializeFriendList, setInitalizeFriendList] = useState(false);
   const [onlineSummonerList, setOnlineSummonerList] = useState<FriendProfileType[] | null>(null);
   const [offlineSummonerList, setOfflineSummonerList] = useState<FriendProfileType[] | null>(null);
@@ -25,15 +28,21 @@ function SummonerFriendList(props: { friendProfileList: FriendProfileType[] | nu
       {initializeFriendList ? (
         <>
           <_.StatusTag>온라인</_.StatusTag>
-          {onlineSummonerList?.map(({ profileImage, status, displayName }) => (
-            <_.SummonerBlock key={displayName}>
+          {onlineSummonerList?.map(({ summonerId, puuid, profileImage, status, displayName }) => (
+            <_.SummonerBlock
+              key={displayName}
+              onClick={() => props.handleClickSummonerBlock(summonerId, puuid)}
+            >
               <UserIconWithStatus userIcon={profileImage} status={status} borderColor="#2B2D31" />
               <p id="display-name">{displayName}</p>
             </_.SummonerBlock>
           ))}
           <_.StatusTag>오프라인</_.StatusTag>
-          {offlineSummonerList?.map(({ profileImage, status, displayName }) => (
-            <_.SummonerBlock key={displayName}>
+          {offlineSummonerList?.map(({ summonerId, puuid, profileImage, status, displayName }) => (
+            <_.SummonerBlock
+              key={displayName}
+              onClick={() => props.handleClickSummonerBlock(summonerId, puuid)}
+            >
               <UserIconWithStatus userIcon={profileImage} status={status} borderColor="#2B2D31" />
               <p id="display-name">{displayName}</p>
             </_.SummonerBlock>

@@ -14,6 +14,11 @@ export const ProfileContainer = styled.div<{ isBackground: boolean }>`
 
   background-color: ${({ isBackground }) => (isBackground ? '#36373c' : 'transparent')};
 
+  &,
+  * {
+    cursor: pointer;
+  }
+
   #profile-icon {
     width: 50px;
     height: 50px;
@@ -64,8 +69,6 @@ export const Information = styled.div<{ nameLength: number; statusMessageLength:
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-
-    cursor: ${(p) => (p.statusMessageLength > 11 ? 'pointer' : 'default')};
   }
   #more-status-message {
     position: absolute;
