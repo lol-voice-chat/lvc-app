@@ -23,7 +23,7 @@ export class Gameflow {
   }
 
   public getStatus() {
-    return this.phase === 'ChampSelect' || this.phase === 'InProgress' ? '게임중' : '온라인';
+    return '온라인';
   }
 
   public isChampselectPhase() {
