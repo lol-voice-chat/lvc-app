@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron';
 import { SummonerMatchHistoryData, Team } from './Team';
+import { IPC_KEY } from '../../const';
 
 interface LeagueTitle {
   value: string;
@@ -22,9 +23,9 @@ interface MatchLeagueTitle {
 export const matchingLeagueTitle = (teamData: []) => {
   const team = new Team(teamData);
 
-  ipcMain.on('league-title', async (event, leagueTitleList: LeagueTitle[]) => {
+  ipcMain.on(IPC_KEY.LEAGUE_TITLE, async (event, leagueTitleList: LeagueTitle[]) => {
     if (team.isAlone()) {
-      event.reply('league-title', null);
+      event.reply(IPC_KEY.LEAGUE_TITLE, null);
       return;
     }
 
@@ -56,7 +57,7 @@ export const matchingLeagueTitle = (teamData: []) => {
       );
     }
 
-    event.reply('league-title', result);
+    event.reply(IPC_KEY.LEAGUE_TITLE, result);
     return;
   });
 };

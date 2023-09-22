@@ -24,7 +24,6 @@ export const onLeagueClientUx = async () => {
   ]);
 
   const summonerStats: SummonerStats = await matchHistory.getSummonerStats();
-  console.log('summoenrStats: ', summonerStats);
   const friendProfileList: FriendProfile[] = friendList.map((friend) => friend.getProfile());
 
   const summoner: Summoner = {
