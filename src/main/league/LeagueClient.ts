@@ -9,6 +9,7 @@ interface LeagueRanked {
 
 export class LeagueClient {
   gameName: string;
+  id: string;
   icon: number;
   lol: LeagueRanked;
   statusMessage: string;
@@ -33,8 +34,8 @@ export class LeagueClient {
     return this.gameName === '';
   }
 
-  public static async fetchFriend(summonerId: number) {
-    const url = `/lol-chat/v1/friends/${summonerId}`;
+  public static async fetchFriend(id: string) {
+    const url = `/lol-chat/v1/friends/${id}`;
     const leagueClientData = await league(url);
     return plainToInstance(LeagueClient, leagueClientData);
   }
