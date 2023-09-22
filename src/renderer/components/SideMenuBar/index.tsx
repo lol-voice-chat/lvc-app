@@ -13,7 +13,7 @@ function SideMenuBar() {
     <_.SideBarContainer>
       <SummonerProfile summoner={summoner} isBackground={true} />
 
-      <SummonerFriendList />
+      <SummonerFriendList friendProfileList={summoner?.friendProfileList ?? null} />
     </_.SideBarContainer>
   );
 }

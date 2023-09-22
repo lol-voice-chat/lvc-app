@@ -5,7 +5,11 @@ function UserIconWithStatus(props: { userIcon: string; status: string; borderCol
   return (
     <IconWithStatus id="user-icon-with-status" borderColor={props.borderColor}>
       <img id="user-profile" src={props.userIcon} alt="소환사 프로필" />
-      <img id="user-status" src={props.status} alt="소환사 상태" />
+      <img
+        id="user-status"
+        src={props.status === '온라인' ? 'img/user-status/online_icon.svg' : ''}
+        alt="소환사 상태"
+      />
     </IconWithStatus>
   );
 }
