@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron';
 import { SummonerMatchHistoryData, Team } from './Team';
 import { IPC_KEY } from '../../const';
+import EventEmitter from 'events';
 
 interface LeagueTitle {
   value: string;
@@ -20,7 +21,9 @@ interface MatchLeagueTitle {
   description: string;
 }
 
-export const matchingLeagueTitle = (teamData: []) => {
+export const leagueTitleEvent = new EventEmitter();
+
+leagueTitleEvent.on(IPC_KEY.LEAGUE_TITLE, (teamData: []) => {
   const team = new Team(teamData);
 
   ipcMain.on(IPC_KEY.LEAGUE_TITLE, async (event, leagueTitleList: LeagueTitle[]) => {
@@ -60,7 +63,7 @@ export const matchingLeagueTitle = (teamData: []) => {
     event.reply(IPC_KEY.LEAGUE_TITLE, result);
     return;
   });
-};
+});
 
 function matching(leagueTitle: LeagueTitle, summonerLeagueTitleScoreList: LeagueTitleScore[]) {
   const sorted = sortByLeagueTitleStandard(leagueTitle, summonerLeagueTitleScoreList);
