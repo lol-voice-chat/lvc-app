@@ -36,9 +36,9 @@ function VoiceRoomModal() {
       setTeamManagementSocket(socket);
     });
 
-    // return () => {
-    //   teamManagementSocket?.disconnect();
-    // };
+    return () => {
+      teamManagementSocket?.disconnect();
+    };
   }, []);
 
   useEffect(() => {
@@ -50,18 +50,17 @@ function VoiceRoomModal() {
         socket.emit('league-manage-join-room', roomName);
         setLeagueManagementSocket(socket);
       });
+    } else if (gameStatus === 'in-game') {
+      leagueManagementSocket?.disconnect();
     }
-    // } else if (gameStatus === 'in-game') {
-    //   leagueManagementSocket?.disconnect();
-    // }
 
-    // return () => {
-    //   leagueManagementSocket?.disconnect();
-    // };
+    return () => {
+      leagueManagementSocket?.disconnect();
+    };
   }, [gameStatus]);
 
   return (
-    <S.Background>
+    <S.VoiceRoom>
       {gameStatus !== 'loading' ? (
         <>
           {teamManagementSocket && (
@@ -110,7 +109,7 @@ function VoiceRoomModal() {
           )}
         </>
       )}
-    </S.Background>
+    </S.VoiceRoom>
   );
 }
 

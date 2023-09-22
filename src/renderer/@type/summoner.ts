@@ -20,5 +20,5 @@ export type ChampionInfoType = {
   name: string;
   kda: string;
   totalDamage: number;
-  totalMinionsKilled: number;
+  cs: number;
 };

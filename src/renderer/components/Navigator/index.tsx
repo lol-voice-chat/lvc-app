@@ -5,6 +5,7 @@ import { summonerState, gameStatusState, summonerInfoListState } from '../../@st
 import { IPC_KEY, STORE_KEY } from '../../../const';
 import electronStore from '../../@store/electron';
 import VoiceRoomModal from '../VoiceRoomModal';
+import * as S from './style';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -34,7 +35,16 @@ function Navigator() {
     });
   }, []);
 
-  return <>{gameStatus !== 'none' && <VoiceRoomModal />}</>;
+  return (
+    <>
+      {gameStatus !== 'none' && <VoiceRoomModal />}
+
+      <S.NavContainer>
+        <S.TitleCategoryTag>홈</S.TitleCategoryTag>
+        <S.SubCategoryTag>전체채팅</S.SubCategoryTag>
+      </S.NavContainer>
+    </>
+  );
 }
 
 export default Navigator;

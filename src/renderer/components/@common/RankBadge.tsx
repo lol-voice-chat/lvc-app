@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { PALETTE } from '../../const';
+import { FONT, PALETTE } from '../../const';
 
 type sizeType = 'small' | 'medium' | 'large';
 let RankBadgeSize = new Map<sizeType, number>([
@@ -11,7 +11,7 @@ let RankBadgeSize = new Map<sizeType, number>([
 
 function RankBadge(props: { size: sizeType; tierImg: string; tier: string }) {
   return (
-    <Badge size={RankBadgeSize.get(props.size) ?? 12} tier={props.tier}>
+    <Badge id="rank-badge" size={RankBadgeSize.get(props.size) ?? 12} tier={props.tier}>
       {props.tier !== 'Unrank' && <img src={props.tierImg} alt="티어 뱃지" />}
       <p>{props.tier}</p>
     </Badge>
@@ -33,8 +33,8 @@ const Badge = styled.div<{ size: number; tier: string }>`
     width: ${(p) => p.size * 2}px;
     height: ${(p) => p.size * 2}px;
   }
-
   p {
+    font-weight: ${FONT.SEMI_BOLD};
     font-size: ${(p) => p.size * 1.1}px;
     padding-left: ${({ size, tier }) => (tier === 'Unrank' ? '0' : `${size / 3}px`)};
 
