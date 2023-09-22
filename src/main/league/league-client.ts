@@ -1,7 +1,7 @@
-import league from '../utils/league';
-import { LCU_ENDPOINT } from '../constants';
-import { CurrentSummoner, getTier, isEmptySummonerData, getProfileImage } from './current-summoner';
 import { MatchHistory, SummonerStats } from './MatchHistory';
+import { LeagueClient } from './LeagueClient';
+import { Friend, FriendProfile } from './Friend';
+import { Gameflow } from './Gameflow';
 
 export interface Summoner {
   summonerId: number;
@@ -10,36 +10,32 @@ export interface Summoner {
   tier: string;
   statusMessage: string;
   summonerStats: SummonerStats;
+  friendProfileList: FriendProfile[];
+  state: string;
 }
 
 export const onLeagueClientUx = async () => {
-  const currentSummoner: CurrentSummoner = await getCurrentSummoner();
-  const matchHistory = await MatchHistory.fetch(currentSummoner.puuid);
-  const summonerStats = matchHistory.getSummonerStats();
-  // const pvpMatchList: MatchData[] = await fetchPvpMatchHistory(currentSummoner.puuid);
-  // const summonerStats: SummonerStats = getSummonerStats(pvpMatchList);
+  const leagueClient: LeagueClient = await LeagueClient.fetch();
+
+  const [matchHistory, friendList, gameflow]: [MatchHistory, Friend[], Gameflow] =
+    await Promise.all([
+      await MatchHistory.fetch(leagueClient.puuid),
+      await Friend.fetch(),
+      await Gameflow.fetch(),
+    ]);
+
+  const friendProfileList: FriendProfile[] = friendList.map((friend) => friend.getProfile());
 
   const summoner: Summoner = {
-    summonerId: currentSummoner.summonerId,
-    displayName: currentSummoner.gameName,
-    profileImage: getProfileImage(currentSummoner.icon),
-    tier: getTier(currentSummoner.lol),
-    statusMessage: currentSummoner.statusMessage,
-    summonerStats,
+    summonerId: leagueClient.summonerId,
+    displayName: leagueClient.gameName,
+    profileImage: leagueClient.getProfileImage(),
+    tier: leagueClient.getTier(),
+    statusMessage: leagueClient.statusMessage,
+    summonerStats: matchHistory.getSummonerStats(),
+    friendProfileList,
+    state: gameflow.getState(),
   };
 
-  return { summoner, matchHistory };
+  return { summoner, matchHistory, gameflow };
 };
-
-async function getCurrentSummoner(): Promise<CurrentSummoner> {
-  return new Promise((resolve) => {
-    let interval = setInterval(async function () {
-      const summoner: CurrentSummoner = await league(LCU_ENDPOINT.CHAT_ME_URL);
-
-      if (!isEmptySummonerData(summoner)) {
-        clearInterval(interval);
-        resolve(summoner);
-      }
-    }, 1000);
-  });
-}
