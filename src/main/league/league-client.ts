@@ -11,7 +11,7 @@ export interface Summoner {
   statusMessage: string;
   summonerStats: SummonerStats;
   friendProfileList: FriendProfile[];
-  state: string;
+  status: string;
 }
 
 export const onLeagueClientUx = async () => {
@@ -34,7 +34,7 @@ export const onLeagueClientUx = async () => {
     statusMessage: leagueClient.statusMessage,
     summonerStats,
     friendProfileList,
-    state: gameflow.getState(),
+    status: gameflow.getStatus(),
   };
 
   return { summoner, matchHistory, gameflow };
