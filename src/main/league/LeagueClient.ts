@@ -33,6 +33,12 @@ export class LeagueClient {
     return this.gameName === '';
   }
 
+  public static async fetchFriend(summonerId: number) {
+    const url = `/lol-chat/v1/friends/${summonerId}`;
+    const leagueClientData = await league(url);
+    return plainToInstance(LeagueClient, leagueClientData);
+  }
+
   public getTier() {
     const { rankedLeagueDivision, rankedLeagueTier } = this.lol;
     const displayTier: string = rankedLeagueTier[0];

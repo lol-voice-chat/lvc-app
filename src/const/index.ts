@@ -5,6 +5,8 @@ export const IPC_KEY = {
   EXIT_IN_GAME: 'exit-in-game',
   START_IN_GAME: 'start-in-game',
   CHAMP_INFO: 'champion-info',
+  LEAGUE_TITLE: 'league-title',
+  FRIEND_STATS: 'friend-stats',
 };
 
 export const STORE_KEY = {
