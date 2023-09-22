@@ -4,7 +4,7 @@ import { Summoner } from './league-client';
 import league from '../utils/league';
 import { LCU_ENDPOINT } from '../constants';
 import { IPC_KEY } from '../../const';
-import { matchingLeagueTitle } from './league-title';
+import { leagueTitleEvent } from './league-title';
 import { Gameflow } from './Gameflow';
 import { SummonerChampionData, Team } from './Team';
 import { MatchHistory, ChampionStats } from './MatchHistory';
@@ -40,7 +40,7 @@ export class LeagueHandler {
       if (data.timer.phase === 'BAN_PICK') {
         if (!isMatchedLeagueTitle) {
           isMatchedLeagueTitle = true;
-          matchingLeagueTitle(data.myTeam);
+          leagueTitleEvent.emit(IPC_KEY.LEAGUE_TITLE, data.myTeam);
         }
 
         const { championId } = data.myTeam.find(
@@ -63,6 +63,7 @@ export class LeagueHandler {
         isJoinedRoom = false;
         this.webContents.send(IPC_KEY.EXIT_CHAMP_SELECT);
         selectedChampionId = 0;
+        isMatchedLeagueTitle = false;
       }
     });
 
