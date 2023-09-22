@@ -6,13 +6,6 @@ export const LCU_ENDPOINT = {
   FRIENDS_URL: '/lol-chat/v1/friends',
 };
 
-export const PHASE = {
-  NONE: 'None',
-  LOBBY: 'Lobby',
-  CHAMP_SELECT: 'ChampSelect',
-  IN_GAME: 'InProgress',
-};
-
 type ChampionsType = {
   [key: string]: string;
 };

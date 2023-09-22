@@ -5,14 +5,7 @@ import league from '../utils/league';
 import { LCU_ENDPOINT } from '../constants';
 import { IPC_KEY } from '../../const';
 import { matchingLeagueTitle } from './league-title';
-import {
-  Gameflow,
-  isChampselectPhase,
-  isCloseGameLoadingWindow,
-  isGameLoadingPhase,
-  isInGamePhase,
-  isCloseInGameWIndow,
-} from './game-flow';
+import { Gameflow } from './Gameflow';
 import { SummonerChampionData, Team } from './Team';
 import { MatchHistory, ChampionStats } from './MatchHistory';
 
@@ -37,10 +30,11 @@ export class LeagueHandler {
   public async handle(gameflow: Gameflow, matchHistory: MatchHistory) {
     await this.handleLeaguePhase(gameflow);
 
+    //챔피언선택 시작
     this.ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, async (data) => {
       if (data.timer.phase === 'BAN_PICK' && !isJoinedRoom) {
-        this.joinTeamVoice(data.myTeam);
         isJoinedRoom = true;
+        this.joinTeamVoice(data.myTeam);
       }
 
       if (data.timer.phase === 'BAN_PICK') {
@@ -66,60 +60,64 @@ export class LeagueHandler {
 
       const isCloseWindow = await this.isCloseChampionSelectionWindow(data.timer.phase);
       if (isCloseWindow) {
-        this.webContents.send(IPC_KEY.EXIT_CHAMP_SELECT);
         isJoinedRoom = false;
+        this.webContents.send(IPC_KEY.EXIT_CHAMP_SELECT);
         selectedChampionId = 0;
       }
     });
 
     this.ws.subscribe(LCU_ENDPOINT.GAMEFLOW_URL, async (data) => {
-      if (isGameLoadingPhase(data) && !isStartedGameLoading) {
+      //게임로딩 시작
+      if (data.phase === 'InProgress' && !data.gameClient.visible && !isStartedGameLoading) {
         isStartedGameLoading = true;
         const { teamOne, teamTwo } = data.gameData;
         await this.joinLeagueVoice(teamOne, teamTwo);
       }
 
-      if (isCloseGameLoadingWindow(data) && isStartedGameLoading) {
-        this.webContents.send(IPC_KEY.EXIT_IN_GAME);
+      //게임로딩 도중 나감
+      if (data.phase === 'None' && !data.gameClient.visible && isStartedGameLoading) {
         isStartedGameLoading = false;
+        this.webContents.send(IPC_KEY.EXIT_IN_GAME);
       }
 
-      if (isInGamePhase(data) && !isStartedInGame) {
+      //인게임 시작
+      if (data.phase === 'InProgress' && data.gameClient.visible && !isStartedInGame) {
         const timeout = setTimeout(() => {
-          this.webContents.send(IPC_KEY.START_IN_GAME);
           isStartedInGame = true;
+          this.webContents.send(IPC_KEY.START_IN_GAME);
         }, 150000);
         clearTimeout(timeout);
       }
 
-      if (isCloseInGameWIndow(data) && isStartedInGame) {
-        this.webContents.send(IPC_KEY.EXIT_IN_GAME);
+      //인게임 도중 나감
+      if (data.phase === 'None' && data.gameClient.visible && isStartedInGame) {
         isStartedInGame = false;
+        this.webContents.send(IPC_KEY.EXIT_IN_GAME);
       }
 
       if (data.phase === 'WaitingForStats' && !isEndGame) {
-        this.webContents.send(IPC_KEY.EXIT_IN_GAME);
         isEndGame = true;
+        this.webContents.send(IPC_KEY.EXIT_IN_GAME);
       }
     });
   }
 
   private async handleLeaguePhase(gameflow: Gameflow) {
-    if (isChampselectPhase(gameflow)) {
+    if (gameflow.isChampselectPhase()) {
       const { myTeam } = await league(LCU_ENDPOINT.CHAMP_SELECT_URL);
       this.joinTeamVoice(myTeam);
       isJoinedRoom = true;
       return;
     }
 
-    if (isGameLoadingPhase(gameflow)) {
+    if (gameflow.isGameLoadingPhase()) {
       const { teamOne, teamTwo } = gameflow.gameData;
       await this.joinLeagueVoice(teamOne, teamTwo);
       isStartedGameLoading = true;
       return;
     }
 
-    if (isInGamePhase(gameflow)) {
+    if (gameflow.isInGamePhase()) {
       const { teamOne, teamTwo } = gameflow.gameData;
 
       const teamOneSummoners = new Team(teamOne);
