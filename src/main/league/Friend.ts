@@ -4,6 +4,7 @@ import { plainToInstance } from 'class-transformer';
 
 export interface FriendProfile {
   id: string;
+  puuid: string;
   profileImage: string;
   displayName: string;
   status: string;
@@ -13,6 +14,7 @@ export class Friend {
   availability: string;
   gameName: string;
   id: string;
+  puuid: string;
   icon: number;
 
   public static async fetch() {
@@ -29,6 +31,7 @@ export class Friend {
 
     const profile: FriendProfile = {
       id: this.id,
+      puuid: this.puuid,
       profileImage: `https://ddragon-webp.lolmath.net/latest/img/profileicon/${this.icon}.webp`,
       displayName: this.gameName,
       status: isOffline ? '오프라인' : '온라인',
