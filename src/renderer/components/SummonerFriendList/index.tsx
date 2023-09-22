@@ -5,7 +5,7 @@ import { FriendProfileType } from '../../@type/summoner';
 
 function SummonerFriendList(props: {
   friendProfileList: FriendProfileType[] | null;
-  handleClickSummonerBlock: (summonerId: number, puuid: string) => void;
+  handleClickSummonerBlock: (id: string) => void;
 }) {
   const [initializeFriendList, setInitalizeFriendList] = useState(false);
   const [onlineSummonerList, setOnlineSummonerList] = useState<FriendProfileType[] | null>(null);
@@ -28,21 +28,15 @@ function SummonerFriendList(props: {
       {initializeFriendList ? (
         <>
           <_.StatusTag>온라인</_.StatusTag>
-          {onlineSummonerList?.map(({ summonerId, puuid, profileImage, status, displayName }) => (
-            <_.SummonerBlock
-              key={displayName}
-              onClick={() => props.handleClickSummonerBlock(summonerId, puuid)}
-            >
+          {onlineSummonerList?.map(({ id, profileImage, status, displayName }) => (
+            <_.SummonerBlock key={displayName} onClick={() => props.handleClickSummonerBlock(id)}>
               <UserIconWithStatus userIcon={profileImage} status={status} borderColor="#2B2D31" />
               <p id="display-name">{displayName}</p>
             </_.SummonerBlock>
           ))}
           <_.StatusTag>오프라인</_.StatusTag>
-          {offlineSummonerList?.map(({ summonerId, puuid, profileImage, status, displayName }) => (
-            <_.SummonerBlock
-              key={displayName}
-              onClick={() => props.handleClickSummonerBlock(summonerId, puuid)}
-            >
+          {offlineSummonerList?.map(({ id, profileImage, status, displayName }) => (
+            <_.SummonerBlock key={displayName} onClick={() => props.handleClickSummonerBlock(id)}>
               <UserIconWithStatus userIcon={profileImage} status={status} borderColor="#2B2D31" />
               <p id="display-name">{displayName}</p>
             </_.SummonerBlock>

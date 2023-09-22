@@ -16,11 +16,9 @@ function SideMenuBar() {
   const [isSummonerRecord, setIsSummonerRecord] = useState(false);
   const [summonerRecord, setSummonerRecord] = useState<SummonerRecordType | null>(null);
 
-  const getFriendSummonerRecord = (summonerId: number, puuid: string) => {
-    ipcRenderer.send(IPC_KEY.FRIEND_STATS, { summonerId, puuid });
-    console.log('보냄');
+  const getFriendSummonerRecord = (id: string) => {
+    ipcRenderer.send(IPC_KEY.FRIEND_STATS, { id });
     ipcRenderer.once(IPC_KEY.FRIEND_STATS, (_, summonerRecordData: SummonerRecordType) => {
-      console.log('받음');
       setSummonerRecord(summonerRecordData);
     });
     setIsSummonerRecord(true);
