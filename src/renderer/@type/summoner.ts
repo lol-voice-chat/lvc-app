@@ -5,6 +5,16 @@ export type SummonerType = {
   tier: string;
   statusMessage: string;
   summonerStats: SummonerStatsType;
+  friendProfileList: FriendProfileType[];
+  status: string;
+};
+
+export type FriendProfileType = {
+  puuid: string;
+  summonerId: number;
+  profileImage: string;
+  displayName: string;
+  status: string;
 };
 
 type SummonerStatsType = {
