@@ -3,6 +3,8 @@ import { LeagueHandler } from './league/LeagueHandler';
 import { onLeagueClientUx } from './league/league-client';
 import onElectronStore from './store';
 import { createWebSocketConnection } from 'league-connect';
+import { friendStatsEvent } from './league/friend-stats';
+import { IPC_KEY } from '../const';
 
 let mainWindow: BrowserWindow;
 
@@ -47,4 +49,5 @@ app.on('window-all-closed', () => {
   app.quit();
 });
 
+friendStatsEvent.emit(IPC_KEY.FRIEND_STATS);
 onElectronStore();

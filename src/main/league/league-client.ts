@@ -4,7 +4,9 @@ import { Friend, FriendProfile } from './Friend';
 import { Gameflow } from './Gameflow';
 
 export interface Summoner {
+  id: string;
   summonerId: number;
+  puuid: string;
   displayName: string;
   profileImage: string;
   tier: string;
@@ -29,7 +31,9 @@ export const onLeagueClientUx = async () => {
     .map((friend) => friend.getProfile());
 
   const summoner: Summoner = {
+    id: leagueClient.id,
     summonerId: leagueClient.summonerId,
+    puuid: leagueClient.puuid,
     displayName: leagueClient.gameName,
     profileImage: leagueClient.getProfileImage(),
     tier: leagueClient.getTier(),
