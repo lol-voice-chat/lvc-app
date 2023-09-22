@@ -1,4 +1,5 @@
-import { getChampionKda, fetchPvpMatchHistory } from './match-history';
+import { MatchHistory } from './MatchHistory';
+import league from '../utils/league';
 
 interface SummonerType {
   summonerId: number;
@@ -13,7 +14,6 @@ export class Summoner {
 
   constructor(summoner: SummonerType) {
     this.summonerId = summoner.summonerId;
-    console.log(summoner.championId);
     this.championId = summoner.championId;
     this.puuid = summoner.puuid;
   }
@@ -26,9 +26,21 @@ export class Summoner {
     return this.summonerId === summonerId;
   }
 
+  public async getMatchHistory() {
+    const summonerUrl = `/lol-summoner/v1/summoners/${this.summonerId}`;
+    const { puuid } = await league(summonerUrl);
+    const matchHistory: MatchHistory = await MatchHistory.fetch(puuid);
+    const summonerMatchHistory = {
+      summonerId: this.summonerId,
+      matchHistory,
+    };
+
+    return summonerMatchHistory;
+  }
+
   public async getChampionKda() {
-    const pvpMatchList = await fetchPvpMatchHistory(this.puuid);
-    const championKda: string = getChampionKda(pvpMatchList, this.championId);
+    const matchHistory: MatchHistory = await MatchHistory.fetch(this.puuid);
+    const championKda = matchHistory.getChampionKda(this.championId);
     const summonerKda = {
       summonerId: this.summonerId,
       championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${this.championId}/tile`,

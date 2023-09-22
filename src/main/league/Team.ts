@@ -1,4 +1,10 @@
+import { MatchHistory } from './MatchHistory';
 import { Summoner } from './Summoner';
+
+export interface SummonerMatchHistoryData {
+  summonerId: number;
+  matchHistory: MatchHistory;
+}
 
 export interface SummonerChampionData {
   summonerId: number;
@@ -26,8 +32,22 @@ export class Team {
     return summonerIds.sort().join('').toString();
   }
 
+  public isAlone() {
+    return this.summoners.length === 1;
+  }
+
+  public async getSummonerMatchHistoryList() {
+    const summonerMatchHistoryList: SummonerMatchHistoryData[] = await Promise.all(
+      this.summoners.map((summoner) => {
+        return summoner.getMatchHistory();
+      })
+    );
+
+    return summonerMatchHistoryList;
+  }
+
   public async getSummonerChampionKdaList() {
-    const summonerChampionKdaList = await Promise.all(
+    const summonerChampionKdaList: SummonerChampionData[] = await Promise.all(
       this.summoners.map((summoner) => {
         return summoner.getChampionKda();
       })

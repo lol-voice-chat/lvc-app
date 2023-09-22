@@ -1,6 +1,5 @@
 import { ipcMain } from 'electron';
-import league from '../utils/league';
-import { MatchData, ParticipantData, fetchPvpMatchHistory } from './match-history';
+import { SummonerMatchHistoryData, Team } from './Team';
 
 interface LeagueTitle {
   value: string;
@@ -9,111 +8,79 @@ interface LeagueTitle {
   standard: 'min' | 'max';
 }
 
-interface SummonerMatchHistory {
+interface LeagueTitleScore {
   summonerId: number;
-  pvpMatchList: MatchData[];
+  count: number;
 }
 
-export const pickLeagueTitle = (team: any[]) => {
+interface MatchLeagueTitle {
+  summonerId: number;
+  title: string;
+  description: string;
+}
+
+export const matchingLeagueTitle = (teamData: []) => {
+  const team = new Team(teamData);
+
   ipcMain.on('league-title', async (event, leagueTitleList: LeagueTitle[]) => {
-    /**
-     * 만약 팀의 소환사가 1명밖에 없다면 null 반환
-     */
-    if (team.length === 1) {
+    if (team.isAlone()) {
       event.reply('league-title', null);
       return;
     }
 
-    /**
-     * 팀 소환사 전적 리스트
-     */
-    const summonerMatchHistoryList: SummonerMatchHistory[] = [];
+    let summonerMatchHistoryList: SummonerMatchHistoryData[] =
+      await team.getSummonerMatchHistoryList();
 
-    for (const summoner of team) {
-      const summonerUrl = `/lol-summoner/v1/summoners/${summoner.summonerId}`;
-      const { puuid } = await league(summonerUrl);
+    const result: MatchLeagueTitle[] = [];
 
-      const pvpMatchList: MatchData[] = await fetchPvpMatchHistory(puuid);
-      const summonerMatchHistory: SummonerMatchHistory = {
-        summonerId: summoner.summonerId,
-        pvpMatchList,
-      };
-
-      summonerMatchHistoryList.push(summonerMatchHistory);
-    }
-
-    const result: any[] = [];
-    let leagueTitleIndex = 0;
-    let copySummonerMatchHistoryList = [...summonerMatchHistoryList];
-
-    /**
-     * 우리팀 소환사 수만큼 돌린다.
-     */
     for (let i = 0; i < summonerMatchHistoryList.length; i++) {
-      /**
-       * 칭호데이터를 순서대로 들고온다.
-       */
-      const leagueTitle = leagueTitleList[leagueTitleIndex];
-      console.log('이번 칭호: ', leagueTitle.title);
-      leagueTitleIndex += 1;
+      const leagueTitle = leagueTitleList[i];
 
-      const array: any[] = [];
-      copySummonerMatchHistoryList.forEach((summonerMatchHistory: SummonerMatchHistory) => {
-        let count = 0;
+      const summonerLeagueTitleScoreList: LeagueTitleScore[] = //
+        summonerMatchHistoryList.map((summonerMatchHistory) => {
+          const count = summonerMatchHistory.matchHistory.getLeagueTitleScore(leagueTitle);
+          const leagueTitleScore: LeagueTitleScore = {
+            summonerId: summonerMatchHistory.summonerId,
+            count,
+          };
 
-        //1. 소환사 pvp match를 돌면서 칭호 데이터값을 더한다.
-        summonerMatchHistory.pvpMatchList.forEach((match: MatchData) => {
-          const participant: ParticipantData = match.participants[0];
-
-          let statsValue = participant.stats[leagueTitle.value as keyof ParticipantData['stats']];
-          if (statsValue) {
-            statsValue = 1;
-          } else {
-            statsValue = 0;
-          }
-
-          count += statsValue;
+          return leagueTitleScore;
         });
 
-        const statsValue = {
-          summonerId: summonerMatchHistory.summonerId,
-          count,
-        };
+      const summonerData = matching(leagueTitle, summonerLeagueTitleScoreList);
+      result.push(summonerData);
 
-        array.push(statsValue);
-      });
-
-      if (leagueTitle.standard === 'max') {
-        const temp = array.sort((a, b) => a.count - b.count);
-        const summoner = temp[temp.length - 1];
-
-        result.push({
-          summonerId: summoner.summonerId,
-          title: leagueTitle.title,
-          description: leagueTitle.description,
-        });
-
-        copySummonerMatchHistoryList = copySummonerMatchHistoryList.filter(
-          (summonerMatchHistory) => summonerMatchHistory.summonerId !== summoner.summonerId
-        );
-      } else {
-        const temp = array.sort((a, b) => b.count - a.count);
-        const summoner = temp[temp.length - 1];
-
-        result.push({
-          summonerId: summoner.summonerId,
-          title: leagueTitle.title,
-          description: leagueTitle.description,
-        });
-
-        copySummonerMatchHistoryList = copySummonerMatchHistoryList.filter(
-          (summonerMatchHistory) => summonerMatchHistory.summonerId !== summoner.summonerId
-        );
-      }
+      //칭호가 매칭된 소환사는 제거
+      summonerMatchHistoryList = summonerMatchHistoryList.filter(
+        (summonerMatchHistory) => summonerMatchHistory.summonerId !== summonerData.summonerId
+      );
     }
-    console.log('최종 칭호 매칭: ', result);
 
     event.reply('league-title', result);
     return;
   });
 };
+
+function matching(leagueTitle: LeagueTitle, summonerLeagueTitleScoreList: LeagueTitleScore[]) {
+  const sorted = sortByLeagueTitleStandard(leagueTitle, summonerLeagueTitleScoreList);
+  const summoner = sorted[sorted.length - 1];
+
+  const matchLeagueTitle: MatchLeagueTitle = {
+    summonerId: summoner.summonerId,
+    title: leagueTitle.title,
+    description: leagueTitle.description,
+  };
+
+  return matchLeagueTitle;
+}
+
+function sortByLeagueTitleStandard(
+  leagueTitle: LeagueTitle,
+  summonerLeagueTitleScoreList: LeagueTitleScore[]
+) {
+  if (leagueTitle.standard === 'max') {
+    return summonerLeagueTitleScoreList.sort((a, b) => a.count - b.count);
+  }
+
+  return summonerLeagueTitleScoreList.sort((a, b) => b.count - a.count);
+}

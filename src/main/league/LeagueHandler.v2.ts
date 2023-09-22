@@ -4,8 +4,7 @@ import { Summoner } from './league-client';
 import league from '../utils/league';
 import { LCU_ENDPOINT } from '../constants';
 import { IPC_KEY } from '../../const';
-import { pickLeagueTitle } from './league-title';
-import { MatchData, getChampionStats, ChampionStats } from './match-history';
+import { matchingLeagueTitle } from './league-title';
 import {
   Gameflow,
   isChampselectPhase,
@@ -15,12 +14,13 @@ import {
   isCloseInGameWIndow,
 } from './game-flow';
 import { SummonerChampionData, Team } from './Team';
+import { MatchHistory, ChampionStats } from './MatchHistory';
 
 let isJoinedRoom = false;
 let isStartedGameLoading = false;
 let isStartedInGame = false;
 let isEndGame = false;
-let isLeagueTitlePicked = false;
+let isMatchedLeagueTitle = false;
 let selectedChampionId: number = 0;
 
 export class LeagueHandler {
@@ -34,7 +34,7 @@ export class LeagueHandler {
     this.summoner = summoner;
   }
 
-  public async handle(gameflow: Gameflow, pvpMatchList: MatchData[]) {
+  public async handle(gameflow: Gameflow, matchHistory: MatchHistory) {
     await this.handleLeaguePhase(gameflow);
 
     this.ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, async (data) => {
@@ -44,9 +44,9 @@ export class LeagueHandler {
       }
 
       if (data.timer.phase === 'BAN_PICK') {
-        if (!isLeagueTitlePicked) {
-          pickLeagueTitle(data.myTeam);
-          isLeagueTitlePicked = true;
+        if (!isMatchedLeagueTitle) {
+          isMatchedLeagueTitle = true;
+          matchingLeagueTitle(data.myTeam);
         }
 
         const { championId } = data.myTeam.find(
@@ -55,10 +55,10 @@ export class LeagueHandler {
 
         if (selectedChampionId !== championId) {
           selectedChampionId = championId;
-          const championStats: ChampionStats = getChampionStats(
-            pvpMatchList,
+          const championStats: ChampionStats = matchHistory.getChampionStats(
+            this.summoner.summonerId,
             championId,
-            this.summoner
+            this.summoner.profileImage
           );
           this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
         }
@@ -163,7 +163,6 @@ export class LeagueHandler {
       teamTwo.getSummonerChampionKdaList(),
     ]);
     const summonerDataList = teamOneSummonerChampionKdaList.concat(teamTwoSummonerChampionKdaList);
-    console.log('챔피언 kda: ', summonerDataList);
 
     this.webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName: teamName });
     this.webContents.send(IPC_KEY.LEAGUE_JOIN_ROOM, {

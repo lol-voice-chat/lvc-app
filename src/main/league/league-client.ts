@@ -1,7 +1,7 @@
 import league from '../utils/league';
 import { LCU_ENDPOINT } from '../constants';
 import { CurrentSummoner, getTier, isEmptySummonerData, getProfileImage } from './current-summoner';
-import { fetchPvpMatchHistory, SummonerStats, getSummonerStats, MatchData } from './match-history';
+import { MatchHistory, SummonerStats } from './MatchHistory';
 
 export interface Summoner {
   summonerId: number;
@@ -14,8 +14,10 @@ export interface Summoner {
 
 export const onLeagueClientUx = async () => {
   const currentSummoner: CurrentSummoner = await getCurrentSummoner();
-  const pvpMatchList: MatchData[] = await fetchPvpMatchHistory(currentSummoner.puuid);
-  const summonerStats: SummonerStats = getSummonerStats(pvpMatchList);
+  const matchHistory = await MatchHistory.fetch(currentSummoner.puuid);
+  const summonerStats = matchHistory.getSummonerStats();
+  // const pvpMatchList: MatchData[] = await fetchPvpMatchHistory(currentSummoner.puuid);
+  // const summonerStats: SummonerStats = getSummonerStats(pvpMatchList);
 
   const summoner: Summoner = {
     summonerId: currentSummoner.summonerId,
@@ -26,7 +28,7 @@ export const onLeagueClientUx = async () => {
     summonerStats,
   };
 
-  return { summoner, pvpMatchList };
+  return { summoner, matchHistory };
 };
 
 async function getCurrentSummoner(): Promise<CurrentSummoner> {
