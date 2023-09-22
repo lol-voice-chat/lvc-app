@@ -19,17 +19,18 @@ export class Friend {
 
   public static async fetch() {
     const friendListData: any[] = await league(LCU_ENDPOINT.FRIENDS_URL);
-    const friendList: Friend[] = plainToInstance(Friend, friendListData);
-    return friendList;
+    return plainToInstance(Friend, friendListData);
   }
 
   public getProfile() {
+    const isOffline = this.availability === 'offline' || this.availability === 'mobile';
+
     const profile: FriendProfile = {
       summonerId: this.summonerId,
       puuid: this.puuid,
       profileImage: `https://ddragon-webp.lolmath.net/latest/img/profileicon/${this.icon}.webp`,
       displayName: this.gameName,
-      status: this.availability === 'offline' ? '오프라인' : '온라인',
+      status: isOffline ? '오프라인' : '온라인',
     };
 
     return profile;
