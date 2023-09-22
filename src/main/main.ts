@@ -25,7 +25,7 @@ const createWindow = () => {
 
 function handleLoadEvent() {
   mainWindow.webContents.on('did-finish-load', async () => {
-    const { summoner, pvpMatchList } = await onLeagueClientUx();
+    const { summoner, matchHistory } = await onLeagueClientUx();
     mainWindow.webContents.send('on-league-client', summoner);
 
     const [ws, gameflow] = await Promise.all([
@@ -34,7 +34,7 @@ function handleLoadEvent() {
     ]);
 
     const leagueHandler: LeagueHandler = new LeagueHandler(mainWindow.webContents, ws, summoner);
-    await leagueHandler.handle(gameflow, pvpMatchList);
+    await leagueHandler.handle(gameflow, matchHistory);
   });
 }
 
