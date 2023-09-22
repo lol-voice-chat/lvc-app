@@ -7,9 +7,6 @@ export const FriendList = styled.div`
   align-items: center;
 
   width: 80%;
-
-  overflow-y: scroll;
-  overflow-x: hidden;
 `;
 
 export const StatusTag = styled.p`

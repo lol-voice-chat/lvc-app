@@ -164,7 +164,7 @@ function SummonerVoiceBlock(props: {
         </div>
         <div>
           <p>평균 피해량</p>
-          <p id="value">{selectedChampion?.totalDamage ?? '-'}</p>
+          <p id="value">{selectedChampion?.damage ?? '-'}</p>
         </div>
         <div>
           <p>평균 CS</p>

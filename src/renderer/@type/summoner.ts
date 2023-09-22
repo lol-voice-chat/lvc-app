@@ -17,11 +17,15 @@ export type FriendProfileType = {
   status: string;
 };
 
-type SummonerStatsType = {
+export type SummonerStatsType = {
+  kda: string;
+  damage: string;
+  cs: string;
+  mostChampionList: string[];
   odds: number;
   winCount: number;
   failCount: number;
-  statsList: { championIcon: string; kda: string; isWin: boolean }[];
+  statsList: { championIcon: string; kda: string; isWin: boolean; killInvolvement: string }[];
 };
 
 export type ChampionInfoType = {
@@ -29,6 +33,14 @@ export type ChampionInfoType = {
   championIcon: string;
   name: string;
   kda: string;
-  totalDamage: number;
+  damage: number;
   cs: number;
+};
+
+export type SummonerRecordType = {
+  displayName: string;
+  profileImage: string;
+  tier: string;
+  statusMessage: string;
+  summonerStats: SummonerStatsType;
 };

@@ -46,9 +46,9 @@ export const AverageInfo = styled.div`
       display: flex;
 
       img {
-        margin-left: 7px;
-        width: 20px;
-        height: 20px;
+        margin-left: 9px;
+        width: 25px;
+        height: 25px;
         border-radius: 50%;
       }
     }
@@ -154,7 +154,6 @@ export const RecentlyPlayList = styled.div`
 
         font-size: 14px;
         color: ${PALETTE.WHITE_1};
-        background-color: #50383b;
       }
     }
 
