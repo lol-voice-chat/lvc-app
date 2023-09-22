@@ -137,6 +137,7 @@ export class MatchHistory {
     const damage = Math.floor(totalDamage / gameCount).toString();
     const cs = this.getStatsAverage(totalCs, gameCount);
     const mostChampionList = Array.from(championCountList.values())
+      .reverse()
       .sort((a, b) => a.count - b.count)
       .slice(-3)
       .map((champ) => `https://lolcdn.darkintaqt.com/cdn/champion/${champ.championId}/tile`);
