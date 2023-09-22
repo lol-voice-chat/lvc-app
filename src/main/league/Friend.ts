@@ -22,6 +22,10 @@ export class Friend {
     return plainToInstance(Friend, friendListData);
   }
 
+  public isEmptyData() {
+    return this.summonerId === 0;
+  }
+
   public getProfile() {
     const isOffline = this.availability === 'offline' || this.availability === 'mobile';
 
