@@ -30,7 +30,7 @@ export interface ChampionStats {
   championIcon: string;
   name: string;
   kda: string;
-  totalDamage: string;
+  damage: string;
   cs: string;
 }
 
@@ -92,7 +92,7 @@ export class MatchHistory {
         .slice(0, RECENT_PVP_MATCH_COUNT)
         .map(async (match: MatchData) => {
           const participant: ParticipantData = match.participants[0];
-          //모스트 챔피언을 알아내기 위해 해당 챔피언으로 뛴 게임 수 저장
+          //해당 챔피언으로 뛴 게임횟수 저장
           this.addChampionCount(participant.championId, championCountList);
 
           const kills = participant.stats.kills;
@@ -221,7 +221,7 @@ export class MatchHistory {
         championIcon: championIcon,
         name: championName,
         kda: '전적 없음',
-        totalDamage: '전적 없음',
+        damage: '전적 없음',
         cs: '전적 없음',
       };
 
@@ -237,7 +237,7 @@ export class MatchHistory {
       ${this.getStatsAverage(champDeath, champCount)}/
       ${this.getStatsAverage(champAssists, champCount)}
       `,
-      totalDamage: Math.floor(totalDamage / champCount).toString(),
+      damage: Math.floor(totalDamage / champCount).toString(),
       cs: this.getStatsAverage(totalCs, champCount),
     };
 
