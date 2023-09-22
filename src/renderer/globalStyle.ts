@@ -91,8 +91,13 @@ video {
 body {
   * {
     font-family: 'Inter', sans-serif;
-    font-weight: ${FONT.SEMI_BOLD};
+    font-weight: ${FONT.MEDIUM};
   }    
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-use-select: none;
+  user-select: none;
+
 }
 article,
 aside,
@@ -138,6 +143,9 @@ input {
   border: none;
   outline: none;
   padding: 0;
+}
+p {
+  cursor: default;
 }
 `;
 

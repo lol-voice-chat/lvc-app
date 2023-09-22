@@ -37,7 +37,6 @@ export const ProfileImg = styled.img<{ visualize: boolean }>`
   border: 3.5px solid ${({ visualize }) => (visualize ? '#50a361' : 'transparent')};
 
   transition: border-color 0.1s;
-
   box-shadow: 0 5px 18px -7px rgba(0, 0, 0, 0.3);
 
   @media (min-width: ${SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {

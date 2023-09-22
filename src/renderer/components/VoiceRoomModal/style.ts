@@ -2,7 +2,12 @@ import styled from 'styled-components';
 import { PALETTE } from '../../const';
 import { LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH } from '../SummonerLeagueVoiceBlock/style';
 
-export const Background = styled.div`
+export const VoiceRoom = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 999;
+
   display: flex;
   justify-content: center;
   align-items: center;
@@ -19,7 +24,6 @@ export const LeagueBlockBundle = styled.div`
   align-items: center;
   justify-content: space-between;
 
-  /* width: ; */
   height: 670px;
   margin-top: 45px;
 

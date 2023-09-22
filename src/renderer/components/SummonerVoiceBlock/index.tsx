@@ -168,7 +168,7 @@ function SummonerVoiceBlock(props: {
         </div>
         <div>
           <p>평균 CS</p>
-          <p id="value">{selectedChampion?.totalMinionsKilled ?? '-'}</p>
+          <p id="value">{selectedChampion?.cs ?? '-'}</p>
         </div>
       </S.AverageGameData>
 
