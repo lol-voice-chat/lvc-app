@@ -16,8 +16,8 @@ function SideMenuBar() {
   const [isSummonerRecord, setIsSummonerRecord] = useState(false);
   const [summonerRecord, setSummonerRecord] = useState<SummonerRecordType | null>(null);
 
-  const getFriendSummonerRecord = (id: string) => {
-    ipcRenderer.send(IPC_KEY.FRIEND_STATS, id);
+  const getFriendSummonerRecord = (id: string, puuid: string) => {
+    ipcRenderer.send(IPC_KEY.FRIEND_STATS, { id, puuid });
     ipcRenderer.once(IPC_KEY.FRIEND_STATS, (_, summonerRecordData: SummonerRecordType) => {
       setSummonerRecord(summonerRecordData);
     });
