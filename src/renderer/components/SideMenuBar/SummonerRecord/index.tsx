@@ -33,7 +33,7 @@ function SummonerRecord(props: { summonerRecord: SummonerRecordType | null }) {
           <_.WinningPercentage>
             <div id="winning-percentage-text">
               <p>승률</p>
-              <p id="value">{props.summonerRecord.summonerStats.odds}</p>
+              <p id="value">{props.summonerRecord.summonerStats.odds}%</p>
             </div>
             <_.ProgressBar>
               <progress
@@ -60,7 +60,7 @@ function SummonerRecord(props: { summonerRecord: SummonerRecordType | null }) {
                     <img src={championIcon} alt="챔피언 아이콘" />
                     <div style={{ backgroundColor: isWin ? '#2C334A' : '#50383b' }}>{kda}</div>
                   </div>
-                  <p id="kill-involvement">{killInvolvement}%</p>
+                  <p id="kill-involvement">{killInvolvement}</p>
                 </div>
               )
             )}
