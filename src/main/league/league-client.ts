@@ -17,12 +17,11 @@ export interface Summoner {
 export const onLeagueClientUx = async () => {
   const leagueClient: LeagueClient = await LeagueClient.fetch();
 
-  const [matchHistory, friendList, gameflow]: [MatchHistory, Friend[], Gameflow] =
-    await Promise.all([
-      await MatchHistory.fetch(leagueClient.puuid),
-      await Friend.fetch(),
-      await Gameflow.fetch(),
-    ]);
+  const [matchHistory, friendList, gameflow] = await Promise.all([
+    MatchHistory.fetch(leagueClient.puuid),
+    Friend.fetch(),
+    Gameflow.fetch(),
+  ]);
 
   const friendProfileList: FriendProfile[] = friendList.map((friend) => friend.getProfile());
 
