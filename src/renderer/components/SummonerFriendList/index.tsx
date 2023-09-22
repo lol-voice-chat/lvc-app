@@ -9,7 +9,7 @@ function SummonerFriendList(props: { friendProfileList: FriendProfileType[] | nu
   const [offlineSummonerList, setOfflineSummonerList] = useState<FriendProfileType[] | null>(null);
 
   useEffect(() => {
-    if (props.friendProfileList) {
+    if (props.friendProfileList && !initializeFriendList) {
       setOnlineSummonerList(
         props.friendProfileList.filter((summoner) => summoner.status === '온라인')
       );
@@ -25,20 +25,19 @@ function SummonerFriendList(props: { friendProfileList: FriendProfileType[] | nu
       {initializeFriendList ? (
         <>
           <_.StatusTag>온라인</_.StatusTag>
-          {onlineSummonerList?.map(({ profileImage, status, displayName }) => {
+          {onlineSummonerList?.map(({ profileImage, status, displayName }) => (
             <_.SummonerBlock key={displayName}>
               <UserIconWithStatus userIcon={profileImage} status={status} borderColor="#2B2D31" />
               <p id="display-name">{displayName}</p>
-            </_.SummonerBlock>;
-          })}
-
+            </_.SummonerBlock>
+          ))}
           <_.StatusTag>오프라인</_.StatusTag>
-          {offlineSummonerList?.map(({ profileImage, status, displayName }) => {
+          {offlineSummonerList?.map(({ profileImage, status, displayName }) => (
             <_.SummonerBlock key={displayName}>
               <UserIconWithStatus userIcon={profileImage} status={status} borderColor="#2B2D31" />
               <p id="display-name">{displayName}</p>
-            </_.SummonerBlock>;
-          })}
+            </_.SummonerBlock>
+          ))}
         </>
       ) : (
         <>{/* 스켈레톤 */} </>

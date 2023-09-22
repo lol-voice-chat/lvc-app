@@ -25,7 +25,7 @@ const IconWithStatus = styled.div<{ borderColor: string }>`
   #user-status {
     position: absolute;
     bottom: 0;
-    right: 0;
+    right: -5px;
 
     width: 11px;
     height: 11px;
