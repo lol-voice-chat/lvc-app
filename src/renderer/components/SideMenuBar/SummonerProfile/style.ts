@@ -49,8 +49,8 @@ export const Information = styled.div<{ nameLength: number; statusMessageLength:
       font-size: 15px;
       color: ${PALETTE.WHITE_1};
 
-      width: ${(p) => (p.nameLength > 10 ? '75px' : 'auto')};
-      overflow: ${(p) => (p.nameLength > 10 ? 'hidden' : 'auto')};
+      width: ${(p) => (p.nameLength > 6 ? '85px' : 'auto')};
+      overflow: ${(p) => (p.nameLength > 6 ? 'hidden' : 'auto')};
       text-overflow: ellipsis;
     }
   }
