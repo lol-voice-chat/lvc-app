@@ -23,6 +23,8 @@ export const onLeagueClientUx = async () => {
     Gameflow.fetch(),
   ]);
 
+  const summonerStats: SummonerStats = await matchHistory.getSummonerStats();
+  console.log('summoenrStats: ', summonerStats);
   const friendProfileList: FriendProfile[] = friendList.map((friend) => friend.getProfile());
 
   const summoner: Summoner = {
@@ -31,7 +33,7 @@ export const onLeagueClientUx = async () => {
     profileImage: leagueClient.getProfileImage(),
     tier: leagueClient.getTier(),
     statusMessage: leagueClient.statusMessage,
-    summonerStats: matchHistory.getSummonerStats(),
+    summonerStats,
     friendProfileList,
     state: gameflow.getState(),
   };
