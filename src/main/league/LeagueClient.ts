@@ -42,6 +42,10 @@ export class LeagueClient {
   }
 
   public getTier() {
+    if (Object.keys(this.lol).length === 0) {
+      return 'off';
+    }
+
     const { rankedLeagueDivision, rankedLeagueTier } = this.lol;
     const displayTier: string = rankedLeagueTier[0];
 
