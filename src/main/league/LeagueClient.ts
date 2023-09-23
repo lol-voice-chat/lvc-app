@@ -2,7 +2,8 @@ import league from '../utils/league';
 import { LCU_ENDPOINT } from '../constants';
 import { plainToInstance } from 'class-transformer';
 
-interface LeagueRanked {
+interface GameData {
+  gameMode: string;
   rankedLeagueDivision: string;
   rankedLeagueTier: string;
 }
@@ -11,7 +12,7 @@ export class LeagueClient {
   gameName: string;
   id: string;
   icon: number;
-  lol: LeagueRanked;
+  lol: GameData;
   statusMessage: string;
   puuid: string;
   summonerId: number;
@@ -41,7 +42,7 @@ export class LeagueClient {
   }
 
   public getTier() {
-    if (Object.keys(this.lol).length === 0) {
+    if (Object.keys(this.lol).length === 0 || this.lol.gameMode === 'TFT') {
       return 'off';
     }
 
