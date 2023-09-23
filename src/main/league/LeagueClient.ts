@@ -9,6 +9,7 @@ interface GameData {
 }
 
 export class LeagueClient {
+  availability: string;
   gameName: string;
   id: string;
   icon: number;
@@ -43,7 +44,7 @@ export class LeagueClient {
 
   public getTier() {
     if (Object.keys(this.lol).length === 0 || this.lol.gameMode === 'TFT') {
-      return 'off';
+      return '';
     }
 
     const { rankedLeagueDivision, rankedLeagueTier } = this.lol;
@@ -71,5 +72,13 @@ export class LeagueClient {
 
   public getProfileImage() {
     return `https://ddragon-webp.lolmath.net/latest/img/profileicon/${this.icon}.webp`;
+  }
+
+  public isOffline() {
+    return (
+      this.availability === 'offline' ||
+      this.availability === 'mobile' ||
+      this.lol.gameMode === 'TFT'
+    );
   }
 }

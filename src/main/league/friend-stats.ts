@@ -10,6 +10,7 @@ interface Summoner {
   tier: string;
   statusMessage: string;
   summonerStats: SummonerStats;
+  status: string;
 }
 
 export const friendStatsEvent = new EventEmitter();
@@ -29,6 +30,7 @@ friendStatsEvent.on(IPC_KEY.FRIEND_STATS, () => {
       tier: leagueClient.getTier(),
       statusMessage: leagueClient.statusMessage,
       summonerStats,
+      status: leagueClient.isOffline() ? '오프라인' : '온라인',
     };
 
     event.reply(IPC_KEY.FRIEND_STATS, summoner);
