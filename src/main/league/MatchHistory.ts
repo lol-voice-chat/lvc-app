@@ -75,7 +75,7 @@ export class MatchHistory {
   }
 
   public async getSummonerStats() {
-    const championCountList = new Map<number, ChampCount>();
+    const recentUsedChampionList = new Map<number, ChampCount>();
     let killCount = 0;
     let deathCount = 0;
     let assistCount = 0;
@@ -93,7 +93,7 @@ export class MatchHistory {
         .map(async (match: MatchData) => {
           const participant: ParticipantData = match.participants[0];
           //해당 챔피언으로 뛴 게임횟수 저장
-          this.addChampionCount(participant.championId, championCountList);
+          this.addChampionCount(participant.championId, recentUsedChampionList);
 
           const kills = participant.stats.kills;
           const deaths = participant.stats.deaths;
@@ -136,11 +136,7 @@ export class MatchHistory {
       `;
     const damage = Math.floor(totalDamage / gameCount).toString();
     const cs = this.getStatsAverage(totalCs, gameCount);
-    const mostChampionList = Array.from(championCountList.values())
-      .reverse()
-      .sort((a, b) => a.count - b.count)
-      .slice(-3)
-      .map((champ) => `https://lolcdn.darkintaqt.com/cdn/champion/${champ.championId}/tile`);
+    const mostChampionList = this.getMostChampionList(recentUsedChampionList);
     const odds = (winCount / RECENT_PVP_MATCH_COUNT) * 100;
 
     const summonerStats: SummonerStats = {
@@ -187,6 +183,14 @@ export class MatchHistory {
       });
 
     return totalKill;
+  }
+
+  private getMostChampionList(recentUsedChampionList: Map<number, ChampCount>) {
+    return Array.from(recentUsedChampionList.values())
+      .reverse()
+      .sort((a, b) => a.count - b.count)
+      .slice(-3)
+      .map((champ) => `https://lolcdn.darkintaqt.com/cdn/champion/${champ.championId}/tile`);
   }
 
   public getChampionStats(summonerId: number, championId: number, profileImage: string) {

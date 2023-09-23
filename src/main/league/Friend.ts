@@ -16,6 +16,7 @@ export class Friend {
   id: string;
   puuid: string;
   icon: number;
+  summonerId: number;
 
   public static async fetch() {
     const friendListData: any[] = await league(LCU_ENDPOINT.FRIENDS_URL);
@@ -23,7 +24,7 @@ export class Friend {
   }
 
   public isEmptyData() {
-    return this.id === '';
+    return this.summonerId === 0;
   }
 
   public getProfile() {
