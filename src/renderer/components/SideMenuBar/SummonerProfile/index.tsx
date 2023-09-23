@@ -24,7 +24,7 @@ function SummonerProfile(props: {
           >
             <div id="name-tag">
               <p id="display-name">{props.summoner.displayName}</p>
-              {props.summoner.status === '온라인' && (
+              {props.summoner.tier === '' && (
                 <RankBadge size="small" tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
               )}
             </div>
