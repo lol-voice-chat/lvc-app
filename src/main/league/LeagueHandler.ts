@@ -1,10 +1,10 @@
 import { WebContents } from 'electron';
 import { LeagueWebSocket } from 'league-connect';
-import { Summoner } from './league-client';
+import { Summoner } from './onLeagueClientUx';
 import league from '../utils/league';
 import { LCU_ENDPOINT } from '../constants';
 import { IPC_KEY } from '../../const';
-import { leagueTitleEvent } from './league-title';
+import { leagueTitleEvent } from './leagueTitleEvent';
 import { Gameflow } from './Gameflow';
 import { SummonerChampionData, Team } from './Team';
 import { MatchHistory, ChampionStats } from './MatchHistory';
