@@ -1,50 +1,90 @@
 import React, { useEffect, useState } from 'react';
 import * as _ from './style';
 import SummonerIcon from '../@common/SummonerIcon';
-import { FriendProfileType } from '../../@type/summoner';
+import { Socket } from 'socket.io-client';
+import { FriendType, SummonerType } from '../../@type/summoner';
 
 function SummonerFriendList(props: {
-  friendProfileList: FriendProfileType[] | null;
+  friendSocket: Socket | null;
+  summoner: SummonerType | null;
   handleClickSummonerBlock: (id: string, puuid: string) => void;
 }) {
-  const [initializeFriendList, setInitalizeFriendList] = useState(false);
-  const [onlineSummonerList, setOnlineSummonerList] = useState<FriendProfileType[] | null>(null);
-  const [offlineSummonerList, setOfflineSummonerList] = useState<FriendProfileType[] | null>(null);
+  const [initFriendList, setInitFriendList] = useState(false);
+
+  const [onlineSummonerList, setOnlineSummonerList] = useState<FriendType[] | null>(null);
+  const [offlineSummonerList, setOfflineSummonerList] = useState<FriendType[] | null>(null);
 
   useEffect(() => {
-    if (props.friendProfileList && !initializeFriendList) {
-      setOnlineSummonerList(
-        props.friendProfileList.filter((summoner) => summoner.status === '온라인')
+    if (!initFriendList && props.summoner) {
+      props.friendSocket?.emit(
+        'summoner-online',
+        {
+          summoner: {
+            id: props.summoner.id,
+            puuid: props.summoner.puuid,
+            profileImage: props.summoner.profileImage,
+            displayName: props.summoner.displayName,
+          },
+          onlineFriendList: props.summoner.onlineFriendList,
+        },
+        ({ onlineFriendList, offlineFriendList }) => {
+          setOnlineSummonerList(onlineFriendList);
+          setOfflineSummonerList(offlineFriendList);
+          setInitFriendList(true);
+        }
       );
-      setOfflineSummonerList(
-        props.friendProfileList.filter((summoner) => summoner.status === '오프라인')
-      );
-      setInitalizeFriendList(true);
     }
-  }, [props.friendProfileList]);
+  }, [props.summoner]);
+
+  useEffect(() => {
+    function updateFriendOnline(friend: FriendType) {
+      if (!onlineSummonerList || !offlineSummonerList) return;
+
+      setOnlineSummonerList([...onlineSummonerList, friend]);
+      setOfflineSummonerList(
+        [...offlineSummonerList].filter((summoner) => friend.displayName !== summoner.displayName)
+      );
+    }
+    function updateFriendOffline(friend: FriendType) {
+      if (!onlineSummonerList || !offlineSummonerList) return;
+
+      setOfflineSummonerList([...offlineSummonerList, friend]);
+      setOnlineSummonerList(
+        [...onlineSummonerList].filter((summoner) => friend.displayName !== summoner.displayName)
+      );
+    }
+
+    props.friendSocket?.on('online-friend', updateFriendOnline);
+    props.friendSocket?.on('offline-friend', updateFriendOffline);
+
+    return () => {
+      props.friendSocket?.off('online-friend', updateFriendOnline);
+      props.friendSocket?.off('offline-friend', updateFriendOffline);
+    };
+  }, [props.friendSocket]);
 
   return (
     <_.FriendList>
-      {initializeFriendList ? (
+      {initFriendList ? (
         <>
           <_.StatusTag>온라인</_.StatusTag>
-          {onlineSummonerList?.map(({ id, puuid, profileImage, status, displayName }) => (
+          {onlineSummonerList?.map(({ id, puuid, profileImage, displayName }) => (
             <_.SummonerBlock
               key={displayName}
               onClick={() => props.handleClickSummonerBlock(id, puuid)}
             >
-              <SummonerIcon userIcon={profileImage} status={status} borderColor="#2B2D31" />
+              <SummonerIcon userIcon={profileImage} status={'온라인'} borderColor="#2B2D31" />
               <p id="display-name">{displayName}</p>
             </_.SummonerBlock>
           ))}
 
           <_.StatusTag>오프라인</_.StatusTag>
-          {offlineSummonerList?.map(({ id, puuid, profileImage, status, displayName }) => (
+          {offlineSummonerList?.map(({ id, puuid, profileImage, displayName }) => (
             <_.SummonerBlock
               key={displayName}
               onClick={() => props.handleClickSummonerBlock(id, puuid)}
             >
-              <SummonerIcon userIcon={profileImage} status={status} borderColor="#2B2D31" />
+              <SummonerIcon userIcon={profileImage} status={'오프라인'} borderColor="#2B2D31" />
               <p id="display-name">{displayName}</p>
             </_.SummonerBlock>
           ))}

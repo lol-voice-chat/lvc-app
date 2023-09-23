@@ -54,8 +54,8 @@ function SummonerRecord(props: { summonerRecord: SummonerRecordType | null }) {
               <p>킬관여</p>
             </div>
             {props.summonerRecord.summonerStats.statsList.map(
-              ({ championIcon, kda, isWin, killInvolvement }) => (
-                <div id="game-info">
+              ({ championIcon, kda, isWin, killInvolvement }, idx) => (
+                <div id="game-info" key={idx}>
                   <div id="kda-info">
                     <img src={championIcon} alt="챔피언 아이콘" />
                     <div style={{ backgroundColor: isWin ? '#2C334A' : '#50383b' }}>{kda}</div>
