@@ -1,9 +1,9 @@
 import { app, BrowserWindow } from 'electron';
 import { LeagueHandler } from './league/LeagueHandler';
-import { onLeagueClientUx } from './league/league-client';
+import { onLeagueClientUx } from './league/onLeagueClientUx';
 import onElectronStore from './store';
 import { createWebSocketConnection } from 'league-connect';
-import { handleFriendStatsEvent } from './league/friend-stats';
+import { handleFriendStatsEvent } from './league/friendStatsEvent';
 
 let mainWindow: BrowserWindow;
 
