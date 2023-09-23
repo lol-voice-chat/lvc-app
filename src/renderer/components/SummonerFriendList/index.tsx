@@ -26,6 +26,7 @@ function SummonerFriendList(props: {
             displayName: props.summoner.displayName,
           },
           onlineFriendList: props.summoner.onlineFriendList,
+          offlineFriendList: props.summoner.offlineFriendList,
         },
         ({ onlineFriendList, offlineFriendList }) => {
           setOnlineSummonerList(onlineFriendList);
