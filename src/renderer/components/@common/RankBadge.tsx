@@ -37,7 +37,6 @@ const Badge = styled.div<{ size: number; tier: string }>`
     font-weight: ${FONT.SEMI_BOLD};
     font-size: ${(p) => p.size * 1.1}px;
     padding-left: ${({ size, tier }) => (tier === 'Unrank' ? '0' : `${size / 3}px`)};
-
     color: ${PALETTE.WHITE_1};
   }
 `;

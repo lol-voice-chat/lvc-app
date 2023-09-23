@@ -9,16 +9,16 @@ export type SummonerType = {
   tier: string;
   statusMessage: string;
   summonerStats: SummonerStatsType;
-  friendProfileList: FriendProfileType[];
+  onlineFriendList: FriendType[];
+  offlineFriendList: FriendType[];
   status: SummonerStatusType;
 };
 
-export type FriendProfileType = {
+export type FriendType = {
   id: string;
   puuid: string;
   profileImage: string;
   displayName: string;
-  status: SummonerStatusType;
 };
 
 export type SummonerStatsType = {
@@ -32,15 +32,6 @@ export type SummonerStatsType = {
   statsList: { championIcon: string; kda: string; isWin: boolean; killInvolvement: string }[];
 };
 
-export type ChampionInfoType = {
-  summonerId: number;
-  championIcon: string;
-  name: string;
-  kda: string;
-  damage: number;
-  cs: number;
-};
-
 export type SummonerRecordType = {
   displayName: string;
   profileImage: string;
@@ -48,4 +39,13 @@ export type SummonerRecordType = {
   statusMessage: string;
   summonerStats: SummonerStatsType;
   status: SummonerStatusType;
+};
+
+export type ChampionInfoType = {
+  summonerId: number;
+  championIcon: string;
+  name: string;
+  kda: string;
+  damage: number;
+  cs: number;
 };

@@ -1,6 +1,5 @@
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
-  LeagueTitleType,
   enemySummonersState,
   gameStatusState,
   leagueTitleListState,
@@ -189,8 +188,8 @@ function useVoiceChat() {
                 producerTransport,
                 consumerTransportList
               );
-              ipcRenderer.send('league-title', leagueTitleList);
-              ipcRenderer.once('league-title', (_, leagueTitleList: LeagueTitleType[] | null) => {
+              ipcRenderer.send(IPC_KEY.LEAGUE_TITLE, leagueTitleList);
+              ipcRenderer.once(IPC_KEY.LEAGUE_TITLE, (_, leagueTitleList) => {
                 socket.emit('league-title', leagueTitleList);
                 setLeagueTitleList(leagueTitleList);
               });

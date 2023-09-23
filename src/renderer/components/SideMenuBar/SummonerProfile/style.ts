@@ -10,8 +10,8 @@ export const ProfileContainer = styled.div<{ isBackground: boolean }>`
 
   margin-top: 25px;
   padding: 2.5px 15px;
-  border-radius: 7.5px;
 
+  border-radius: 7.5px;
   background-color: ${({ isBackground }) => (isBackground ? '#36373c' : 'transparent')};
 
   &,
@@ -51,12 +51,13 @@ export const Information = styled.div<{ nameLength: number; statusMessageLength:
     #display-name {
       margin-right: 15px;
       font-weight: ${FONT.SEMI_BOLD};
-      font-size: 15px;
+      font-size: ${({ nameLength }) => (nameLength > 6 ? '11px' : '13px')};
       color: ${PALETTE.WHITE_1};
 
-      width: ${(p) => (p.nameLength > 6 ? '85px' : 'auto')};
-      overflow: ${(p) => (p.nameLength > 6 ? 'hidden' : 'auto')};
-      text-overflow: ellipsis;
+      display: block;
+      width: 85px;
+      height: 30px;
+      overflow: hidden;
     }
   }
   #status-message {

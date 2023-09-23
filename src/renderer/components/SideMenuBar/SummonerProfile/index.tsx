@@ -1,18 +1,10 @@
-import { SummonerStatusType } from '../../../@type/summoner';
+import { SummonerRecordType } from '../../../@type/summoner';
 import RankBadge from '../../@common/RankBadge';
 import * as _ from './style';
 import React, { useState } from 'react';
 
-type SummonerProfileType = {
-  profileImage: string;
-  displayName: string;
-  statusMessage: string;
-  tier: string;
-  status: SummonerStatusType;
-};
-
 function SummonerProfile(props: {
-  summoner: SummonerProfileType | null;
+  summoner: SummonerRecordType | null;
   isBackground: boolean;
   handleClickSummonerProfile: (displayName: string) => void;
 }) {
@@ -26,12 +18,9 @@ function SummonerProfile(props: {
       {props.summoner ? (
         <>
           <img id="profile-icon" src={props.summoner.profileImage} alt="소환사 프로필" />
-          <_.Information
-            nameLength={props.summoner.displayName.length}
-            statusMessageLength={props.summoner.statusMessage.length}
-          >
+          <_.Information nameLength={7} statusMessageLength={props.summoner.statusMessage.length}>
             <div id="name-tag">
-              <p id="display-name">{props.summoner.displayName}</p>
+              <p id="display-name">녹녹녹녹녹녹녹녹녹녹녹녹녹녹녹녹</p>
               {props.summoner.status === '온라인' && (
                 <RankBadge size="small" tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
               )}
