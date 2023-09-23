@@ -62,7 +62,7 @@ function SummonerFriendList(props: {
       props.friendSocket?.off('online-friend', updateFriendOnline);
       props.friendSocket?.off('offline-friend', updateFriendOffline);
     };
-  }, [props.friendSocket]);
+  }, [onlineSummonerList, offlineSummonerList]);
 
   return (
     <_.FriendList>
