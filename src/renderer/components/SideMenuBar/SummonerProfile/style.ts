@@ -56,7 +56,6 @@ export const Information = styled.div<{ nameLength: number; statusMessageLength:
 
       display: block;
       width: 85px;
-      height: 30px;
       overflow: hidden;
     }
   }

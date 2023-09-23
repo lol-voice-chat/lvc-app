@@ -11,7 +11,6 @@ export type SummonerType = {
   summonerStats: SummonerStatsType;
   onlineFriendList: FriendType[];
   offlineFriendList: FriendType[];
-  status: SummonerStatusType;
 };
 
 export type FriendType = {
@@ -38,7 +37,6 @@ export type SummonerRecordType = {
   tier: string;
   statusMessage: string;
   summonerStats: SummonerStatsType;
-  status: SummonerStatusType;
 };
 
 export type ChampionInfoType = {
