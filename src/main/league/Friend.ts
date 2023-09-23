@@ -10,10 +10,15 @@ export interface FriendProfile {
   status: string;
 }
 
+interface GameData {
+  gameMode: string;
+}
+
 export class Friend {
   availability: string;
   gameName: string;
   id: string;
+  lol: GameData;
   puuid: string;
   icon: number;
   summonerId: number;
@@ -28,7 +33,10 @@ export class Friend {
   }
 
   public getProfile() {
-    const isOffline = this.availability === 'offline' || this.availability === 'mobile';
+    const isOffline =
+      this.availability === 'offline' ||
+      this.availability === 'mobile' ||
+      this.lol.gameMode === 'TFT';
 
     const profile: FriendProfile = {
       id: this.id,

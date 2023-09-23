@@ -2,16 +2,18 @@ import league from '../utils/league';
 import { LCU_ENDPOINT } from '../constants';
 import { plainToInstance } from 'class-transformer';
 
-interface LeagueRanked {
+interface GameData {
+  gameMode: string;
   rankedLeagueDivision: string;
   rankedLeagueTier: string;
 }
 
 export class LeagueClient {
+  availability: string;
   gameName: string;
   id: string;
   icon: number;
-  lol: LeagueRanked;
+  lol: GameData;
   statusMessage: string;
   puuid: string;
   summonerId: number;
@@ -41,8 +43,8 @@ export class LeagueClient {
   }
 
   public getTier() {
-    if (Object.keys(this.lol).length === 0) {
-      return 'off';
+    if (Object.keys(this.lol).length === 0 || this.lol.gameMode === 'TFT') {
+      return '';
     }
 
     const { rankedLeagueDivision, rankedLeagueTier } = this.lol;
@@ -70,5 +72,13 @@ export class LeagueClient {
 
   public getProfileImage() {
     return `https://ddragon-webp.lolmath.net/latest/img/profileicon/${this.icon}.webp`;
+  }
+
+  public isOffline() {
+    return (
+      this.availability === 'offline' ||
+      this.availability === 'mobile' ||
+      this.lol.gameMode === 'TFT'
+    );
   }
 }

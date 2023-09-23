@@ -182,6 +182,10 @@ export class MatchHistory {
         totalKill += participant.stats.kills;
       });
 
+    if (totalKill === 0) {
+      return 1;
+    }
+
     return totalKill;
   }
 
