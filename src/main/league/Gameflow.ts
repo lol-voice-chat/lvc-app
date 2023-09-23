@@ -22,10 +22,6 @@ export class Gameflow {
     return plainToInstance(Gameflow, gameflowData);
   }
 
-  public getStatus() {
-    return '온라인';
-  }
-
   public isChampselectPhase() {
     return this.phase === 'ChampSelect';
   }
