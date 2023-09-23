@@ -3,6 +3,7 @@ import * as _ from './style';
 import SummonerIcon from '../@common/SummonerIcon';
 import { Socket } from 'socket.io-client';
 import { FriendType, SummonerType } from '../../@type/summoner';
+const { ipcRenderer } = window.require('electron');
 
 function SummonerFriendList(props: {
   friendSocket: Socket | null;
@@ -17,7 +18,7 @@ function SummonerFriendList(props: {
   useEffect(() => {
     if (!initFriendList && props.summoner) {
       props.friendSocket?.emit(
-        'summoner-online',
+        'online-summoner',
         {
           summoner: {
             id: props.summoner.id,
@@ -34,6 +35,15 @@ function SummonerFriendList(props: {
           setInitFriendList(true);
         }
       );
+
+      ipcRenderer.once('shutdown-app', () => {
+        props.friendSocket?.emit('offline-summoner', {
+          id: props.summoner?.id,
+          puuid: props.summoner?.puuid,
+          profileImage: props.summoner?.profileImage,
+          displayName: props.summoner?.displayName,
+        });
+      });
     }
   }, [props.summoner]);
 

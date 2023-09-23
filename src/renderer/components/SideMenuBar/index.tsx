@@ -30,11 +30,11 @@ function SideMenuBar() {
   }, []);
 
   const getFriendSummonerRecord = (id: string, puuid: string) => {
-    setIsSummonerRecord(true);
     ipcRenderer.send(IPC_KEY.FRIEND_STATS, { id, puuid });
     ipcRenderer.once(IPC_KEY.FRIEND_STATS, (_, summonerStatsData: SummonerRecordType) => {
       setSummonerRecord(summonerStatsData);
     });
+    setIsSummonerRecord(true);
   };
 
   const handleClickSummonerProfile = (displayName: string) => {
