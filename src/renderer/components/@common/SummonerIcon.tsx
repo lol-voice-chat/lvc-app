@@ -1,7 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
+import { SummonerStatusType } from '../../@type/summoner';
 
-function UserIconWithStatus(props: { userIcon: string; status: string; borderColor: string }) {
+function SummonerIcon(props: {
+  userIcon: string;
+  status: SummonerStatusType;
+  borderColor: string;
+}) {
   return (
     <IconWithStatus id="user-icon-with-status" borderColor={props.borderColor}>
       <img id="user-profile" src={props.userIcon} alt="소환사 프로필" />
@@ -34,4 +39,4 @@ const IconWithStatus = styled.div<{ borderColor: string }>`
   }
 `;
 
-export default UserIconWithStatus;
+export default SummonerIcon;

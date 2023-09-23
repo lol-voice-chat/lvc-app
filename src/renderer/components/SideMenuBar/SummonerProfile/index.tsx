@@ -1,3 +1,4 @@
+import { SummonerStatusType } from '../../../@type/summoner';
 import RankBadge from '../../@common/RankBadge';
 import * as _ from './style';
 import React, { useState } from 'react';
@@ -7,6 +8,7 @@ type SummonerProfileType = {
   displayName: string;
   statusMessage: string;
   tier: string;
+  status: SummonerStatusType;
 };
 
 function SummonerProfile(props: {
@@ -30,7 +32,9 @@ function SummonerProfile(props: {
           >
             <div id="name-tag">
               <p id="display-name">{props.summoner.displayName}</p>
-              <RankBadge size="small" tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
+              {props.summoner.status === '온라인' && (
+                <RankBadge size="small" tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
+              )}
             </div>
             <p
               id="status-message"

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import * as _ from './style';
-import UserIconWithStatus from '../@common/UserIconWithStatus';
+import SummonerIcon from '../@common/SummonerIcon';
 import { FriendProfileType } from '../../@type/summoner';
 
 function SummonerFriendList(props: {
@@ -33,17 +33,18 @@ function SummonerFriendList(props: {
               key={displayName}
               onClick={() => props.handleClickSummonerBlock(id, puuid)}
             >
-              <UserIconWithStatus userIcon={profileImage} status={status} borderColor="#2B2D31" />
+              <SummonerIcon userIcon={profileImage} status={status} borderColor="#2B2D31" />
               <p id="display-name">{displayName}</p>
             </_.SummonerBlock>
           ))}
+
           <_.StatusTag>오프라인</_.StatusTag>
           {offlineSummonerList?.map(({ id, puuid, profileImage, status, displayName }) => (
             <_.SummonerBlock
               key={displayName}
               onClick={() => props.handleClickSummonerBlock(id, puuid)}
             >
-              <UserIconWithStatus userIcon={profileImage} status={status} borderColor="#2B2D31" />
+              <SummonerIcon userIcon={profileImage} status={status} borderColor="#2B2D31" />
               <p id="display-name">{displayName}</p>
             </_.SummonerBlock>
           ))}
