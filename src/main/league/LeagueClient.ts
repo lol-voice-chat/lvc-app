@@ -37,7 +37,6 @@ export class LeagueClient {
   public static async fetchFriend(id: string) {
     const url = `/lol-chat/v1/friends/${id}`;
     const leagueClientData = await league(url);
-    console.log('tes: ', leagueClientData);
     return plainToInstance(LeagueClient, leagueClientData);
   }
 
