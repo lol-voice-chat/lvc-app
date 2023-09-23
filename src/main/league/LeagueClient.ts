@@ -2,18 +2,16 @@ import league from '../utils/league';
 import { LCU_ENDPOINT } from '../constants';
 import { plainToInstance } from 'class-transformer';
 
-interface GameData {
-  gameMode: string;
+interface LeagueRanked {
   rankedLeagueDivision: string;
   rankedLeagueTier: string;
 }
 
 export class LeagueClient {
-  availability: string;
   gameName: string;
   id: string;
   icon: number;
-  lol: GameData;
+  lol: LeagueRanked;
   statusMessage: string;
   puuid: string;
   summonerId: number;
@@ -36,17 +34,7 @@ export class LeagueClient {
     return this.gameName === '';
   }
 
-  public static async fetchFriend(id: string) {
-    const url = `/lol-chat/v1/friends/${id}`;
-    const leagueClientData = await league(url);
-    return plainToInstance(LeagueClient, leagueClientData);
-  }
-
   public getTier() {
-    if (Object.keys(this.lol).length === 0 || this.lol.gameMode === 'TFT') {
-      return '';
-    }
-
     const { rankedLeagueDivision, rankedLeagueTier } = this.lol;
     const displayTier: string = rankedLeagueTier[0];
 
@@ -72,13 +60,5 @@ export class LeagueClient {
 
   public getProfileImage() {
     return `https://ddragon-webp.lolmath.net/latest/img/profileicon/${this.icon}.webp`;
-  }
-
-  public isOffline() {
-    return (
-      this.availability === 'offline' ||
-      this.availability === 'mobile' ||
-      this.lol.gameMode === 'TFT'
-    );
   }
 }

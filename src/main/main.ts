@@ -3,8 +3,7 @@ import { LeagueHandler } from './league/LeagueHandler';
 import { onLeagueClientUx } from './league/league-client';
 import onElectronStore from './store';
 import { createWebSocketConnection } from 'league-connect';
-import { friendStatsEvent } from './league/friend-stats';
-import { IPC_KEY } from '../const';
+import { handleFriendStatsEvent } from './league/friend-stats';
 
 let mainWindow: BrowserWindow;
 
@@ -23,7 +22,7 @@ const createWindow = () => {
   handleLoadEvent();
 };
 
-function handleLoadEvent() {
+async function handleLoadEvent() {
   mainWindow.webContents.on('did-finish-load', async () => {
     const { summoner, matchHistory, gameflow } = await onLeagueClientUx();
     mainWindow.webContents.send('on-league-client', summoner);
@@ -49,5 +48,5 @@ app.on('window-all-closed', () => {
   app.quit();
 });
 
-friendStatsEvent.emit(IPC_KEY.FRIEND_STATS);
+handleFriendStatsEvent();
 onElectronStore();

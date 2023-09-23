@@ -1,7 +1,8 @@
 import { MatchHistory, SummonerStats } from './MatchHistory';
 import { LeagueClient } from './LeagueClient';
-import { Friend, FriendProfile } from './Friend';
+import { FriendProfile } from './Friend';
 import { Gameflow } from './Gameflow';
+import { Friends } from './Friends';
 
 export interface Summoner {
   id: string;
@@ -12,23 +13,20 @@ export interface Summoner {
   tier: string;
   statusMessage: string;
   summonerStats: SummonerStats;
-  friendProfileList: FriendProfile[];
-  status: string;
+  offlineFriendList: FriendProfile[];
+  onlineFriendList: FriendProfile[];
 }
 
 export const onLeagueClientUx = async () => {
   const leagueClient: LeagueClient = await LeagueClient.fetch();
 
-  const [matchHistory, friendList, gameflow] = await Promise.all([
+  const [matchHistory, friends, gameflow] = await Promise.all([
     MatchHistory.fetch(leagueClient.puuid),
-    Friend.fetch(),
+    Friends.fetch(),
     Gameflow.fetch(),
   ]);
 
   const summonerStats: SummonerStats = await matchHistory.getSummonerStats();
-  const friendProfileList: FriendProfile[] = friendList
-    .filter((friend) => !friend.isEmptyData())
-    .map((friend) => friend.getProfile());
 
   const summoner: Summoner = {
     id: leagueClient.id,
@@ -39,8 +37,8 @@ export const onLeagueClientUx = async () => {
     tier: leagueClient.getTier(),
     statusMessage: leagueClient.statusMessage,
     summonerStats,
-    friendProfileList,
-    status: gameflow.getStatus(),
+    offlineFriendList: friends.getOfflineFriendList(),
+    onlineFriendList: friends.getOnlineFriendList(),
   };
 
   return { summoner, matchHistory, gameflow };
