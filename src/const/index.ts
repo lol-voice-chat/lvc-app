@@ -7,6 +7,7 @@ export const IPC_KEY = {
   CHAMP_INFO: 'champion-info',
   LEAGUE_TITLE: 'league-title',
   FRIEND_STATS: 'friend-stats',
+  SHUTDOWN_APP: 'shutdown-app',
 };
 
 export const STORE_KEY = {

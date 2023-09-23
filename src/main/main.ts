@@ -2,8 +2,9 @@ import { app, BrowserWindow } from 'electron';
 import { LeagueHandler } from './league/LeagueHandler';
 import { onLeagueClientUx } from './league/onLeagueClientUx';
 import onElectronStore from './store';
-import { createWebSocketConnection } from 'league-connect';
+import { authenticate, createWebSocketConnection, LeagueClient } from 'league-connect';
 import { handleFriendStatsEvent } from './league/friendStatsEvent';
+import { IPC_KEY } from '../const';
 
 let mainWindow: BrowserWindow;
 
@@ -21,6 +22,18 @@ const createWindow = () => {
 
   handleLoadEvent();
 };
+
+authenticate({
+  awaitConnection: true,
+}).then((credentials) => {
+  const client = new LeagueClient(credentials);
+  client.start();
+
+  client.on('disconnect', () => {
+    console.log('종로됨');
+    mainWindow.webContents.send(IPC_KEY.SHUTDOWN_APP);
+  });
+});
 
 async function handleLoadEvent() {
   mainWindow.webContents.on('did-finish-load', async () => {
