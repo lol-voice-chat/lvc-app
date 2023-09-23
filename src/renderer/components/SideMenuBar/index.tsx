@@ -18,8 +18,8 @@ function SideMenuBar() {
 
   const getFriendSummonerRecord = (id: string, puuid: string) => {
     ipcRenderer.send(IPC_KEY.FRIEND_STATS, { id, puuid });
-    ipcRenderer.once(IPC_KEY.FRIEND_STATS, (_, summonerRecordData: SummonerRecordType) => {
-      setSummonerRecord(summonerRecordData);
+    ipcRenderer.once(IPC_KEY.FRIEND_STATS, (_, summonerStatsData: SummonerRecordType) => {
+      setSummonerRecord(summonerStatsData);
     });
     setIsSummonerRecord(true);
   };

@@ -1,3 +1,5 @@
+export type SummonerStatusType = '온라인' | '오프라인';
+
 export type SummonerType = {
   id: string;
   puuid: string;
@@ -8,7 +10,7 @@ export type SummonerType = {
   statusMessage: string;
   summonerStats: SummonerStatsType;
   friendProfileList: FriendProfileType[];
-  status: string;
+  status: SummonerStatusType;
 };
 
 export type FriendProfileType = {
@@ -16,7 +18,7 @@ export type FriendProfileType = {
   puuid: string;
   profileImage: string;
   displayName: string;
-  status: string;
+  status: SummonerStatusType;
 };
 
 export type SummonerStatsType = {
@@ -45,4 +47,5 @@ export type SummonerRecordType = {
   tier: string;
   statusMessage: string;
   summonerStats: SummonerStatsType;
+  status: SummonerStatusType;
 };
