@@ -23,7 +23,7 @@ export class Friend {
   summonerId: number;
 
   public existsByGameTag() {
-    return !Number.isNaN(this.gameTag);
+    return Number.isNaN(parseInt(this.gameTag));
   }
 
   public isOffline() {
