@@ -30,7 +30,6 @@ authenticate({
   client.start();
 
   client.on('disconnect', () => {
-    console.log('종로됨');
     mainWindow.webContents.send(IPC_KEY.SHUTDOWN_APP);
   });
 });
