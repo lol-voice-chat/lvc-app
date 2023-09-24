@@ -1,4 +1,4 @@
-import league from '../utils/league';
+import League from '../utils';
 import { plainToInstance } from 'class-transformer';
 import { CHAMPIONS } from '../constants';
 
@@ -70,7 +70,7 @@ export class MatchHistory {
 
   public static async fetch(puuid: string) {
     const url = `/lol-match-history/v1/products/lol/${puuid}/matches?begIndex=0&endIndex=99`;
-    const matchHistoryData = await league(url);
+    const matchHistoryData = await League.httpRequest(url);
     return plainToInstance(MatchHistory, matchHistoryData);
   }
 
@@ -171,7 +171,7 @@ export class MatchHistory {
 
   private async getMyTeamTotalKill(gameId: number, teamId: number) {
     const url = `/lol-match-history/v1/games/${gameId}`;
-    const game: MatchData = await league(url);
+    const game: MatchData = await League.httpRequest(url);
 
     let totalKill = 0;
     game.participants

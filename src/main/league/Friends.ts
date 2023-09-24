@@ -1,5 +1,5 @@
 import { Friend } from './Friend';
-import league from '../utils/league';
+import League from '../utils';
 import { LCU_ENDPOINT } from '../constants';
 import { plainToInstance } from 'class-transformer';
 
@@ -7,14 +7,14 @@ export class Friends {
   private friends: Friend[];
 
   public static async fetch() {
-    const friendListData: any[] = await league(LCU_ENDPOINT.FRIENDS_URL);
+    const friendListData: any[] = await League.httpRequest(LCU_ENDPOINT.FRIENDS_URL);
     const friends = plainToInstance(Friend, friendListData);
     return new Friends(friends);
   }
 
   public static async fetchOne(id: string) {
     const url = `/lol-chat/v1/friends/${id}`;
-    const leagueClientData = await league(url);
+    const leagueClientData = await League.httpRequest(url);
     return plainToInstance(Friend, leagueClientData);
   }
 

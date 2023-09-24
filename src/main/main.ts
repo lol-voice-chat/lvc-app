@@ -2,9 +2,9 @@ import { app, BrowserWindow } from 'electron';
 import { LeagueHandler } from './league/LeagueHandler';
 import { onLeagueClientUx } from './league/onLeagueClientUx';
 import onElectronStore from './store';
-import { authenticate, createWebSocketConnection, LeagueClient } from 'league-connect';
+import { createWebSocketConnection } from 'league-connect';
 import { handleFriendStatsEvent } from './league/friendStatsEvent';
-import { IPC_KEY } from '../const';
+import League from './utils';
 
 let mainWindow: BrowserWindow;
 
@@ -23,19 +23,10 @@ const createWindow = () => {
   handleLoadEvent();
 };
 
-authenticate({
-  awaitConnection: true,
-}).then((credentials) => {
-  const client = new LeagueClient(credentials);
-  client.start();
-
-  client.on('disconnect', () => {
-    mainWindow.webContents.send(IPC_KEY.SHUTDOWN_APP);
-  });
-});
-
 async function handleLoadEvent() {
   mainWindow.webContents.on('did-finish-load', async () => {
+    await League.initialize(mainWindow);
+
     const { summoner, matchHistory, gameflow } = await onLeagueClientUx();
     mainWindow.webContents.send('on-league-client', summoner);
 

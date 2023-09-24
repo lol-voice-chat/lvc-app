@@ -1,5 +1,5 @@
 import { MatchHistory } from './MatchHistory';
-import league from '../utils/league';
+import League from '../utils';
 
 interface SummonerType {
   summonerId: number;
@@ -28,7 +28,7 @@ export class Summoner {
 
   public async getMatchHistory() {
     const summonerUrl = `/lol-summoner/v1/summoners/${this.summonerId}`;
-    const { puuid } = await league(summonerUrl);
+    const { puuid } = await League.httpRequest(summonerUrl);
     const matchHistory: MatchHistory = await MatchHistory.fetch(puuid);
     const summonerMatchHistory = {
       summonerId: this.summonerId,
