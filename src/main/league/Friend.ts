@@ -22,7 +22,7 @@ export class Friend {
   puuid: string;
   summonerId: number;
 
-  public existSummoner() {
+  public existsByGameTag() {
     return !Number.isNaN(this.gameTag);
   }
 
