@@ -1,4 +1,4 @@
-import league from '../utils/league';
+import League from '../utils';
 import { LCU_ENDPOINT } from '../constants';
 import { plainToInstance } from 'class-transformer';
 
@@ -19,7 +19,7 @@ export class LeagueClient {
   public static async fetch(): Promise<LeagueClient> {
     return new Promise((resolve) => {
       let interval = setInterval(async function () {
-        const leagueClientData = await league(LCU_ENDPOINT.CHAT_ME_URL);
+        const leagueClientData = await League.httpRequest(LCU_ENDPOINT.CHAT_ME_URL);
         const leagueClient: LeagueClient = plainToInstance(LeagueClient, leagueClientData);
 
         if (!leagueClient.isEmptyData()) {

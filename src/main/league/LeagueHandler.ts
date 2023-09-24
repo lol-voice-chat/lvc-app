@@ -1,7 +1,7 @@
 import { WebContents } from 'electron';
 import { LeagueWebSocket } from 'league-connect';
 import { Summoner } from './onLeagueClientUx';
-import league from '../utils/league';
+import League from '../utils';
 import { LCU_ENDPOINT } from '../constants';
 import { IPC_KEY } from '../../const';
 import { leagueTitleEvent } from './leagueTitleEvent';
@@ -105,7 +105,7 @@ export class LeagueHandler {
 
   private async handleLeaguePhase(gameflow: Gameflow) {
     if (gameflow.isChampselectPhase()) {
-      const { myTeam } = await league(LCU_ENDPOINT.CHAMP_SELECT_URL);
+      const { myTeam } = await League.httpRequest(LCU_ENDPOINT.CHAMP_SELECT_URL);
       this.joinTeamVoice(myTeam);
       isJoinedRoom = true;
       return;
@@ -133,7 +133,7 @@ export class LeagueHandler {
   }
 
   private async isCloseChampionSelectionWindow(phase: string) {
-    const gameflowPhase = await league(LCU_ENDPOINT.GAMEFLOW_PHASE_URL);
+    const gameflowPhase = await League.httpRequest(LCU_ENDPOINT.GAMEFLOW_PHASE_URL);
     const isNotChampSelect: boolean = gameflowPhase === 'None' || gameflowPhase === 'Lobby';
     return isJoinedRoom && phase === '' && isNotChampSelect;
   }

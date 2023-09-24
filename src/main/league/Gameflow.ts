@@ -1,4 +1,4 @@
-import league from '../utils/league';
+import League from '../utils';
 import { LCU_ENDPOINT } from '../constants';
 import { plainToInstance } from 'class-transformer';
 
@@ -18,7 +18,7 @@ export class Gameflow {
   gameData: GameData;
 
   public static async fetch() {
-    const gameflowData = await league(LCU_ENDPOINT.GAMEFLOW_URL);
+    const gameflowData = await League.httpRequest(LCU_ENDPOINT.GAMEFLOW_URL);
     return plainToInstance(Gameflow, gameflowData);
   }
 
