@@ -13,6 +13,7 @@ interface LolData {
 
 export class Friend {
   availability: string;
+  gameTag: string;
   gameName: string;
   id: string;
   icon: number;
@@ -21,8 +22,8 @@ export class Friend {
   puuid: string;
   summonerId: number;
 
-  public isEmptyData() {
-    return this.summonerId === 0;
+  public existSummoner() {
+    return !Number.isNaN(this.gameTag);
   }
 
   public isOffline() {
