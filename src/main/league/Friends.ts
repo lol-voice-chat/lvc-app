@@ -23,7 +23,7 @@ export class Friends {
   }
 
   private from(friendList: Friend[]) {
-    return friendList.filter((friend) => !friend.existSummoner());
+    return friendList.filter((friend) => !friend.existsByGameTag());
   }
 
   public getOfflineFriendList() {
