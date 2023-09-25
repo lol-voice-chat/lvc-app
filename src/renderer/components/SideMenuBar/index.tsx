@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import * as _ from './style';
 import { useRecoilValue } from 'recoil';
 import { summonerState } from '../../@store/atom';
-import SummonerFriendList from '../SummonerFriendList';
+import SummonerFriendList from './SummonerFriendList';
 import SummonerProfile from './SummonerProfile';
 import SummonerRecord from './SummonerRecord';
 import { IPC_KEY } from '../../../const';
