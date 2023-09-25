@@ -1,5 +1,5 @@
-import { SummonerRecordType } from '../../../@type/summoner';
-import RankBadge from '../../@common/RankBadge';
+import { SummonerRecordType } from '../../../../@type/summoner';
+import RankBadge from '../../../@common/RankBadge';
 import * as _ from './style';
 import React, { useState } from 'react';
 

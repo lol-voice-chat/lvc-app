@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { FONT, PALETTE } from '../../const';
+import { FONT, PALETTE } from '../../../const';
 
 export const NavContainer = styled.div`
   position: absolute;

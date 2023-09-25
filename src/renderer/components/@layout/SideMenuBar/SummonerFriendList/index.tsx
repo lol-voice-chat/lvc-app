@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import * as _ from './style';
-import SummonerIcon from '../../@common/SummonerIcon';
+import SummonerIcon from '../../../@common/SummonerIcon';
 import { Socket } from 'socket.io-client';
-import { FriendType, SummonerType } from '../../../@type/summoner';
+import { FriendType, SummonerType } from '../../../../@type/summoner';
 const { ipcRenderer } = window.require('electron');
 
 function SummonerFriendList(props: {

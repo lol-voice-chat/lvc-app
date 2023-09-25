@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import * as _ from './style';
 import { useRecoilValue } from 'recoil';
-import { summonerState } from '../../@store/atom';
+import { summonerState } from '../../../@store/atom';
 import SummonerFriendList from './SummonerFriendList';
 import SummonerProfile from './SummonerProfile';
 import SummonerRecord from './SummonerRecord';
-import { IPC_KEY } from '../../../const';
-import { SummonerRecordType } from '../../@type/summoner';
-import { connectSocket } from '../../utils/socket';
+import { IPC_KEY } from '../../../../const';
+import { SummonerRecordType } from '../../../@type/summoner';
+import { connectSocket } from '../../../utils/socket';
 import { Socket } from 'socket.io-client';
 
 const { ipcRenderer } = window.require('electron');
@@ -40,8 +40,8 @@ function SideMenuBar() {
   const handleClickSummonerProfile = (displayName: string) => {
     if (summoner && summoner.displayName === displayName) {
       setSummonerRecord(summoner);
-      setIsSummonerRecord(true);
     }
+    setIsSummonerRecord((curState) => !curState);
   };
 
   return (
