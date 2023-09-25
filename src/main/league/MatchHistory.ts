@@ -18,6 +18,7 @@ interface StatsData {
   kda: string;
   isWin: boolean;
   killInvolvement: string;
+  time: string;
 }
 
 interface ChampCount {
@@ -40,6 +41,7 @@ interface MatchHistoryData {
 
 interface MatchData {
   gameId: number;
+  gameCreationDate: string;
   gameType: string;
   participants: ParticipantData[];
 }
@@ -115,6 +117,7 @@ export class MatchHistory {
             kda: `${kills}/${deaths}/${assists}`,
             isWin: participant.stats.win,
             killInvolvement: `${killInvolvement}%`,
+            time: this.getElapsedTime(match.gameCreationDate),
           };
 
           if (participant.stats.win) {
@@ -187,6 +190,32 @@ export class MatchHistory {
     }
 
     return totalKill;
+  }
+
+  //게임 경과시간 구하기
+  private getElapsedTime(gameDateTime: string) {
+    const currentTime = new Date().getTime();
+    const gameTime = new Date(gameDateTime.substring(0, 19)).getTime();
+    const diff = (currentTime - gameTime) / 1000;
+
+    const times = [
+      { name: '년', milliSeconds: 60 * 60 * 24 * 365 },
+      { name: '개월', milliSeconds: 60 * 60 * 24 * 30 },
+      { name: '일', milliSeconds: 60 * 60 * 24 },
+      { name: '시간', milliSeconds: 60 * 60 },
+      { name: '분', milliSeconds: 60 },
+      { name: '초', milliSeconds: 1 },
+    ];
+
+    for (const value of times) {
+      const betweenTime = Math.floor(diff / value.milliSeconds);
+
+      if (betweenTime > 0) {
+        return `${betweenTime}${value.name} 전`;
+      }
+    }
+
+    return '방금 전';
   }
 
   private getMostChampionList(recentUsedChampionList: Map<number, ChampCount>) {

@@ -6,11 +6,11 @@ export class League {
   private static credentials: Credentials;
 
   public static async initialize(mainWindow: BrowserWindow) {
-    League.credentials = await authenticate({
+    this.credentials = await authenticate({
       awaitConnection: true,
     });
 
-    const client = new LeagueClient(League.credentials);
+    const client = new LeagueClient(this.credentials);
     client.start();
 
     client.on('disconnect', () => {
@@ -25,7 +25,7 @@ export class League {
           method: 'GET',
           url,
         },
-        League.credentials
+        this.credentials
       );
 
       return JSON.parse(response.text());
