@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { FONT } from '../../../const';
+import { FONT } from '../../../../const';
 
 export const FriendList = styled.div`
   display: flex;

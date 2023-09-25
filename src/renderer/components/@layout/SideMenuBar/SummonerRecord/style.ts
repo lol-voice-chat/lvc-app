@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { FONT, PALETTE } from '../../../const';
+import { FONT, PALETTE } from '../../../../const';
 
 export const RecordContainer = styled.div`
   display: flex;
@@ -190,9 +190,15 @@ export const RecentlyPlayList = styled.div`
 
         width: 80px;
         height: 25px;
+        margin-right: 7.5px;
 
         font-size: 14px;
         color: ${PALETTE.WHITE_1};
+      }
+      p {
+        font-weight: ${FONT.MEDIUM};
+        font-size: 12px;
+        color: #7f8189;
       }
     }
 

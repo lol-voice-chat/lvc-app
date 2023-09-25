@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
-import { SummonerType } from '../../@type/summoner';
+import { SummonerType } from '../../../@type/summoner';
 import { useRecoilState, useSetRecoilState } from 'recoil';
-import { summonerState, gameStatusState, summonerInfoListState } from '../../@store/atom';
-import { IPC_KEY, STORE_KEY } from '../../../const';
-import electronStore from '../../@store/electron';
-import VoiceRoomModal from '../VoiceRoomModal';
+import { summonerState, gameStatusState, summonerInfoListState } from '../../../@store/atom';
+import { IPC_KEY, STORE_KEY } from '../../../../const';
+import electronStore from '../../../@store/electron';
+import VoiceRoomModal from '../../VoiceRoomModal';
 import * as S from './style';
 
 const { ipcRenderer } = window.require('electron');

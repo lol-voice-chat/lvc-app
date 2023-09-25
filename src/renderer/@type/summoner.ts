@@ -28,7 +28,13 @@ export type SummonerStatsType = {
   odds: number;
   winCount: number;
   failCount: number;
-  statsList: { championIcon: string; kda: string; isWin: boolean; killInvolvement: string }[];
+  statsList: {
+    championIcon: string;
+    kda: string;
+    isWin: boolean;
+    time: string;
+    killInvolvement: string;
+  }[];
 };
 
 export type SummonerRecordType = {

@@ -1,8 +1,8 @@
 import React from 'react';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { PATH } from './const';
-import Navigator from './components/Navigator';
-import SideMenuBar from './components/SideMenuBar';
+import Navigator from './components/@layout/Navigator';
+import SideMenuBar from './components/@layout/SideMenuBar';
 
 function Router() {
   return (
