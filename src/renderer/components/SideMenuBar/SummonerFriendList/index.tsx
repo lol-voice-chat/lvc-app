@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import * as _ from './style';
-import SummonerIcon from '../@common/SummonerIcon';
+import SummonerIcon from '../../@common/SummonerIcon';
 import { Socket } from 'socket.io-client';
-import { FriendType, SummonerType } from '../../@type/summoner';
+import { FriendType, SummonerType } from '../../../@type/summoner';
 const { ipcRenderer } = window.require('electron');
 
 function SummonerFriendList(props: {
@@ -88,8 +88,7 @@ function SummonerFriendList(props: {
               <p id="display-name">{displayName}</p>
             </_.SummonerBlock>
           ))}
-
-          <_.StatusTag>오프라인</_.StatusTag>
+          <_.StatusTag style={{ marginTop: '50px' }}>오프라인</_.StatusTag>
           {offlineSummonerList?.map(({ id, puuid, profileImage, displayName }) => (
             <_.SummonerBlock
               key={displayName}
@@ -101,7 +100,23 @@ function SummonerFriendList(props: {
           ))}
         </>
       ) : (
-        <>{/* 스켈레톤 */} </>
+        <>
+          {/* 스켈레톤 */}
+          <_.StatusTag>온라인</_.StatusTag>
+          {Array.from({ length: 4 }, (_, idx) => (
+            <div id="sk-summoner-block" key={idx}>
+              <div id="sk-user-icon" />
+              <div id="sk-display-name" />
+            </div>
+          ))}
+          <_.StatusTag style={{ marginTop: '50px' }}>오프라인</_.StatusTag>
+          {Array.from({ length: 20 }, (_, idx) => (
+            <div id="sk-summoner-block" key={idx}>
+              <div id="sk-user-icon" />
+              <div id="sk-display-name" />
+            </div>
+          ))}
+        </>
       )}
     </_.FriendList>
   );

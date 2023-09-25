@@ -30,7 +30,7 @@ export const ProfileContainer = styled.div<{ isBackground: boolean }>`
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background-color: #232428;
+    background-color: #2f3035;
   }
 `;
 
@@ -51,18 +51,20 @@ export const Information = styled.div<{ nameLength: number; statusMessageLength:
     #display-name {
       margin-right: 15px;
       font-weight: ${FONT.SEMI_BOLD};
-      font-size: ${({ nameLength }) => (nameLength > 6 ? '11px' : '13px')};
+      font-size: 14px;
       color: ${PALETTE.WHITE_1};
 
       display: block;
-      width: 85px;
+      width: ${({ nameLength }) => (nameLength > 7 ? '85px' : 'auto')};
       overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
   }
   #status-message {
     width: 125px;
     font-weight: ${FONT.REGULAR};
-    font-size: 12.5px;
+    font-size: 13px;
     color: #949ba4;
 
     display: block;
@@ -89,8 +91,8 @@ export const Information = styled.div<{ nameLength: number; statusMessageLength:
     display: flex;
 
     #sk-display-name {
-      width: 55px;
-      height: 18px;
+      width: 85px;
+      height: 16px;
       border-radius: 4px;
       margin-right: 15px;
       background-color: #404249;
@@ -104,7 +106,7 @@ export const Information = styled.div<{ nameLength: number; statusMessageLength:
   }
   #sk-status-message {
     width: 125px;
-    height: 14.5px;
+    height: 14px;
     border-radius: 3.5px;
     background-color: #404249;
   }

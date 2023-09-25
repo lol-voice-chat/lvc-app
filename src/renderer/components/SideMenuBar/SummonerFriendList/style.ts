@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { FONT, PALETTE } from '../../const';
+import { FONT } from '../../../const';
 
 export const FriendList = styled.div`
   display: flex;
@@ -7,12 +7,50 @@ export const FriendList = styled.div`
   align-items: center;
 
   width: 80%;
+  height: 100%;
+  margin-top: 30px;
+
+  overflow-x: hidden;
+  overflow-y: scroll;
+
+  /* 스크롤바 숨기기 */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  #sk-summoner-block {
+    display: flex;
+    align-items: center;
+
+    width: 90%;
+    margin: 2.5px 0;
+    padding: 6.5px 12px;
+
+    border-radius: 5px;
+    background-color: #36373c;
+
+    #sk-user-icon {
+      margin-right: 10px;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background-color: #2f3035;
+    }
+    #sk-display-name {
+      width: 130px;
+      height: 20px;
+      border-radius: 3.5px;
+      background-color: #404249;
+    }
+  }
 `;
 
 export const StatusTag = styled.p`
   width: 100%;
-  margin: 50px 0 2.5px 0;
-  font-size: 16px;
+  margin: 0 0 2.5px 0;
+  font-size: 15px;
   color: #949ba4;
 `;
 
@@ -20,7 +58,7 @@ export const SummonerBlock = styled.div`
   display: flex;
   align-items: center;
 
-  width: 100%;
+  width: 90%;
   margin: 2.5px 0;
   padding: 6.5px 12px;
 

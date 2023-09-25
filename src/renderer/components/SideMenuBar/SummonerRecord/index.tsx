@@ -67,7 +67,36 @@ function SummonerRecord(props: { summonerRecord: SummonerRecordType | null }) {
           </_.RecentlyPlayList>
         </>
       ) : (
-        <>{/* 스켈레톤 */}</>
+        <>
+          {/* 스켈레톤 */}
+          <_.AverageInfo>
+            {Array.from({ length: 4 }).map((_, idx) => (
+              <div id="sk-info-category" key={idx}>
+                <div id="sk-name" />
+                <div id="sk-value" />
+              </div>
+            ))}
+          </_.AverageInfo>
+          <_.WinningPercentage>
+            <div id="sk-winning-percentage-text">
+              <div />
+              <div />
+            </div>
+            <div id="sk-progress" />
+          </_.WinningPercentage>
+          <_.RecentlyPlayList>
+            <div id="sk-category-tag">
+              <div />
+              <div />
+            </div>
+            {Array.from({ length: 10 }).map((_, idx) => (
+              <div id="sk-game-info" key={idx}>
+                <div id="sk-kda-info" />
+                <div id="value" />
+              </div>
+            ))}
+          </_.RecentlyPlayList>
+        </>
       )}
     </_.RecordContainer>
   );

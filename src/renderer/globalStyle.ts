@@ -98,6 +98,7 @@ body {
   -ms-use-select: none;
   user-select: none;
 
+  background-color: #303236;
 }
 article,
 aside,
