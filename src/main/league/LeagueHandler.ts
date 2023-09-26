@@ -85,7 +85,8 @@ export class LeagueHandler {
 
       //인게임 시작
       if (data.phase === 'InProgress' && data.gameClient.visible && !isStartedInGame) {
-        const timeout = setTimeout(() => {
+        console.log('인게임 시작');
+        setTimeout(() => {
           isStartedInGame = true;
 
           //
@@ -95,11 +96,11 @@ export class LeagueHandler {
 
           const summoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
           const myTeam = summoner ? teamOneSummoners : teamTwoSummoners;
-          const summonerList: SummonerInfo[] = myTeam.getSummonerInfoList();
+          const summonerList: SummonerInfo[] = myTeam.getSummonerInfoList(this.summoner.summonerId);
           //
           this.webContents.send(IPC_KEY.START_IN_GAME, summonerList);
-        }, 1000 * 60 + 5000);
-        clearTimeout(timeout);
+          console.log('팀원 소환사 정보 리스트 보냄');
+        }, 10000);
       }
 
       //인게임 도중 나감
