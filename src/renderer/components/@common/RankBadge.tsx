@@ -4,7 +4,7 @@ import { FONT, PALETTE } from '../../const';
 
 type sizeType = 'small' | 'medium' | 'large';
 let RankBadgeSize = new Map<sizeType, number>([
-  ['small', 12],
+  ['small', 10],
   ['medium', 14],
   ['large', 16],
 ]);

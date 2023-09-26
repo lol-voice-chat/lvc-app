@@ -8,18 +8,18 @@ function SummonerIcon(props: {
   borderColor: string;
 }) {
   return (
-    <IconWithStatus id="user-icon-with-status" borderColor={props.borderColor}>
+    <IconWithStatus
+      id="user-icon-with-status"
+      statusColor={props.status === '온라인' ? '#50A361' : '#949BA4'}
+      borderColor={props.borderColor}
+    >
       <img id="user-profile" src={props.userIcon} alt="소환사 프로필" />
-      <img
-        id="user-status"
-        src={props.status === '온라인' ? 'img/user-status/online_icon.svg' : ''}
-        alt="소환사 상태"
-      />
+      <div id="user-status" />
     </IconWithStatus>
   );
 }
 
-const IconWithStatus = styled.div<{ borderColor: string }>`
+const IconWithStatus = styled.div<{ statusColor: string; borderColor: string }>`
   position: relative;
 
   #user-profile {
@@ -35,6 +35,7 @@ const IconWithStatus = styled.div<{ borderColor: string }>`
     width: 11px;
     height: 11px;
     border-radius: 50%;
+    background-color: ${(p) => p.statusColor};
     border: 2.5px solid ${(p) => p.borderColor};
   }
 `;

@@ -98,6 +98,13 @@ body {
   -ms-use-select: none;
   user-select: none;
 
+  .drag-able {
+    -webkit-user-select: text;
+	  -moz-user-select: text;
+	  -ms-user-select: text;
+	  user-select: text;
+  }
+
   background-color: #303236;
 }
 article,

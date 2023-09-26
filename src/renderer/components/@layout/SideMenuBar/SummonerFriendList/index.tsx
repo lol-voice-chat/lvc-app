@@ -8,7 +8,7 @@ const { ipcRenderer } = window.require('electron');
 function SummonerFriendList(props: {
   friendSocket: Socket | null;
   summoner: SummonerType | null;
-  handleClickSummonerBlock: (id: string, puuid: string) => void;
+  handleClickSummonerBlock: (puuid: string) => void;
 }) {
   const [initFriendList, setInitFriendList] = useState(false);
 
@@ -21,8 +21,8 @@ function SummonerFriendList(props: {
         'online-summoner',
         {
           summoner: {
-            id: props.summoner.id,
             puuid: props.summoner.puuid,
+            summonerId: props.summoner.summonerId,
             profileImage: props.summoner.profileImage,
             displayName: props.summoner.displayName,
           },
@@ -38,8 +38,8 @@ function SummonerFriendList(props: {
 
       ipcRenderer.once('shutdown-app', () => {
         props.friendSocket?.emit('offline-summoner', {
-          id: props.summoner?.id,
           puuid: props.summoner?.puuid,
+          summonerId: props.summoner?.summonerId,
           profileImage: props.summoner?.profileImage,
           displayName: props.summoner?.displayName,
         });
@@ -79,20 +79,20 @@ function SummonerFriendList(props: {
       {initFriendList ? (
         <>
           <_.StatusTag>온라인</_.StatusTag>
-          {onlineSummonerList?.map(({ id, puuid, profileImage, displayName }) => (
+          {onlineSummonerList?.map(({ puuid, profileImage, displayName }) => (
             <_.SummonerBlock
               key={displayName}
-              onClick={() => props.handleClickSummonerBlock(id, puuid)}
+              onClick={() => props.handleClickSummonerBlock(puuid)}
             >
               <SummonerIcon userIcon={profileImage} status={'온라인'} borderColor="#2B2D31" />
               <p id="display-name">{displayName}</p>
             </_.SummonerBlock>
           ))}
           <_.StatusTag style={{ marginTop: '50px' }}>오프라인</_.StatusTag>
-          {offlineSummonerList?.map(({ id, puuid, profileImage, displayName }) => (
+          {offlineSummonerList?.map(({ puuid, profileImage, displayName }) => (
             <_.SummonerBlock
               key={displayName}
-              onClick={() => props.handleClickSummonerBlock(id, puuid)}
+              onClick={() => props.handleClickSummonerBlock(puuid)}
             >
               <SummonerIcon userIcon={profileImage} status={'오프라인'} borderColor="#2B2D31" />
               <p id="display-name">{displayName}</p>
