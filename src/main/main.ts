@@ -3,7 +3,7 @@ import { LeagueHandler } from './league/LeagueHandler';
 import { onLeagueClientUx } from './league/onLeagueClientUx';
 import onElectronStore from './store';
 import { createWebSocketConnection } from 'league-connect';
-import { handleFriendStatsEvent } from './league/friendStatsEvent';
+import { handleFriendStatsEvent } from './league/summonerStatsEvent';
 import League from './utils';
 
 let mainWindow: BrowserWindow;

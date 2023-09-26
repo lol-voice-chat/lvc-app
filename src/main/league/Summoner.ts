@@ -5,17 +5,30 @@ interface SummonerType {
   summonerId: number;
   championId: number;
   puuid: string;
+  summonerName: string;
+  profileIconId: number;
+}
+
+export interface SummonerInfo {
+  summonerId: number;
+  profileImage: string;
+  displayName: string;
+  puuid: string;
 }
 
 export class Summoner {
   summonerId: number;
   championId: number;
   puuid: string;
+  summonerName: string;
+  profileIconId: number;
 
   constructor(summoner: SummonerType) {
     this.summonerId = summoner.summonerId;
     this.championId = summoner.championId;
     this.puuid = summoner.puuid;
+    this.summonerName = summoner.summonerName;
+    this.profileIconId = summoner.profileIconId;
   }
 
   public static valueOf = (summoner: SummonerType) => {
@@ -48,5 +61,15 @@ export class Summoner {
     };
 
     return summonerKda;
+  }
+
+  public getInfo() {
+    const summonerInfo: SummonerInfo = {
+      summonerId: this.summonerId,
+      profileImage: `https://ddragon-webp.lolmath.net/latest/img/profileicon/${this.profileIconId}.webp`,
+      displayName: this.summonerName,
+      puuid: this.puuid,
+    };
+    return summonerInfo;
   }
 }
