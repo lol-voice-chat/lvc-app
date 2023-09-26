@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import * as _ from './style';
 import SummonerIcon from '../../../@common/SummonerIcon';
 import { Socket } from 'socket.io-client';
-import { FriendType, SummonerType } from '../../../../@type/summoner';
+import { FriendType } from '../../../../@type/summoner';
 const { ipcRenderer } = window.require('electron');
 
 function SummonerFriendList(props: {
   friendSocket: Socket | null;
-  summoner: SummonerType | null;
+  summoner: FriendType | null;
   handleClickSummonerBlock: (puuid: string) => void;
 }) {
   const [initFriendList, setInitFriendList] = useState(false);
@@ -26,8 +26,6 @@ function SummonerFriendList(props: {
             profileImage: props.summoner.profileImage,
             displayName: props.summoner.displayName,
           },
-          onlineFriendList: props.summoner.onlineFriendList,
-          offlineFriendList: props.summoner.offlineFriendList,
         },
         ({ onlineFriendList, offlineFriendList }) => {
           setOnlineSummonerList(onlineFriendList);
