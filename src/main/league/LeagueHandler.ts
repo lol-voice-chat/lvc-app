@@ -98,7 +98,7 @@ export class LeagueHandler {
           const summonerList: SummonerInfo[] = myTeam.getSummonerInfoList();
           //
           this.webContents.send(IPC_KEY.START_IN_GAME, summonerList);
-        }, 150000);
+        }, 1000 * 60 + 5000);
         clearTimeout(timeout);
       }
 
