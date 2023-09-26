@@ -2,116 +2,28 @@ import React from 'react';
 import * as _ from './style';
 import { SummonerRecordType } from '../../../../@type/summoner';
 
-const summonerRecord = {
-  displayName: '붕붕카 1호',
-  profileImage: '',
-  tier: '',
-  statusMessage: '앙기모띠띠띠띠띠',
-  summonerStats: {
-    kda: '1 / 2 / 3',
-    damage: '11111',
-    cs: '12312',
-    mostChampionList: ['', '', ''],
-    odds: 10,
-    winCount: 12,
-    failCount: 8,
-    statsList: [
-      {
-        championIcon: '',
-        kda: '',
-        isWin: true,
-        time: '6분전',
-        killInvolvement: '55%',
-      },
-      {
-        championIcon: '',
-        kda: '',
-        isWin: true,
-        time: '6분전',
-        killInvolvement: '55%',
-      },
-      {
-        championIcon: '',
-        kda: '',
-        isWin: true,
-        time: '6분전',
-        killInvolvement: '55%',
-      },
-      {
-        championIcon: '',
-        kda: '',
-        isWin: true,
-        time: '6분전',
-        killInvolvement: '55%',
-      },
-      {
-        championIcon: '',
-        kda: '',
-        isWin: true,
-        time: '6분전',
-        killInvolvement: '55%',
-      },
-      {
-        championIcon: '',
-        kda: '',
-        isWin: true,
-        time: '6분전',
-        killInvolvement: '55%',
-      },
-      {
-        championIcon: '',
-        kda: '',
-        isWin: true,
-        time: '6분전',
-        killInvolvement: '55%',
-      },
-      {
-        championIcon: '',
-        kda: '',
-        isWin: true,
-        time: '6분전',
-        killInvolvement: '55%',
-      },
-      {
-        championIcon: '',
-        kda: '',
-        isWin: true,
-        time: '6분전',
-        killInvolvement: '55%',
-      },
-      {
-        championIcon: '',
-        kda: '',
-        isWin: true,
-        time: '6분전',
-        killInvolvement: '55%',
-      },
-    ],
-  },
-};
-
 function SummonerRecord(props: { summonerRecord: SummonerRecordType | null }) {
   return (
     <_.RecordContainer>
-      {summonerRecord ? (
+      {props.summonerRecord ? (
         <>
           <_.AverageInfo>
             <div id="info-category">
               <p id="name">KDA</p>
-              <p id="value">{summonerRecord.summonerStats.kda}</p>
+              <p id="value">{props.summonerRecord.summonerStats.kda}</p>
             </div>
             <div id="info-category">
               <p id="name">평균 피해량</p>
-              <p id="value">{summonerRecord.summonerStats.damage}</p>
+              <p id="value">{props.summonerRecord.summonerStats.damage}</p>
             </div>
             <div id="info-category">
               <p id="name">평균 CS</p>
-              <p id="value">{summonerRecord.summonerStats.cs}</p>
+              <p id="value">{props.summonerRecord.summonerStats.cs}</p>
             </div>
             <div id="info-category">
               <p id="name">모스트 챔피언</p>
               <div id="most-champ-list">
-                {summonerRecord.summonerStats.mostChampionList.map((championIcon) => (
+                {props.summonerRecord.summonerStats.mostChampionList.map((championIcon) => (
                   <img src={championIcon} alt="챔피언 아이콘" />
                 ))}
               </div>
@@ -121,15 +33,18 @@ function SummonerRecord(props: { summonerRecord: SummonerRecordType | null }) {
           <_.WinningPercentage>
             <div id="winning-percentage-text">
               <p>승률</p>
-              <p id="value">{summonerRecord.summonerStats.odds}%</p>
+              <p id="value">{props.summonerRecord.summonerStats.odds}%</p>
             </div>
             <_.ProgressBar>
               <progress
-                value={summonerRecord.summonerStats.winCount}
-                max={summonerRecord.summonerStats.winCount + summonerRecord.summonerStats.failCount}
+                value={props.summonerRecord.summonerStats.winCount}
+                max={
+                  props.summonerRecord.summonerStats.winCount +
+                  props.summonerRecord.summonerStats.failCount
+                }
               />
-              <p id="win">{summonerRecord.summonerStats.winCount}W</p>
-              <p id="fail">{summonerRecord.summonerStats.failCount}L</p>
+              <p id="win">{props.summonerRecord.summonerStats.winCount}W</p>
+              <p id="fail">{props.summonerRecord.summonerStats.failCount}L</p>
             </_.ProgressBar>
           </_.WinningPercentage>
 
@@ -138,7 +53,7 @@ function SummonerRecord(props: { summonerRecord: SummonerRecordType | null }) {
               <p>최근 플레이</p>
               <p>킬관여</p>
             </div>
-            {summonerRecord.summonerStats.statsList.map(
+            {props.summonerRecord.summonerStats.statsList.map(
               ({ championIcon, kda, isWin, time, killInvolvement }, idx) => (
                 <div id="game-info" key={idx}>
                   <div id="kda-info">
