@@ -68,6 +68,7 @@ export interface ParticipantData {
 }
 
 const RECENT_PVP_MATCH_COUNT = 10;
+moment.relativeTimeThreshold('ss', 0);
 
 export class MatchHistory {
   games: MatchHistoryData;
@@ -119,7 +120,7 @@ export class MatchHistory {
             kda: `${kills}/${deaths}/${assists}`,
             isWin: participant.stats.win,
             killInvolvement: `${killInvolvement}%`,
-            time: this.getElapsedTime(match.gameCreationDate),
+            time: moment(match.gameCreationDate).fromNow(),
           };
 
           if (participant.stats.win) {
@@ -192,12 +193,6 @@ export class MatchHistory {
     }
 
     return totalKill;
-  }
-
-  //게임 경과시간 구하기
-  private getElapsedTime(gameDateTime: string) {
-    moment.relativeTimeThreshold('ss', 0);
-    return moment(gameDateTime).fromNow();
   }
 
   private getMostChampionList(recentUsedChampionList: Map<number, ChampCount>) {
