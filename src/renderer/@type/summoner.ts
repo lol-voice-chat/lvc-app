@@ -1,7 +1,6 @@
 export type SummonerStatusType = '온라인' | '오프라인';
 
 export type SummonerType = {
-  id: string;
   puuid: string;
   summonerId: number;
   displayName: string;
@@ -14,7 +13,6 @@ export type SummonerType = {
 };
 
 export type FriendType = {
-  id: string;
   puuid: string;
   profileImage: string;
   displayName: string;

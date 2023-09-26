@@ -29,8 +29,8 @@ function SideMenuBar() {
     };
   }, []);
 
-  const getFriendSummonerRecord = (id: string, puuid: string) => {
-    ipcRenderer.send(IPC_KEY.FRIEND_STATS, { id, puuid });
+  const getFriendSummonerRecord = (puuid: string) => {
+    ipcRenderer.send(IPC_KEY.FRIEND_STATS, puuid);
     ipcRenderer.once(IPC_KEY.FRIEND_STATS, (_, summonerStatsData: SummonerRecordType) => {
       setSummonerRecord(summonerStatsData);
     });
