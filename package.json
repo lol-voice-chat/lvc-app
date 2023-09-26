@@ -19,6 +19,7 @@
     "electron-store": "^8.1.0",
     "league-connect": "^6.0.0-rc12",
     "mediasoup-client": "^3.6.100",
+    "moment": "^2.29.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-helmet": "^6.1.0",
