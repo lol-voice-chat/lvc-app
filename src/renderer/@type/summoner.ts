@@ -14,6 +14,7 @@ export type SummonerType = {
 
 export type FriendType = {
   puuid: string;
+  summonerId: number;
   profileImage: string;
   displayName: string;
 };

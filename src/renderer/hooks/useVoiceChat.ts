@@ -214,9 +214,10 @@ function useVoiceChat() {
       );
     });
 
-    // ipcRenderer.once(IPC_KEY.START_IN_GAME, () => {});
+    /* 게임 시작 */
+    ipcRenderer.once(IPC_KEY.START_IN_GAME, () => {});
 
-    /* 인게임 방 떠남 */
+    /* 게임 방 떠남 */
     ipcRenderer.once(IPC_KEY.EXIT_IN_GAME, () => {
       disconnectVoiceChat();
     });
@@ -280,12 +281,14 @@ function useVoiceChat() {
       );
     });
 
+    /* 게임 시작 */
     ipcRenderer.once(IPC_KEY.START_IN_GAME, () => {
       socket.emit('start-in-game');
       disconnectVoiceChat();
       setGameStatus('in-game');
     });
 
+    /* 게임 나감 */
     ipcRenderer.once(IPC_KEY.EXIT_IN_GAME, () => {
       disconnectVoiceChat();
     });

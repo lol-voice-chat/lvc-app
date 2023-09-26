@@ -22,6 +22,7 @@ function SummonerFriendList(props: {
         {
           summoner: {
             puuid: props.summoner.puuid,
+            summonerId: props.summoner.summonerId,
             profileImage: props.summoner.profileImage,
             displayName: props.summoner.displayName,
           },
@@ -38,6 +39,7 @@ function SummonerFriendList(props: {
       ipcRenderer.once('shutdown-app', () => {
         props.friendSocket?.emit('offline-summoner', {
           puuid: props.summoner?.puuid,
+          summonerId: props.summoner?.summonerId,
           profileImage: props.summoner?.profileImage,
           displayName: props.summoner?.displayName,
         });

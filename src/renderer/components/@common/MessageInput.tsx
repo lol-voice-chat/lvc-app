@@ -23,7 +23,7 @@ function MessageInput() {
         </div>
         <textarea
           id="text-area"
-          placeholder="메시지를 입력해주세요..."
+          placeholder="메시지를 입력하자!..."
           rows={1}
           onChange={handleResizeHeight}
         />

@@ -24,6 +24,10 @@ function SideMenuBar() {
     const socket = connectSocket('/friend');
     setFriendSocket(socket);
 
+    ipcRenderer.once(IPC_KEY.START_IN_GAME, (_, summonerList) => {
+      socket.emit('start-in-game', summonerList);
+    });
+
     return () => {
       socket.disconnect();
     };
