@@ -8,6 +8,7 @@ import { leagueTitleEvent } from './leagueTitleEvent';
 import { Gameflow } from './Gameflow';
 import { SummonerChampionData, Team } from './Team';
 import { MatchHistory, ChampionStats } from './MatchHistory';
+import { SummonerInfo } from './Summoner';
 
 let isJoinedRoom = false;
 let isStartedGameLoading = false;
@@ -72,6 +73,7 @@ export class LeagueHandler {
       if (data.phase === 'InProgress' && !data.gameClient.visible && !isStartedGameLoading) {
         isStartedGameLoading = true;
         const { teamOne, teamTwo } = data.gameData;
+        console.log('teamOne: ', teamOne);
         await this.joinLeagueVoice(teamOne, teamTwo);
       }
 
@@ -85,7 +87,17 @@ export class LeagueHandler {
       if (data.phase === 'InProgress' && data.gameClient.visible && !isStartedInGame) {
         const timeout = setTimeout(() => {
           isStartedInGame = true;
-          this.webContents.send(IPC_KEY.START_IN_GAME);
+
+          //
+          const { teamOne, teamTwo } = data.gameData;
+          const teamOneSummoners = new Team(teamOne);
+          const teamTwoSummoners = new Team(teamTwo);
+
+          const summoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
+          const myTeam = summoner ? teamOneSummoners : teamTwoSummoners;
+          const summonerList: SummonerInfo[] = myTeam.getSummonerInfoList();
+          //
+          this.webContents.send(IPC_KEY.START_IN_GAME, summonerList);
         }, 150000);
         clearTimeout(timeout);
       }

@@ -55,4 +55,8 @@ export class Team {
 
     return summonerChampionKdaList;
   }
+
+  public getSummonerInfoList() {
+    return this.summoners.map((summoner) => summoner.getInfo());
+  }
 }
