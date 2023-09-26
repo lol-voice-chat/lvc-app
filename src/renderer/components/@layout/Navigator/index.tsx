@@ -6,6 +6,8 @@ import { IPC_KEY, STORE_KEY } from '../../../../const';
 import electronStore from '../../../@store/electron';
 import VoiceRoomModal from '../../VoiceRoomModal';
 import * as S from './style';
+import { useNavigate } from 'react-router-dom';
+import { PATH } from '../../../const';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -13,6 +15,8 @@ function Navigator() {
   const [gameStatus, setGameStatus] = useRecoilState(gameStatusState);
   const setSummoner = useSetRecoilState(summonerState);
   const setSummonerInfoList = useSetRecoilState(summonerInfoListState);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     ipcRenderer.once('on-league-client', (_, summoner: SummonerType) => {
@@ -41,7 +45,7 @@ function Navigator() {
 
       <S.NavContainer>
         <S.TitleCategoryTag>홈</S.TitleCategoryTag>
-        <S.SubCategoryTag>전체채팅</S.SubCategoryTag>
+        <S.SubCategoryTag onClick={() => navigate(PATH.HOME)}>전체채팅</S.SubCategoryTag>
       </S.NavContainer>
     </>
   );

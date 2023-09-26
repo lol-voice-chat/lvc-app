@@ -41,6 +41,6 @@ export const SubCategoryTag = styled.div`
   &:hover {
     cursor: pointer;
     color: ${PALETTE.WHITE_1};
-    background-color: #3a3c41;
+    background-color: #313338;
   }
 `;

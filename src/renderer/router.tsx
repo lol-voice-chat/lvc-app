@@ -3,6 +3,7 @@ import { HashRouter, Route, Routes } from 'react-router-dom';
 import { PATH } from './const';
 import Navigator from './components/@layout/Navigator';
 import SideMenuBar from './components/@layout/SideMenuBar';
+import GeneralChatRoom from './components/GeneralChatRoom';
 
 function Router() {
   return (
@@ -10,7 +11,7 @@ function Router() {
       <Navigator />
 
       <Routes>
-        <Route path={PATH.HOME} element={<></>} />
+        <Route path={PATH.HOME} element={<GeneralChatRoom />} />
       </Routes>
 
       <SideMenuBar />
