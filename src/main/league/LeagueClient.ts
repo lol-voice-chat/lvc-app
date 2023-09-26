@@ -9,7 +9,6 @@ interface LeagueRanked {
 
 export class LeagueClient {
   gameName: string;
-  id: string;
   icon: number;
   lol: LeagueRanked;
   statusMessage: string;
@@ -28,6 +27,12 @@ export class LeagueClient {
         }
       }, 1000);
     });
+  }
+
+  public static async fetchByPuuid(puuid: string) {
+    const url = `/lol-summoner/v2/summoners/puuid/${puuid}`;
+    const leagueClientData = await League.httpRequest(url);
+    return plainToInstance(LeagueClient, leagueClientData);
   }
 
   public isEmptyData() {
