@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { FONT } from '../../../../const';
 
-export const SummonerList = styled.div`
+export const RecentSummonerContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -9,6 +9,17 @@ export const SummonerList = styled.div`
   width: 80%;
   height: 100%;
   margin-top: 30px;
+
+  overflow: hidden;
+`;
+
+export const SummonerList = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 100%;
+  height: 100%;
 
   overflow-x: hidden;
   overflow-y: scroll;
