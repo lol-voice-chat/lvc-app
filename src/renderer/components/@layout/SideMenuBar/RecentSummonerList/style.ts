@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { FONT } from '../../../../const';
 
-export const FriendList = styled.div`
+export const SummonerList = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -31,7 +31,7 @@ export const FriendList = styled.div`
     border-radius: 5px;
     background-color: #36373c;
 
-    #sk-user-icon {
+    #sk-summoner-icon {
       margin-right: 10px;
       width: 35px;
       height: 35px;
@@ -49,7 +49,7 @@ export const FriendList = styled.div`
 
 export const StatusTag = styled.p`
   width: 100%;
-  margin: 0 0 2.5px 0;
+  margin: 0 0 5px 0;
   font-size: 15px;
   color: #949ba4;
 `;
@@ -82,13 +82,16 @@ export const SummonerBlock = styled.div`
     }
   }
 
+  #summoner-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
   #display-name {
     font-weight: ${FONT.MEDIUM};
     font-size: 15px;
     color: #949ba4;
     transition: color 0.15s;
-  }
-  #user-icon-with-status {
-    margin-right: 10px;
   }
 `;

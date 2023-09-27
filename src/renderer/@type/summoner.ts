@@ -8,11 +8,9 @@ export type SummonerType = {
   tier: string;
   statusMessage: string;
   summonerStats: SummonerStatsType;
-  onlineFriendList: FriendType[];
-  offlineFriendList: FriendType[];
 };
 
-export type FriendType = {
+export type RecentSummonerType = {
   puuid: string;
   summonerId: number;
   profileImage: string;
