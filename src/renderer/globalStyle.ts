@@ -108,6 +108,7 @@ body {
     }
   }
 
+  overflow: hidden;
   background-color: #303236;
 }
 article,

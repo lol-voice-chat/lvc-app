@@ -1,7 +1,7 @@
 import { SummonerRecordType } from '../../../../@type/summoner';
 import RankBadge from '../../../@common/RankBadge';
 import * as _ from './style';
-import React, { useState } from 'react';
+import React from 'react';
 
 function SummonerProfile(props: {
   summoner: SummonerRecordType | null;
@@ -17,11 +17,9 @@ function SummonerProfile(props: {
         <>
           <img id="profile-icon" src={props.summoner.profileImage} alt="소환사 프로필" />
           <_.Information nameLength={props.summoner.displayName.length}>
-            <div id="name-tag">
+            <div id="summoner-info">
               <p id="display-name">{props.summoner.displayName}</p>
-              {props.summoner.tier !== '' && (
-                <RankBadge size="small" tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
-              )}
+              <RankBadge size="small" tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
             </div>
           </_.Information>
         </>
@@ -30,7 +28,7 @@ function SummonerProfile(props: {
           {/* 스켈레톤 */}
           <div id="sk-profile-icon" />
           <_.Information nameLength={0}>
-            <div id="sk-name-tag">
+            <div id="sk-summoner-info">
               <div id="sk-display-name" />
               <div id="sk-rank-badge" />
             </div>

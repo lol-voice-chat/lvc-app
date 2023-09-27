@@ -5,14 +5,15 @@ export const ProfileContainer = styled.div<{ isBackground: boolean }>`
   display: flex;
   align-items: center;
 
-  width: ${({ isBackground }) => (isBackground ? '70%' : '80%')};
-  height: 65px;
+  width: 70%;
+  height: 68.5px;
 
   margin-top: 25px;
   padding: 2.5px 15px;
 
   border-radius: 7.5px;
   background-color: ${({ isBackground }) => (isBackground ? '#36373c' : 'transparent')};
+  transition: background-color 0.15s;
 
   &,
   * {
@@ -30,7 +31,7 @@ export const ProfileContainer = styled.div<{ isBackground: boolean }>`
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background-color: #2f3035;
+    background-color: #404249;
   }
 `;
 
@@ -43,40 +44,41 @@ export const Information = styled.div<{ nameLength: number }>`
   align-items: flex-start;
 
   height: 45px;
-  margin-left: 8px;
+  margin-left: 10px;
 
-  #name-tag {
+  #summoner-info {
     display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
 
     #display-name {
-      margin-right: 15px;
       font-weight: ${FONT.SEMI_BOLD};
-      font-size: 14px;
+      font-size: ${({ nameLength }) => (nameLength > 11 ? '11px' : '15px')};
       color: ${PALETTE.WHITE_1};
-
-      display: block;
-      width: ${({ nameLength }) => (nameLength > 7 ? '85px' : 'auto')};
-      overflow: hidden;
       white-space: nowrap;
-      text-overflow: ellipsis;
     }
   }
 
   /* 스켈레톤 */
-  #sk-name-tag {
+  #sk-summoner-info {
     display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    height: 100%;
 
     #sk-display-name {
       width: 85px;
-      height: 16px;
+      height: 16.5px;
       border-radius: 4px;
       margin-right: 15px;
       background-color: #404249;
     }
     #sk-rank-badge {
-      width: 45px;
-      height: 22px;
-      border-radius: 22px;
+      width: 50px;
+      height: 21.25px;
+      border-radius: 21.25px;
       background-color: #222427;
     }
   }

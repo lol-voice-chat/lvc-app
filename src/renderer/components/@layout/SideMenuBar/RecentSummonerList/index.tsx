@@ -9,6 +9,7 @@ function RecentSummonerList(props: {
   return (
     <_.RecentSummonerContainer>
       <_.StatusTag>최근 함께한 소환사</_.StatusTag>
+
       <_.SummonerList>
         {props.recentSummonerList ? (
           <>
