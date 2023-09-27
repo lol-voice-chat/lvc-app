@@ -10,8 +10,8 @@ interface LeagueRanked {
 export class LeagueClient {
   gameName: string;
   icon: number;
+  profileIconId: number;
   lol: LeagueRanked;
-  statusMessage: string;
   puuid: string;
   summonerId: number;
 
@@ -87,5 +87,9 @@ export class LeagueClient {
 
   public getProfileImage() {
     return `https://ddragon-webp.lolmath.net/latest/img/profileicon/${this.icon}.webp`;
+  }
+
+  public getOtherProfileImage() {
+    return `https://ddragon-webp.lolmath.net/latest/img/profileicon/${this.profileIconId}.webp`;
   }
 }

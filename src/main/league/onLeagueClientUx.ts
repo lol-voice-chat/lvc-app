@@ -8,7 +8,6 @@ export interface Summoner {
   displayName: string;
   profileImage: string;
   tier: string;
-  statusMessage: string;
   summonerStats: SummonerStats;
 }
 
@@ -28,7 +27,6 @@ export const onLeagueClientUx = async () => {
     displayName: leagueClient.gameName,
     profileImage: leagueClient.getProfileImage(),
     tier: leagueClient.getTier(),
-    statusMessage: leagueClient.statusMessage,
     summonerStats,
   };
 

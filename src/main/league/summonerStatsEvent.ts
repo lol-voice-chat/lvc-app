@@ -7,7 +7,6 @@ interface Summoner {
   displayName: string;
   profileImage: string;
   tier: string;
-  statusMessage: string;
   summonerStats: SummonerStats;
 }
 
@@ -28,7 +27,6 @@ export const handleFriendStatsEvent = () => {
       displayName: leagueClient.gameName,
       profileImage: leagueClient.getProfileImage(),
       tier,
-      statusMessage: leagueClient.statusMessage,
       summonerStats,
     };
 
