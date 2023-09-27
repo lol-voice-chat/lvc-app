@@ -39,6 +39,28 @@ export class LeagueClient {
     return this.gameName === '';
   }
 
+  public async getOtherTier() {
+    const rankedData = await League.httpRequest(`/lol-ranked/v1/ranked-stats/${this.puuid}`);
+    const { highestRankedEntry } = rankedData;
+    const { division, tier } = highestRankedEntry;
+    const displayTier: string = tier[0];
+
+    switch (division) {
+      case 'I':
+        return displayTier + 1;
+      case 'II':
+        return displayTier + 2;
+      case 'III':
+        return displayTier + 3;
+      case 'IV':
+        return displayTier + 4;
+      case 'V':
+        return displayTier + 5;
+      default:
+        throw new Error('존재하지 않는 랭크등급입니다.');
+    }
+  }
+
   public getTier() {
     const { rankedLeagueDivision, rankedLeagueTier } = this.lol;
     const displayTier: string = rankedLeagueTier[0];

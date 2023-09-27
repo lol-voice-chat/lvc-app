@@ -18,12 +18,16 @@ export const handleFriendStatsEvent = () => {
       MatchHistory.fetch(puuid),
     ]);
 
-    const summonerStats: SummonerStats = await matchHistory.getSummonerStats();
+    const [summonerStats, tier]: [SummonerStats, string] = await Promise.all([
+      matchHistory.getSummonerStats(),
+      leagueClient.getOtherTier(),
+    ]);
+    console.log(tier);
 
     const summoner: Summoner = {
       displayName: leagueClient.gameName,
       profileImage: leagueClient.getProfileImage(),
-      tier: leagueClient.getTier(),
+      tier,
       statusMessage: leagueClient.statusMessage,
       summonerStats,
     };

@@ -73,7 +73,6 @@ export class LeagueHandler {
       if (data.phase === 'InProgress' && !data.gameClient.visible && !isStartedGameLoading) {
         isStartedGameLoading = true;
         const { teamOne, teamTwo } = data.gameData;
-        console.log('teamOne: ', teamOne);
         await this.joinLeagueVoice(teamOne, teamTwo);
       }
 
@@ -85,7 +84,6 @@ export class LeagueHandler {
 
       //인게임 시작
       if (data.phase === 'InProgress' && data.gameClient.visible && !isStartedInGame) {
-        console.log('인게임 시작');
         setTimeout(() => {
           isStartedInGame = true;
 
@@ -99,7 +97,6 @@ export class LeagueHandler {
           const summonerList: SummonerInfo[] = myTeam.getSummonerInfoList(this.summoner.summonerId);
           //
           this.webContents.send(IPC_KEY.START_IN_GAME, summonerList);
-          console.log('팀원 소환사 정보 리스트 보냄');
         }, 10000);
       }
 
