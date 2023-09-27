@@ -6,7 +6,6 @@ export type SummonerType = {
   displayName: string;
   profileImage: string;
   tier: string;
-  statusMessage: string;
   summonerStats: SummonerStatsType;
 };
 
@@ -38,7 +37,6 @@ export type SummonerRecordType = {
   displayName: string;
   profileImage: string;
   tier: string;
-  statusMessage: string;
   summonerStats: SummonerStatsType;
 };
 
