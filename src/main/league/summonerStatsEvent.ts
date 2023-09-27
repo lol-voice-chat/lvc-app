@@ -21,11 +21,10 @@ export const handleFriendStatsEvent = () => {
       matchHistory.getSummonerStats(),
       leagueClient.getOtherTier(),
     ]);
-    console.log(tier);
 
     const summoner: Summoner = {
       displayName: leagueClient.gameName,
-      profileImage: leagueClient.getProfileImage(),
+      profileImage: leagueClient.getOtherProfileImage(),
       tier,
       summonerStats,
     };
