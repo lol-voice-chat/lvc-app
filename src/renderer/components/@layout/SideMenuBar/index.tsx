@@ -33,9 +33,10 @@ function SideMenuBar() {
     };
   }, []);
 
-  const getFriendSummonerRecord = (puuid: string) => {
+  const getRecentSummonerRecord = (puuid: string) => {
     ipcRenderer.send(IPC_KEY.FRIEND_STATS, puuid);
     ipcRenderer.once(IPC_KEY.FRIEND_STATS, (_, summonerStatsData: SummonerRecordType) => {
+      console.log(summonerStatsData);
       setSummonerRecord(summonerStatsData);
     });
     setIsSummonerRecord(true);
@@ -62,7 +63,7 @@ function SideMenuBar() {
         <RecentSummonerList
           summonerStatusSocket={summonerStatusSocket}
           summoner={summoner}
-          handleClickSummonerBlock={getFriendSummonerRecord}
+          handleClickSummonerBlock={getRecentSummonerRecord}
         />
       )}
     </_.SideBarContainer>

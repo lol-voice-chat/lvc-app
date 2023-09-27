@@ -34,7 +34,7 @@ export const ProfileContainer = styled.div<{ isBackground: boolean }>`
   }
 `;
 
-export const Information = styled.div<{ nameLength: number; statusMessageLength: number }>`
+export const Information = styled.div<{ nameLength: number }>`
   position: relative;
 
   display: flex;
@@ -61,30 +61,6 @@ export const Information = styled.div<{ nameLength: number; statusMessageLength:
       text-overflow: ellipsis;
     }
   }
-  #status-message {
-    width: 125px;
-    font-weight: ${FONT.REGULAR};
-    font-size: 13px;
-    color: #949ba4;
-
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  #more-status-message {
-    position: absolute;
-    top: 50px;
-    left: -10px;
-
-    padding: 5px;
-    border-radius: 2.5px;
-
-    font-weight: ${FONT.REGULAR};
-    font-size: 11px;
-    color: #949ba4;
-    background-color: #111214;
-  }
 
   /* 스켈레톤 */
   #sk-name-tag {
@@ -103,11 +79,5 @@ export const Information = styled.div<{ nameLength: number; statusMessageLength:
       border-radius: 22px;
       background-color: #222427;
     }
-  }
-  #sk-status-message {
-    width: 125px;
-    height: 14px;
-    border-radius: 3.5px;
-    background-color: #404249;
   }
 `;
