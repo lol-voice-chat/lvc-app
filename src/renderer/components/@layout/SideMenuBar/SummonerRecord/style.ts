@@ -178,6 +178,7 @@ export const RecentlyPlayList = styled.div`
 
     #kda-info {
       display: flex;
+      align-items: center;
 
       img {
         width: 25px;
