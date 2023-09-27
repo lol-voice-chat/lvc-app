@@ -1,64 +1,64 @@
 import { MatchHistory } from './MatchHistory';
-import { Summoner } from './Summoner';
+import { Member } from './Member';
 
-export interface SummonerMatchHistoryData {
+export interface MemberMatchHistoryData {
   summonerId: number;
   matchHistory: MatchHistory;
 }
 
-export interface SummonerChampionData {
+export interface MemberChampionData {
   summonerId: number;
   championIcon: string;
   kda: string;
 }
 
 export class Team {
-  private summoners: Summoner[];
+  private members: Member[];
 
   constructor(team: []) {
-    this.summoners = this.from(team);
+    this.members = this.from(team);
   }
 
-  private from(team: []): Summoner[] {
-    return team.map(Summoner.valueOf);
+  private from(team: []): Member[] {
+    return team.map(Member.valueOf);
   }
 
   public findBySummonerId(summonerId: number) {
-    return this.summoners.find((summoner) => summoner.isSameSummonerId(summonerId));
+    return this.members.find((member) => member.isSameSummonerId(summonerId));
   }
 
   public createVoiceRoomName() {
-    const summonerIds: number[] = this.summoners.map((summoner) => summoner.summonerId);
+    const summonerIds: number[] = this.members.map((member) => member.summonerId);
     return summonerIds.sort().join('').toString();
   }
 
   public isAlone() {
-    return this.summoners.length === 1;
+    return this.members.length === 1;
   }
 
-  public async getSummonerMatchHistoryList() {
-    const summonerMatchHistoryList: SummonerMatchHistoryData[] = await Promise.all(
-      this.summoners.map((summoner) => {
-        return summoner.getMatchHistory();
+  public async getMemberMatchHistoryList() {
+    const memberMatchHistoryList: MemberMatchHistoryData[] = await Promise.all(
+      this.members.map((member) => {
+        return member.getMatchHistory();
       })
     );
 
-    return summonerMatchHistoryList;
+    return memberMatchHistoryList;
   }
 
-  public async getSummonerChampionKdaList() {
-    const summonerChampionKdaList: SummonerChampionData[] = await Promise.all(
-      this.summoners.map((summoner) => {
-        return summoner.getChampionKda();
+  public async getMemberChampionKdaList() {
+    const memberChampionKdaList: MemberChampionData[] = await Promise.all(
+      this.members.map((member) => {
+        return member.getChampionKda();
       })
     );
 
-    return summonerChampionKdaList;
+    return memberChampionKdaList;
   }
 
-  public getSummonerInfoList(summonerId: number) {
-    return this.summoners
-      .filter((summoner) => !summoner.isSameSummonerId(summonerId))
-      .map((summoner) => summoner.getInfo());
+  public getMemberInfoList(summonerId: number) {
+    return this.members
+      .filter((member) => !member.isSameSummonerId(summonerId))
+      .map((member) => member.getInfo());
   }
 }

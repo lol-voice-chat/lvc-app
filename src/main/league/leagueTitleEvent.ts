@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron';
-import { SummonerMatchHistoryData, Team } from './Team';
+import { MemberMatchHistoryData, Team } from './Team';
 import { IPC_KEY } from '../../const';
 import EventEmitter from 'events';
 
@@ -32,31 +32,30 @@ leagueTitleEvent.on(IPC_KEY.LEAGUE_TITLE, (teamData: []) => {
       return;
     }
 
-    let summonerMatchHistoryList: SummonerMatchHistoryData[] =
-      await team.getSummonerMatchHistoryList();
+    let memberMatchHistoryList: MemberMatchHistoryData[] = await team.getMemberMatchHistoryList();
 
     const result: MatchLeagueTitle[] = [];
 
-    for (let i = 0; i < summonerMatchHistoryList.length; i++) {
+    for (let i = 0; i < memberMatchHistoryList.length; i++) {
       const leagueTitle = leagueTitleList[i];
 
       const summonerLeagueTitleScoreList: LeagueTitleScore[] = //
-        summonerMatchHistoryList.map((summonerMatchHistory) => {
-          const count = summonerMatchHistory.matchHistory.getLeagueTitleScore(leagueTitle);
+        memberMatchHistoryList.map((memberMatchHistory) => {
+          const count = memberMatchHistory.matchHistory.getLeagueTitleScore(leagueTitle);
           const leagueTitleScore: LeagueTitleScore = {
-            summonerId: summonerMatchHistory.summonerId,
+            summonerId: memberMatchHistory.summonerId,
             count,
           };
 
           return leagueTitleScore;
         });
 
-      const summonerData = matching(leagueTitle, summonerLeagueTitleScoreList);
-      result.push(summonerData);
+      const memberData = matching(leagueTitle, summonerLeagueTitleScoreList);
+      result.push(memberData);
 
       //칭호가 매칭된 소환사는 제거
-      summonerMatchHistoryList = summonerMatchHistoryList.filter(
-        (summonerMatchHistory) => summonerMatchHistory.summonerId !== summonerData.summonerId
+      memberMatchHistoryList = memberMatchHistoryList.filter(
+        (memberMatchHistory) => memberMatchHistory.summonerId !== memberData.summonerId
       );
     }
 
@@ -65,12 +64,12 @@ leagueTitleEvent.on(IPC_KEY.LEAGUE_TITLE, (teamData: []) => {
   });
 });
 
-function matching(leagueTitle: LeagueTitle, summonerLeagueTitleScoreList: LeagueTitleScore[]) {
-  const sorted = sortByLeagueTitleStandard(leagueTitle, summonerLeagueTitleScoreList);
-  const summoner = sorted[sorted.length - 1];
+function matching(leagueTitle: LeagueTitle, memberLeagueTitleScoreList: LeagueTitleScore[]) {
+  const sorted = sortByLeagueTitleStandard(leagueTitle, memberLeagueTitleScoreList);
+  const member = sorted[sorted.length - 1];
 
   const matchLeagueTitle: MatchLeagueTitle = {
-    summonerId: summoner.summonerId,
+    summonerId: member.summonerId,
     title: leagueTitle.title,
     description: leagueTitle.description,
   };
@@ -80,11 +79,11 @@ function matching(leagueTitle: LeagueTitle, summonerLeagueTitleScoreList: League
 
 function sortByLeagueTitleStandard(
   leagueTitle: LeagueTitle,
-  summonerLeagueTitleScoreList: LeagueTitleScore[]
+  memberLeagueTitleScoreList: LeagueTitleScore[]
 ) {
   if (leagueTitle.standard === 'max') {
-    return summonerLeagueTitleScoreList.sort((a, b) => a.count - b.count);
+    return memberLeagueTitleScoreList.sort((a, b) => a.count - b.count);
   }
 
-  return summonerLeagueTitleScoreList.sort((a, b) => b.count - a.count);
+  return memberLeagueTitleScoreList.sort((a, b) => b.count - a.count);
 }

@@ -1,8 +1,9 @@
 import { MatchHistory, SummonerStats } from './MatchHistory';
-import { LeagueClient } from './LeagueClient';
 import { Gameflow } from './Gameflow';
+import { Summoner } from './Summoner';
+import { LeagueRanked } from './LeagueRanked';
 
-export interface Summoner {
+export interface SummonerInfo {
   summonerId: number;
   puuid: string;
   displayName: string;
@@ -12,23 +13,25 @@ export interface Summoner {
 }
 
 export const onLeagueClientUx = async () => {
-  const leagueClient: LeagueClient = await LeagueClient.fetch();
+  const summoner: Summoner = await Summoner.fetch();
 
-  const [matchHistory, gameflow] = await Promise.all([
-    MatchHistory.fetch(leagueClient.puuid),
+  const [leagueRanked, matchHistory, gameflow] = await Promise.all([
+    LeagueRanked.fetch(summoner.puuid),
+    MatchHistory.fetch(summoner.puuid),
     Gameflow.fetch(),
   ]);
 
   const summonerStats: SummonerStats = await matchHistory.getSummonerStats();
 
-  const summoner: Summoner = {
-    summonerId: leagueClient.summonerId,
-    puuid: leagueClient.puuid,
-    displayName: leagueClient.gameName,
-    profileImage: leagueClient.getProfileImage(),
-    tier: leagueClient.getTier(),
+  const summonerInfo: SummonerInfo = {
+    summonerId: summoner.summonerId,
+    puuid: summoner.puuid,
+    displayName: summoner.displayName,
+    profileImage: summoner.getProfileImage(),
+    tier: leagueRanked.getTier(),
     summonerStats,
   };
+  console.log(summonerInfo);
 
-  return { summoner, matchHistory, gameflow };
+  return { summonerInfo, matchHistory, gameflow };
 };

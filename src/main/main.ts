@@ -27,12 +27,16 @@ async function handleLoadEvent() {
   mainWindow.webContents.on('did-finish-load', async () => {
     await League.initialize(mainWindow);
 
-    const { summoner, matchHistory, gameflow } = await onLeagueClientUx();
-    mainWindow.webContents.send('on-league-client', summoner);
+    const { summonerInfo, matchHistory, gameflow } = await onLeagueClientUx();
+    mainWindow.webContents.send('on-league-client', summonerInfo);
 
     const ws = await createWebSocketConnection();
 
-    const leagueHandler: LeagueHandler = new LeagueHandler(mainWindow.webContents, ws, summoner);
+    const leagueHandler: LeagueHandler = new LeagueHandler(
+      mainWindow.webContents,
+      ws,
+      summonerInfo
+    );
     await leagueHandler.handle(gameflow, matchHistory);
   });
 }

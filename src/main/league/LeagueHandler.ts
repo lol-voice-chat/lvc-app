@@ -1,14 +1,14 @@
 import { WebContents } from 'electron';
 import { LeagueWebSocket } from 'league-connect';
-import { Summoner } from './onLeagueClientUx';
+import { SummonerInfo } from './onLeagueClientUx';
 import League from '../utils';
 import { LCU_ENDPOINT } from '../constants';
 import { IPC_KEY } from '../../const';
 import { leagueTitleEvent } from './leagueTitleEvent';
 import { Gameflow } from './Gameflow';
-import { SummonerChampionData, Team } from './Team';
+import { MemberChampionData, Team } from './Team';
 import { MatchHistory, ChampionStats } from './MatchHistory';
-import { SummonerInfo } from './Summoner';
+import { MemberInfo } from './Member';
 
 let isJoinedRoom = false;
 let isStartedGameLoading = false;
@@ -20,9 +20,9 @@ let selectedChampionId: number = 0;
 export class LeagueHandler {
   webContents: WebContents;
   ws: LeagueWebSocket;
-  summoner: Summoner;
+  summoner: SummonerInfo;
 
-  constructor(webContents: WebContents, ws: LeagueWebSocket, summoner: Summoner) {
+  constructor(webContents: WebContents, ws: LeagueWebSocket, summoner: SummonerInfo) {
     this.webContents = webContents;
     this.ws = ws;
     this.summoner = summoner;
@@ -94,7 +94,7 @@ export class LeagueHandler {
 
           const summoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
           const myTeam = summoner ? teamOneSummoners : teamTwoSummoners;
-          const summonerList: SummonerInfo[] = myTeam.getSummonerInfoList(this.summoner.summonerId);
+          const summonerList: MemberInfo[] = myTeam.getMemberInfoList(this.summoner.summonerId);
           //
           this.webContents.send(IPC_KEY.START_IN_GAME, summonerList);
         }, 10000);
@@ -165,12 +165,9 @@ export class LeagueHandler {
     const teamName = myTeam.createVoiceRoomName();
 
     const [teamOneSummonerChampionKdaList, teamTwoSummonerChampionKdaList]: [
-      SummonerChampionData[],
-      SummonerChampionData[]
-    ] = await Promise.all([
-      teamOne.getSummonerChampionKdaList(),
-      teamTwo.getSummonerChampionKdaList(),
-    ]);
+      MemberChampionData[],
+      MemberChampionData[]
+    ] = await Promise.all([teamOne.getMemberChampionKdaList(), teamTwo.getMemberChampionKdaList()]);
     const summonerDataList = teamOneSummonerChampionKdaList.concat(teamTwoSummonerChampionKdaList);
 
     this.webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName: teamName });
