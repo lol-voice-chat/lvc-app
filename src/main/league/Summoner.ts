@@ -1,75 +1,38 @@
-import { MatchHistory } from './MatchHistory';
 import League from '../utils';
-
-interface SummonerType {
-  summonerId: number;
-  championId: number;
-  puuid: string;
-  summonerName: string;
-  profileIconId: number;
-}
-
-export interface SummonerInfo {
-  summonerId: number;
-  profileImage: string;
-  displayName: string;
-  puuid: string;
-}
+import { LCU_ENDPOINT } from '../constants';
+import { plainToInstance } from 'class-transformer';
 
 export class Summoner {
-  summonerId: number;
-  championId: number;
-  puuid: string;
-  summonerName: string;
+  displayName: string;
   profileIconId: number;
+  puuid: string;
+  summonerId: number;
 
-  constructor(summoner: SummonerType) {
-    this.summonerId = summoner.summonerId;
-    this.championId = summoner.championId;
-    this.puuid = summoner.puuid;
-    this.summonerName = summoner.summonerName;
-    this.profileIconId = summoner.profileIconId;
+  public static fetch(): Promise<Summoner> {
+    return new Promise((resolve) => {
+      let interval = setInterval(async function () {
+        const summonerData = await League.httpRequest(LCU_ENDPOINT.CURRENT_SUMMONER);
+        const summoner: Summoner = plainToInstance(Summoner, summonerData);
+
+        if (!summoner.isEmptyData()) {
+          clearInterval(interval);
+          resolve(summoner);
+        }
+      }, 1000);
+    });
   }
 
-  public static valueOf = (summoner: SummonerType) => {
-    return new Summoner(summoner);
-  };
-
-  public isSameSummonerId(summonerId: number) {
-    return this.summonerId === summonerId;
+  public static async fetchByPuuid(puuid: string) {
+    const url = `/lol-summoner/v2/summoners/puuid/${puuid}`;
+    const summonerData = await League.httpRequest(url);
+    return plainToInstance(Summoner, summonerData);
   }
 
-  public async getMatchHistory() {
-    const summonerUrl = `/lol-summoner/v1/summoners/${this.summonerId}`;
-    const { puuid } = await League.httpRequest(summonerUrl);
-    const matchHistory: MatchHistory = await MatchHistory.fetch(puuid);
-    const summonerMatchHistory = {
-      summonerId: this.summonerId,
-      matchHistory,
-    };
-
-    return summonerMatchHistory;
+  public isEmptyData() {
+    return this.summonerId === 0;
   }
 
-  public async getChampionKda() {
-    const matchHistory: MatchHistory = await MatchHistory.fetch(this.puuid);
-    const championKda = matchHistory.getChampionKda(this.championId);
-    const summonerKda = {
-      summonerId: this.summonerId,
-      championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${this.championId}/tile`,
-      kda: championKda,
-    };
-
-    return summonerKda;
-  }
-
-  public getInfo() {
-    const summonerInfo: SummonerInfo = {
-      summonerId: this.summonerId,
-      profileImage: `https://ddragon-webp.lolmath.net/latest/img/profileicon/${this.profileIconId}.webp`,
-      displayName: this.summonerName,
-      puuid: this.puuid,
-    };
-    return summonerInfo;
+  public getProfileImage() {
+    return `https://ddragon-webp.lolmath.net/latest/img/profileicon/${this.profileIconId}.webp`;
   }
 }

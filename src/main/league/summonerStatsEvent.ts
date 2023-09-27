@@ -1,9 +1,10 @@
 import { ipcMain } from 'electron';
 import { MatchHistory, SummonerStats } from './MatchHistory';
 import { IPC_KEY } from '../../const';
-import { LeagueClient } from './LeagueClient';
+import { Summoner } from './Summoner';
+import { LeagueRanked } from './LeagueRanked';
 
-interface Summoner {
+interface SummonerInfo {
   displayName: string;
   profileImage: string;
   tier: string;
@@ -12,24 +13,23 @@ interface Summoner {
 
 export const handleFriendStatsEvent = () => {
   ipcMain.on(IPC_KEY.FRIEND_STATS, async (event, puuid) => {
-    const [leagueClient, matchHistory]: [LeagueClient, MatchHistory] = await Promise.all([
-      LeagueClient.fetchByPuuid(puuid),
-      MatchHistory.fetch(puuid),
-    ]);
+    const [summoner, leagueRanked, matchHistory]: [Summoner, LeagueRanked, MatchHistory] =
+      await Promise.all([
+        Summoner.fetchByPuuid(puuid),
+        LeagueRanked.fetch(puuid),
+        MatchHistory.fetch(puuid),
+      ]);
 
-    const [summonerStats, tier]: [SummonerStats, string] = await Promise.all([
-      matchHistory.getSummonerStats(),
-      leagueClient.getOtherTier(),
-    ]);
+    const summonerStats: SummonerStats = await matchHistory.getSummonerStats();
 
-    const summoner: Summoner = {
-      displayName: leagueClient.gameName,
-      profileImage: leagueClient.getOtherProfileImage(),
-      tier,
+    const summonerInfo: SummonerInfo = {
+      displayName: summoner.displayName,
+      profileImage: summoner.getProfileImage(),
+      tier: leagueRanked.getTier(),
       summonerStats,
     };
 
-    event.reply(IPC_KEY.FRIEND_STATS, summoner);
+    event.reply(IPC_KEY.FRIEND_STATS, summonerInfo);
   });
 };
 

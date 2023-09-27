@@ -2,8 +2,7 @@ export const LCU_ENDPOINT = {
   GAMEFLOW_URL: '/lol-gameflow/v1/session',
   GAMEFLOW_PHASE_URL: '/lol-gameflow/v1/gameflow-phase',
   CHAMP_SELECT_URL: '/lol-champ-select/v1/session',
-  CHAT_ME_URL: '/lol-chat/v1/me',
-  FRIENDS_URL: '/lol-chat/v1/friends',
+  CURRENT_SUMMONER: '/lol-summoner/v1/current-summoner',
 };
 
 type ChampionsType = {
