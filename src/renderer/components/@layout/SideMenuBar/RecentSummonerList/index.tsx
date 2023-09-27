@@ -24,7 +24,7 @@ function RecentSummonerList(props: {
             displayName: props.summoner.displayName,
           },
         },
-        (recentSummonerList: RecentSummonerType[]) => {
+        ({ recentSummonerList }) => {
           setRecentSummonerList(recentSummonerList);
           setInitRecentList(true);
         }
@@ -47,7 +47,6 @@ function RecentSummonerList(props: {
         {initRecentSummonerList ? (
           <>
             <_.StatusTag>최근 함께한 소환사</_.StatusTag>
-
             {recentSummonerList?.map(({ puuid, profileImage, displayName }) => (
               <_.SummonerBlock
                 key={displayName}
@@ -62,7 +61,6 @@ function RecentSummonerList(props: {
           <>
             {/* 스켈레톤 */}
             <_.StatusTag>최근 함께한 소환사</_.StatusTag>
-
             {Array.from({ length: 20 }, (_, idx) => (
               <div id="sk-summoner-block" key={idx}>
                 <div id="sk-summoner-icon" />
