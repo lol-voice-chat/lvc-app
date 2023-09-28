@@ -14,7 +14,6 @@ const { ipcRenderer } = window.require('electron');
 
 function SideMenuBar() {
   const summoner = useRecoilValue(summonerState);
-
   const [summonerStatusSocket, setSummonerStatusSocket] = useState<Socket | null>(null);
 
   const [isSummonerRecord, setIsSummonerRecord] = useState(false);

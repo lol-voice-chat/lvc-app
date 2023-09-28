@@ -12,7 +12,7 @@ let RankBadgeSize = new Map<sizeType, number>([
 function RankBadge(props: { size: sizeType; tierImg: string; tier: string }) {
   return (
     <Badge id="rank-badge" size={RankBadgeSize.get(props.size) ?? 50} tier={props.tier}>
-      {props.tier !== 'Unrank' && props.tier !== '' && <img src={props.tierImg} alt="티어 뱃지" />}
+      {props.tier !== 'Unrank' && <img src={props.tierImg} alt="티어 뱃지" />}
       <p>{props.tier}</p>
     </Badge>
   );
@@ -34,7 +34,7 @@ const Badge = styled.div<{ size: number; tier: string }>`
   }
   p {
     font-weight: ${FONT.SEMI_BOLD};
-    font-size: ${(p) => p.size * 0.25}px;
+    font-size: ${(p) => p.size * (p.tier === 'Unrank' ? 0.22 : 0.25)}px;
     color: ${PALETTE.WHITE_1};
   }
 `;

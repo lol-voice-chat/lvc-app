@@ -19,7 +19,7 @@ function SummonerProfile(props: {
           <_.Information nameLength={props.summoner.displayName.length}>
             <div id="summoner-info">
               <p id="display-name">{props.summoner.displayName}</p>
-              <RankBadge size="small" tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
+              <RankBadge size="small" tierImg="img/dummy_rank.png" tier={'Unrank'} />
             </div>
           </_.Information>
         </>

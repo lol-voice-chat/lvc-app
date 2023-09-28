@@ -6,6 +6,7 @@ import {
   gameStatusState,
   myTeamSummonersState,
   summonerState,
+  userStreamState,
 } from '../../@store/atom';
 import * as S from './style';
 import SummonerVoiceBlock from '../summoner-voice-block';
@@ -16,6 +17,8 @@ import { Socket } from 'socket.io-client';
 import SummonerLeagueVoiceBlock from '../summoner-league-voice-block';
 
 function VoiceRoomModal() {
+  const userStream = useRecoilValue(userStreamState);
+
   const gameStatus = useRecoilValue(gameStatusState);
 
   const summoner = useRecoilValue(summonerState);
@@ -28,8 +31,10 @@ function VoiceRoomModal() {
   const { onTeamVoiceRoom, onLeagueVoiceRoom } = useVoiceChat();
 
   useEffect(() => {
-    onTeamVoiceRoom();
+    userStream && onTeamVoiceRoom(userStream);
+  }, [userStream]);
 
+  useEffect(() => {
     electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
       const socket = connectSocket('/team-voice-chat/manage');
       socket.emit('team-manage-join-room', roomName);
@@ -42,9 +47,13 @@ function VoiceRoomModal() {
   }, []);
 
   useEffect(() => {
-    if (gameStatus === 'loading') {
-      onLeagueVoiceRoom();
+    if (gameStatus === 'loading' && userStream) {
+      onLeagueVoiceRoom(userStream);
+    }
+  }, [gameStatus, userStream]);
 
+  useEffect(() => {
+    if (gameStatus === 'loading') {
       electronStore.get(STORE_KEY.LEAGUE_VOICE_ROOM_NAME).then(({ roomName }) => {
         const socket = connectSocket('/league-voice-chat/manage');
         socket.emit('league-manage-join-room', roomName);

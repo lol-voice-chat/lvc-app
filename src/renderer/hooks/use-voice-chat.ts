@@ -16,17 +16,24 @@ import electronStore from '../@store/electron';
 import { connectSocket } from '../utils/socket';
 import { Socket } from 'socket.io-client';
 import { getSummonerSpeaker, getUserAudioStream } from '../utils/audio';
-
+import { useEffect } from 'react';
 const { ipcRenderer } = window.require('electron');
 
 function useVoiceChat() {
+  const setUserStream = useSetRecoilState(userStreamState);
+
   const setGameStatus = useSetRecoilState(gameStatusState);
-  const [userStream, setUserStream] = useRecoilState(userStreamState);
 
   const summoner = useRecoilValue(summonerState);
   const [myTeamSummoners, setMyTeamSummoners] = useRecoilState(myTeamSummonersState);
   const [enemySummoners, setEnemySummoners] = useRecoilState(enemySummonersState);
   const setLeagueTitleList = useSetRecoilState(leagueTitleListState);
+
+  useEffect(() => {
+    getUserAudioStream().then((stream) => {
+      setUserStream(stream);
+    });
+  }, []);
 
   const connectVoiceChat = (
     isTeamVoiceChat: Boolean,
@@ -47,14 +54,14 @@ function useVoiceChat() {
     createDevice();
 
     const createSendTransport = (audioTrack: MediaStreamTrack) => {
-      socket.emit('create-producer-transport', ({ params }: any) => {
+      socket.emit('create-producer-transport', (params) => {
         if (!device) return;
 
         producerTransport = device.createSendTransport(params);
 
         producerTransport.on('connect', ({ dtlsParameters }, callback, errback) => {
           try {
-            socket.emit('transport-connect', { dtlsParameters });
+            socket.emit('transport-connect', dtlsParameters);
             callback();
           } catch (err) {
             errback(err as Error);
@@ -104,8 +111,8 @@ function useVoiceChat() {
         ? setMyTeamSummoners([...(myTeamSummoners ?? []), newSummoner])
         : setEnemySummoners([...(enemySummoners ?? []), newSummoner]);
 
-      socket.emit('create-consumer-transport', { remoteProducerId });
-      socket.on('complete-create-consumer-transport', ({ params }) => {
+      socket.emit('create-consumer-transport', remoteProducerId);
+      socket.on('complete-create-consumer-transport', (params) => {
         if (!device) return;
 
         const consumerTransport = device.createRecvTransport(params);
@@ -121,7 +128,6 @@ function useVoiceChat() {
             errback(err as Error);
           }
         });
-
         connectRecvTransport(newSummoner.summonerId, remoteProducerId, consumerTransport);
       });
     };
@@ -158,13 +164,13 @@ function useVoiceChat() {
           const newSummonerAudio = getSummonerSpeaker(summonerId);
           newSummonerAudio.srcObject = new MediaStream([consumer.track]);
 
-          socket.emit('consumer-resume', { remoteProducerId });
+          socket.emit('consumer-resume', remoteProducerId);
         }
       );
     };
   };
 
-  const onTeamVoiceRoom = () => {
+  const onTeamVoiceRoom = (userStream: MediaStream) => {
     const socket = connectSocket('/team-voice-chat');
 
     let device: DeviceType | null = null;
@@ -172,31 +178,26 @@ function useVoiceChat() {
     let consumerTransportList: ConsumerTransportType[] = [];
 
     electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
-      getUserAudioStream().then((stream) => {
-        if (stream) {
-          setUserStream(stream);
-          socket.emit(
-            'team-join-room',
-            { roomName, summoner },
-            ({ rtpCapabilities, leagueTitleList }) => {
-              connectVoiceChat(
-                true,
-                socket,
-                device,
-                stream,
-                rtpCapabilities,
-                producerTransport,
-                consumerTransportList
-              );
-              ipcRenderer.send(IPC_KEY.LEAGUE_TITLE, leagueTitleList);
-              ipcRenderer.once(IPC_KEY.LEAGUE_TITLE, (_, leagueTitleList) => {
-                socket.emit('league-title', leagueTitleList);
-                setLeagueTitleList(leagueTitleList);
-              });
-            }
+      socket.emit(
+        'team-join-room',
+        { roomName, summoner },
+        ({ rtpCapabilities, leagueTitleList }) => {
+          connectVoiceChat(
+            true,
+            socket,
+            device,
+            userStream,
+            rtpCapabilities,
+            producerTransport,
+            consumerTransportList
           );
+          ipcRenderer.send(IPC_KEY.LEAGUE_TITLE, leagueTitleList);
+          ipcRenderer.once(IPC_KEY.LEAGUE_TITLE, (_, leagueTitleList) => {
+            socket.emit('league-title', leagueTitleList);
+            setLeagueTitleList(leagueTitleList);
+          });
         }
-      });
+      );
     });
 
     /* 팀원 나감 */
@@ -239,7 +240,7 @@ function useVoiceChat() {
     };
   };
 
-  const onLeagueVoiceRoom = () => {
+  const onLeagueVoiceRoom = (userStream: MediaStream) => {
     const socket = connectSocket('/league-voice-chat');
 
     let device: DeviceType | null = null;
@@ -247,24 +248,22 @@ function useVoiceChat() {
     let consumerTransportList: ConsumerTransportType[] = [];
 
     electronStore.get(STORE_KEY.LEAGUE_VOICE_ROOM_NAME).then(({ roomName, teamName }) => {
-      if (userStream) {
-        socket.emit(
-          'league-join-room',
-          { roomName, teamName, summoner },
-          ({ rtpCapabilities, leagueTitleList }) => {
-            setLeagueTitleList(leagueTitleList);
-            connectVoiceChat(
-              false,
-              socket,
-              device,
-              userStream,
-              rtpCapabilities,
-              producerTransport,
-              consumerTransportList
-            );
-          }
-        );
-      }
+      socket.emit(
+        'league-join-room',
+        { roomName, teamName, summoner },
+        ({ rtpCapabilities, leagueTitleList }) => {
+          setLeagueTitleList(leagueTitleList);
+          connectVoiceChat(
+            false,
+            socket,
+            device,
+            userStream,
+            rtpCapabilities,
+            producerTransport,
+            consumerTransportList
+          );
+        }
+      );
     });
 
     socket.on('inform-exit-in-game', ({ summonerId }) => {
