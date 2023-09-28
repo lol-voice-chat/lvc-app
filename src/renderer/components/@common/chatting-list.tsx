@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import MessageBlock from './MessageBlock';
+import MessageBlock from './message-block';
 
 function ChattingList() {
   return (

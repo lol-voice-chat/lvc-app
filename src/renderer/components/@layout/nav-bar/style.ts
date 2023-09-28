@@ -27,14 +27,15 @@ export const TitleCategoryTag = styled.div`
   cursor: default;
 `;
 
-export const SubCategoryTag = styled.div`
+export const SubCategoryTag = styled.div<{ isClick: boolean }>`
   width: 80%;
   padding: 7.5px;
   border-radius: 4px;
 
   font-weight: ${FONT.MEDIUM};
   font-size: 17px;
-  color: #949ba4;
+  color: ${({ isClick }) => (isClick ? PALETTE.WHITE_1 : '#949ba4')};
+  background-color: ${({ isClick }) => (isClick ? '#313338' : 'transparent')};
 
   transition: 0.15s;
 

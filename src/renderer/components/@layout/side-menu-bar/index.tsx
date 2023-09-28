@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import * as _ from './style';
 import { useRecoilValue } from 'recoil';
 import { summonerState } from '../../../@store/atom';
-import SummonerProfile from './SummonerProfile';
-import SummonerRecord from './SummonerRecord';
+import SummonerProfile from './summoner-profile';
+import SummonerRecord from './summoner-record';
 import { IPC_KEY } from '../../../../const';
 import { RecentSummonerType, SummonerRecordType } from '../../../@type/summoner';
 import { connectSocket } from '../../../utils/socket';
 import { Socket } from 'socket.io-client';
-import RecentSummonerList from './RecentSummonerList';
+import RecentSummonerList from './recent-summoner-list';
 
 const { ipcRenderer } = window.require('electron');
 

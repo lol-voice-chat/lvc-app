@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import useVoiceChat from '../../hooks/useVoiceChat';
+import useVoiceChat from '../../hooks/use-voice-chat';
 import { useRecoilValue } from 'recoil';
 import {
   enemySummonersState,
@@ -8,12 +8,12 @@ import {
   summonerState,
 } from '../../@store/atom';
 import * as S from './style';
-import SummonerVoiceBlock from '../SummonerVoiceBlock';
+import SummonerVoiceBlock from '../summoner-voice-block';
 import { connectSocket } from '../../utils/socket';
 import { STORE_KEY } from '../../../const';
 import electronStore from '../../@store/electron';
 import { Socket } from 'socket.io-client';
-import SummonerLeagueVoiceBlock from '../SummonerLeagueVoiceBlock';
+import SummonerLeagueVoiceBlock from '../summoner-league-voice-block';
 
 function VoiceRoomModal() {
   const gameStatus = useRecoilValue(gameStatusState);

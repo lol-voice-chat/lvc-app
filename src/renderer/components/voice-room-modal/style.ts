@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { PALETTE } from '../../const';
-import { LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH } from '../SummonerLeagueVoiceBlock/style';
+import { LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH } from '../summoner-league-voice-block/style';
 
 export const VoiceRoom = styled.div`
   position: absolute;

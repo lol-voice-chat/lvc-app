@@ -10,9 +10,9 @@ import {
 import { SummonerType } from '../../@type/summoner';
 import { Socket } from 'socket.io-client';
 import { getSummonerSpeaker, micVolumeHandler } from '../../utils/audio';
-import VolumeSlider from '../@common/VolumeSlider';
+import VolumeSlider from '../@common/volume-slider';
 import * as S from './style';
-import RankBadge from '../@common/RankBadge';
+import RankBadge from '../@common/rank-badge';
 
 function SummonerLeagueVoiceBlock(props: {
   isMine: boolean;

@@ -1,5 +1,5 @@
 import { SummonerRecordType } from '../../../../@type/summoner';
-import RankBadge from '../../../@common/RankBadge';
+import RankBadge from '../../../@common/rank-badge';
 import * as _ from './style';
 import React from 'react';
 

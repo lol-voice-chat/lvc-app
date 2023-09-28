@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import RankBadge from './RankBadge';
+import RankBadge from './rank-badge';
 import { FONT, PALETTE } from '../../const';
 
 function MessageBlock(props: {

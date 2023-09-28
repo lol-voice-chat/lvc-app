@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import * as S from './style';
-import RankBadge from '../@common/RankBadge';
+import RankBadge from '../@common/rank-badge';
 import { ChampionInfoType, SummonerType } from '../../@type/summoner';
-import VolumeSlider from '../@common/VolumeSlider';
+import VolumeSlider from '../@common/volume-slider';
 import { getSummonerSpeaker, micVolumeHandler } from '../../utils/audio';
 import { IPC_KEY } from '../../../const';
 import { useRecoilValue } from 'recoil';
