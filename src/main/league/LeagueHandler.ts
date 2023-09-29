@@ -94,9 +94,9 @@ export class LeagueHandler {
 
           const summoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
           const myTeam = summoner ? teamOneSummoners : teamTwoSummoners;
-          const summonerList: MemberInfo[] = myTeam.getMemberInfoList(this.summoner.summonerId);
+          const summonerIdList: number[] = myTeam.getSummonerIdList(this.summoner.summonerId);
           //
-          this.webContents.send(IPC_KEY.START_IN_GAME, summonerList);
+          this.webContents.send(IPC_KEY.START_IN_GAME, summonerIdList);
         }, 10000);
       }
 

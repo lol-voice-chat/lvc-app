@@ -56,9 +56,9 @@ export class Team {
     return memberChampionKdaList;
   }
 
-  public getMemberInfoList(summonerId: number) {
+  public getSummonerIdList(summonerId: number) {
     return this.members
       .filter((member) => !member.isSameSummonerId(summonerId))
-      .map((member) => member.getInfo());
+      .map((member) => member.summonerId);
   }
 }
