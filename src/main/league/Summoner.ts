@@ -20,7 +20,7 @@ export class Summoner {
   public static fetch(): Promise<Summoner> {
     return new Promise((resolve) => {
       let interval = setInterval(async function () {
-        const summonerData = await League.httpRequest(LCU_ENDPOINT.CURRENT_SUMMONER);
+        const summonerData = await League.httpRequest(LCU_ENDPOINT.CHAT_ME_URL);
         const summoner: Summoner = plainToInstance(Summoner, summonerData);
 
         if (!summoner.isEmptyData()) {
