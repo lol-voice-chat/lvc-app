@@ -3,7 +3,6 @@ import { LeagueHandler } from './league/LeagueHandler';
 import { onLeagueClientUx } from './league/onLeagueClientUx';
 import onElectronStore from './store';
 import { createWebSocketConnection } from 'league-connect';
-import { handleFriendStatsEvent } from './league/summonerStatsEvent';
 import { handleFriendRequest } from './league/handleFriendRequest';
 import League from './utils';
 
@@ -56,6 +55,5 @@ app.on('window-all-closed', () => {
   app.quit();
 });
 
-handleFriendStatsEvent();
 handleFriendRequest();
 onElectronStore();
