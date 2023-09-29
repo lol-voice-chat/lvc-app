@@ -4,6 +4,7 @@ import { onLeagueClientUx } from './league/onLeagueClientUx';
 import onElectronStore from './store';
 import { createWebSocketConnection } from 'league-connect';
 import { handleFriendStatsEvent } from './league/summonerStatsEvent';
+import { handleFriendRequest } from './league/handleFriendRequest';
 import League from './utils';
 
 let mainWindow: BrowserWindow;
@@ -56,4 +57,5 @@ app.on('window-all-closed', () => {
 });
 
 handleFriendStatsEvent();
+handleFriendRequest();
 onElectronStore();

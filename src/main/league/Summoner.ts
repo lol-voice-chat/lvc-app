@@ -3,10 +3,19 @@ import { LCU_ENDPOINT } from '../constants';
 import { plainToInstance } from 'class-transformer';
 
 export class Summoner {
-  displayName: string;
-  profileIconId: number;
+  gameName: string;
+  gameTag: string;
+  icon: string;
+  id: string;
+  name: string;
+  pid: string;
   puuid: string;
   summonerId: number;
+
+  displayName: string;
+  profileIconId: number;
+  // puuid: string;
+  // summonerId: number;
 
   public static fetch(): Promise<Summoner> {
     return new Promise((resolve) => {
@@ -30,6 +39,10 @@ export class Summoner {
 
   public isEmptyData() {
     return this.summonerId === 0;
+  }
+
+  public getMyProfileImage() {
+    return `https://ddragon-webp.lolmath.net/latest/img/profileicon/${this.icon}.webp`;
   }
 
   public getProfileImage() {
