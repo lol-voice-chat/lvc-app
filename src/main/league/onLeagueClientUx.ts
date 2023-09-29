@@ -18,7 +18,6 @@ export interface SummonerInfo {
 
 export const onLeagueClientUx = async () => {
   const summoner: Summoner = await Summoner.fetch();
-  console.log(summoner);
 
   const [leagueRanked, matchHistory, gameflow] = await Promise.all([
     LeagueRanked.fetch(summoner.puuid),
