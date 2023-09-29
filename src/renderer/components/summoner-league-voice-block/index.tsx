@@ -105,8 +105,8 @@ function SummonerLeagueVoiceBlock(props: {
       />
 
       <S.SummonerInfo id="summoner-info">
-        <S.NameTag length={props.summoner.displayName.length}>
-          <p id="display-name">{props.summoner.displayName}</p>
+        <S.NameTag length={props.summoner.name.length}>
+          <p id="name">{props.summoner.name}</p>
           <RankBadge size={'medium'} tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
         </S.NameTag>
 

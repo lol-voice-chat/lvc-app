@@ -49,7 +49,7 @@ export const SummonerList = styled.div`
       border-radius: 50%;
       background-color: #2f3035;
     }
-    #sk-display-name {
+    #sk-name {
       width: 130px;
       height: 20px;
       border-radius: 3.5px;
@@ -79,6 +79,19 @@ export const SummonerBlock = styled.div`
   #user-status {
     transition: border-color 0.15s;
   }
+  #summoner-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+  #name {
+    font-weight: ${FONT.MEDIUM};
+    font-size: 15px;
+    color: #949ba4;
+    transition: color 0.15s;
+  }
+
   &:hover {
     background-color: #404249;
     &,
@@ -88,21 +101,8 @@ export const SummonerBlock = styled.div`
     #user-status {
       border-color: #404249;
     }
-    #display-name {
+    #name {
       color: #dcdee1;
     }
-  }
-
-  #summoner-icon {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    margin-right: 10px;
-  }
-  #display-name {
-    font-weight: ${FONT.MEDIUM};
-    font-size: 15px;
-    color: #949ba4;
-    transition: color 0.15s;
   }
 `;

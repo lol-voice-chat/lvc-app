@@ -5,7 +5,7 @@ import { summonerState } from '../../../@store/atom';
 import SummonerProfile from './summoner-profile';
 import SummonerRecord from './summoner-record';
 import { IPC_KEY } from '../../../../const';
-import { RecentSummonerType, SummonerRecordType } from '../../../@type/summoner';
+import { SummonerType } from '../../../@type/summoner';
 import { connectSocket } from '../../../utils/socket';
 import { Socket } from 'socket.io-client';
 import RecentSummonerList from './recent-summoner-list';
@@ -17,17 +17,16 @@ function SideMenuBar() {
   const [summonerStatusSocket, setSummonerStatusSocket] = useState<Socket | null>(null);
 
   const [isSummonerRecord, setIsSummonerRecord] = useState(false);
-  const [summonerRecord, setSummonerRecord] = useState<SummonerRecordType | null>(null);
-
-  const [recentSummonerList, setRecentSummonerList] = useState<RecentSummonerType[] | null>(null);
+  const [summonerRecordInfo, setSummonerRecordInfo] = useState<SummonerType | null>(null);
+  const [recentSummonerList, setRecentSummonerList] = useState<SummonerType[] | null>(null);
 
   useEffect(() => {
     const socket = connectSocket('/summoner-status');
     setSummonerStatusSocket(socket);
 
     /* 롤 인게임 시작 */
-    ipcRenderer.once(IPC_KEY.START_IN_GAME, (_, summonerList) => {
-      socket.emit('start-in-game', summonerList);
+    ipcRenderer.once(IPC_KEY.START_IN_GAME, (_, summonerIdList) => {
+      socket.emit('start-in-game', summonerIdList);
     });
 
     return () => {
@@ -40,62 +39,46 @@ function SideMenuBar() {
       /* 앱 시작 - 온라인 */
       summonerStatusSocket?.emit(
         'online-summoner',
-        {
-          summoner: {
-            puuid: summoner.puuid,
-            summonerId: summoner.summonerId,
-            profileImage: summoner.profileImage,
-            displayName: summoner.displayName,
-          },
-        },
-        ({ recentSummonerList }) => {
+        summoner,
+        (recentSummonerList: SummonerType[]) => {
           setRecentSummonerList(recentSummonerList);
         }
       );
-
-      /* 롤 종료 */
+      /* 롤 종료 - 오프라인 */
       ipcRenderer.once('shutdown-app', () => {
-        summonerStatusSocket?.emit('offline-summoner', {
-          puuid: summoner?.puuid,
-          summonerId: summoner?.summonerId,
-          profileImage: summoner?.profileImage,
-          displayName: summoner?.displayName,
-        });
+        // summonerStatusSocket?.emit('offline-summoner');
       });
     }
   }, [summoner]);
 
-  const getRecentSummonerRecord = (puuid: string) => {
-    setSummonerRecord(null);
+  const getRecentSummonerData = (summonerData: SummonerType) => {
+    setSummonerRecordInfo(summonerData);
     setIsSummonerRecord(true);
-
-    ipcRenderer.send(IPC_KEY.FRIEND_STATS, puuid);
-    ipcRenderer.once(IPC_KEY.FRIEND_STATS, (_, summonerStatsData: SummonerRecordType) => {
-      setSummonerRecord(summonerStatsData);
-    });
   };
 
-  const handleClickSummonerProfile = (displayName: string) => {
-    if (summoner && summoner.displayName === displayName) {
-      setSummonerRecord(summoner);
-    }
+  const handleClickSummonerProfile = (isMine: boolean) => {
+    if (isMine) setSummonerRecordInfo(summoner);
+
     setIsSummonerRecord((curState) => !curState);
   };
 
   return (
     <_.SideBarContainer>
       <SummonerProfile
-        summoner={isSummonerRecord ? summonerRecord ?? null : summoner}
+        summoner={isSummonerRecord ? summonerRecordInfo : summoner}
+        isMine={summonerRecordInfo?.name === summoner?.name}
         isBackground={!isSummonerRecord}
         handleClickSummonerProfile={handleClickSummonerProfile}
       />
 
       {isSummonerRecord ? (
-        <SummonerRecord summonerRecord={summonerRecord} />
+        // 소환사 전적
+        <SummonerRecord summonerData={summonerRecordInfo} />
       ) : (
+        // 최근 보이스한 소환사 리스트
         <RecentSummonerList
           recentSummonerList={recentSummonerList}
-          handleClickSummonerBlock={getRecentSummonerRecord}
+          handleClickSummonerBlock={getRecentSummonerData}
         />
       )}
     </_.SideBarContainer>

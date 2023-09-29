@@ -52,11 +52,30 @@ export const Information = styled.div<{ nameLength: number }>`
     justify-content: space-between;
     height: 100%;
 
-    #display-name {
+    #name {
       font-weight: ${FONT.SEMI_BOLD};
       font-size: ${({ nameLength }) => (nameLength > 11 ? '11px' : '15px')};
       color: ${PALETTE.WHITE_1};
       white-space: nowrap;
+    }
+    #badge-bundle {
+      display: flex;
+      #rank-badge {
+        margin-right: 15px;
+      }
+      #friend-badge {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 21.25px;
+        width: 37.5px;
+        border-radius: 21.25px;
+        background-color: #222427;
+        img {
+          height: 70%;
+          width: auto;
+        }
+      }
     }
   }
 
@@ -68,18 +87,27 @@ export const Information = styled.div<{ nameLength: number }>`
 
     height: 100%;
 
-    #sk-display-name {
+    #sk-name {
       width: 85px;
       height: 16.5px;
       border-radius: 4px;
       margin-right: 15px;
       background-color: #404249;
     }
-    #sk-rank-badge {
-      width: 50px;
-      height: 21.25px;
-      border-radius: 21.25px;
-      background-color: #222427;
+    #sk-badge-bundle {
+      display: flex;
+      div {
+        height: 21.25px;
+        border-radius: 21.25px;
+        background-color: #222427;
+      }
+      #sk-rank-badge {
+        width: 50px;
+        margin-right: 15px;
+      }
+      #sk-friend-badge {
+        width: 37.5px;
+      }
     }
   }
 `;

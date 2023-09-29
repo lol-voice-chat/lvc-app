@@ -120,7 +120,7 @@ export const NameTag = styled.div<{ length: number }>`
   width: 75%;
   padding-top: 24.5%;
 
-  #display-name {
+  #name {
     font-size: ${({ length }) => (length < 8 ? '16px' : '13px')};
     color: ${PALETTE.WHITE_1};
   }
@@ -128,7 +128,7 @@ export const NameTag = styled.div<{ length: number }>`
   @media (min-width: ${LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
     padding-top: 27.5%;
 
-    #display-name {
+    #name {
       width: 60%;
       font-size: ${({ length }) => (length < 8 ? '20px' : '13px')};
     }

@@ -1,10 +1,10 @@
 import React from 'react';
 import * as _ from './style';
-import { RecentSummonerType } from '../../../../@type/summoner';
+import { SummonerType } from '../../../../@type/summoner';
 
 function RecentSummonerList(props: {
-  recentSummonerList: RecentSummonerType[] | null;
-  handleClickSummonerBlock: (puuid: string) => void;
+  recentSummonerList: SummonerType[] | null;
+  handleClickSummonerBlock: (summonerData: SummonerType) => void;
 }) {
   return (
     <_.RecentSummonerContainer>
@@ -13,13 +13,13 @@ function RecentSummonerList(props: {
       <_.SummonerList>
         {props.recentSummonerList ? (
           <>
-            {props.recentSummonerList?.map(({ puuid, profileImage, displayName }) => (
+            {props.recentSummonerList?.map((summoner) => (
               <_.SummonerBlock
-                key={displayName}
-                onClick={() => props.handleClickSummonerBlock(puuid)}
+                key={summoner.id}
+                onClick={() => props.handleClickSummonerBlock(summoner)}
               >
-                <img id="summoner-icon" src={profileImage} alt={displayName} />
-                <p id="display-name">{displayName}</p>
+                <img id="summoner-icon" src={summoner.profileImage} />
+                <p id="name">{summoner.name}</p>
               </_.SummonerBlock>
             ))}
           </>
@@ -29,7 +29,7 @@ function RecentSummonerList(props: {
             {Array.from({ length: 20 }, (_, idx) => (
               <div id="sk-summoner-block" key={idx}>
                 <div id="sk-summoner-icon" />
-                <div id="sk-display-name" />
+                <div id="sk-name" />
               </div>
             ))}
           </>

@@ -22,7 +22,7 @@ function NavBar() {
 
   useEffect(() => {
     /* 롤 클라이언트 on */
-    ipcRenderer.once('on-league-client', (_, summoner: SummonerType) => {
+    ipcRenderer.once(IPC_KEY.ON_LEAGUE_CLIENT, (_, summoner: SummonerType) => {
       setSummoner(summoner);
     });
 
