@@ -36,6 +36,8 @@ function SideMenuBar() {
 
   useEffect(() => {
     if (summoner) {
+      setSummonerRecordInfo(summoner);
+
       /* 앱 시작 - 온라인 */
       summonerStatusSocket?.emit(
         'online-summoner',
@@ -61,6 +63,8 @@ function SideMenuBar() {
 
     setIsSummonerRecord((curState) => !curState);
   };
+
+  console.log(summoner?.name, summonerRecordInfo?.name);
 
   return (
     <_.SideBarContainer>
