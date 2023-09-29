@@ -4,9 +4,13 @@ import { Summoner } from './Summoner';
 import { LeagueRanked } from './LeagueRanked';
 
 export interface SummonerInfo {
-  summonerId: number;
+  gameName: string;
+  gameTag: string;
+  id: string;
+  name: string;
+  pid: string;
   puuid: string;
-  displayName: string;
+  summonerId: number;
   profileImage: string;
   tier: string;
   summonerStats: SummonerStats;
@@ -24,14 +28,17 @@ export const onLeagueClientUx = async () => {
   const summonerStats: SummonerStats = await matchHistory.getSummonerStats();
 
   const summonerInfo: SummonerInfo = {
-    summonerId: summoner.summonerId,
+    gameName: summoner.gameName,
+    gameTag: summoner.gameTag,
+    id: summoner.id,
+    name: summoner.name,
+    pid: summoner.pid,
     puuid: summoner.puuid,
-    displayName: summoner.displayName,
-    profileImage: summoner.getProfileImage(),
+    summonerId: summoner.summonerId,
+    profileImage: summoner.getMyProfileImage(),
     tier: leagueRanked.getTier(),
     summonerStats,
   };
-  console.log(summonerInfo);
 
   return { summonerInfo, matchHistory, gameflow };
 };

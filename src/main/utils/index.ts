@@ -3,7 +3,7 @@ import { Credentials, LeagueClient, authenticate, createHttp1Request } from 'lea
 import { IPC_KEY } from '../../const';
 
 export class League {
-  private static credentials: Credentials;
+  public static credentials: Credentials;
 
   public static async initialize(mainWindow: BrowserWindow) {
     this.credentials = await authenticate({
