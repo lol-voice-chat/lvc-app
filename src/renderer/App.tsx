@@ -1,7 +1,7 @@
 import React from 'react';
 import { RecoilRoot } from 'recoil';
 import Router from './router';
-import GlobalStyle from './globalStyle';
+import GlobalStyle from './global-style';
 import Helmets from './helmets';
 
 function App() {

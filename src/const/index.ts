@@ -1,4 +1,5 @@
 export const IPC_KEY = {
+  ON_LEAGUE_CLIENT: 'on-league-client',
   TEAM_JOIN_ROOM: 'team-join-room',
   LEAGUE_JOIN_ROOM: 'league-join-room',
   EXIT_CHAMP_SELECT: 'exit-champ-select',
@@ -6,7 +7,6 @@ export const IPC_KEY = {
   START_IN_GAME: 'start-in-game',
   CHAMP_INFO: 'champion-info',
   LEAGUE_TITLE: 'league-title',
-  FRIEND_STATS: 'friend-stats',
   SHUTDOWN_APP: 'shutdown-app',
 };
 

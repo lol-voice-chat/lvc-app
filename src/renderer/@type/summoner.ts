@@ -1,19 +1,16 @@
 export type SummonerStatusType = '온라인' | '오프라인';
 
 export type SummonerType = {
+  id: string;
+  pid: string;
   puuid: string;
   summonerId: number;
-  displayName: string;
+  gameName: string;
+  gameTag: string;
+  name: string;
   profileImage: string;
   tier: string;
   summonerStats: SummonerStatsType;
-};
-
-export type RecentSummonerType = {
-  puuid: string;
-  summonerId: number;
-  profileImage: string;
-  displayName: string;
 };
 
 export type SummonerStatsType = {
@@ -31,13 +28,6 @@ export type SummonerStatsType = {
     time: string;
     killInvolvement: string;
   }[];
-};
-
-export type SummonerRecordType = {
-  displayName: string;
-  profileImage: string;
-  tier: string;
-  summonerStats: SummonerStatsType;
 };
 
 export type ChampionInfoType = {
