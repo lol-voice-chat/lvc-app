@@ -9,7 +9,7 @@ export const ProfileContainer = styled.div<{ isBackground: boolean }>`
   height: 68.5px;
 
   margin-top: 25px;
-  padding: 2.5px 15px;
+  padding: 2.5px 20px;
 
   border-radius: 7.5px;
   background-color: ${({ isBackground }) => (isBackground ? '#36373c' : 'transparent')};
@@ -43,7 +43,7 @@ export const Information = styled.div<{ nameLength: number }>`
   justify-content: space-between;
   align-items: flex-start;
 
-  height: 45px;
+  height: 50px;
   margin-left: 10px;
 
   #summoner-info {
@@ -60,21 +60,13 @@ export const Information = styled.div<{ nameLength: number }>`
     }
     #badge-bundle {
       display: flex;
+      align-items: center;
       #rank-badge {
-        margin-right: 15px;
+        margin-right: 75px;
       }
-      #friend-badge {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 21.25px;
-        width: 37.5px;
-        border-radius: 21.25px;
-        background-color: #222427;
-        img {
-          height: 70%;
-          width: auto;
-        }
+      img {
+        height: 13.5px;
+        width: auto;
       }
     }
   }

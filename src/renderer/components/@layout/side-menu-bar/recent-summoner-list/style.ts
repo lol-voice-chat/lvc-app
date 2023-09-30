@@ -6,7 +6,7 @@ export const RecentSummonerContainer = styled.div`
   flex-direction: column;
   align-items: center;
 
-  width: 80%;
+  width: 250px;
   height: 81.5%;
   margin-top: 30px;
 

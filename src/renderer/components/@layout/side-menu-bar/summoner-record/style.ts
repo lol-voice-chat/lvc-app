@@ -29,7 +29,7 @@ export const AverageInfo = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 3.5px 0;
+    margin: 4.5px 0;
     width: 100%;
 
     p {

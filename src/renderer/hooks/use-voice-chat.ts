@@ -44,14 +44,13 @@ function useVoiceChat() {
     producerTransport: TransportType | null,
     consumerTransportList: ConsumerTransportType[]
   ) => {
-    const createDevice = () => {
+    (() => {
       device = new mediasoup.Device();
       device
         .load({ routerRtpCapabilities })
         .then(() => createSendTransport(stream.getAudioTracks()[0]))
         .catch((err) => console.log('디바이스 로드 에러', err));
-    };
-    createDevice();
+    })();
 
     const createSendTransport = (audioTrack: MediaStreamTrack) => {
       socket.emit('create-producer-transport', (params) => {

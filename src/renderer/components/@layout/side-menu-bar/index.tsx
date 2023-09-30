@@ -53,8 +53,8 @@ function SideMenuBar() {
     }
   }, [summoner]);
 
-  const getRecentSummonerData = (summonerData: SummonerType) => {
-    setSummonerRecordInfo(summonerData);
+  const getRecentSummonerData = (summonerInfo: SummonerType) => {
+    setSummonerRecordInfo(summonerInfo);
     setIsSummonerRecord(true);
   };
 
@@ -64,13 +64,11 @@ function SideMenuBar() {
     setIsSummonerRecord((curState) => !curState);
   };
 
-  console.log(summoner?.name, summonerRecordInfo?.name);
-
   return (
     <_.SideBarContainer>
       <SummonerProfile
         summoner={isSummonerRecord ? summonerRecordInfo : summoner}
-        isMine={summonerRecordInfo?.name === summoner?.name}
+        isMine={summoner}
         isBackground={!isSummonerRecord}
         handleClickSummonerProfile={handleClickSummonerProfile}
       />
