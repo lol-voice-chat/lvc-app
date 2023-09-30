@@ -3,16 +3,22 @@ import RankBadge from '../../../@common/rank-badge';
 import * as _ from './style';
 import React from 'react';
 
+const { ipcRenderer } = window.require('electron');
+
 function SummonerProfile(props: {
   summoner: SummonerType | null;
-  isMine: boolean;
+  isMine: SummonerType | null;
   isBackground: boolean;
   handleClickSummonerProfile: (isMine: boolean) => void;
 }) {
+  const handleClickAddFriend = () => {
+    ipcRenderer.send('friend-request', props.summoner);
+  };
+
   return (
     <_.ProfileContainer
       isBackground={props.isBackground}
-      onClick={() => props.handleClickSummonerProfile(props.isMine)}
+      onClick={() => props.handleClickSummonerProfile(props.isMine === props.summoner)}
     >
       {props.summoner ? (
         <>
@@ -22,10 +28,12 @@ function SummonerProfile(props: {
               <p id="name">{props.summoner.name}</p>
               <div id="badge-bundle">
                 <RankBadge size="small" tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
-                {!props.isMine && (
-                  <div id="friend-badge">
-                    <img src="img/friend_add_icon.svg" />
-                  </div>
+                {!(props.isMine === props.summoner) && (
+                  <img
+                    id="friend-badge"
+                    src="img/friend_add_icon.svg"
+                    onClick={handleClickAddFriend}
+                  />
                 )}
               </div>
             </div>
