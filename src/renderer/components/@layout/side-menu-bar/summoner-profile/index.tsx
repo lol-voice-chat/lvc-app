@@ -1,20 +1,16 @@
+import { RecentSummonerType } from '..';
 import { SummonerType } from '../../../../@type/summoner';
 import RankBadge from '../../../@common/rank-badge';
 import * as _ from './style';
 import React from 'react';
 
-const { ipcRenderer } = window.require('electron');
-
 function SummonerProfile(props: {
-  summoner: SummonerType | null;
+  summoner: SummonerType | RecentSummonerType | null;
   isMine: SummonerType | null;
   isBackground: boolean;
   handleClickSummonerProfile: (isMine: boolean) => void;
+  handleClickAddFriend: (summonerInfo: RecentSummonerType) => void;
 }) {
-  const handleClickAddFriend = () => {
-    ipcRenderer.send('friend-request', props.summoner);
-  };
-
   return (
     <_.ProfileContainer
       isBackground={props.isBackground}
@@ -22,19 +18,22 @@ function SummonerProfile(props: {
     >
       {props.summoner ? (
         <>
-          <img id="profile-icon" src={props.summoner.profileImage} alt="소환사 프로필" />
+          <img id="profile-icon" src={props.summoner.profileImage} />
           <_.Information nameLength={props.summoner.name.length}>
             <div id="summoner-info">
               <p id="name">{props.summoner.name}</p>
               <div id="badge-bundle">
                 <RankBadge size="small" tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
-                {!(props.isMine === props.summoner) && (
-                  <img
-                    id="friend-badge"
-                    src="img/friend_add_icon.svg"
-                    onClick={handleClickAddFriend}
-                  />
-                )}
+                {!(props.isMine === props.summoner) &&
+                  !(props.summoner as RecentSummonerType).isRequested && (
+                    <img
+                      id="friend-badge"
+                      src="img/friend_add_icon.svg"
+                      onClick={() =>
+                        props.handleClickAddFriend(props.summoner as RecentSummonerType)
+                      }
+                    />
+                  )}
               </div>
             </div>
           </_.Information>
