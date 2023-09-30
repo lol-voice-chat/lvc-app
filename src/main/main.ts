@@ -30,6 +30,10 @@ async function handleLoadEvent() {
     const { summonerInfo, matchHistory, gameflow } = await onLeagueClientUx();
     mainWindow.webContents.send('on-league-client', summonerInfo);
 
+    const friendList = await League.httpRequest('/lol-chat/v1/friends');
+    const friendSummonerIdList = friendList.map((friend: any) => friend.summonerId);
+    mainWindow.webContents.send('online-summoner', friendSummonerIdList);
+
     const ws = await createWebSocketConnection();
 
     const leagueHandler: LeagueHandler = new LeagueHandler(
