@@ -2,6 +2,7 @@ import { MatchHistory, SummonerStats } from './MatchHistory';
 import { Gameflow } from './Gameflow';
 import { Summoner } from './Summoner';
 import { LeagueRanked } from './LeagueRanked';
+import League from '../utils';
 
 export interface SummonerInfo {
   gameName: string;

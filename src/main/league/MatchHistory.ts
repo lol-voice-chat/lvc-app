@@ -115,6 +115,8 @@ export class MatchHistory {
           const myTeamTotalKill = await this.getMyTeamTotalKill(match.gameId, participant.teamId);
           const killInvolvement = Math.floor(((kills + assists) / myTeamTotalKill) * 100);
 
+          console.log('test: ', match.gameCreationDate);
+
           const stats: StatsData = {
             championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${participant.championId}/tile`,
             kda: `${kills}/${deaths}/${assists}`,
