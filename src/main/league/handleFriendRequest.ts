@@ -5,13 +5,13 @@ import League from '../utils';
 interface Recipient {
   gameName: string;
   gameTag: string;
-  profileImage: string;
   id: string;
-  displayName: string;
-  note: string;
+  name: string;
   pid: string;
   puuid: string;
   summonerId: number;
+  profileImage: string;
+  tier: string;
 }
 
 export const handleFriendRequest = () => {
@@ -29,8 +29,8 @@ export const handleFriendRequest = () => {
             gameTag: recipient.gameTag,
             icon,
             id: recipient.id,
-            name: recipient.displayName,
-            note: recipient.note,
+            name: recipient.name,
+            note: '',
             pid: recipient.pid,
             puuid: recipient.puuid,
             summonerId: recipient.summonerId,
