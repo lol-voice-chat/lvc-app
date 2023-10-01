@@ -1,6 +1,7 @@
 import League from '../utils';
-import moment from 'moment';
-import 'moment/locale/ko';
+import dayjs from 'dayjs';
+import 'dayjs/locale/ko';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import { plainToInstance } from 'class-transformer';
 import { CHAMPIONS } from '../constants';
 
@@ -44,6 +45,7 @@ interface MatchHistoryData {
 interface MatchData {
   gameId: number;
   gameCreationDate: string;
+  gameDuration: number;
   gameType: string;
   participants: ParticipantData[];
 }
@@ -67,8 +69,9 @@ export interface ParticipantData {
   teamId: number;
 }
 
+dayjs.locale('ko');
+dayjs.extend(relativeTime);
 const RECENT_PVP_MATCH_COUNT = 10;
-moment.relativeTimeThreshold('ss', 0);
 
 export class MatchHistory {
   games: MatchHistoryData;
@@ -115,14 +118,19 @@ export class MatchHistory {
           const myTeamTotalKill = await this.getMyTeamTotalKill(match.gameId, participant.teamId);
           const killInvolvement = Math.floor(((kills + assists) / myTeamTotalKill) * 100);
 
-          console.log('test: ', match.gameCreationDate);
+          const minutes = Math.floor(match.gameDuration / 60);
+          const seconds = match.gameDuration % 60;
+
+          const date = new Date(match.gameCreationDate);
+          date.setMinutes(date.getMinutes() + minutes);
+          date.setSeconds(date.getSeconds() + seconds);
 
           const stats: StatsData = {
             championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${participant.championId}/tile`,
             kda: `${kills}/${deaths}/${assists}`,
             isWin: participant.stats.win,
             killInvolvement: `${killInvolvement}%`,
-            time: moment(match.gameCreationDate).fromNow(),
+            time: dayjs(date.toISOString()).fromNow(),
           };
 
           if (participant.stats.win) {
