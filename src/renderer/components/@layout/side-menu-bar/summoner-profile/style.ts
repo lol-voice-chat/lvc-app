@@ -64,7 +64,7 @@ export const Information = styled.div<{ nameLength: number }>`
       #rank-badge {
         margin-right: 75px;
       }
-      img {
+      #friend-add-badge {
         height: 13.5px;
         width: auto;
       }
