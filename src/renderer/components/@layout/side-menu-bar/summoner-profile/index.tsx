@@ -27,7 +27,7 @@ function SummonerProfile(props: {
                 {!(props.isMine === props.summoner) &&
                   !(props.summoner as RecentSummonerType).isRequested && (
                     <img
-                      id="friend-badge"
+                      id="friend-add-badge"
                       src="img/friend_add_icon.svg"
                       onClick={() =>
                         props.handleClickAddFriend(props.summoner as RecentSummonerType)

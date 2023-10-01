@@ -1,12 +1,38 @@
 import React from 'react';
 import styled from 'styled-components';
 import { FONT, PALETTE } from '../../const';
+import { useRecoilValue } from 'recoil';
+import { summonerState } from '../../@store/atom';
 
-function MessageInput() {
+function MessageInput(props: { socket: WebSocket | null }) {
+  const summoner = useRecoilValue(summonerState);
+
   const handleResizeHeight = () => {
     const textarea = document.getElementById('text-area') as HTMLTextAreaElement;
     textarea.style.height = 'auto';
     textarea.style.height = textarea.scrollHeight + 'px';
+  };
+
+  const handleEnterText = (event: any) => {
+    if (event.keyCode == 13 && summoner) {
+      if (!event.shiftKey) {
+        if (event.target.value === '') return;
+
+        event.preventDefault();
+        props.socket?.send(
+          JSON.stringify({
+            summoner: {
+              name: summoner.name,
+              profileImage: summoner.profileImage,
+              tier: summoner.tier,
+              tierImage: 'img/dummy_rank.png',
+            },
+            message: event.target.value,
+          })
+        );
+        event.target.value = '';
+      }
+    }
   };
 
   const handleClickImgUpload = () => {
@@ -23,9 +49,10 @@ function MessageInput() {
         </div>
         <textarea
           id="text-area"
-          placeholder="메시지를 입력하자!..."
+          placeholder="말 예쁘게 하자 쓰발라마!..."
           rows={1}
           onChange={handleResizeHeight}
+          onKeyDown={handleEnterText}
         />
       </div>
     </Input>

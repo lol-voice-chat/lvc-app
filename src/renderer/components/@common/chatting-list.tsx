@@ -1,136 +1,51 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import MessageBlock from './message-block';
 
-function ChattingList() {
+type MessageInfoType = {
+  summoner: {
+    name: string;
+    profileImage: string;
+    tier: string;
+    tierImage: string;
+  };
+  message: string;
+  time: string;
+};
+
+function ChattingList(props: { socket: WebSocket | null }) {
+  const [messageList, setMessageList] = useState<MessageInfoType[] | null>(null);
+
+  useEffect(() => {
+    if (props.socket) {
+      props.socket.onmessage = (event) => {
+        const payload = JSON.parse(event.data);
+
+        if (payload.key === 'init') {
+          setMessageList(payload.messageList.map((messageInfo) => JSON.parse(messageInfo)));
+        }
+        if (payload.key === 'message') {
+          const { summoner, message, time } = payload;
+          setMessageList([...(messageList ?? []), { summoner, message, time }]);
+        }
+      };
+    }
+  }, [props.socket, messageList]);
+
   return (
     <ChatContainer>
-      <MessageBlock
-        summonerIcon="img/warning_icon.svg"
-        tier="P1"
-        tierImg="img/dummy_rank.png"
-        name="붕붕카 1호"
-        time="6분전"
-        messageType="text"
-        message="앙기모모모모ㅗ모몸띠ㅣ띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠"
-      />
-      <MessageBlock
-        summonerIcon="img/warning_icon.svg"
-        tier="P1"
-        tierImg="img/dummy_rank.png"
-        name="붕붕카 1호"
-        time="6분전"
-        messageType="text"
-        message="앙기모모모모ㅗ모몸띠ㅣ띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠"
-      />
-      <MessageBlock
-        summonerIcon="img/warning_icon.svg"
-        tier="P1"
-        tierImg="img/dummy_rank.png"
-        name="붕붕카 1호"
-        time="6분전"
-        messageType="text"
-        message="앙기모모모모ㅗ모몸띠ㅣ띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠"
-      />
-      <MessageBlock
-        summonerIcon="img/warning_icon.svg"
-        tier="P1"
-        tierImg="img/dummy_rank.png"
-        name="붕붕카 1호"
-        time="6분전"
-        messageType="text"
-        message="앙기모모모모ㅗ모몸띠ㅣ띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠"
-      />
-      <MessageBlock
-        summonerIcon="img/warning_icon.svg"
-        tier="P1"
-        tierImg="img/dummy_rank.png"
-        name="붕붕카 1호"
-        time="6분전"
-        messageType="text"
-        message="앙기모모모모ㅗ모몸띠ㅣ띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠"
-      />
-      <MessageBlock
-        summonerIcon="img/warning_icon.svg"
-        tier="P1"
-        tierImg="img/dummy_rank.png"
-        name="붕붕카 1호"
-        time="6분전"
-        messageType="text"
-        message="앙기모모모모ㅗ모몸띠ㅣ띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠"
-      />
-      <MessageBlock
-        summonerIcon="img/warning_icon.svg"
-        tier="P1"
-        tierImg="img/dummy_rank.png"
-        name="붕붕카 1호"
-        time="6분전"
-        messageType="text"
-        message="앙기모모모모ㅗ모몸띠ㅣ띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠"
-      />
-      <MessageBlock
-        summonerIcon="img/warning_icon.svg"
-        tier="P1"
-        tierImg="img/dummy_rank.png"
-        name="붕붕카 1호"
-        time="6분전"
-        messageType="text"
-        message="앙기모모모모ㅗ모몸띠ㅣ띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠"
-      />
-      <MessageBlock
-        summonerIcon="img/warning_icon.svg"
-        tier="P1"
-        tierImg="img/dummy_rank.png"
-        name="붕붕카 1호"
-        time="6분전"
-        messageType="text"
-        message="앙기모모모모ㅗ모몸띠ㅣ띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠"
-      />
-      <MessageBlock
-        summonerIcon="img/warning_icon.svg"
-        tier="P1"
-        tierImg="img/dummy_rank.png"
-        name="붕붕카 1호"
-        time="6분전"
-        messageType="text"
-        message="앙기모모모모ㅗ모몸띠ㅣ띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠"
-      />
-      <MessageBlock
-        summonerIcon="img/warning_icon.svg"
-        tier="P1"
-        tierImg="img/dummy_rank.png"
-        name="붕붕카 1호"
-        time="6분전"
-        messageType="text"
-        message="앙기모모모모ㅗ모몸띠ㅣ띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠"
-      />
-      <MessageBlock
-        summonerIcon="img/warning_icon.svg"
-        tier="P1"
-        tierImg="img/dummy_rank.png"
-        name="붕붕카 1호"
-        time="6분전"
-        messageType="text"
-        message="앙기모모모모ㅗ모몸띠ㅣ띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠"
-      />
-      <MessageBlock
-        summonerIcon="img/warning_icon.svg"
-        tier="P1"
-        tierImg="img/dummy_rank.png"
-        name="붕붕카 1호"
-        time="6분전"
-        messageType="text"
-        message="앙기모모모모ㅗ모몸띠ㅣ띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠"
-      />
-      <MessageBlock
-        summonerIcon="img/warning_icon.svg"
-        tier="P1"
-        tierImg="img/dummy_rank.png"
-        name="붕붕카 1호"
-        time="6분전"
-        messageType="text"
-        message="앙기모모모모ㅗ모몸띠ㅣ띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠띠띠띠띠ㄸ띠띠띠띠띠띠띠띠"
-      />
+      {messageList?.map(({ summoner, message, time }, idx) => (
+        <MessageBlock
+          summonerIcon={summoner.profileImage}
+          tier={summoner.tier}
+          tierImg={summoner.tierImage}
+          name={summoner.name}
+          time={time}
+          messageType="text"
+          message={message}
+          key={idx}
+        />
+      ))}
     </ChatContainer>
   );
 }
@@ -140,7 +55,7 @@ const ChatContainer = styled.div`
   flex-direction: column;
 
   width: 100%;
-  height: 100vh;
+  height: 90vh;
 
   overflow-x: hidden;
   overflow-y: scroll;
