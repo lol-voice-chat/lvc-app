@@ -76,7 +76,6 @@ export const Information = styled.div<{ nameLength: number }>`
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-
     height: 100%;
 
     #sk-name {

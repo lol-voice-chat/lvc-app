@@ -16,9 +16,10 @@ function MessageBlock(props: {
   return (
     <BlockContainer>
       <div id="summoner-profile">
-        <img id="summoner-icon" src={props.summonerIcon} alt="소환사 아이콘" />
+        <img id="summoner-icon" src={props.summonerIcon} />
         <RankBadge size="small" tierImg={props.tierImg} tier={props.tier} />
       </div>
+
       <div className="drag-able" id="message-info">
         <div id="summoner-info">
           <p id="name">{props.name}</p>
@@ -27,7 +28,7 @@ function MessageBlock(props: {
         {props.messageType === 'text' ? (
           <p id="message-text">{props.message}</p>
         ) : (
-          <img id="message-img" src={props.image} alt="이미지" />
+          <img id="message-img" src={props.image} />
         )}
       </div>
     </BlockContainer>
@@ -36,8 +37,8 @@ function MessageBlock(props: {
 
 const BlockContainer = styled.div`
   display: flex;
-  width: 100%;
-  padding: 15px 0 15px 15px;
+  width: 96%;
+  padding: 15px 4% 15px 15px;
 
   &:hover {
     background-color: #2a2c2f;
@@ -62,6 +63,7 @@ const BlockContainer = styled.div`
   #message-info {
     display: flex;
     flex-direction: column;
+    width: 100%;
 
     #summoner-info {
       display: flex;
@@ -79,9 +81,12 @@ const BlockContainer = styled.div`
       }
     }
     #message-text {
+      width: 90%;
       font-weight: ${FONT.REGULAR};
       font-size: 14px;
       color: #f2f3f5;
+      white-space: pre-wrap;
+      word-wrap: break-word;
     }
     #message-img {
       width: 60%;
