@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { PALETTE } from '../../../const';
 
 export const ChatContainer = styled.div`
   display: flex;
@@ -17,6 +18,17 @@ export const ChatContainer = styled.div`
   #loading-container {
     width: 100%;
     margin: 15px 0;
+  }
+
+  #new-msg-alram {
+    position: absolute;
+    bottom: 100px;
+    left: calc(50% - 100px);
+    width: 200px;
+    height: 30px;
+    border-radius: 30px;
+    cursor: pointer;
+    background-color: ${PALETTE.YELLOW};
   }
 `;
 

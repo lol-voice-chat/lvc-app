@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import MessageBlock from '../@common/message-block';
+import MessageBlock from '../../@common/message-block';
 import * as _ from './style';
-import { SummonerType } from '../../@type/summoner';
-import useObserver from '../../hooks/use-observer';
+import { SummonerType } from '../../../@type/summoner';
+import useObserver from '../../../hooks/use-observer';
 import SkeletonChattingList from './skeleton';
-import LoadingDots from '../@common/loading-dots';
+import LoadingDots from '../../@common/loading-dots';
 
 type MessageInfoType = {
   summoner: {
@@ -21,6 +21,8 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
   const [messageList, setMessageList] = useState<MessageInfoType[] | null>(null);
 
   const [messageEvent, setMessageEvent] = useState({ key: '' });
+
+  const [isReceiveNewMsg, setIsReceiveNewMsg] = useState(false);
 
   const [curMessagePage, setCurMessagePage] = useState(0);
   const [prevScrollHeight, setPrevScrollHeight] = useState(0);
@@ -40,8 +42,16 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
           const { summoner, message, time } = payload;
           setMessageList((msgList) => [...(msgList ?? []), { summoner, message, time }]);
 
-          if (props.summoner?.name === summoner.name) {
+          const target = document.getElementById('chat-list-container') as HTMLDivElement;
+          const isScrollEnd = target.scrollTop + target.clientHeight >= target.scrollHeight - 30;
+
+          /* 내가 보낸 거 or 최신 메시지 보는 중 */
+          if (props.summoner?.name === summoner.name || isScrollEnd) {
             setMessageEvent({ key: payload.key });
+          }
+          /* 남이 보낸 거 and 이전 메시지 보는 중 */
+          if (props.summoner?.name !== summoner.name && !isScrollEnd) {
+            setIsReceiveNewMsg(true);
           }
         }
         if (payload.key === 'response-before-message') {
@@ -63,11 +73,8 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
 
   /* 새 메시지 항목별 이벤트 수행 */
   useEffect(() => {
-    if (messageEvent.key === 'init') {
+    if (messageEvent.key === 'init' || messageEvent.key === 'message') {
       document.getElementById('chat-list-bottom')?.scrollIntoView();
-    }
-    if (messageEvent.key === 'message') {
-      document.getElementById('chat-list-bottom')?.scrollIntoView({ behavior: 'smooth' });
     }
     if (messageEvent.key === 'response-before-message') {
       const container = document.getElementById('chat-list-container');
@@ -113,6 +120,17 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
               key={idx}
             />
           ))}
+
+          {isReceiveNewMsg && (
+            <div
+              id="new-msg-alram"
+              onClick={() => {
+                document.getElementById('chat-list-bottom')?.scrollIntoView();
+                setIsReceiveNewMsg(false);
+              }}
+            />
+          )}
+
           <div id="chat-list-bottom" />
         </>
       ) : (
