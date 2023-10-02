@@ -43,10 +43,11 @@ export class LeagueHandler {
           leagueTitleEvent.emit(IPC_KEY.LEAGUE_TITLE, data.myTeam);
         }
 
-        data.myTeam.forEach((summoner: any) => {
+        for (const summoner of data.myTeam) {
           const championId = summmoners.get(summoner.summonerId);
           if (!championId) {
             summmoners.set(summoner.summonerId, summoner.championId);
+            continue;
           }
 
           if (championId !== summoner.championId) {
@@ -60,7 +61,10 @@ export class LeagueHandler {
 
             this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
           }
-        });
+        }
+        // data.myTeam.forEach((summoner: any) => {
+
+        // });
       }
 
       const isCloseWindow = await this.isCloseChampionSelectionWindow(data.timer.phase);
