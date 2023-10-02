@@ -17,7 +17,7 @@ import RankBadge from '../@common/rank-badge';
 function SummonerLeagueVoiceBlock(props: {
   isMine: boolean;
   summoner: SummonerType;
-  managementSocket: Socket;
+  managementSocket: Socket | null;
 }) {
   // 소환사 정보
   const summonerInfoList = useRecoilValue(summonerInfoListState);
@@ -35,7 +35,7 @@ function SummonerLeagueVoiceBlock(props: {
 
   useEffect(() => {
     if (!props.isMine) {
-      props.managementSocket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
+      props.managementSocket?.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
         if (props.summoner.summonerId === summonerId) {
           setVisualizerVolume(visualizerVolume);
         }
@@ -47,7 +47,7 @@ function SummonerLeagueVoiceBlock(props: {
         return setSummonerInfo(summonerInfo);
       }
     });
-  }, []);
+  }, [props.managementSocket]);
 
   useEffect(() => {
     let visualizerInterval;
@@ -61,7 +61,7 @@ function SummonerLeagueVoiceBlock(props: {
 
   useEffect(() => {
     if (props.isMine) {
-      props.managementSocket.emit('mic-visualizer', {
+      props.managementSocket?.emit('mic-visualizer', {
         summonerId: props.summoner.summonerId,
         visualizerVolume,
       });
