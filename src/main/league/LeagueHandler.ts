@@ -8,14 +8,12 @@ import { leagueTitleEvent } from './leagueTitleEvent';
 import { Gameflow } from './Gameflow';
 import { MemberChampionData, Team } from './Team';
 import { MatchHistory, ChampionStats } from './MatchHistory';
-import { MemberInfo } from './Member';
 
 let isJoinedRoom = false;
 let isStartedGameLoading = false;
 let isStartedInGame = false;
 let isEndGame = false;
 let isMatchedLeagueTitle = false;
-let selectedChampionId: number = 0;
 
 export class LeagueHandler {
   webContents: WebContents;
@@ -32,8 +30,9 @@ export class LeagueHandler {
     await this.handleLeaguePhase(gameflow, matchHistory);
 
     //챔피언선택 시작
+    const summmoners = new Map();
     this.ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, async (data) => {
-      if (data.timer.phase === 'BAN_PICK' && !isJoinedRoom) {
+      if (!isJoinedRoom) {
         isJoinedRoom = true;
         this.joinTeamVoice(data.myTeam);
       }
@@ -44,26 +43,30 @@ export class LeagueHandler {
           leagueTitleEvent.emit(IPC_KEY.LEAGUE_TITLE, data.myTeam);
         }
 
-        const { championId } = data.myTeam.find(
-          (summoner: any) => summoner.summonerId === this.summoner.summonerId
-        );
+        data.myTeam.forEach((summoner: any) => {
+          const championId = summmoners.get(summoner.summonerId);
+          if (!championId) {
+            summmoners.set(summoner.summonerId, summoner.championId);
+          }
 
-        if (selectedChampionId !== championId) {
-          selectedChampionId = championId;
-          const championStats: ChampionStats = matchHistory.getChampionStats(
-            this.summoner.summonerId,
-            championId,
-            this.summoner.profileImage
-          );
-          this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
-        }
+          if (championId !== summoner.championId) {
+            summmoners.set(summoner.summonerId, summoner.championId);
+
+            const championStats: ChampionStats = matchHistory.getChampionStats(
+              this.summoner.summonerId,
+              championId,
+              this.summoner.profileImage
+            );
+
+            this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
+          }
+        });
       }
 
       const isCloseWindow = await this.isCloseChampionSelectionWindow(data.timer.phase);
       if (isCloseWindow) {
         isJoinedRoom = false;
         this.webContents.send(IPC_KEY.EXIT_CHAMP_SELECT);
-        selectedChampionId = 0;
         isMatchedLeagueTitle = false;
       }
     });
@@ -120,24 +123,21 @@ export class LeagueHandler {
       const { myTeam } = await League.httpRequest(LCU_ENDPOINT.CHAMP_SELECT_URL);
       this.joinTeamVoice(myTeam);
 
-      const { championId } = myTeam.find(
-        (summoner: any) => summoner.summonerId === this.summoner.summonerId
+      const myTeamSummonerChampionStatsList = await Promise.all(
+        myTeam.map((summoner: any) => {
+          if (summoner.championId !== 0) {
+            const championStats: ChampionStats = matchHistory.getChampionStats(
+              this.summoner.summonerId,
+              summoner.championId,
+              this.summoner.profileImage
+            );
+
+            return championStats;
+          }
+        })
       );
 
-      if (championId !== 0) {
-        selectedChampionId = championId;
-        const championStats: ChampionStats = matchHistory.getChampionStats(
-          this.summoner.summonerId,
-          championId,
-          this.summoner.profileImage
-        );
-
-        ipcMain.on('selected-champ-info', (event) => {
-          // event.reply(championStats);
-          this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
-          console.log('챔피언 정보 전달 완료');
-        });
-      }
+      this.webContents.send('selected-champ-info-list', myTeamSummonerChampionStatsList);
       return;
     }
 
