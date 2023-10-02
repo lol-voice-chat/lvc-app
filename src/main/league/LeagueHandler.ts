@@ -125,18 +125,19 @@ export class LeagueHandler {
       this.joinTeamVoice(myTeam);
 
       const myTeamSummonerChampionStatsList = await Promise.all(
-        myTeam.map((summoner: any) => {
-          if (summoner.championId !== 0) {
+        myTeam
+          .filter((summoner: any) => summoner.championId !== 0)
+          .map((summoner: any) => {
             const championStats: ChampionStats = matchHistory.getChampionStats(
-              this.summoner.summonerId,
+              summoner.summonerId,
               summoner.championId,
-              this.summoner.profileImage
+              '' //무조건 있음
             );
 
             return championStats;
-          }
-        })
+          })
       );
+      console.log('test입니다: ', myTeamSummonerChampionStatsList);
 
       this.webContents.send('selected-champ-info-list', myTeamSummonerChampionStatsList);
       return;
