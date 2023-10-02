@@ -29,7 +29,7 @@ export class LeagueHandler {
   }
 
   public async handle(gameflow: Gameflow, matchHistory: MatchHistory) {
-    await this.handleLeaguePhase(gameflow);
+    await this.handleLeaguePhase(gameflow, matchHistory);
 
     //챔피언선택 시작
     this.ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, async (data) => {
@@ -113,11 +113,27 @@ export class LeagueHandler {
     });
   }
 
-  private async handleLeaguePhase(gameflow: Gameflow) {
+  private async handleLeaguePhase(gameflow: Gameflow, matchHistory: MatchHistory) {
     if (gameflow.isChampselectPhase()) {
+      isJoinedRoom = true;
+
       const { myTeam } = await League.httpRequest(LCU_ENDPOINT.CHAMP_SELECT_URL);
       this.joinTeamVoice(myTeam);
-      isJoinedRoom = true;
+
+      const { championId } = myTeam.find(
+        (summoner: any) => summoner.summonerId === this.summoner.summonerId
+      );
+
+      if (championId !== 0) {
+        selectedChampionId = championId;
+        const championStats: ChampionStats = matchHistory.getChampionStats(
+          this.summoner.summonerId,
+          championId,
+          this.summoner.profileImage
+        );
+        this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
+        console.log('챔피언 정보 전달 완료');
+      }
       return;
     }
 
