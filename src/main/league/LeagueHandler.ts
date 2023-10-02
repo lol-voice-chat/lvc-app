@@ -44,24 +44,22 @@ export class LeagueHandler {
         }
 
         for (const summoner of data.myTeam) {
-          const championId = summmoners.get(summoner.summonerId);
-          if (championId === undefined) {
+          if (summoner.championId === 0) {
             summmoners.set(summoner.summonerId, 0);
-            console.log('건너뜀');
-            continue;
+            return;
           }
+          const championId = summmoners.get(summoner.summonerId);
 
           if (championId !== summoner.championId) {
             summmoners.set(summoner.summonerId, summoner.championId);
 
             const championStats: ChampionStats = matchHistory.getChampionStats(
               this.summoner.summonerId,
-              championId,
+              summoner.championId,
               this.summoner.profileImage
             );
 
             this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
-            console.log('챔피언 정보 보냄');
           }
         }
       }
