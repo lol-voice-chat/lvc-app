@@ -1,4 +1,4 @@
-import { WebContents } from 'electron';
+import { WebContents, ipcMain } from 'electron';
 import { LeagueWebSocket } from 'league-connect';
 import { SummonerInfo } from './onLeagueClientUx';
 import League from '../utils';
@@ -131,8 +131,12 @@ export class LeagueHandler {
           championId,
           this.summoner.profileImage
         );
-        this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
-        console.log('챔피언 정보 전달 완료');
+
+        ipcMain.on('selected-champ-info', (event) => {
+          // event.reply(championStats);
+          this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
+          console.log('챔피언 정보 전달 완료');
+        });
       }
       return;
     }
