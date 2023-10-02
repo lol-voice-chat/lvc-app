@@ -31,6 +31,7 @@ function SummonerVoiceBlock(props: {
 
   useEffect(() => {
     ipcRenderer.once('selected-champ-info-list', (_, championInfoList: ChampionInfoType[]) => {
+      console.log('선택된 챔프 리스트', championInfoList);
       championInfoList.map((chmapInfo: ChampionInfoType) => {
         if (props.summoner.summonerId === chmapInfo.summonerId) {
           return setSelectedChampion(chmapInfo);
@@ -38,12 +39,11 @@ function SummonerVoiceBlock(props: {
       });
     });
 
-    function selectChampionEvent(_, championInfo: ChampionInfoType) {
+    ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
       if (props.summoner.summonerId === championInfo.summonerId) {
         setSelectedChampion(championInfo);
       }
-    }
-    ipcRenderer.on(IPC_KEY.CHAMP_INFO, selectChampionEvent);
+    });
 
     /* 팀원 소환사 */
     if (!props.isMine) {
@@ -55,7 +55,7 @@ function SummonerVoiceBlock(props: {
     }
 
     return () => {
-      ipcRenderer.off(IPC_KEY.CHAMP_INFO);
+      ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
     };
   }, [props.managementSocket]);
 
