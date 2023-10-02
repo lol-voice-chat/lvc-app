@@ -14,7 +14,7 @@ const { ipcRenderer } = window.require('electron');
 function SummonerVoiceBlock(props: {
   isMine: boolean;
   summoner: SummonerType;
-  managementSocket: Socket;
+  managementSocket: Socket | null;
 }) {
   // 선택한 챔피언 정보
   const [selectedChampion, setSelectedChampion] = useState<ChampionInfoType | null>(null);
@@ -30,23 +30,24 @@ function SummonerVoiceBlock(props: {
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
 
   useEffect(() => {
-    if (props.isMine) {
-      /* 챔피언 선택 후 앱을 켰을 때 알림 */
-      ipcRenderer.send('selected-champ-info');
-
-      /* 선택한 챔피언 정보 불러오기 */
-      ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
-        setSelectedChampion(championInfo);
-        console.log('감지', championInfo);
-        props.managementSocket.emit('champion-info', championInfo);
-      });
-    } else {
-      props.managementSocket.on('champion-info', (championInfo: ChampionInfoType) => {
-        if (props.summoner.summonerId === championInfo.summonerId) {
-          setSelectedChampion(championInfo);
+    ipcRenderer.once('selected-champ-info-list', (_, championInfoList: ChampionInfoType[]) => {
+      championInfoList.map((chmapInfo: ChampionInfoType) => {
+        if (props.summoner.summonerId === chmapInfo.summonerId) {
+          setSelectedChampion(chmapInfo);
         }
       });
-      props.managementSocket.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
+    });
+
+    function selectChampionEvent(_, championInfo: ChampionInfoType) {
+      if (props.summoner.summonerId === championInfo.summonerId) {
+        setSelectedChampion(championInfo);
+      }
+    }
+    ipcRenderer.on(IPC_KEY.CHAMP_INFO, selectChampionEvent);
+
+    /* 팀원 소환사 */
+    if (!props.isMine) {
+      props.managementSocket?.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
         if (props.summoner.summonerId === summonerId) {
           setVisualizerVolume(visualizerVolume);
         }
@@ -54,9 +55,9 @@ function SummonerVoiceBlock(props: {
     }
 
     return () => {
-      ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
+      ipcRenderer.off(IPC_KEY.CHAMP_INFO);
     };
-  }, []);
+  }, [props.managementSocket]);
 
   useEffect(() => {
     let visualizerInterval;
@@ -70,7 +71,7 @@ function SummonerVoiceBlock(props: {
 
   useEffect(() => {
     if (props.isMine) {
-      props.managementSocket.emit('mic-visualizer', {
+      props.managementSocket?.emit('mic-visualizer', {
         summonerId: props.summoner.summonerId,
         visualizerVolume,
       });

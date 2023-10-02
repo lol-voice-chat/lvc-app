@@ -72,50 +72,44 @@ function VoiceRoomModal() {
     <S.VoiceRoom>
       {gameStatus !== 'loading' ? (
         <>
-          {teamManagementSocket && (
-            <>
-              {summoner && (
-                <SummonerVoiceBlock
-                  isMine={true}
-                  summoner={summoner}
-                  managementSocket={teamManagementSocket}
-                />
-              )}
-              {myTeamSummoners?.map((summoner) => (
-                <SummonerVoiceBlock
-                  isMine={false}
-                  summoner={summoner}
-                  managementSocket={teamManagementSocket}
-                />
-              ))}
-            </>
+          {summoner && (
+            <SummonerVoiceBlock
+              isMine={true}
+              summoner={summoner}
+              managementSocket={teamManagementSocket}
+            />
           )}
+          {myTeamSummoners?.map((summoner) => (
+            <SummonerVoiceBlock
+              isMine={false}
+              summoner={summoner}
+              managementSocket={teamManagementSocket}
+            />
+          ))}
         </>
       ) : (
         <>
-          {leagueManagementSocket && (
-            <S.LeagueBlockBundle>
-              <S.TeamBlocks isMyTeam={false}>
-                {enemySummoners?.map((enemy) => (
-                  <SummonerLeagueVoiceBlock
-                    isMine={false}
-                    summoner={enemy}
-                    managementSocket={leagueManagementSocket}
-                  />
-                ))}
-              </S.TeamBlocks>
+          <S.LeagueBlockBundle>
+            <S.TeamBlocks isMyTeam={false}>
+              {enemySummoners?.map((enemy) => (
+                <SummonerLeagueVoiceBlock
+                  isMine={false}
+                  summoner={enemy}
+                  managementSocket={leagueManagementSocket}
+                />
+              ))}
+            </S.TeamBlocks>
 
-              <S.TeamBlocks isMyTeam={true}>
-                {summoner && (
-                  <SummonerLeagueVoiceBlock
-                    isMine={true}
-                    summoner={summoner}
-                    managementSocket={leagueManagementSocket}
-                  />
-                )}
-              </S.TeamBlocks>
-            </S.LeagueBlockBundle>
-          )}
+            <S.TeamBlocks isMyTeam={true}>
+              {summoner && (
+                <SummonerLeagueVoiceBlock
+                  isMine={true}
+                  summoner={summoner}
+                  managementSocket={leagueManagementSocket}
+                />
+              )}
+            </S.TeamBlocks>
+          </S.LeagueBlockBundle>
         </>
       )}
     </S.VoiceRoom>
