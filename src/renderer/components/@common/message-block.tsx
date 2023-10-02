@@ -15,14 +15,12 @@ function MessageBlock(props: {
 }) {
   return (
     <BlockContainer>
-      <div id="summoner-profile">
-        <img id="summoner-icon" src={props.summonerIcon} />
-        <RankBadge size="small" tierImg={props.tierImg} tier={props.tier} />
-      </div>
+      <img id="summoner-icon" src={props.summonerIcon} />
 
       <div className="drag-able" id="message-info">
         <div id="summoner-info">
           <p id="name">{props.name}</p>
+          <RankBadge size="small" tierImg={props.tierImg} tier={props.tier} />
           <p id="time">{props.time}</p>
         </div>
         {props.messageType === 'text' ? (
@@ -44,21 +42,11 @@ const BlockContainer = styled.div`
     background-color: #2a2c2f;
   }
 
-  #summoner-profile {
-    position: relative;
+  #summoner-icon {
+    width: 45px;
     height: 45px;
+    border-radius: 50%;
     margin-right: 12px;
-
-    #summoner-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-    }
-    #rank-badge {
-      position: absolute;
-      bottom: -5px;
-      left: -5px;
-    }
   }
   #message-info {
     display: flex;
@@ -67,12 +55,15 @@ const BlockContainer = styled.div`
 
     #summoner-info {
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       margin-bottom: 5px;
 
       #name {
         font-size: 14px;
         color: ${PALETTE.WHITE_1};
+        margin-right: 7px;
+      }
+      #rank-badge {
         margin-right: 7px;
       }
       #time {
