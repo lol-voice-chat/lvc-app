@@ -54,7 +54,7 @@ export class LeagueHandler {
             summmoners.set(summoner.summonerId, summoner.championId);
 
             const championStats: ChampionStats = matchHistory.getChampionStats(
-              this.summoner.summonerId,
+              summoner.summonerId,
               summoner.championId,
               this.summoner.profileImage
             );
