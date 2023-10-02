@@ -33,7 +33,7 @@ function SummonerVoiceBlock(props: {
     ipcRenderer.once('selected-champ-info-list', (_, championInfoList: ChampionInfoType[]) => {
       championInfoList.map((chmapInfo: ChampionInfoType) => {
         if (props.summoner.summonerId === chmapInfo.summonerId) {
-          setSelectedChampion(chmapInfo);
+          return setSelectedChampion(chmapInfo);
         }
       });
     });
