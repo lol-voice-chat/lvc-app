@@ -64,9 +64,6 @@ export class LeagueHandler {
             console.log('챔피언 정보 보냄');
           }
         }
-        // data.myTeam.forEach((summoner: any) => {
-
-        // });
       }
 
       const isCloseWindow = await this.isCloseChampionSelectionWindow(data.timer.phase);
