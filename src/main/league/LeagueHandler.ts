@@ -45,8 +45,9 @@ export class LeagueHandler {
 
         for (const summoner of data.myTeam) {
           const championId = summmoners.get(summoner.summonerId);
-          if (!championId) {
-            summmoners.set(summoner.summonerId, summoner.championId);
+          if (championId === undefined) {
+            summmoners.set(summoner.summonerId, 0);
+            console.log('건너뜀');
             continue;
           }
 
@@ -60,11 +61,9 @@ export class LeagueHandler {
             );
 
             this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
+            console.log('챔피언 정보 보냄');
           }
         }
-        // data.myTeam.forEach((summoner: any) => {
-
-        // });
       }
 
       const isCloseWindow = await this.isCloseChampionSelectionWindow(data.timer.phase);
