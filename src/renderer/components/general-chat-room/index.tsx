@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import * as _ from './style';
 import MessageInput from '../@common/message-input';
-import ChattingList from '../chatting-list';
+import ChattingList from './chatting-list';
 import { useRecoilValue } from 'recoil';
 import { summonerState } from '../../@store/atom';
 

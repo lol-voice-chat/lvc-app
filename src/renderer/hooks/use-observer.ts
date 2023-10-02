@@ -10,12 +10,12 @@ function useObserver(
   useEffect(() => {
     let observer: IntersectionObserver;
 
-    if (target && target) {
+    if (target) {
       observer = new IntersectionObserver(onIntersect, { root, rootMargin, threshold });
       observer.observe(target);
     }
 
-    return () => observer && observer.disconnect();
+    return () => observer?.disconnect();
   }, [target, rootMargin, threshold, onIntersect, root]);
 }
 
