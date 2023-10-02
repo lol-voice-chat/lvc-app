@@ -2,8 +2,12 @@ import React, { useEffect, useState } from 'react';
 import * as _ from './style';
 import MessageInput from '../@common/message-input';
 import ChattingList from '../chatting-list';
+import { useRecoilValue } from 'recoil';
+import { summonerState } from '../../@store/atom';
 
 function GeneralChatRoom() {
+  const summoner = useRecoilValue(summonerState);
+
   const [generalChatSocket, setGeneralChatSocket] = useState<WebSocket | null>(null);
 
   useEffect(() => {
@@ -17,8 +21,8 @@ function GeneralChatRoom() {
 
   return (
     <_.GeneralChatRoomContainer>
-      <ChattingList socket={generalChatSocket} />
-      <MessageInput socket={generalChatSocket} />
+      <ChattingList socket={generalChatSocket} summoner={summoner} />
+      <MessageInput socket={generalChatSocket} summoner={summoner} />
     </_.GeneralChatRoomContainer>
   );
 }

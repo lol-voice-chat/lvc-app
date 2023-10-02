@@ -1,16 +1,12 @@
-import React, { ChangeEvent, useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { FONT, PALETTE } from '../../const';
-import { useRecoilValue } from 'recoil';
-import { summonerState } from '../../@store/atom';
 import { SummonerType } from '../../@type/summoner';
 
 const ENTER = 13;
 const TAB = 9;
 
-function MessageInput(props: { socket: WebSocket | null }) {
-  const summoner = useRecoilValue(summonerState);
-
+function MessageInput(props: { socket: WebSocket | null; summoner: SummonerType | null }) {
   const handleResizeHeight = () => {
     const textarea = document.getElementById('text-area') as HTMLTextAreaElement;
     textarea.style.height = 'auto';
@@ -18,10 +14,10 @@ function MessageInput(props: { socket: WebSocket | null }) {
   };
 
   const handleInputKey = (event: any) => {
-    if (summoner) {
+    if (props.summoner) {
       if (event.keyCode === ENTER && !event.shiftKey) {
         event.preventDefault();
-        handleEnter(event, summoner);
+        handleEnter(event, props.summoner);
       }
       if (event.keyCode === TAB) {
         event.preventDefault();
@@ -55,7 +51,7 @@ function MessageInput(props: { socket: WebSocket | null }) {
       tier: sender.tier,
       tierImage: 'img/dummy_rank.png',
     };
-    props.socket?.send(JSON.stringify({ summoner, message }));
+    props.socket?.send(JSON.stringify({ key: 'new-message', summoner, message }));
   };
 
   const handleClickImgUpload = () => {
@@ -64,7 +60,7 @@ function MessageInput(props: { socket: WebSocket | null }) {
   };
 
   return (
-    <Input id="message-input">
+    <MessageInputContainer id="message-input">
       <div id="input-box">
         <div id="img-upload-btn" onClick={handleClickImgUpload}>
           <img src="img/img_add_btn.svg" alt="이미지 추가 버튼" />
@@ -80,11 +76,11 @@ function MessageInput(props: { socket: WebSocket | null }) {
           onKeyDown={handleInputKey}
         />
       </div>
-    </Input>
+    </MessageInputContainer>
   );
 }
 
-const Input = styled.div`
+const MessageInputContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
