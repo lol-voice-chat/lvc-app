@@ -15,12 +15,7 @@ export const ChatContainer = styled.div`
     display: none;
   }
 
-  #loading-container {
-    width: 100%;
-    margin: 15px 0;
-  }
-
-  #new-msg-alram {
+  #new-message-alram {
     position: absolute;
     bottom: 100px;
     left: calc(50% - 100px);

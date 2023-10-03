@@ -175,17 +175,17 @@ function SummonerVoiceBlock(props: {
             </S.ProgressBar>
 
             <S.KDAList>
-              {props.summoner.summonerStats.statsList.map((summonerStats, idx) => (
-                <div style={{ backgroundColor: summonerStats.isWin ? '#2C334A' : '#50383B' }}>
-                  <img src={summonerStats.championIcon} />
-                  <p>{summonerStats.kda}</p>
+              {props.summoner.summonerStats.statsList.map(({ isWin, championIcon, kda }, idx) => (
+                <div style={{ backgroundColor: isWin ? '#2C334A' : '#50383B' }} key={idx}>
+                  <img src={championIcon} />
+                  <p>{kda}</p>
                 </div>
               ))}
             </S.KDAList>
           </S.WinningPercentage>
         ) : (
           <div id="warning-box">
-            <img src="img/warning_icon.svg" alt="위험 아이콘" />
+            <img src="img/warning_icon.svg" />
             <p>전적이 없습니다.</p>
           </div>
         )}

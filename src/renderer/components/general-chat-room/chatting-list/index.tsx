@@ -4,7 +4,6 @@ import * as _ from './style';
 import { SummonerType } from '../../../@type/summoner';
 import useObserver from '../../../hooks/use-observer';
 import SkeletonChattingList from './skeleton';
-import LoadingDots from '../../@common/loading-dots';
 
 type MessageInfoType = {
   summoner: {
@@ -24,9 +23,8 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
 
   const [isReceiveNewMsg, setIsReceiveNewMsg] = useState(false);
 
-  const [curMessagePage, setCurMessagePage] = useState(0);
   const [prevScrollHeight, setPrevScrollHeight] = useState(0);
-  const [isFetchLoading, setIsFetchLoading] = useState(false);
+  const [fetchingMsgPage, setFetchingMsgPage] = useState(0);
   const [isFetchEnd, setIsFetchEnd] = useState(false);
 
   useEffect(() => {
@@ -62,10 +60,9 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
               ...payload.messageList.map((messageInfo) => JSON.parse(messageInfo)),
               ...(msgList ?? []),
             ]);
+            setFetchingMsgPage((page) => page + 1);
+            setMessageEvent({ key: payload.key });
           }
-          setIsFetchLoading(false);
-          setCurMessagePage((curPage) => curPage + 1);
-          setMessageEvent({ key: payload.key });
         }
       };
     }
@@ -78,35 +75,37 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
     }
     if (messageEvent.key === 'response-before-message') {
       const container = document.getElementById('chat-list-container');
-      container?.scrollTo({ top: prevScrollHeight });
+      if (container) {
+        container.scrollTo({ top: container.scrollHeight - prevScrollHeight });
+      }
     }
   }, [messageEvent]);
 
-  /* 이전 채팅 목록 불러오기 */
-  const fetchBeforeChatList = () => {
-    if (props.socket && !isFetchEnd) {
-      props.socket.send(JSON.stringify({ key: 'before-message', page: curMessagePage + 1 }));
-      setPrevScrollHeight(document.getElementById('chat-list-container')?.scrollHeight as number);
-      setIsFetchLoading(true);
-    }
-  };
-
+  /* chat-list-top 감지되면 이전 채팅목록 불러오기 */
   useObserver(
     document.getElementById('chat-list-top') as HTMLDivElement,
-    ([entry]: any) => entry.isIntersecting && fetchBeforeChatList()
+    ([entry]: any) => {
+      if (entry.isIntersecting && props.socket) {
+        props.socket.send(JSON.stringify({ key: 'before-message', page: fetchingMsgPage + 1 }));
+        const curScrollHeight = document.getElementById('chat-list-container')?.scrollHeight;
+        curScrollHeight && setPrevScrollHeight(curScrollHeight);
+      }
+    },
+    null,
+    '100px',
+    0.1
   );
+
+  const handleClickNewMessageAlram = () => {
+    document.getElementById('chat-list-bottom')?.scrollIntoView();
+    setIsReceiveNewMsg(false);
+  };
 
   return (
     <_.ChatContainer id="chat-list-container">
       {messageList ? (
         <>
-          {isFetchLoading && !isFetchEnd ? (
-            <div id="loading-container">
-              <LoadingDots />
-            </div>
-          ) : (
-            <div id="chat-list-top" />
-          )}
+          {!isFetchEnd && <div id="chat-list-top" />}
 
           {messageList?.map(({ summoner, message, time }, idx) => (
             <MessageBlock
@@ -121,16 +120,7 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
             />
           ))}
 
-          {isReceiveNewMsg && (
-            <div
-              id="new-msg-alram"
-              onClick={() => {
-                document.getElementById('chat-list-bottom')?.scrollIntoView();
-                setIsReceiveNewMsg(false);
-              }}
-            />
-          )}
-
+          {isReceiveNewMsg && <div id="new-message-alram" onClick={handleClickNewMessageAlram} />}
           <div id="chat-list-bottom" />
         </>
       ) : (

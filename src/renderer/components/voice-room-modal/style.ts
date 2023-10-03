@@ -16,6 +16,8 @@ export const VoiceRoom = styled.div`
   height: 100vh;
 
   background-color: ${PALETTE.BLACK_2};
+
+  overflow: hidden;
 `;
 
 export const LeagueBlockBundle = styled.div`
