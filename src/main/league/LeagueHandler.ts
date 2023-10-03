@@ -128,16 +128,28 @@ export class LeagueHandler {
         myTeam
           .filter((summoner: any) => summoner.championId !== 0)
           .map((summoner: any) => {
-            const championStats: ChampionStats = matchHistory.getChampionStats(
-              summoner.summonerId,
-              summoner.championId,
-              '' //무조건 있음
-            );
+            if (summoner.championId !== 0) {
+              const championStats: ChampionStats = matchHistory.getChampionStats(
+                summoner.summonerId,
+                summoner.championId,
+                '' //무조건 있음
+              );
+
+              return championStats;
+            }
+
+            const championStats = {
+              summonerId: summoner.summonerId,
+              championIcon: null,
+              name: null,
+              kda: null,
+              damage: null,
+              cs: null,
+            };
 
             return championStats;
           })
       );
-      console.log('test입니다: ', myTeamSummonerChampionStatsList);
 
       this.webContents.send('selected-champ-info-list', myTeamSummonerChampionStatsList);
       return;
