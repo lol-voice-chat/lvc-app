@@ -36,6 +36,7 @@ export interface ChampionStats {
   kda: string;
   damage: string;
   cs: string;
+  playCount: string;
 }
 
 interface MatchHistoryData {
@@ -53,18 +54,13 @@ interface MatchData {
 export interface ParticipantData {
   championId: number;
   stats: {
-    causedEarlySurrender: boolean; //조기항복 유도 여부
-    doubleKills: number;
-    assists: number;
-    deaths: number;
-    kills: number;
-    totalHeal: number;
-    visionScore: number; //시야점수
-    turretKills: number; //타워킬 횟수
+    assists: number; //어시스트 횟수
+    deaths: number; //죽은 횟수
+    kills: number; //킬 횟수
     totalDamageDealtToChampions: number; //총 피해량
     totalMinionsKilled: number; //미니언 처치 횟수
     neutralMinionsKilled: number; //중립 몬스터 처치 횟수
-    win: boolean;
+    win: boolean; //승리 여부
   };
   teamId: number;
 }
@@ -248,6 +244,7 @@ export class MatchHistory {
         kda: '전적 없음',
         damage: '전적 없음',
         cs: '전적 없음',
+        playCount: '전적 없음',
       };
 
       return championStats;
@@ -264,6 +261,7 @@ export class MatchHistory {
       `,
       damage: Math.floor(totalDamage / champCount).toString(),
       cs: this.getStatsAverage(totalCs, champCount),
+      playCount: champCount.toString(),
     };
 
     return championStats;
@@ -306,25 +304,6 @@ export class MatchHistory {
     }
 
     return statsAverage;
-  }
-
-  public getLeagueTitleScore(leagueTitle: any) {
-    let count = 0;
-
-    this.getPvpMatchList().forEach((match: MatchData) => {
-      const participant: ParticipantData = match.participants[0];
-
-      let statsValue = participant.stats[leagueTitle.value as keyof ParticipantData['stats']];
-      if (statsValue) {
-        statsValue = 1;
-      } else {
-        statsValue = 0;
-      }
-
-      count += statsValue;
-    });
-
-    return count;
   }
 
   private getPvpMatchList() {

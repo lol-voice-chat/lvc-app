@@ -32,20 +32,6 @@ export class Team {
     return summonerIds.sort().join('').toString();
   }
 
-  public isAlone() {
-    return this.members.length === 1;
-  }
-
-  public async getMemberMatchHistoryList() {
-    const memberMatchHistoryList: MemberMatchHistoryData[] = await Promise.all(
-      this.members.map((member) => {
-        return member.getMatchHistory();
-      })
-    );
-
-    return memberMatchHistoryList;
-  }
-
   public async getMemberChampionKdaList() {
     const memberChampionKdaList: MemberChampionData[] = await Promise.all(
       this.members.map((member) => {
