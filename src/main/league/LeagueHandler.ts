@@ -102,7 +102,7 @@ export class LeagueHandler {
           const summonerIdList: number[] = myTeam.getSummonerIdList(this.summoner.summonerId);
           //
           this.webContents.send(IPC_KEY.START_IN_GAME, summonerIdList);
-        }, 10000);
+        }, 190000);
       }
 
       //인게임 도중 나감
@@ -159,6 +159,40 @@ export class LeagueHandler {
     if (gameflow.isGameLoadingPhase()) {
       const { teamOne, teamTwo } = gameflow.gameData;
       await this.joinLeagueVoice(teamOne, teamTwo);
+
+      const teamOneSummoners = new Team(teamOne);
+      const summoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
+      const myTeam = summoner ? teamOne : teamTwo;
+
+      const myTeamSummonerChampionStatsList = await Promise.all(
+        myTeam
+          .filter((summoner: any) => summoner.championId !== 0)
+          .map((summoner: any) => {
+            if (summoner.championId !== 0) {
+              const championStats: ChampionStats = matchHistory.getChampionStats(
+                summoner.summonerId,
+                summoner.championId,
+                '' //무조건 있음
+              );
+
+              return championStats;
+            }
+
+            const championStats = {
+              summonerId: summoner.summonerId,
+              championIcon: null,
+              name: null,
+              kda: null,
+              damage: null,
+              cs: null,
+            };
+
+            return championStats;
+          })
+      );
+
+      this.webContents.send('selected-champ-info-list', myTeamSummonerChampionStatsList);
+
       isStartedGameLoading = true;
       return;
     }
