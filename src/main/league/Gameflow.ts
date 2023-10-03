@@ -27,7 +27,7 @@ export class Gameflow {
   }
 
   public isGameLoadingPhase() {
-    return this.phase === 'InProgress' && !this.gameClient.visible;
+    return this.phase === 'InProgress' && this.gameClient.running;
   }
 
   public isInGamePhase() {

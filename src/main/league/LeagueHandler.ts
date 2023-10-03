@@ -1,10 +1,9 @@
-import { WebContents, ipcMain } from 'electron';
+import { WebContents } from 'electron';
 import { LeagueWebSocket } from 'league-connect';
 import { SummonerInfo } from './onLeagueClientUx';
 import League from '../utils';
 import { LCU_ENDPOINT } from '../constants';
 import { IPC_KEY } from '../../const';
-import { leagueTitleEvent } from './leagueTitleEvent';
 import { Gameflow } from './Gameflow';
 import { MemberChampionData, Team } from './Team';
 import { MatchHistory, ChampionStats } from './MatchHistory';
@@ -13,7 +12,6 @@ let isJoinedRoom = false;
 let isStartedGameLoading = false;
 let isStartedInGame = false;
 let isEndGame = false;
-let isMatchedLeagueTitle = false;
 
 export class LeagueHandler {
   webContents: WebContents;
@@ -38,11 +36,6 @@ export class LeagueHandler {
       }
 
       if (data.timer.phase === 'BAN_PICK') {
-        if (!isMatchedLeagueTitle) {
-          isMatchedLeagueTitle = true;
-          leagueTitleEvent.emit(IPC_KEY.LEAGUE_TITLE, data.myTeam);
-        }
-
         for (const summoner of data.myTeam) {
           if (summoner.championId === 0) {
             summmoners.set(summoner.summonerId, 0);
@@ -68,21 +61,20 @@ export class LeagueHandler {
       if (isCloseWindow) {
         isJoinedRoom = false;
         this.webContents.send(IPC_KEY.EXIT_CHAMP_SELECT);
-        isMatchedLeagueTitle = false;
         summmoners = new Map();
       }
     });
 
     this.ws.subscribe(LCU_ENDPOINT.GAMEFLOW_URL, async (data) => {
       //게임로딩 시작
-      if (data.phase === 'InProgress' && !data.gameClient.visible && !isStartedGameLoading) {
+      if (data.phase === 'InProgress' && data.gameClient.running && !isStartedGameLoading) {
         isStartedGameLoading = true;
         const { teamOne, teamTwo } = data.gameData;
         await this.joinLeagueVoice(teamOne, teamTwo);
       }
 
       //게임로딩 도중 나감
-      if (data.phase === 'None' && !data.gameClient.visible && isStartedGameLoading) {
+      if (data.phase === 'None' && data.gameClient.running && isStartedGameLoading) {
         isStartedGameLoading = false;
         this.webContents.send(IPC_KEY.EXIT_IN_GAME);
       }
