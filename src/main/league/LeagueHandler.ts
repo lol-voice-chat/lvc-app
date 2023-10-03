@@ -30,7 +30,7 @@ export class LeagueHandler {
     await this.handleLeaguePhase(gameflow, matchHistory);
 
     //챔피언선택 시작
-    const summmoners = new Map();
+    let summmoners = new Map();
     this.ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, async (data) => {
       if (!isJoinedRoom) {
         isJoinedRoom = true;
@@ -69,6 +69,7 @@ export class LeagueHandler {
         isJoinedRoom = false;
         this.webContents.send(IPC_KEY.EXIT_CHAMP_SELECT);
         isMatchedLeagueTitle = false;
+        summmoners = new Map();
       }
     });
 
