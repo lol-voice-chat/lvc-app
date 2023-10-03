@@ -138,6 +138,7 @@ export class LeagueHandler {
               kda: null,
               damage: null,
               cs: null,
+              playCount: null,
             };
 
             return championStats;
@@ -177,6 +178,7 @@ export class LeagueHandler {
               kda: null,
               damage: null,
               cs: null,
+              playCount: null,
             };
 
             return championStats;
@@ -220,6 +222,7 @@ export class LeagueHandler {
               kda: null,
               damage: null,
               cs: null,
+              playCount: null,
             };
 
             return championStats;
