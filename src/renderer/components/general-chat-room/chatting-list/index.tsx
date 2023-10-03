@@ -48,7 +48,7 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
           if (containerRef.current) {
             const isScrollEnd =
               containerRef.current.scrollTop + containerRef.current.clientHeight >=
-              containerRef.current.scrollHeight - 30;
+              containerRef.current.scrollHeight - 100;
 
             /* 내가 보낸 거 or 최신 메시지 보는 중 */
             if (props.summoner?.name === summoner.name || isScrollEnd) {
@@ -61,16 +61,14 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
           }
         }
         if (payload.key === 'response-before-message') {
-          if (payload.messageList.length === 0) {
-            setIsFetchEnd(true);
-          } else {
-            setMessageList((msgList) => [
-              ...payload.messageList.map((messageInfo) => JSON.parse(messageInfo)),
-              ...(msgList ?? []),
-            ]);
-            setFetchingMsgPage((page) => page + 1);
-            setMessageEvent({ key: payload.key });
-          }
+          if (payload.isLast) setIsFetchEnd(true);
+
+          setMessageList((msgList) => [
+            ...payload.messageList.map((messageInfo) => JSON.parse(messageInfo)),
+            ...(msgList ?? []),
+          ]);
+          setFetchingMsgPage((page) => page + 1);
+          setMessageEvent({ key: payload.key });
           setIsFetchLoading(false);
         }
       };
@@ -130,6 +128,7 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
           ))}
 
           {isReceiveNewMsg && <div id="new-message-alram" onClick={handleClickNewMessageAlram} />}
+
           <div ref={bottomRef} />
         </>
       ) : (
