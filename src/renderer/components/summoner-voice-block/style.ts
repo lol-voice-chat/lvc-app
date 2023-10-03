@@ -371,6 +371,7 @@ export const ProgressBar = styled.div`
 
 export const KDAList = styled.div`
   display: grid;
+  grid-auto-flow: column;
   grid-template-columns: repeat(2, 85px);
   grid-template-rows: repeat(5, 25px);
   column-gap: 14px;
