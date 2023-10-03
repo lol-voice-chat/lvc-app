@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import MessageBlock from '../../@common/message-block';
 import * as _ from './style';
 import { SummonerType } from '../../../@type/summoner';
@@ -23,8 +23,13 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
 
   const [isReceiveNewMsg, setIsReceiveNewMsg] = useState(false);
 
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const topRef = useRef<HTMLDivElement | null>(null);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
   const [prevScrollHeight, setPrevScrollHeight] = useState(0);
   const [fetchingMsgPage, setFetchingMsgPage] = useState(0);
+  const [isFetchLoading, setIsFetchLoading] = useState(false);
   const [isFetchEnd, setIsFetchEnd] = useState(false);
 
   useEffect(() => {
@@ -40,16 +45,19 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
           const { summoner, message, time } = payload;
           setMessageList((msgList) => [...(msgList ?? []), { summoner, message, time }]);
 
-          const target = document.getElementById('chat-list-container') as HTMLDivElement;
-          const isScrollEnd = target.scrollTop + target.clientHeight >= target.scrollHeight - 30;
+          if (containerRef.current) {
+            const isScrollEnd =
+              containerRef.current.scrollTop + containerRef.current.clientHeight >=
+              containerRef.current.scrollHeight - 30;
 
-          /* 내가 보낸 거 or 최신 메시지 보는 중 */
-          if (props.summoner?.name === summoner.name || isScrollEnd) {
-            setMessageEvent({ key: payload.key });
-          }
-          /* 남이 보낸 거 and 이전 메시지 보는 중 */
-          if (props.summoner?.name !== summoner.name && !isScrollEnd) {
-            setIsReceiveNewMsg(true);
+            /* 내가 보낸 거 or 최신 메시지 보는 중 */
+            if (props.summoner?.name === summoner.name || isScrollEnd) {
+              setMessageEvent({ key: payload.key });
+            }
+            /* 남이 보낸 거 and 이전 메시지 보는 중 */
+            if (props.summoner?.name !== summoner.name && !isScrollEnd) {
+              setIsReceiveNewMsg(true);
+            }
           }
         }
         if (payload.key === 'response-before-message') {
@@ -63,6 +71,7 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
             setFetchingMsgPage((page) => page + 1);
             setMessageEvent({ key: payload.key });
           }
+          setIsFetchLoading(false);
         }
       };
     }
@@ -71,41 +80,41 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
   /* 새 메시지 항목별 이벤트 수행 */
   useEffect(() => {
     if (messageEvent.key === 'init' || messageEvent.key === 'message') {
-      document.getElementById('chat-list-bottom')?.scrollIntoView();
+      bottomRef.current?.scrollIntoView();
     }
     if (messageEvent.key === 'response-before-message') {
-      const container = document.getElementById('chat-list-container');
-      if (container) {
-        container.scrollTo({ top: container.scrollHeight - prevScrollHeight });
+      if (containerRef.current) {
+        containerRef.current.scrollTo({
+          top: containerRef.current.scrollHeight - prevScrollHeight,
+        });
       }
     }
   }, [messageEvent]);
 
   /* chat-list-top 감지되면 이전 채팅목록 불러오기 */
-  useObserver(
-    document.getElementById('chat-list-top') as HTMLDivElement,
-    ([entry]: any) => {
-      if (entry.isIntersecting && props.socket) {
-        props.socket.send(JSON.stringify({ key: 'before-message', page: fetchingMsgPage + 1 }));
-        const curScrollHeight = document.getElementById('chat-list-container')?.scrollHeight;
-        curScrollHeight && setPrevScrollHeight(curScrollHeight);
+  useObserver(topRef, ([entry]: any) => entry.isIntersecting && fetchBeforeChatList());
+
+  const fetchBeforeChatList = () => {
+    if (props.socket) {
+      props.socket.send(JSON.stringify({ key: 'before-message', page: fetchingMsgPage + 1 }));
+      const curScrollHeight = containerRef.current?.scrollHeight;
+      if (curScrollHeight) {
+        setPrevScrollHeight(curScrollHeight);
+        setIsFetchLoading(true);
       }
-    },
-    null,
-    '100px',
-    0.1
-  );
+    }
+  };
 
   const handleClickNewMessageAlram = () => {
-    document.getElementById('chat-list-bottom')?.scrollIntoView();
+    bottomRef.current?.scrollIntoView();
     setIsReceiveNewMsg(false);
   };
 
   return (
-    <_.ChatContainer id="chat-list-container">
+    <_.ChatContainer ref={containerRef}>
       {messageList ? (
         <>
-          {!isFetchEnd && <div id="chat-list-top" />}
+          {!isFetchEnd && !isFetchLoading && <div ref={topRef} />}
 
           {messageList?.map(({ summoner, message, time }, idx) => (
             <MessageBlock
@@ -121,7 +130,7 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
           ))}
 
           {isReceiveNewMsg && <div id="new-message-alram" onClick={handleClickNewMessageAlram} />}
-          <div id="chat-list-bottom" />
+          <div ref={bottomRef} />
         </>
       ) : (
         <>
