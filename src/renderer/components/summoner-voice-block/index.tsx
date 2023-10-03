@@ -4,20 +4,17 @@ import RankBadge from '../@common/rank-badge';
 import { ChampionInfoType, SummonerType } from '../../@type/summoner';
 import VolumeSlider from '../@common/volume-slider';
 import { getSummonerSpeaker, micVolumeHandler } from '../../utils/audio';
-import { IPC_KEY } from '../../../const';
 import { useRecoilValue } from 'recoil';
 import { LeagueTitleType, leagueTitleListState, userStreamState } from '../../@store/atom';
 import { Socket } from 'socket.io-client';
 
-const { ipcRenderer } = window.require('electron');
-
 function SummonerVoiceBlock(props: {
   isMine: boolean;
   summoner: SummonerType;
+  selectedChampInfo: ChampionInfoType | null;
   managementSocket: Socket | null;
 }) {
   // 선택한 챔피언 정보
-  const [selectedChampion, setSelectedChampion] = useState<ChampionInfoType | null>(null);
   const leagueTitleList = useRecoilValue(leagueTitleListState);
   const [myLeagueTitle, setMyLeagueTitle] = useState<LeagueTitleType | null>(null);
 
@@ -30,21 +27,6 @@ function SummonerVoiceBlock(props: {
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
 
   useEffect(() => {
-    ipcRenderer.once('selected-champ-info-list', (_, championInfoList: ChampionInfoType[]) => {
-      console.log('선택된 챔프 리스트', championInfoList);
-      championInfoList.map((chmapInfo: ChampionInfoType) => {
-        if (props.summoner.summonerId === chmapInfo.summonerId) {
-          return setSelectedChampion(chmapInfo);
-        }
-      });
-    });
-
-    ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
-      if (props.summoner.summonerId === championInfo.summonerId) {
-        setSelectedChampion(championInfo);
-      }
-    });
-
     /* 팀원 소환사 */
     if (!props.isMine) {
       props.managementSocket?.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
@@ -53,11 +35,16 @@ function SummonerVoiceBlock(props: {
         }
       });
     }
-
-    return () => {
-      ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
-    };
   }, [props.managementSocket]);
+
+  useEffect(() => {
+    if (props.isMine) {
+      props.managementSocket?.emit('mic-visualizer', {
+        summonerId: props.summoner.summonerId,
+        visualizerVolume,
+      });
+    }
+  }, [visualizerVolume]);
 
   useEffect(() => {
     let visualizerInterval;
@@ -68,15 +55,6 @@ function SummonerVoiceBlock(props: {
     }
     return () => clearInterval(visualizerInterval);
   }, [userStream]);
-
-  useEffect(() => {
-    if (props.isMine) {
-      props.managementSocket?.emit('mic-visualizer', {
-        summonerId: props.summoner.summonerId,
-        visualizerVolume,
-      });
-    }
-  }, [visualizerVolume]);
 
   useEffect(() => {
     leagueTitleList?.map((leagueTitle) => {
@@ -111,7 +89,7 @@ function SummonerVoiceBlock(props: {
     <S.SummonerBlock id={props.summoner.summonerId.toString()}>
       <S.ProfileImg
         visualize={!isMuteSpeaker && visualizerVolume > 20}
-        src={selectedChampion?.championIcon ?? props.summoner.profileImage}
+        src={props.selectedChampInfo?.championIcon ?? props.summoner.profileImage}
       />
 
       <S.NameTag length={props.summoner.name.length}>
@@ -163,18 +141,18 @@ function SummonerVoiceBlock(props: {
       </S.SoundBox>
 
       <S.AverageGameData>
-        <p id="name">{selectedChampion?.name ?? '선택한 챔피언'}</p>
+        <p id="name">{props.selectedChampInfo?.name ?? '선택한 챔피언'}</p>
         <div>
           <p>평균 KDA</p>
-          <p id="value">{selectedChampion?.kda ?? '-'}</p>
+          <p id="value">{props.selectedChampInfo?.kda ?? '-'}</p>
         </div>
         <div>
           <p>평균 피해량</p>
-          <p id="value">{selectedChampion?.damage ?? '-'}</p>
+          <p id="value">{props.selectedChampInfo?.damage ?? '-'}</p>
         </div>
         <div>
           <p>평균 CS</p>
-          <p id="value">{selectedChampion?.cs ?? '-'}</p>
+          <p id="value">{props.selectedChampInfo?.cs ?? '-'}</p>
         </div>
       </S.AverageGameData>
 
@@ -198,11 +176,8 @@ function SummonerVoiceBlock(props: {
 
             <S.KDAList>
               {props.summoner.summonerStats.statsList.map((summonerStats, idx) => (
-                <div
-                  key={idx}
-                  style={{ backgroundColor: summonerStats.isWin ? '#2C334A' : '#50383B' }}
-                >
-                  <img src={summonerStats.championIcon} alt="챔피언 아이콘" />
+                <div style={{ backgroundColor: summonerStats.isWin ? '#2C334A' : '#50383B' }}>
+                  <img src={summonerStats.championIcon} />
                   <p>{summonerStats.kda}</p>
                 </div>
               ))}

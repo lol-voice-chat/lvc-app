@@ -11,10 +11,13 @@ import {
 import * as S from './style';
 import SummonerVoiceBlock from '../summoner-voice-block';
 import { connectSocket } from '../../utils/socket';
-import { STORE_KEY } from '../../../const';
+import { IPC_KEY, STORE_KEY } from '../../../const';
 import electronStore from '../../@store/electron';
 import { Socket } from 'socket.io-client';
 import SummonerLeagueVoiceBlock from '../summoner-league-voice-block';
+import { ChampionInfoType } from '../../@type/summoner';
+
+const { ipcRenderer } = window.require('electron');
 
 function VoiceRoomModal() {
   const userStream = useRecoilValue(userStreamState);
@@ -23,6 +26,9 @@ function VoiceRoomModal() {
 
   const summoner = useRecoilValue(summonerState);
   const myTeamSummoners = useRecoilValue(myTeamSummonersState);
+  const [selectedChampList, setSelectedChampList] = useState<Map<number, ChampionInfoType>>(
+    new Map()
+  );
   const enemySummoners = useRecoilValue(enemySummonersState);
 
   const [teamManagementSocket, setTeamManagementSocket] = useState<Socket | null>(null);
@@ -41,8 +47,21 @@ function VoiceRoomModal() {
       setTeamManagementSocket(socket);
     });
 
+    /* 입장시 선택한 챔피언 리스트 */
+    ipcRenderer.once('selected-champ-info-list', (_, championInfoList: ChampionInfoType[]) => {
+      championInfoList.map((champInfo: ChampionInfoType) => {
+        setSelectedChampList((prev) => new Map([...prev, [champInfo.summonerId, champInfo]]));
+      });
+    });
+
+    /* 실시간 챔피언 선택 */
+    ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
+      setSelectedChampList((prev) => new Map(prev).set(championInfo.summonerId, championInfo));
+    });
+
     return () => {
       teamManagementSocket?.disconnect();
+      ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
     };
   }, []);
 
@@ -76,6 +95,7 @@ function VoiceRoomModal() {
             <SummonerVoiceBlock
               isMine={true}
               summoner={summoner}
+              selectedChampInfo={selectedChampList.get(summoner.summonerId) ?? null}
               managementSocket={teamManagementSocket}
             />
           )}
@@ -83,6 +103,7 @@ function VoiceRoomModal() {
             <SummonerVoiceBlock
               isMine={false}
               summoner={summoner}
+              selectedChampInfo={selectedChampList.get(summoner.summonerId) ?? null}
               managementSocket={teamManagementSocket}
             />
           ))}
