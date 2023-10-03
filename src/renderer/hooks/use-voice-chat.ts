@@ -2,7 +2,6 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   enemySummonersState,
   gameStatusState,
-  leagueTitleListState,
   myTeamSummonersState,
   summonerState,
   userStreamState,
@@ -27,7 +26,6 @@ function useVoiceChat() {
   const summoner = useRecoilValue(summonerState);
   const [myTeamSummoners, setMyTeamSummoners] = useRecoilState(myTeamSummonersState);
   const [enemySummoners, setEnemySummoners] = useRecoilState(enemySummonersState);
-  const setLeagueTitleList = useSetRecoilState(leagueTitleListState);
 
   useEffect(() => {
     getUserAudioStream().then((stream) => {
@@ -177,26 +175,17 @@ function useVoiceChat() {
     let consumerTransportList: ConsumerTransportType[] = [];
 
     electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
-      socket.emit(
-        'team-join-room',
-        { roomName, summoner },
-        ({ rtpCapabilities, leagueTitleList }) => {
-          connectVoiceChat(
-            true,
-            socket,
-            device,
-            userStream,
-            rtpCapabilities,
-            producerTransport,
-            consumerTransportList
-          );
-          ipcRenderer.send(IPC_KEY.LEAGUE_TITLE, leagueTitleList);
-          ipcRenderer.once(IPC_KEY.LEAGUE_TITLE, (_, leagueTitleList) => {
-            socket.emit('league-title', leagueTitleList);
-            setLeagueTitleList(leagueTitleList);
-          });
-        }
-      );
+      socket.emit('team-join-room', { roomName, summoner }, ({ rtpCapabilities }) => {
+        connectVoiceChat(
+          true,
+          socket,
+          device,
+          userStream,
+          rtpCapabilities,
+          producerTransport,
+          consumerTransportList
+        );
+      });
     });
 
     /* 팀원 나감 */
@@ -247,22 +236,17 @@ function useVoiceChat() {
     let consumerTransportList: ConsumerTransportType[] = [];
 
     electronStore.get(STORE_KEY.LEAGUE_VOICE_ROOM_NAME).then(({ roomName, teamName }) => {
-      socket.emit(
-        'league-join-room',
-        { roomName, teamName, summoner },
-        ({ rtpCapabilities, leagueTitleList }) => {
-          setLeagueTitleList(leagueTitleList);
-          connectVoiceChat(
-            false,
-            socket,
-            device,
-            userStream,
-            rtpCapabilities,
-            producerTransport,
-            consumerTransportList
-          );
-        }
-      );
+      socket.emit('league-join-room', { roomName, teamName, summoner }, ({ rtpCapabilities }) => {
+        connectVoiceChat(
+          false,
+          socket,
+          device,
+          userStream,
+          rtpCapabilities,
+          producerTransport,
+          consumerTransportList
+        );
+      });
     });
 
     socket.on('inform-exit-in-game', ({ summonerId }) => {

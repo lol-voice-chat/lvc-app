@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import {
-  LeagueTitleType,
-  SummonerInfoType,
-  leagueTitleListState,
-  summonerInfoListState,
-  userStreamState,
-} from '../../@store/atom';
+import { SummonerInfoType, summonerInfoListState, userStreamState } from '../../@store/atom';
 import { SummonerType } from '../../@type/summoner';
 import { Socket } from 'socket.io-client';
 import { getSummonerSpeaker, micVolumeHandler } from '../../utils/audio';
@@ -22,8 +16,6 @@ function SummonerLeagueVoiceBlock(props: {
   // 소환사 정보
   const summonerInfoList = useRecoilValue(summonerInfoListState);
   const [summonerInfo, setSummonerInfo] = useState<SummonerInfoType | null>(null);
-  const leagueTitleList = useRecoilValue(leagueTitleListState);
-  const [myLeagueTitle, setMyLeagueTitle] = useState<LeagueTitleType | null>(null);
 
   // 스피커, 마이크 정보
   const userStream = useRecoilValue(userStreamState);
@@ -89,14 +81,6 @@ function SummonerLeagueVoiceBlock(props: {
     setIsMuteMic((curMute) => !curMute);
   };
 
-  useEffect(() => {
-    leagueTitleList?.map((leagueTitle) => {
-      if (props.summoner.summonerId === leagueTitle.summonerId) {
-        return setMyLeagueTitle(leagueTitle);
-      }
-    });
-  }, [leagueTitleList]);
-
   return (
     <S.SummonerBlock id={props.summoner.summonerId.toString()}>
       <S.ProfileImg
@@ -109,23 +93,6 @@ function SummonerLeagueVoiceBlock(props: {
           <p id="name">{props.summoner.name}</p>
           <RankBadge size={'medium'} tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
         </S.NameTag>
-
-        <S.TitleTag>
-          {myLeagueTitle ? (
-            <>
-              <p id="title-name">{myLeagueTitle.title}</p>
-              <div id="question-circle">
-                ?
-                <S.TitleDescription id="title-description">
-                  <p id="name">{myLeagueTitle.title}</p>
-                  <p id="description">{myLeagueTitle.description}</p>
-                </S.TitleDescription>
-              </div>
-            </>
-          ) : (
-            <p id="title-name">소환사님의 칭호는...</p>
-          )}
-        </S.TitleTag>
 
         <S.SoundBox>
           {props.isMine ? (

@@ -37,4 +37,5 @@ export type ChampionInfoType = {
   kda: string | null;
   damage: string | null;
   cs: string | null;
+  playCount: string | null;
 };

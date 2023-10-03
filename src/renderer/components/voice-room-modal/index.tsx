@@ -26,10 +26,11 @@ function VoiceRoomModal() {
 
   const summoner = useRecoilValue(summonerState);
   const myTeamSummoners = useRecoilValue(myTeamSummonersState);
+  const enemySummoners = useRecoilValue(enemySummonersState);
+
   const [selectedChampList, setSelectedChampList] = useState<Map<number, ChampionInfoType>>(
     new Map()
   );
-  const enemySummoners = useRecoilValue(enemySummonersState);
 
   const [teamManagementSocket, setTeamManagementSocket] = useState<Socket | null>(null);
   const [leagueManagementSocket, setLeagueManagementSocket] = useState<Socket | null>(null);
@@ -47,7 +48,7 @@ function VoiceRoomModal() {
       setTeamManagementSocket(socket);
     });
 
-    /* 입장시 선택한 챔피언 리스트 */
+    /* 입장시 선택한 챔피언 리스트 받음 */
     ipcRenderer.once('selected-champ-info-list', (_, championInfoList: ChampionInfoType[]) => {
       championInfoList.map((champInfo: ChampionInfoType) => {
         setSelectedChampList((prev) => new Map([...prev, [champInfo.summonerId, champInfo]]));

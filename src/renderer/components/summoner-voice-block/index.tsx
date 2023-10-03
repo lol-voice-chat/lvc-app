@@ -5,7 +5,7 @@ import { ChampionInfoType, SummonerType } from '../../@type/summoner';
 import VolumeSlider from '../@common/volume-slider';
 import { getSummonerSpeaker, micVolumeHandler } from '../../utils/audio';
 import { useRecoilValue } from 'recoil';
-import { LeagueTitleType, leagueTitleListState, userStreamState } from '../../@store/atom';
+import { userStreamState } from '../../@store/atom';
 import { Socket } from 'socket.io-client';
 
 function SummonerVoiceBlock(props: {
@@ -14,10 +14,6 @@ function SummonerVoiceBlock(props: {
   selectedChampInfo: ChampionInfoType | null;
   managementSocket: Socket | null;
 }) {
-  // 선택한 챔피언 정보
-  const leagueTitleList = useRecoilValue(leagueTitleListState);
-  const [myLeagueTitle, setMyLeagueTitle] = useState<LeagueTitleType | null>(null);
-
   // 스피커, 마이크 정보
   const userStream = useRecoilValue(userStreamState);
   const [speakerVolume, setSpeakerVolume] = useState(0.8);
@@ -56,14 +52,6 @@ function SummonerVoiceBlock(props: {
     return () => clearInterval(visualizerInterval);
   }, [userStream]);
 
-  useEffect(() => {
-    leagueTitleList?.map((leagueTitle) => {
-      if (props.summoner.summonerId === leagueTitle.summonerId) {
-        return setMyLeagueTitle(leagueTitle);
-      }
-    });
-  }, [leagueTitleList]);
-
   const handleChangeSpeakerVolume = (speakerVolume: number) => {
     const speaker = getSummonerSpeaker(props.summoner.summonerId);
     speaker.volume = speakerVolume;
@@ -96,23 +84,6 @@ function SummonerVoiceBlock(props: {
         <p id="name">{props.summoner.name}</p>
         <RankBadge size={'medium'} tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
       </S.NameTag>
-
-      <S.TitleTag>
-        {myLeagueTitle ? (
-          <>
-            <p id="title-name">{myLeagueTitle.title}</p>
-            <div id="question-circle">
-              ?
-              <S.TitleDescription id="title-description">
-                <p id="name">{myLeagueTitle.title}</p>
-                <p id="description">{myLeagueTitle.description}</p>
-              </S.TitleDescription>
-            </div>
-          </>
-        ) : (
-          <p id="title-name">소환사님의 칭호는...</p>
-        )}
-      </S.TitleTag>
 
       <S.SoundBox>
         {props.isMine ? (
@@ -153,6 +124,10 @@ function SummonerVoiceBlock(props: {
         <div>
           <p>평균 CS</p>
           <p id="value">{props.selectedChampInfo?.cs ?? '-'}</p>
+        </div>
+        <div>
+          <p>플레이 횟수</p>
+          <p id="value">{props.selectedChampInfo?.playCount ?? '-'}</p>
         </div>
       </S.AverageGameData>
 

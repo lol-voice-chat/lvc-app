@@ -33,9 +33,3 @@ export const summonerInfoListState = atom<SummonerInfoType[] | null>({
   key: 'summonerInfoList',
   default: null,
 });
-
-export type LeagueTitleType = { summonerId: number; title: string; description: string };
-export const leagueTitleListState = atom<LeagueTitleType[] | null>({
-  key: 'leagueTitle',
-  default: null,
-});
