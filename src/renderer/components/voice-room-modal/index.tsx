@@ -78,7 +78,8 @@ function VoiceRoomModal() {
         socket.emit('league-manage-join-room', roomName);
         setLeagueManagementSocket(socket);
       });
-    } else if (gameStatus === 'in-game') {
+    }
+    if (gameStatus === 'in-game') {
       leagueManagementSocket?.disconnect();
     }
 
@@ -89,7 +90,7 @@ function VoiceRoomModal() {
 
   return (
     <S.VoiceRoom>
-      {gameStatus !== 'loading' ? (
+      {(gameStatus === 'champ-select' || gameStatus === 'in-game') && (
         <>
           {summoner && (
             <SummonerVoiceBlock
@@ -108,30 +109,30 @@ function VoiceRoomModal() {
             />
           ))}
         </>
-      ) : (
-        <>
-          <S.LeagueBlockBundle>
-            <S.TeamBlocks isMyTeam={false}>
-              {enemySummoners?.map((enemy) => (
-                <SummonerLeagueVoiceBlock
-                  isMine={false}
-                  summoner={enemy}
-                  managementSocket={leagueManagementSocket}
-                />
-              ))}
-            </S.TeamBlocks>
+      )}
 
-            <S.TeamBlocks isMyTeam={true}>
-              {summoner && (
-                <SummonerLeagueVoiceBlock
-                  isMine={true}
-                  summoner={summoner}
-                  managementSocket={leagueManagementSocket}
-                />
-              )}
-            </S.TeamBlocks>
-          </S.LeagueBlockBundle>
-        </>
+      {gameStatus === 'loading' && (
+        <S.LeagueBlockBundle>
+          <S.TeamBlocks isMyTeam={false}>
+            {enemySummoners?.map((enemy) => (
+              <SummonerLeagueVoiceBlock
+                isMine={false}
+                summoner={enemy}
+                managementSocket={leagueManagementSocket}
+              />
+            ))}
+          </S.TeamBlocks>
+
+          <S.TeamBlocks isMyTeam={true}>
+            {summoner && (
+              <SummonerLeagueVoiceBlock
+                isMine={true}
+                summoner={summoner}
+                managementSocket={leagueManagementSocket}
+              />
+            )}
+          </S.TeamBlocks>
+        </S.LeagueBlockBundle>
       )}
     </S.VoiceRoom>
   );
