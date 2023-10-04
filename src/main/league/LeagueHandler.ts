@@ -31,17 +31,19 @@ export class LeagueHandler {
     let summmoners = new Map();
     this.ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, async (data) => {
       if (!isJoinedRoom) {
+        console.log('우리팀: ', data.myTeam);
         isJoinedRoom = true;
         this.joinTeamVoice(data.myTeam);
       }
 
       if (data.timer.phase === 'BAN_PICK') {
         for (const summoner of data.myTeam) {
-          if (summoner.championId === 0) {
-            summmoners.set(summoner.summonerId, 0);
-            return;
-          }
+          //메모리에서 들고옴
           const championId = summmoners.get(summoner.summonerId);
+
+          if (championId === 'undefined') {
+            summmoners.set(summoner.summonerId, summoner.championId);
+          }
 
           if (championId !== summoner.championId) {
             summmoners.set(summoner.summonerId, summoner.championId);
@@ -54,6 +56,25 @@ export class LeagueHandler {
 
             this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
           }
+
+          // console.log('감지: ', summoner.summonerId, summoner.championId);
+          // if (summoner.championId === 0) {
+          //   summmoners.set(summoner.summonerId, 0);
+          //   continue;
+          // }
+          // const championId = summmoners.get(summoner.summonerId);
+
+          // if (championId !== summoner.championId) {
+          //   summmoners.set(summoner.summonerId, summoner.championId);
+
+          //   const championStats: ChampionStats = matchHistory.getChampionStats(
+          //     summoner.summonerId,
+          //     summoner.championId,
+          //     this.summoner.profileImage
+          //   );
+
+          //   this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
+          // }
         }
       }
 
