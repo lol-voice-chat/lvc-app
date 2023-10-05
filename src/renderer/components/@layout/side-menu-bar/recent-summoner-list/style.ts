@@ -7,7 +7,7 @@ export const RecentSummonerContainer = styled.div`
   align-items: center;
 
   width: 250px;
-  height: 81.5%;
+  height: 80%;
   margin-top: 30px;
 
   overflow: hidden;

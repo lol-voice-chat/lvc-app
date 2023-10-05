@@ -14,6 +14,7 @@ export const NavContainer = styled.div`
   height: 100vh;
 
   background-color: #1e1f22;
+  -webkit-app-region: drag;
 `;
 
 export const TitleCategoryTag = styled.div`
@@ -44,4 +45,5 @@ export const SubCategoryTag = styled.div<{ isClick: boolean }>`
     color: ${PALETTE.WHITE_1};
     background-color: #313338;
   }
+  -webkit-app-region: no-drag;
 `;

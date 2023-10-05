@@ -2,11 +2,14 @@ import styled from 'styled-components';
 import { PALETTE } from '../../../const';
 
 export const ChatContainer = styled.div`
+  position: absolute;
+  top: 20px;
   display: flex;
   flex-direction: column;
 
   width: 100%;
   height: 90vh;
+  background-color: #303236;
 
   overflow-x: hidden;
   overflow-y: scroll;
@@ -22,8 +25,8 @@ export const ChatContainer = styled.div`
     width: 200px;
     height: 30px;
     border-radius: 30px;
-    cursor: pointer;
     background-color: ${PALETTE.YELLOW};
+    cursor: pointer;
   }
 `;
 

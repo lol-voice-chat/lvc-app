@@ -100,7 +100,6 @@ function SummonerLeagueVoiceBlock(props: {
               id="mic-button"
               src={!isMuteMic ? 'img/mic_icon.svg' : 'img/mic_mute_icon.svg'}
               onClick={handleClickMuteMic}
-              alt="마이크 아이콘"
             />
           ) : (
             <div id="speaker-ctrl">
@@ -108,7 +107,6 @@ function SummonerLeagueVoiceBlock(props: {
                 id="speaker-button"
                 src={!isMuteSpeaker ? 'img/headset_icon.svg' : 'img/headset_mute_icon.svg'}
                 onClick={handleClickMuteSpeaker}
-                alt="헤드셋 아이콘"
               />
               <VolumeSlider
                 audiotype="speaker"
@@ -145,9 +143,9 @@ function SummonerLeagueVoiceBlock(props: {
               {props.summoner.summonerStats.statsList.map((summonerStats, idx) => (
                 <div
                   key={idx}
-                  style={{ backgroundColor: summonerStats.isWin ? '#2C334A' : '#50383B' }}
+                  style={{ backgroundColor: summonerStats.isWin ? '#0F3054' : '#50383B' }}
                 >
-                  <img src={summonerStats.championIcon} alt="챔피언 아이콘" />
+                  <img src={summonerStats.championIcon} />
                   <p>{summonerStats.kda}</p>
                 </div>
               ))}
@@ -156,7 +154,7 @@ function SummonerLeagueVoiceBlock(props: {
         ) : (
           <div id="warning-box">
             <p>전적이 없습니다.</p>
-            <img src="img/warning_icon.svg" alt="위험 아이콘" />
+            <img src="img/warning_icon.svg" />
             <p id="warning-text">( 현재시즌 솔로랭크 전적이 없습니다 )</p>
           </div>
         )}

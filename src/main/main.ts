@@ -16,6 +16,7 @@ const createWindow = () => {
       nodeIntegration: true,
       contextIsolation: false,
     },
+    frame: false,
   });
 
   mainWindow.loadURL('http://localhost:3000');

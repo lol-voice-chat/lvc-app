@@ -91,7 +91,6 @@ function SummonerVoiceBlock(props: {
             id="mic-button"
             src={!isMuteMic ? 'img/mic_icon.svg' : 'img/mic_mute_icon.svg'}
             onClick={handleClickMuteMic}
-            alt="마이크 아이콘"
           />
         ) : (
           <div id="speaker-ctrl">
@@ -99,7 +98,6 @@ function SummonerVoiceBlock(props: {
               id="speaker-button"
               src={!isMuteSpeaker ? 'img/headset_icon.svg' : 'img/headset_mute_icon.svg'}
               onClick={handleClickMuteSpeaker}
-              alt="헤드셋 아이콘"
             />
             <VolumeSlider
               audiotype="speaker"
@@ -151,7 +149,7 @@ function SummonerVoiceBlock(props: {
 
             <S.KDAList>
               {props.summoner.summonerStats.statsList.map(({ isWin, championIcon, kda }, idx) => (
-                <div style={{ backgroundColor: isWin ? '#2C334A' : '#50383B' }} key={idx}>
+                <div style={{ backgroundColor: isWin ? '#0F3054' : '#50383B' }} key={idx}>
                   <img src={championIcon} />
                   <p>{kda}</p>
                 </div>

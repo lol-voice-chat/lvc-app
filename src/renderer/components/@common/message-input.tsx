@@ -126,6 +126,7 @@ const MessageInputContainer = styled.div`
       height: 35px;
       max-height: 400px;
       line-height: 35px;
+      border-radius: 0 7.5px 7.5px 0;
 
       word-break: break-all;
       font-weight: ${FONT.REGULAR};
@@ -133,7 +134,6 @@ const MessageInputContainer = styled.div`
 
       color: ${PALETTE.WHITE_1};
       background-color: #36383d;
-      border-radius: 0 7.5px 7.5px 0;
 
       &::placeholder {
         font-weight: ${FONT.MEDIUM};

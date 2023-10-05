@@ -146,7 +146,7 @@ export const SoundBox = styled.div`
   #mic-button {
     width: 30px;
     height: 30px;
-    margin: 0 0 12px 0;
+    margin: 12px 0;
     cursor: pointer;
   }
 
@@ -154,7 +154,7 @@ export const SoundBox = styled.div`
     display: flex;
     justify-content: space-between;
     width: 80%;
-    margin: 0 0 12px 0;
+    margin: 12px 0;
 
     #speaker-button {
       width: 30px;
@@ -170,11 +170,11 @@ export const SoundBox = styled.div`
     #mic-button {
       width: 40px;
       height: 40px;
-      margin: 0 0 16px 0;
+      margin: 16px 0;
       cursor: pointer;
     }
     #speaker-ctrl {
-      margin: 0 0 16px 0;
+      margin: 16px 0;
 
       #speaker-button {
         width: 40px;
