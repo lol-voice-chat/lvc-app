@@ -24,7 +24,7 @@ function SummonerRecord(props: { summonerData: SummonerType | null }) {
               <p id="name">모스트 챔피언</p>
               <div id="most-champ-list">
                 {props.summonerData.summonerStats.mostChampionList.map((championIcon) => (
-                  <img src={championIcon} alt="챔피언 아이콘" />
+                  <img src={championIcon} />
                 ))}
               </div>
             </div>
@@ -57,8 +57,8 @@ function SummonerRecord(props: { summonerData: SummonerType | null }) {
               ({ championIcon, kda, isWin, time, killInvolvement }, idx) => (
                 <div id="game-info" key={idx}>
                   <div id="kda-info">
-                    <img src={championIcon} alt="챔피언 아이콘" />
-                    <div style={{ backgroundColor: isWin ? '#2C334A' : '#50383b' }}>{kda}</div>
+                    <img src={championIcon} />
+                    <div style={{ backgroundColor: isWin ? '#0F3054' : '#50383b' }}>{kda}</div>
                     <p>{time}</p>
                   </div>
                   <p id="kill-involvement">{killInvolvement}</p>

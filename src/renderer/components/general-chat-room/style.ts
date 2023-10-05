@@ -9,7 +9,6 @@ export const GeneralChatRoomContainer = styled.div`
 
   width: calc(100% - (170px + 300px));
   min-height: 100vh;
-  background-color: #303236;
 
   #message-input {
     position: absolute;

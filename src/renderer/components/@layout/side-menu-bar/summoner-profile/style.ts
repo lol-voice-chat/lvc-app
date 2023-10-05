@@ -8,7 +8,6 @@ export const ProfileContainer = styled.div<{ isBackground: boolean }>`
   width: 70%;
   height: 68.5px;
 
-  margin-top: 25px;
   padding: 2.5px 20px;
 
   border-radius: 7.5px;

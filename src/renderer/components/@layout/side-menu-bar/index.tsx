@@ -9,6 +9,7 @@ import { SummonerType } from '../../../@type/summoner';
 import { connectSocket } from '../../../utils/socket';
 import { Socket } from 'socket.io-client';
 import RecentSummonerList from './recent-summoner-list';
+import AppHeader from './app-header';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -88,6 +89,8 @@ function SideMenuBar() {
 
   return (
     <_.SideBarContainer>
+      <AppHeader />
+
       <SummonerProfile
         summoner={isSummonerRecord ? summonerRecordInfo : summoner}
         isMine={summoner}

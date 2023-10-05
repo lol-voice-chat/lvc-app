@@ -41,3 +41,8 @@ export const getSummonerSpeaker = (summonerId: number) => {
   const speaker = document.getElementById(summonerId.toString() + 'speaker') as HTMLAudioElement;
   return speaker;
 };
+
+export const getConnectedDevices = async () => {
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  return devices.filter((device) => device.kind === 'audioinput');
+};

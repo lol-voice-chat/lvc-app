@@ -41,6 +41,7 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
           setMessageList(payload.messageList.map((messageInfo) => JSON.parse(messageInfo)));
           setMessageEvent({ key: payload.key });
         }
+
         if (payload.key === 'message') {
           const { summoner, message, time } = payload;
           setMessageList((msgList) => [...(msgList ?? []), { summoner, message, time }]);
@@ -60,6 +61,7 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
             }
           }
         }
+
         if (payload.key === 'response-before-message') {
           if (payload.isLast) setIsFetchEnd(true);
 
