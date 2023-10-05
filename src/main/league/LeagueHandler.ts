@@ -28,53 +28,35 @@ export class LeagueHandler {
     await this.handleLeaguePhase(gameflow, matchHistory);
 
     //챔피언선택 시작
-    let summmoners = new Map();
+    let summoners = new Map();
     this.ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, async (data) => {
       if (!isJoinedRoom) {
-        console.log('우리팀: ', data.myTeam);
         isJoinedRoom = true;
         this.joinTeamVoice(data.myTeam);
       }
 
       if (data.timer.phase === 'BAN_PICK') {
-        for (const summoner of data.myTeam) {
-          //메모리에서 들고옴
-          const championId = summmoners.get(summoner.summonerId);
+        if (data.actions[0]) {
+          for (const summoner of data.actions[0]) {
+            if (summoner.championId === 0) {
+              summoners.set(summoner.id, summoner.championId);
+              continue;
+            }
+            const championId = summoners.get(summoner.id);
 
-          if (championId === 'undefined') {
-            summmoners.set(summoner.summonerId, summoner.championId);
+            if (championId !== summoner.championId) {
+              summoners.set(summoner.id, summoner.championId);
+              const { summonerId } = data.myTeam[summoner.id - 1];
+
+              const championStats: ChampionStats = matchHistory.getChampionStats(
+                summonerId,
+                summoner.championId,
+                null
+              );
+
+              this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
+            }
           }
-
-          if (championId !== summoner.championId) {
-            summmoners.set(summoner.summonerId, summoner.championId);
-
-            const championStats: ChampionStats = matchHistory.getChampionStats(
-              summoner.summonerId,
-              summoner.championId,
-              this.summoner.profileImage
-            );
-
-            this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
-          }
-
-          // console.log('감지: ', summoner.summonerId, summoner.championId);
-          // if (summoner.championId === 0) {
-          //   summmoners.set(summoner.summonerId, 0);
-          //   continue;
-          // }
-          // const championId = summmoners.get(summoner.summonerId);
-
-          // if (championId !== summoner.championId) {
-          //   summmoners.set(summoner.summonerId, summoner.championId);
-
-          //   const championStats: ChampionStats = matchHistory.getChampionStats(
-          //     summoner.summonerId,
-          //     summoner.championId,
-          //     this.summoner.profileImage
-          //   );
-
-          //   this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
-          // }
         }
       }
 
@@ -82,7 +64,7 @@ export class LeagueHandler {
       if (isCloseWindow) {
         isJoinedRoom = false;
         this.webContents.send(IPC_KEY.EXIT_CHAMP_SELECT);
-        summmoners = new Map();
+        summoners = new Map();
       }
     });
 
