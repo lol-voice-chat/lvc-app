@@ -31,7 +31,7 @@ interface ChampCount {
 
 export interface ChampionStats {
   summonerId: number;
-  championIcon: string;
+  championIcon: string | null;
   name: string;
   kda: string;
   damage: string;
@@ -209,7 +209,7 @@ export class MatchHistory {
       .map((champ) => `https://lolcdn.darkintaqt.com/cdn/champion/${champ.championId}/tile`);
   }
 
-  public getChampionStats(summonerId: number, championId: number, profileImage: string) {
+  public getChampionStats(summonerId: number, championId: number, profileImage: any) {
     let champKill = 0;
     let champDeath = 0;
     let champAssists = 0;
