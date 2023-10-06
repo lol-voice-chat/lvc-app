@@ -1,6 +1,7 @@
 import { BrowserWindow } from 'electron';
 import { Credentials, LeagueClient, authenticate, createHttp1Request } from 'league-connect';
 import { IPC_KEY } from '../../const';
+import { onLeagueClientUx } from '../league/onLeagueClientUx';
 
 export class League {
   public static credentials: Credentials;
@@ -12,6 +13,12 @@ export class League {
 
     const client = new LeagueClient(this.credentials);
     client.start();
+
+    client.on('connect', async (newCredentials) => {
+      this.credentials = newCredentials;
+      const { summonerInfo } = await onLeagueClientUx();
+      mainWindow.webContents.send('on-league-client', summonerInfo);
+    });
 
     client.on('disconnect', () => {
       mainWindow.webContents.send(IPC_KEY.SHUTDOWN_APP);
