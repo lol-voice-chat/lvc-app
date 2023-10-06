@@ -37,41 +37,39 @@ export class LeagueHandler {
         this.joinTeamVoice(data.myTeam);
       }
 
-      if (data.timer.phase === 'BAN_PICK') {
-        if (data.actions[0]) {
-          for (const summoner of data.actions[0]) {
-            console.log(summoner.id, summoner.championId); //테스트
+      if (data.actions[0]) {
+        for (const summoner of data.actions[0]) {
+          console.log(summoner.id, summoner.championId); //테스트
 
-            if (summoner.championId === 0) {
-              summoners.set(summoner.id, summoner.championId);
-              continue;
-            }
-            const championId = summoners.get(summoner.id);
+          if (summoner.championId === 0) {
+            summoners.set(summoner.id, summoner.championId);
+            continue;
+          }
+          const championId = summoners.get(summoner.id);
 
-            if (championId !== summoner.championId) {
-              summoners.set(summoner.id, summoner.championId);
+          if (championId !== summoner.championId) {
+            summoners.set(summoner.id, summoner.championId);
 
-              let summonerId;
-              if (summoner.id >= 5) {
-                if (summoner.id === 5) {
-                  if (data.myTeam.filter((member: any) => member.team === 1).length > 0) {
-                    summonerId = data.myTeam[summoner.id - 1].summonerId;
-                  }
-                } else {
-                  summonerId = data.myTeam[summoner.id - 5].summonerId;
+            let summonerId;
+            if (summoner.id >= 5) {
+              if (summoner.id === 5) {
+                if (data.myTeam.filter((member: any) => member.team === 1).length > 0) {
+                  summonerId = data.myTeam[summoner.id - 1].summonerId;
                 }
               } else {
-                summonerId = data.myTeam[summoner.id - 1].summonerId;
+                summonerId = data.myTeam[summoner.id - 5].summonerId;
               }
-
-              const championStats: ChampionStats = matchHistory.getChampionStats(
-                summonerId,
-                summoner.championId,
-                null
-              );
-
-              this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
+            } else {
+              summonerId = data.myTeam[summoner.id - 1].summonerId;
             }
+
+            const championStats: ChampionStats = matchHistory.getChampionStats(
+              summonerId,
+              summoner.championId,
+              null
+            );
+
+            this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
           }
         }
       }
