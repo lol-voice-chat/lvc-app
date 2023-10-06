@@ -39,8 +39,6 @@ export class LeagueHandler {
 
       if (data.actions[0]) {
         for (const summoner of data.actions[0]) {
-          console.log(summoner.id, summoner.championId); //테스트
-
           if (summoner.championId === 0) {
             summoners.set(summoner.id, summoner.championId);
             continue;
