@@ -1,5 +1,4 @@
 import { WebContents } from 'electron';
-import { LeagueWebSocket } from 'league-connect';
 import { SummonerInfo } from './onLeagueClientUx';
 import League from '../utils';
 import { LCU_ENDPOINT } from '../constants';
@@ -17,12 +16,10 @@ let isEndGame = false;
 
 export class LeagueHandler {
   webContents: WebContents;
-  ws: LeagueWebSocket;
   summoner: SummonerInfo;
 
-  constructor(webContents: WebContents, ws: LeagueWebSocket, summoner: SummonerInfo) {
+  constructor(webContents: WebContents, summoner: SummonerInfo) {
     this.webContents = webContents;
-    this.ws = ws;
     this.summoner = summoner;
   }
 
@@ -31,7 +28,7 @@ export class LeagueHandler {
 
     //챔피언선택 시작
     let summoners = new Map();
-    this.ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, async (data) => {
+    League.ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, async (data) => {
       if (!isJoinedRoom) {
         isJoinedRoom = true;
         this.joinTeamVoice(data.myTeam);
@@ -80,7 +77,7 @@ export class LeagueHandler {
       }
     });
 
-    this.ws.subscribe(LCU_ENDPOINT.GAMEFLOW_URL, async (data) => {
+    League.ws.subscribe(LCU_ENDPOINT.GAMEFLOW_URL, async (data) => {
       //게임로딩 시작
       if (data.phase === 'InProgress' && data.gameClient.running && !isStartedGameLoading) {
         isStartedGameLoading = true;

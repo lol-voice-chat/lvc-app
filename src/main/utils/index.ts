@@ -1,15 +1,32 @@
 import { BrowserWindow } from 'electron';
-import { Credentials, LeagueClient, authenticate, createHttp1Request } from 'league-connect';
+import {
+  Credentials,
+  LeagueClient,
+  LeagueWebSocket,
+  authenticate,
+  createHttp1Request,
+} from 'league-connect';
 import { IPC_KEY } from '../../const';
 import { onLeagueClientUx } from '../league/onLeagueClientUx';
+import { createWebSocketConnection } from 'league-connect';
 
 export class League {
   public static credentials: Credentials;
+  public static ws: LeagueWebSocket;
 
   public static async initialize(mainWindow: BrowserWindow) {
-    this.credentials = await authenticate({
-      awaitConnection: true,
-    });
+    const [credentials, ws] = await Promise.all([
+      authenticate({
+        awaitConnection: true,
+      }),
+      createWebSocketConnection({
+        authenticationOptions: {
+          awaitConnection: true,
+        },
+      }),
+    ]);
+    this.credentials = credentials;
+    this.ws = ws;
 
     const client = new LeagueClient(this.credentials);
     client.start();
@@ -18,6 +35,7 @@ export class League {
       this.credentials = newCredentials;
       const { summonerInfo } = await onLeagueClientUx();
       mainWindow.webContents.send('on-league-client', summonerInfo);
+      this.ws = await createWebSocketConnection();
     });
 
     client.on('disconnect', () => {

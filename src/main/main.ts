@@ -2,7 +2,6 @@ import { app, BrowserWindow } from 'electron';
 import { LeagueHandler } from './league/LeagueHandler';
 import { onLeagueClientUx } from './league/onLeagueClientUx';
 import onElectronStore from './store';
-import { createWebSocketConnection } from 'league-connect';
 import { handleFriendRequest } from './league/handleFriendRequest';
 import League from './utils';
 
@@ -35,13 +34,7 @@ async function handleLoadEvent() {
     const friendSummonerIdList = friendList.map((friend: any) => friend.summonerId);
     mainWindow.webContents.send('online-summoner', friendSummonerIdList);
 
-    const ws = await createWebSocketConnection();
-
-    const leagueHandler: LeagueHandler = new LeagueHandler(
-      mainWindow.webContents,
-      ws,
-      summonerInfo
-    );
+    const leagueHandler: LeagueHandler = new LeagueHandler(mainWindow.webContents, summonerInfo);
     await leagueHandler.handle(gameflow, matchHistory);
   });
 }
