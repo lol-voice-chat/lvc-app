@@ -1,4 +1,4 @@
-import { app, BrowserWindow, screen } from 'electron';
+import { app, BrowserWindow, screen, ipcMain } from 'electron';
 import { LeagueHandler } from './league/LeagueHandler';
 import { onLeagueClientUx } from './league/onLeagueClientUx';
 import onElectronStore from './store';
@@ -83,6 +83,18 @@ async function handleLoadEvent() {
     await leagueHandler.handle(gameflow, matchHistory);
   });
 }
+
+ipcMain.on(IPC_KEY.SUMMONER_VISUALIZER, (event, value) => {
+  event.reply(value);
+});
+
+ipcMain.on(IPC_KEY.OVERLAY_SUMMONER, (event, summoner) => {
+  event.reply(summoner);
+});
+
+ipcMain.on(IPC_KEY.OVERLAY_MY_TEAM_SUMMONERS, (event, summonerList) => {
+  event.reply(summonerList);
+});
 
 app.whenReady().then(() => {
   createWindow();
