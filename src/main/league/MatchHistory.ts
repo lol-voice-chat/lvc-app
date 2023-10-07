@@ -1,4 +1,4 @@
-import League from '../utils';
+import request from '../utils';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -73,7 +73,7 @@ export class MatchHistory {
 
   public static async fetch(puuid: string) {
     const url = `/lol-match-history/v1/products/lol/${puuid}/matches?begIndex=0&endIndex=99`;
-    const matchHistoryData = await League.httpRequest(url);
+    const matchHistoryData = await request(url);
     const matches = matchHistoryData.games.games
       .slice(0, 100)
       .filter((match: Match) => match.gameType !== 'CUSTOM_GAME');
@@ -186,7 +186,7 @@ export class MatchHistory {
 
   private async getMyTeamTotalKill(gameId: number, teamId: number) {
     const url = `/lol-match-history/v1/games/${gameId}`;
-    const game: Match = await League.httpRequest(url);
+    const game: Match = await request(url);
 
     let totalKill = 0;
     game.participants
@@ -212,7 +212,7 @@ export class MatchHistory {
       .map((champ) => `https://lolcdn.darkintaqt.com/cdn/champion/${champ.championId}/tile`);
   }
 
-  public getChampionStats(summonerId: number, championId: number, profileImage: any) {
+  public getChampionStats(summonerId: number, championId: number) {
     let champKill = 0;
     let champDeath = 0;
     let champAssists = 0;
@@ -233,9 +233,7 @@ export class MatchHistory {
       }
     });
 
-    const championIcon = championId
-      ? `https://lolcdn.darkintaqt.com/cdn/champion/${championId}/tile`
-      : profileImage;
+    const championIcon = `https://lolcdn.darkintaqt.com/cdn/champion/${championId}/tile`;
 
     const championName: string = CHAMPIONS[championId.toString()];
 

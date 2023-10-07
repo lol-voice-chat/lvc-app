@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import { createHttp1Request } from 'league-connect';
-import League from '../utils';
+import { credentials } from './LvcApplication';
 
 interface Recipient {
   gameName: string;
@@ -14,7 +14,7 @@ interface Recipient {
   tier: string;
 }
 
-export const handleFriendRequest = () => {
+export const handleFriendRequestEvent = () => {
   ipcMain.on('friend-request', async (event, recipient: Recipient) => {
     const icon: number = getIconByProfileImage(recipient.profileImage);
 
@@ -36,7 +36,7 @@ export const handleFriendRequest = () => {
             summonerId: recipient.summonerId,
           },
         },
-        League.credentials
+        credentials
       );
     } catch (error) {
       throw new Error('친구요청중 오류가 발생했습니다: ' + error);
