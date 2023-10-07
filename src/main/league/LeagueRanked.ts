@@ -1,5 +1,5 @@
 import { plainToInstance } from 'class-transformer';
-import League from '../utils';
+import { request } from '../utils';
 
 interface Entry {
   division: string;
@@ -10,7 +10,7 @@ export class LeagueRanked {
   private highestRankedEntry: Entry;
 
   public static async fetch(puuid: string) {
-    const rankedData = await League.httpRequest(`/lol-ranked/v1/ranked-stats/${puuid}`);
+    const rankedData = await request(`/lol-ranked/v1/ranked-stats/${puuid}`);
     return plainToInstance(LeagueRanked, rankedData);
   }
 

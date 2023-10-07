@@ -1,5 +1,4 @@
 import { MatchHistory } from './MatchHistory';
-import League from '../utils';
 
 interface MemberType {
   summonerId: number;
@@ -39,18 +38,6 @@ export class Member {
     return this.summonerId === summonerId;
   }
 
-  public async getMatchHistory() {
-    const summonerUrl = `/lol-summoner/v1/summoners/${this.summonerId}`;
-    const { puuid } = await League.httpRequest(summonerUrl);
-    const matchHistory: MatchHistory = await MatchHistory.fetch(puuid);
-    const summonerMatchHistory = {
-      summonerId: this.summonerId,
-      matchHistory,
-    };
-
-    return summonerMatchHistory;
-  }
-
   public async getChampionKda() {
     const matchHistory: MatchHistory = await MatchHistory.fetch(this.puuid);
     const championKda = matchHistory.getChampionKda(this.championId);
@@ -61,15 +48,5 @@ export class Member {
     };
 
     return summonerKda;
-  }
-
-  public getInfo() {
-    const member: MemberInfo = {
-      summonerId: this.summonerId,
-      profileImage: `https://ddragon-webp.lolmath.net/latest/img/profileicon/${this.profileIconId}.webp`,
-      displayName: this.summonerName,
-      puuid: this.puuid,
-    };
-    return member;
   }
 }
