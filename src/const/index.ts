@@ -12,3 +12,9 @@ export const IPC_KEY = {
   OVERLAY_SUMMONER: 'overlay-summoner',
   OVERLAY_MY_TEAM_SUMMONERS: 'overlay-my-team-summoners',
 };
+
+export const generalSettingsDefaultConfig = {
+  isPressToTalk: false,
+  pressToTalkShortcutKey: 'M',
+  muteMicShortcutKey: 'M',
+};

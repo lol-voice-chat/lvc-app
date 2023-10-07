@@ -3,12 +3,6 @@ import * as _ from './style';
 import electronStore from '../../@store/electron';
 import { GeneralSettingsConfigType } from '../../@store/atom';
 
-export const generalSettingsDefaultConfig = {
-  isPressToTalk: false,
-  pressToTalkShortcutKey: 'M',
-  muteMicShortcutKey: 'M',
-};
-
 function GeneralSettingModal(props: {
   handleClickModalTrigger: () => void;
   settingsConfig: GeneralSettingsConfigType;
@@ -22,14 +16,13 @@ function GeneralSettingModal(props: {
   );
 
   const handleClickSaveButton = () => {
-    const updateConfig = {
+    const config = {
       isPressToTalk,
       pressToTalkShortcutKey,
       muteMicShortcutKey,
     };
-
+    electronStore.set('general-settings-config', config);
     props.handleClickModalTrigger();
-    electronStore.set('general-settings-config', updateConfig);
   };
 
   return (

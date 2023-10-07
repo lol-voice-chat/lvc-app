@@ -1,7 +1,7 @@
-import { app, BrowserWindow, screen, ipcMain, globalShortcut } from 'electron';
+import { app, BrowserWindow, screen, ipcMain } from 'electron';
 import onElectronStore, { store } from './store';
 import { GlobalKeyboardListener } from 'node-global-key-listener';
-import { IPC_KEY } from '../const';
+import { IPC_KEY, generalSettingsDefaultConfig } from '../const';
 import { LvcApplication } from './league/LvcApplication';
 import { authenticate, createWebSocketConnection } from 'league-connect';
 
@@ -24,6 +24,10 @@ const createWindow = () => {
     show: false,
     autoHideMenuBar: true,
   });
+
+  if (!store.has('general-settings-config')) {
+    store.set('general-settings-config', generalSettingsDefaultConfig);
+  }
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
@@ -117,8 +121,7 @@ app.whenReady().then(() => {
   let isPressingKey = false;
 
   globalKey.addListener((e) => {
-    console.log('?');
-    const settingsConfig = store.get('general-settings-config') as any;
+    let settingsConfig = store.get('general-settings-config') as any;
 
     if (settingsConfig) {
       const { isPressToTalk, pressToTalkShortcutKey, muteMicShortcutKey } = settingsConfig;
