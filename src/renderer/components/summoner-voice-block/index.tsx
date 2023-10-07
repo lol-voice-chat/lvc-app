@@ -41,7 +41,7 @@ function SummonerVoiceBlock(props: {
   }, [props.managementSocket]);
 
   useEffect(() => {
-    if (props.isMine) {
+    if (props.isMine && generalSettingsConfig) {
       if (generalSettingsConfig.isPressToTalk) {
         userStream?.getAudioTracks().forEach((track) => (track.enabled = false));
         setIsMuteMic(true);
@@ -52,7 +52,7 @@ function SummonerVoiceBlock(props: {
     return () => {
       ipcRenderer.removeAllListeners(IPC_KEY.SUMMONER_MUTE);
     };
-  }, [userStream]);
+  }, [userStream, generalSettingsConfig]);
 
   useEffect(() => {
     if (props.isMine) {
