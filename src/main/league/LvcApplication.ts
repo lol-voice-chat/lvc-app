@@ -1,34 +1,94 @@
 import { WebContents } from 'electron';
-import { SummonerInfo } from './onLeagueClientUx';
-import League from '../utils';
-import { LCU_ENDPOINT } from '../constants';
+import {
+  Credentials,
+  LeagueClient,
+  LeagueWebSocket,
+  createWebSocketConnection,
+} from 'league-connect';
 import { IPC_KEY } from '../../const';
-import { Gameflow } from './Gameflow';
+import { Summoner } from './Summoner';
+import { LeagueRanked } from './LeagueRanked';
+import { ChampionStats, MatchHistory, SummonerStats } from './MatchHistory';
+import request from '../utils';
 import { MemberChampionData, Team } from './Team';
-import { MatchHistory, ChampionStats } from './MatchHistory';
 import axios from 'axios';
 import https from 'https';
+import { handleFriendRequestEvent } from './handleFriendRequestEvent';
 
+export let credentials: Credentials;
 let isJoinedRoom = false;
 let isStartedGameLoading = false;
 let isStartedInGame = false;
 let isEndGame = false;
 
-export class LeagueHandler {
-  webContents: WebContents;
-  summoner: SummonerInfo;
+export class LvcApplication {
+  private webContents: WebContents;
+  private ws: LeagueWebSocket;
+  private summonerId: number;
+  private matchHistory: MatchHistory;
 
-  constructor(webContents: WebContents, summoner: SummonerInfo) {
+  constructor(webContents: WebContents, credential: Credentials, ws: LeagueWebSocket) {
+    credentials = credential;
     this.webContents = webContents;
-    this.summoner = summoner;
+    this.ws = ws;
   }
 
-  public async handle(gameflow: Gameflow, matchHistory: MatchHistory) {
-    await this.handleLeaguePhase(gameflow, matchHistory);
+  public async initialize() {
+    const client = new LeagueClient(credentials);
+    client.start();
 
-    //챔피언선택 시작
-    let summoners = new Map();
-    League.ws.subscribe(LCU_ENDPOINT.CHAMP_SELECT_URL, async (data) => {
+    client.on('connect', async (newCredentials) => {
+      credentials = newCredentials;
+      await this.fetchLeagueClient();
+      this.ws = await createWebSocketConnection();
+    });
+
+    client.on('disconnect', () => {
+      this.webContents.send(IPC_KEY.SHUTDOWN_APP);
+    });
+
+    await this.fetchLeagueClient();
+    handleFriendRequestEvent();
+  }
+
+  public async fetchLeagueClient() {
+    const summoner: Summoner = await Summoner.fetch();
+
+    const [leagueRanked, matchHistory] = await Promise.all([
+      LeagueRanked.fetch(summoner.puuid),
+      MatchHistory.fetch(summoner.puuid),
+    ]);
+
+    const summonerStats: SummonerStats = await matchHistory.getSummonerStats();
+    const friendList = await request('/lol-chat/v1/friends');
+    const friendSummonerIdList = friendList.map((friend: any) => friend.summonerId);
+
+    const leagueClient = {
+      gameName: summoner.gameName,
+      gameTag: summoner.gameTag,
+      id: summoner.id,
+      name: summoner.name,
+      pid: summoner.pid,
+      puuid: summoner.puuid,
+      summonerId: summoner.summonerId,
+      profileImage: summoner.getMyProfileImage(),
+      tier: leagueRanked.getTier(),
+      summonerStats,
+    };
+
+    this.webContents.send('on-league-client', leagueClient);
+    this.webContents.send('online-summoner', friendSummonerIdList);
+
+    this.summonerId = summoner.summonerId;
+    this.matchHistory = matchHistory;
+  }
+
+  public async handle() {
+    await this.handleCurrentPhase();
+
+    //챔피언 선택
+    let myTeamMembers: Map<number, number> = new Map();
+    this.ws.subscribe('/lol-champ-select/v1/session', async (data) => {
       if (!isJoinedRoom) {
         isJoinedRoom = true;
         this.joinTeamVoice(data.myTeam);
@@ -37,13 +97,13 @@ export class LeagueHandler {
       if (data.actions[0]) {
         for (const summoner of data.actions[0]) {
           if (summoner.championId === 0) {
-            summoners.set(summoner.id, summoner.championId);
+            myTeamMembers.set(summoner.id, summoner.championId);
             continue;
           }
-          const championId = summoners.get(summoner.id);
+          const championId = myTeamMembers.get(summoner.id);
 
           if (championId !== summoner.championId) {
-            summoners.set(summoner.id, summoner.championId);
+            myTeamMembers.set(summoner.id, summoner.championId);
 
             let summonerId;
             if (summoner.id >= 5) {
@@ -58,10 +118,9 @@ export class LeagueHandler {
               summonerId = data.myTeam[summoner.id - 1].summonerId;
             }
 
-            const championStats: ChampionStats = matchHistory.getChampionStats(
+            const championStats: ChampionStats = this.matchHistory.getChampionStats(
               summonerId,
-              summoner.championId,
-              null
+              summoner.championId
             );
 
             this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
@@ -73,18 +132,18 @@ export class LeagueHandler {
       if (isCloseWindow) {
         isJoinedRoom = false;
         this.webContents.send(IPC_KEY.EXIT_CHAMP_SELECT);
-        summoners = new Map();
+        myTeamMembers = new Map();
       }
     });
 
-    League.ws.subscribe(LCU_ENDPOINT.GAMEFLOW_URL, async (data) => {
-      //게임로딩 시작
+    this.ws.subscribe('/lol-gameflow/v1/session', async (data) => {
       if (data.phase === 'InProgress' && data.gameClient.running && !isStartedGameLoading) {
         isStartedGameLoading = true;
+
         const { teamOne, teamTwo } = data.gameData;
         await this.joinLeagueVoice(teamOne, teamTwo);
 
-        fetchTime().then((currentTime: number) => {
+        this.fetchTime().then((currentTime: number) => {
           const ms = currentTime * 1000;
           setTimeout(() => {
             isStartedInGame = true;
@@ -93,9 +152,9 @@ export class LeagueHandler {
             const teamOneSummoners = new Team(teamOne);
             const teamTwoSummoners = new Team(teamTwo);
 
-            const summoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
+            const summoner = teamOneSummoners.findBySummonerId(this.summonerId);
             const myTeam = summoner ? teamOneSummoners : teamTwoSummoners;
-            const summonerIdList: number[] = myTeam.getSummonerIdList(this.summoner.summonerId);
+            const summonerIdList: number[] = myTeam.getSummonerIdList(this.summonerId);
 
             this.webContents.send(IPC_KEY.START_IN_GAME, summonerIdList);
           }, 1000 * 60 + 5000 - ms);
@@ -114,41 +173,50 @@ export class LeagueHandler {
         this.webContents.send(IPC_KEY.EXIT_IN_GAME);
       }
 
+      //게임 종료
       if (data.phase === 'WaitingForStats' && !isEndGame) {
         isEndGame = true;
         this.webContents.send(IPC_KEY.EXIT_IN_GAME);
       }
     });
-
-    async function fetchTime(): Promise<number> {
-      return new Promise((resolve) => {
-        let interval = setInterval(async () => {
-          try {
-            const response = await axios({
-              url: 'https://127.0.0.1:2999/liveclientdata/allgamedata',
-              method: 'GET',
-              httpsAgent: new https.Agent({
-                rejectUnauthorized: false,
-              }),
-            });
-
-            if (response.data.gameData.gameTime) {
-              clearInterval(interval);
-              resolve(Math.floor(response.data.gameData.gameTime));
-            }
-          } catch (error) {
-            //에러나도 게임 경과 시간 받아올 때까지 반복
-          }
-        }, 5000);
-      });
-    }
   }
 
-  private async handleLeaguePhase(gameflow: Gameflow, matchHistory: MatchHistory) {
-    if (gameflow.isChampselectPhase()) {
+  private async isCloseChampionSelectionWindow(phase: string) {
+    const gameflowPhase = await request('/lol-gameflow/v1/gameflow-phase');
+    const isNotChampSelect: boolean = gameflowPhase === 'None' || gameflowPhase === 'Lobby';
+    return isJoinedRoom && phase === '' && isNotChampSelect;
+  }
+
+  private fetchTime(): Promise<number> {
+    return new Promise((resolve) => {
+      let interval = setInterval(async () => {
+        try {
+          const response = await axios({
+            url: 'https://127.0.0.1:2999/liveclientdata/allgamedata',
+            method: 'GET',
+            httpsAgent: new https.Agent({
+              rejectUnauthorized: false,
+            }),
+          });
+
+          if (response.data.gameData.gameTime) {
+            clearInterval(interval);
+            resolve(Math.floor(response.data.gameData.gameTime));
+          }
+        } catch (error) {
+          //에러나도 게임 경과 시간 받아올 때까지 반복
+        }
+      }, 5000);
+    });
+  }
+
+  private async handleCurrentPhase() {
+    const flow = await request('/lol-gameflow/v1/session');
+
+    if (flow.phase === 'ChampSelect') {
       isJoinedRoom = true;
 
-      const { myTeam } = await League.httpRequest(LCU_ENDPOINT.CHAMP_SELECT_URL);
+      const { myTeam } = await request('/lol-champ-select/v1/session');
       this.joinTeamVoice(myTeam);
 
       const myTeamSummonerChampionStatsList = await Promise.all(
@@ -156,10 +224,9 @@ export class LeagueHandler {
           .filter((summoner: any) => summoner.championId !== 0)
           .map((summoner: any) => {
             if (summoner.championId !== 0) {
-              const championStats: ChampionStats = matchHistory.getChampionStats(
+              const championStats: ChampionStats = this.matchHistory.getChampionStats(
                 summoner.summonerId,
-                summoner.championId,
-                '' //무조건 있음
+                summoner.championId
               );
 
               return championStats;
@@ -183,12 +250,14 @@ export class LeagueHandler {
       return;
     }
 
-    if (gameflow.isGameLoadingPhase()) {
-      const { teamOne, teamTwo } = gameflow.gameData;
+    if (flow.phase === 'InProgress' && flow.gameClient.running) {
+      isStartedInGame = true;
+
+      const { teamOne, teamTwo } = flow.gameData;
       await this.joinLeagueVoice(teamOne, teamTwo);
 
       const teamOneSummoners = new Team(teamOne);
-      const summoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
+      const summoner = teamOneSummoners.findBySummonerId(this.summonerId);
       const myTeam = summoner ? teamOne : teamTwo;
 
       const myTeamSummonerChampionStatsList = await Promise.all(
@@ -196,10 +265,9 @@ export class LeagueHandler {
           .filter((summoner: any) => summoner.championId !== 0)
           .map((summoner: any) => {
             if (summoner.championId !== 0) {
-              const championStats: ChampionStats = matchHistory.getChampionStats(
+              const championStats: ChampionStats = this.matchHistory.getChampionStats(
                 summoner.summonerId,
-                summoner.championId,
-                '' //무조건 있음
+                summoner.championId
               );
 
               return championStats;
@@ -220,8 +288,6 @@ export class LeagueHandler {
       );
 
       this.webContents.send('selected-champ-info-list', myTeamSummonerChampionStatsList);
-
-      isStartedGameLoading = true;
       return;
     }
 
@@ -236,12 +302,15 @@ export class LeagueHandler {
 
       if (response.data.gameData.gameTime) {
         const time = Math.floor(response.data.gameData.gameTime);
+
         if (time < 50) {
-          const { teamOne, teamTwo } = gameflow.gameData;
+          isStartedInGame = true;
+
+          const { teamOne, teamTwo } = flow.gameData;
           await this.joinLeagueVoice(teamOne, teamTwo);
 
           const teamOneSummoners = new Team(teamOne);
-          const summoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
+          const summoner = teamOneSummoners.findBySummonerId(this.summonerId);
           const myTeam = summoner ? teamOne : teamTwo;
 
           const myTeamSummonerChampionStatsList = await Promise.all(
@@ -249,10 +318,9 @@ export class LeagueHandler {
               .filter((summoner: any) => summoner.championId !== 0)
               .map((summoner: any) => {
                 if (summoner.championId !== 0) {
-                  const championStats: ChampionStats = matchHistory.getChampionStats(
+                  const championStats: ChampionStats = this.matchHistory.getChampionStats(
                     summoner.summonerId,
-                    summoner.championId,
-                    '' //무조건 있음
+                    summoner.championId
                   );
 
                   return championStats;
@@ -273,14 +341,14 @@ export class LeagueHandler {
           );
 
           this.webContents.send('selected-champ-info-list', myTeamSummonerChampionStatsList);
-          isStartedInGame = true;
-
           return;
         } else {
-          const { teamOne, teamTwo } = gameflow.gameData;
+          isStartedInGame = true;
+
+          const { teamOne, teamTwo } = flow.gameData;
 
           const teamOneSummoners = new Team(teamOne);
-          const summoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
+          const summoner = teamOneSummoners.findBySummonerId(this.summonerId);
           const myTeam = summoner ? teamOne : teamTwo;
           this.joinTeamVoice(myTeam);
 
@@ -291,10 +359,9 @@ export class LeagueHandler {
               .filter((summoner: any) => summoner.championId !== 0)
               .map((summoner: any) => {
                 if (summoner.championId !== 0) {
-                  const championStats: ChampionStats = matchHistory.getChampionStats(
+                  const championStats: ChampionStats = this.matchHistory.getChampionStats(
                     summoner.summonerId,
-                    summoner.championId,
-                    '' //무조건 있음
+                    summoner.championId
                   );
 
                   return championStats;
@@ -315,21 +382,16 @@ export class LeagueHandler {
           );
 
           this.webContents.send('selected-champ-info-list', myTeamSummonerChampionStatsList);
-
-          isStartedInGame = true;
           return;
         }
       }
-    } catch (error) {
-      //에러처리 어떻게 할지 고민
-      return;
-    }
-  }
+    } catch (error: any) {
+      if (error.toString().includes('ECONNREFUSED')) {
+        return;
+      }
 
-  private async isCloseChampionSelectionWindow(phase: string) {
-    const gameflowPhase = await League.httpRequest(LCU_ENDPOINT.GAMEFLOW_PHASE_URL);
-    const isNotChampSelect: boolean = gameflowPhase === 'None' || gameflowPhase === 'Lobby';
-    return isJoinedRoom && phase === '' && isNotChampSelect;
+      throw new Error(error);
+    }
   }
 
   private joinTeamVoice(myTeam: []) {
@@ -344,7 +406,7 @@ export class LeagueHandler {
 
     const roomName = teamOne.createVoiceRoomName() + teamTwo.createVoiceRoomName();
 
-    const summoner = teamOne.findBySummonerId(this.summoner.summonerId);
+    const summoner = teamOne.findBySummonerId(this.summonerId);
     const myTeam = summoner ? teamOne : teamTwo;
     const teamName = myTeam.createVoiceRoomName();
 

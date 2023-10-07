@@ -1,11 +1,9 @@
 import { app, BrowserWindow, screen, ipcMain } from 'electron';
-import { LeagueHandler } from './league/LeagueHandler';
-import { onLeagueClientUx } from './league/onLeagueClientUx';
 import onElectronStore from './store';
-import { handleFriendRequest } from './league/handleFriendRequest';
-import League from './utils';
 import { GlobalKeyboardListener } from 'node-global-key-listener';
 import { IPC_KEY } from '../const';
+import { LvcApplication } from './league/LvcApplication';
+import { authenticate, createWebSocketConnection } from 'league-connect';
 
 const globalKey = new GlobalKeyboardListener();
 
@@ -70,18 +68,28 @@ const createOverlayWindow = () => {
 
 async function handleLoadEvent() {
   mainWindow.webContents.on('did-finish-load', async () => {
-    await League.initialize(mainWindow);
+    const { credentials, ws } = await onLeagueClientUx();
+    const app = new LvcApplication(mainWindow.webContents, credentials, ws);
 
-    const { summonerInfo, matchHistory, gameflow } = await onLeagueClientUx();
-    mainWindow.webContents.send('on-league-client', summonerInfo);
-
-    const friendList = await League.httpRequest('/lol-chat/v1/friends');
-    const friendSummonerIdList = friendList.map((friend: any) => friend.summonerId);
-    mainWindow.webContents.send('online-summoner', friendSummonerIdList);
-
-    const leagueHandler: LeagueHandler = new LeagueHandler(mainWindow.webContents, summonerInfo);
-    await leagueHandler.handle(gameflow, matchHistory);
+    app.initialize().then(async () => {
+      app.handle();
+    });
   });
+}
+
+async function onLeagueClientUx() {
+  const [credentials, ws] = await Promise.all([
+    authenticate({
+      awaitConnection: true,
+    }),
+    createWebSocketConnection({
+      authenticationOptions: {
+        awaitConnection: true,
+      },
+    }),
+  ]);
+
+  return { credentials, ws };
 }
 
 ipcMain.on(IPC_KEY.SUMMONER_VISUALIZER, (event, value) => {
@@ -119,5 +127,4 @@ app.on('window-all-closed', () => {
   app.quit();
 });
 
-handleFriendRequest();
 onElectronStore();

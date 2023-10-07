@@ -1,5 +1,4 @@
-import League from '../utils';
-import { LCU_ENDPOINT } from '../constants';
+import { request } from '../utils';
 import { plainToInstance } from 'class-transformer';
 
 export class Summoner {
@@ -20,7 +19,7 @@ export class Summoner {
   public static fetch(): Promise<Summoner> {
     return new Promise((resolve) => {
       let interval = setInterval(async function () {
-        const summonerData = await League.httpRequest(LCU_ENDPOINT.CHAT_ME_URL);
+        const summonerData = await request('/lol-chat/v1/me');
         const summoner: Summoner = plainToInstance(Summoner, summonerData);
 
         if (!summoner.isEmptyData()) {
@@ -33,7 +32,7 @@ export class Summoner {
 
   public static async fetchByPuuid(puuid: string) {
     const url = `/lol-summoner/v2/summoners/puuid/${puuid}`;
-    const summonerData = await League.httpRequest(url);
+    const summonerData = await request(url);
     return plainToInstance(Summoner, summonerData);
   }
 
