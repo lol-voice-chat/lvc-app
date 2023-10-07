@@ -1,4 +1,4 @@
-import { app, BrowserWindow, screen, ipcMain } from 'electron';
+import { app, BrowserWindow, screen, ipcMain, systemPreferences } from 'electron';
 import onElectronStore, { store } from './store';
 import { GlobalKeyboardListener } from 'node-global-key-listener';
 import { IPC_KEY } from '../const';
@@ -6,6 +6,9 @@ import { LvcApplication } from './league/LvcApplication';
 import { authenticate, createWebSocketConnection } from 'league-connect';
 
 const globalKey = new GlobalKeyboardListener();
+if (systemPreferences.isTrustedAccessibilityClient(true)) {
+  console.log();
+}
 
 let mainWindow: BrowserWindow;
 let lvcOverlayWindow: BrowserWindow;
@@ -116,6 +119,7 @@ app.whenReady().then(() => {
   let isPressingKey = false;
 
   globalKey.addListener((e) => {
+    console.log('?');
     const settingsConfig = store.get('general-settings-config') as any;
 
     if (settingsConfig) {
