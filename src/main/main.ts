@@ -1,10 +1,5 @@
 import { app, BrowserWindow, screen, ipcMain } from 'electron';
-import { LeagueHandler } from './league/LeagueHandler';
-import { onLeagueClientUx } from './league/onLeagueClientUx';
 import onElectronStore, { store } from './store';
-import { handleFriendRequest } from './league/handleFriendRequest';
-import League from './utils';
-import onElectronStore from './store';
 import { GlobalKeyboardListener } from 'node-global-key-listener';
 import { IPC_KEY } from '../const';
 import { LvcApplication } from './league/LvcApplication';
