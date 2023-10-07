@@ -10,7 +10,7 @@ import * as mediasoup from 'mediasoup-client';
 import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
 import { DeviceType, ConsumerTransportType, TransportType } from '../@type/webRtc';
 import { SummonerType } from '../@type/summoner';
-import { IPC_KEY, STORE_KEY } from '../../const';
+import { IPC_KEY } from '../../const';
 import electronStore from '../@store/electron';
 import { connectSocket } from '../utils/socket';
 import { Socket } from 'socket.io-client';
@@ -174,7 +174,7 @@ function useVoiceChat() {
     let producerTransport: TransportType | null = null;
     let consumerTransportList: ConsumerTransportType[] = [];
 
-    electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
+    electronStore.get('team-voice-room-name').then((roomName) => {
       socket.emit('team-join-room', { roomName, summoner }, ({ rtpCapabilities }) => {
         connectVoiceChat(
           true,
@@ -235,7 +235,7 @@ function useVoiceChat() {
     let producerTransport: TransportType | null = null;
     let consumerTransportList: ConsumerTransportType[] = [];
 
-    electronStore.get(STORE_KEY.LEAGUE_VOICE_ROOM_NAME).then(({ roomName, teamName }) => {
+    electronStore.get('league-voice-room-name').then(({ roomName, teamName }) => {
       socket.emit('league-join-room', { roomName, teamName, summoner }, ({ rtpCapabilities }) => {
         connectVoiceChat(
           false,

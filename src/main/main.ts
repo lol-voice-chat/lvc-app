@@ -1,7 +1,7 @@
 import { app, BrowserWindow, screen, ipcMain } from 'electron';
 import { LeagueHandler } from './league/LeagueHandler';
 import { onLeagueClientUx } from './league/onLeagueClientUx';
-import onElectronStore from './store';
+import onElectronStore, { store } from './store';
 import { handleFriendRequest } from './league/handleFriendRequest';
 import League from './utils';
 import { GlobalKeyboardListener } from 'node-global-key-listener';
@@ -56,7 +56,7 @@ const createOverlayWindow = () => {
     y: 170,
   });
 
-  lvcOverlayWindow.setIgnoreMouseEvents(true, { forward: true });
+  // lvcOverlayWindow.setIgnoreMouseEvents(true, { forward: true });
   lvcOverlayWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   lvcOverlayWindow.setAlwaysOnTop(true, process.platform === 'darwin' ? 'floating' : 'normal');
 
@@ -84,26 +84,51 @@ async function handleLoadEvent() {
   });
 }
 
-ipcMain.on(IPC_KEY.SUMMONER_VISUALIZER, (event, value) => {
-  event.reply(IPC_KEY.SUMMONER_VISUALIZER, value);
+ipcMain.on(IPC_KEY.SUMMONER_VISUALIZER, (_, value) => {
+  lvcOverlayWindow.webContents.send(IPC_KEY.SUMMONER_VISUALIZER, value);
 });
 
-ipcMain.on(IPC_KEY.OVERLAY_SUMMONER, (event, summoner) => {
-  event.reply(IPC_KEY.OVERLAY_SUMMONER, summoner);
+ipcMain.on(IPC_KEY.OVERLAY_SUMMONER, (_, summoner) => {
+  lvcOverlayWindow.webContents.send(IPC_KEY.OVERLAY_SUMMONER, summoner);
 });
 
-ipcMain.on(IPC_KEY.OVERLAY_MY_TEAM_SUMMONERS, (event, summonerList) => {
-  event.reply(IPC_KEY.OVERLAY_MY_TEAM_SUMMONERS, summonerList);
+ipcMain.on(IPC_KEY.OVERLAY_MY_TEAM_SUMMONERS, (_, summonerList) => {
+  lvcOverlayWindow.webContents.send(IPC_KEY.OVERLAY_MY_TEAM_SUMMONERS, summonerList);
 });
 
 app.whenReady().then(() => {
   createWindow();
   createOverlayWindow();
 
+  const handleChangeMuteMicSummoner = () => {
+    mainWindow.webContents.send(IPC_KEY.SUMMONER_MUTE);
+    lvcOverlayWindow.webContents.send(IPC_KEY.SUMMONER_MUTE);
+  };
+
+  let isPressingKey = false;
+
   globalKey.addListener((e) => {
-    if (e.name === 'M' && e.state === 'DOWN') {
-      mainWindow.webContents.send(IPC_KEY.SUMMONER_MUTE);
-      lvcOverlayWindow.webContents.send(IPC_KEY.SUMMONER_MUTE);
+    const settingsConfig = store.get('general-settings-config') as any;
+
+    if (settingsConfig) {
+      const { isPressToTalk, pressToTalkShortcutKey, muteMicShortcutKey } = settingsConfig;
+
+      /* 눌러서 말하기 off - default */
+      if (!isPressToTalk && e.name === muteMicShortcutKey && e.state === 'DOWN') {
+        mainWindow.webContents.send(IPC_KEY.SUMMONER_MUTE);
+        lvcOverlayWindow.webContents.send(IPC_KEY.SUMMONER_MUTE);
+      }
+      // 눌러서 말하기 on
+      if (isPressToTalk && e.name === pressToTalkShortcutKey) {
+        if (!isPressingKey && e.state === 'DOWN') {
+          handleChangeMuteMicSummoner();
+          isPressingKey = true;
+        }
+        if (e.state === 'UP') {
+          handleChangeMuteMicSummoner();
+          isPressingKey = false;
+        }
+      }
     }
   });
 

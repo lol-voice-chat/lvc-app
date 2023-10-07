@@ -6,19 +6,24 @@ export const AppHeader = styled.div`
 
   -webkit-app-region: drag;
 
-  div {
+  #tool-container {
     display: flex;
     justify-content: flex-end;
     align-items: flex-end;
     width: 270px;
 
-    img {
+    div {
       width: 13px;
-      height: auto;
+      height: 13px;
       margin-left: 15px;
 
-      cursor: pointer;
       -webkit-app-region: no-drag;
+      cursor: pointer;
+
+      img {
+        width: 100%;
+        height: auto;
+      }
     }
   }
 `;

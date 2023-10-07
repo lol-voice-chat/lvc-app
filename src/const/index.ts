@@ -12,8 +12,3 @@ export const IPC_KEY = {
   OVERLAY_SUMMONER: 'overlay-summoner',
   OVERLAY_MY_TEAM_SUMMONERS: 'overlay-my-team-summoners',
 };
-
-export const STORE_KEY = {
-  TEAM_VOICE_ROOM_NAME: 'team-voice-room-name',
-  LEAGUE_VOICE_ROOM_NAME: 'league-voice-room-name',
-};

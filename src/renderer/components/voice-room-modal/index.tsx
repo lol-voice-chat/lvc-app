@@ -11,7 +11,7 @@ import {
 import * as S from './style';
 import SummonerVoiceBlock from '../summoner-voice-block';
 import { connectSocket } from '../../utils/socket';
-import { IPC_KEY, STORE_KEY } from '../../../const';
+import { IPC_KEY } from '../../../const';
 import electronStore from '../../@store/electron';
 import { Socket } from 'socket.io-client';
 import SummonerLeagueVoiceBlock from '../summoner-league-voice-block';
@@ -42,7 +42,7 @@ function VoiceRoomModal() {
   }, [userStream]);
 
   useEffect(() => {
-    electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((roomName) => {
+    electronStore.get('team-voice-room-name').then((roomName) => {
       const socket = connectSocket('/team-voice-chat/manage');
       socket.emit('team-manage-join-room', roomName);
       setTeamManagementSocket(socket);
@@ -74,7 +74,7 @@ function VoiceRoomModal() {
 
   useEffect(() => {
     if (gameStatus === 'loading') {
-      electronStore.get(STORE_KEY.LEAGUE_VOICE_ROOM_NAME).then(({ roomName }) => {
+      electronStore.get('league-voice-room-name').then(({ roomName }) => {
         const socket = connectSocket('/league-voice-chat/manage');
         socket.emit('league-manage-join-room', roomName);
         setLeagueManagementSocket(socket);

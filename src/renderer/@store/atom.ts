@@ -1,10 +1,6 @@
 import { SummonerType } from '../@type/summoner';
 import { atom } from 'recoil';
-
-export const userStreamState = atom<MediaStream | null>({
-  key: 'user-stream',
-  default: null,
-});
+import { generalSettingsDefaultConfig } from '../components/general-setting-modal';
 
 type GameStatus = 'none' | 'champ-select' | 'loading' | 'in-game';
 
@@ -26,4 +22,19 @@ export const myTeamSummonersState = atom<SummonerType[] | null>({
 export const enemySummonersState = atom<SummonerType[] | null>({
   key: 'enemy-summoners',
   default: null,
+});
+
+export const userStreamState = atom<MediaStream | null>({
+  key: 'user-stream',
+  default: null,
+});
+
+export type GeneralSettingsConfigType = {
+  isPressToTalk: boolean;
+  pressToTalkShortcutKey: string;
+  muteMicShortcutKey: string;
+};
+export const generalSettingsConfigState = atom<GeneralSettingsConfigType>({
+  key: 'general-settings-config',
+  default: generalSettingsDefaultConfig,
 });
