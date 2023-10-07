@@ -10,7 +10,6 @@ import { connectSocket } from '../../../utils/socket';
 import { Socket } from 'socket.io-client';
 import RecentSummonerList from './recent-summoner-list';
 import AppHeader from './app-header';
-
 const { ipcRenderer } = window.require('electron');
 
 export type RecentSummonerType = SummonerType & { isRequested: boolean };
@@ -88,7 +87,7 @@ function SideMenuBar() {
   };
 
   return (
-    <_.SideBarContainer>
+    <_.SideBarContainer id="side-menu-bar">
       <AppHeader />
 
       <SummonerProfile

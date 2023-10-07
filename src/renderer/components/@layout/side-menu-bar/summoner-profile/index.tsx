@@ -3,6 +3,7 @@ import { SummonerType } from '../../../../@type/summoner';
 import RankBadge from '../../../@common/rank-badge';
 import * as _ from './style';
 import React from 'react';
+const { ipcRenderer } = window.require('electron');
 
 function SummonerProfile(props: {
   summoner: SummonerType | RecentSummonerType | null;

@@ -2,14 +2,14 @@ import { SummonerType } from '../@type/summoner';
 import { atom } from 'recoil';
 
 export const userStreamState = atom<MediaStream | null>({
-  key: 'userStream',
+  key: 'user-stream',
   default: null,
 });
 
 type GameStatus = 'none' | 'champ-select' | 'loading' | 'in-game';
 
 export const gameStatusState = atom<GameStatus>({
-  key: 'gameStatus',
+  key: 'game-status',
   default: 'none',
 });
 
@@ -19,17 +19,11 @@ export const summonerState = atom<SummonerType | null>({
 });
 
 export const myTeamSummonersState = atom<SummonerType[] | null>({
-  key: 'myTeamSummoners',
+  key: 'my-team-summoners',
   default: null,
 });
 
 export const enemySummonersState = atom<SummonerType[] | null>({
-  key: 'enemySummoners',
-  default: null,
-});
-
-export type SummonerInfoType = { summonerId: number; championIcon: string; kda: string };
-export const summonerInfoListState = atom<SummonerInfoType[] | null>({
-  key: 'summonerInfoList',
+  key: 'enemy-summoners',
   default: null,
 });
