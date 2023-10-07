@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import * as _ from './style';
 import { IPC_KEY } from '../../../const';
 import { SummonerType } from '../../@type/summoner';
+import electronStore from '../../@store/electron';
 const { ipcRenderer } = window.require('electron');
 
 type visualizerType = { visualizerVolume: number; isMuteSpeaker: boolean };
@@ -24,6 +25,10 @@ function LvcOverlay() {
       navBar.style.display = 'none';
       sideMenuBar.style.display = 'none';
     }
+
+    electronStore.get('general-settings-config').then(({ isPressToTalk }) => {
+      setIsMuteMic(isPressToTalk);
+    });
 
     /* 소환사 비주얼라이저 값 실시간 업데이트  */
     ipcRenderer.on(IPC_KEY.SUMMONER_VISUALIZER, (_, { summonerId, value }) => {

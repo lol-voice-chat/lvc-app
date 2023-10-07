@@ -1,20 +1,16 @@
 import { ipcMain } from 'electron';
 
 import Store from 'electron-store';
-import { STORE_KEY } from '../const';
 
-const store = new Store();
-
-const STORE_KEY_LIST = [STORE_KEY.TEAM_VOICE_ROOM_NAME, STORE_KEY.LEAGUE_VOICE_ROOM_NAME];
+export const store = new Store();
 
 const onElectronStore = () => {
-  STORE_KEY_LIST.map((storeKey) => {
-    ipcMain.handle(storeKey + 'get', () => {
-      return store.get(storeKey);
-    });
-    ipcMain.on(storeKey + 'set', (_, { setValue }) => {
-      store.set(storeKey, setValue);
-    });
+  ipcMain.handle('electron-store-get', (_, { key, defaultValue }) => {
+    return store.get(key, defaultValue);
+  });
+
+  ipcMain.on('electron-store-set', (_, { key, setValue }) => {
+    store.set(key, setValue);
   });
 };
 

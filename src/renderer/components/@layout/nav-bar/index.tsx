@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { SummonerType } from '../../../@type/summoner';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import { summonerState, gameStatusState } from '../../../@store/atom';
-import { IPC_KEY, STORE_KEY } from '../../../../const';
+import { IPC_KEY } from '../../../../const';
 import electronStore from '../../../@store/electron';
 import VoiceRoomModal from '../../voice-room-modal';
 import * as S from './style';
@@ -28,16 +28,16 @@ function NavBar() {
     /* 챔피언 선택창 on */
     ipcRenderer.once(IPC_KEY.TEAM_JOIN_ROOM, (_, { roomName }) => {
       setGameStatus('champ-select');
-      electronStore.set(STORE_KEY.TEAM_VOICE_ROOM_NAME, roomName);
+      electronStore.set('team-voice-room-name', roomName);
     });
 
     /* 인게임 전 로딩창 on */
     ipcRenderer.once(IPC_KEY.LEAGUE_JOIN_ROOM, (_, { roomName, teamName, summonerDataList }) => {
-      electronStore.get(STORE_KEY.TEAM_VOICE_ROOM_NAME).then((teamVoiceRoomName) => {
+      electronStore.get('league-voice-room-name').then((teamVoiceRoomName) => {
         if (teamVoiceRoomName === roomName) return;
 
         setGameStatus('loading');
-        electronStore.set(STORE_KEY.LEAGUE_VOICE_ROOM_NAME, { roomName, teamName });
+        electronStore.set('league-voice-room-name', { roomName, teamName });
       });
     });
   }, []);

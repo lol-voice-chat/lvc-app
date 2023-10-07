@@ -5,7 +5,7 @@ import { ChampionInfoType, SummonerType } from '../../@type/summoner';
 import VolumeSlider from '../@common/volume-slider';
 import { getSummonerSpeaker, micVolumeHandler } from '../../utils/audio';
 import { useRecoilValue } from 'recoil';
-import { userStreamState } from '../../@store/atom';
+import { generalSettingsConfigState, userStreamState } from '../../@store/atom';
 import { Socket } from 'socket.io-client';
 import { IPC_KEY } from '../../../const';
 const { ipcRenderer } = window.require('electron');
@@ -17,6 +17,8 @@ function SummonerVoiceBlock(props: {
   managementSocket: Socket | null;
 }) {
   const userStream = useRecoilValue(userStreamState);
+  const generalSettingsConfig = useRecoilValue(generalSettingsConfigState);
+
   const [speakerVolume, setSpeakerVolume] = useState(0.8);
   const [beforeMuteSpeakerVolume, setBeforeMuteSpeakerVolume] = useState(0.8);
   const [isMuteSpeaker, setIsMuteSpeaker] = useState(false);
@@ -36,16 +38,21 @@ function SummonerVoiceBlock(props: {
         }
       });
     }
+  }, [props.managementSocket]);
 
-    /* 소환사 (자신) */
+  useEffect(() => {
     if (props.isMine) {
+      if (generalSettingsConfig.isPressToTalk) {
+        userStream?.getAudioTracks().forEach((track) => (track.enabled = false));
+        setIsMuteMic(true);
+      }
       ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, handleClickMuteMic);
     }
 
     return () => {
       ipcRenderer.removeAllListeners(IPC_KEY.SUMMONER_MUTE);
     };
-  }, [props.managementSocket]);
+  }, [userStream]);
 
   useEffect(() => {
     if (props.isMine) {
@@ -90,7 +97,7 @@ function SummonerVoiceBlock(props: {
 
   const handleClickMuteMic = () => {
     userStream?.getAudioTracks().forEach((track) => (track.enabled = !track.enabled));
-    setIsMuteMic((curMute) => !curMute);
+    setIsMuteMic((prev) => !prev);
   };
 
   return (

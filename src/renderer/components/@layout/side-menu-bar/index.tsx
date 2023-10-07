@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import * as _ from './style';
-import { useRecoilValue } from 'recoil';
-import { summonerState } from '../../../@store/atom';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import {
+  GeneralSettingsConfigType,
+  generalSettingsConfigState,
+  summonerState,
+} from '../../../@store/atom';
 import SummonerProfile from './summoner-profile';
 import SummonerRecord from './summoner-record';
 import { IPC_KEY } from '../../../../const';
@@ -10,6 +14,8 @@ import { connectSocket } from '../../../utils/socket';
 import { Socket } from 'socket.io-client';
 import RecentSummonerList from './recent-summoner-list';
 import AppHeader from './app-header';
+import GeneralSettingModal, { generalSettingsDefaultConfig } from '../../general-setting-modal';
+import electronStore from '../../../@store/electron';
 const { ipcRenderer } = window.require('electron');
 
 export type RecentSummonerType = SummonerType & { isRequested: boolean };
@@ -17,6 +23,11 @@ export type RecentSummonerType = SummonerType & { isRequested: boolean };
 function SideMenuBar() {
   const summoner = useRecoilValue(summonerState);
   const [summonerStatusSocket, setSummonerStatusSocket] = useState<Socket | null>(null);
+
+  const [generalSettingModal, setGeneralSettingModal] = useState(false);
+  const [settingsConfig, setSettingsConfig] = useRecoilState<GeneralSettingsConfigType>(
+    generalSettingsConfigState
+  );
 
   const [isSummonerRecord, setIsSummonerRecord] = useState(false);
   const [summonerRecordInfo, setSummonerRecordInfo] = useState<
@@ -60,6 +71,12 @@ function SideMenuBar() {
     }
   }, [summoner]);
 
+  useEffect(() => {
+    electronStore.get('general-settings-config', generalSettingsDefaultConfig).then((config) => {
+      setSettingsConfig(config);
+    });
+  }, [generalSettingModal]);
+
   const getRecentSummonerData = (summonerInfo: SummonerType | RecentSummonerType) => {
     setSummonerRecordInfo(summonerInfo);
     setIsSummonerRecord(true);
@@ -75,9 +92,7 @@ function SideMenuBar() {
     if (recentSummonerList) {
       setRecentSummonerList(
         [...recentSummonerList].map((recentSummoner) => {
-          if (recentSummonerInfo === recentSummoner) {
-            recentSummoner.isRequested = true;
-          }
+          recentSummoner.isRequested = recentSummonerInfo === recentSummoner;
           return recentSummoner;
         })
       );
@@ -87,28 +102,37 @@ function SideMenuBar() {
   };
 
   return (
-    <_.SideBarContainer id="side-menu-bar">
-      <AppHeader />
-
-      <SummonerProfile
-        summoner={isSummonerRecord ? summonerRecordInfo : summoner}
-        isMine={summoner}
-        isBackground={!isSummonerRecord}
-        handleClickSummonerProfile={handleClickSummonerProfile}
-        handleClickAddFriend={handleClickAddFriend}
-      />
-
-      {isSummonerRecord ? (
-        // 소환사 전적
-        <SummonerRecord summonerData={summonerRecordInfo} />
-      ) : (
-        // 최근 보이스한 소환사 리스트
-        <RecentSummonerList
-          recentSummonerList={recentSummonerList}
-          handleClickSummonerBlock={getRecentSummonerData}
+    <>
+      {generalSettingModal && settingsConfig && (
+        <GeneralSettingModal
+          settingsConfig={settingsConfig}
+          handleClickModalTrigger={() => setGeneralSettingModal((prev) => !prev)}
         />
       )}
-    </_.SideBarContainer>
+
+      <_.SideBarContainer id="side-menu-bar">
+        <AppHeader handleClickSettingModalTrigger={() => setGeneralSettingModal((prev) => !prev)} />
+
+        <SummonerProfile
+          summoner={isSummonerRecord ? summonerRecordInfo : summoner}
+          isMine={summoner}
+          isBackground={!isSummonerRecord}
+          handleClickSummonerProfile={handleClickSummonerProfile}
+          handleClickAddFriend={handleClickAddFriend}
+        />
+
+        {isSummonerRecord ? (
+          // 소환사 전적
+          <SummonerRecord summonerData={summonerRecordInfo} />
+        ) : (
+          // 최근 보이스한 소환사 리스트
+          <RecentSummonerList
+            recentSummonerList={recentSummonerList}
+            handleClickSummonerBlock={getRecentSummonerData}
+          />
+        )}
+      </_.SideBarContainer>
+    </>
   );
 }
 
