@@ -92,8 +92,8 @@ async function onLeagueClientUx() {
   return { credentials, ws };
 }
 
-ipcMain.on(IPC_KEY.SUMMONER_VISUALIZER, (event, value) => {
-  event.reply(IPC_KEY.SUMMONER_VISUALIZER, value);
+ipcMain.on(IPC_KEY.SUMMONER_VISUALIZER, (_, value) => {
+  lvcOverlayWindow.webContents.send(IPC_KEY.SUMMONER_VISUALIZER, value);
 });
 
 ipcMain.on(IPC_KEY.OVERLAY_SUMMONER, (_, summoner) => {
