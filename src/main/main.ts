@@ -1,4 +1,4 @@
-import { app, BrowserWindow, screen, ipcMain } from 'electron';
+import { app, BrowserWindow, screen, ipcMain, globalShortcut } from 'electron';
 import onElectronStore, { store } from './store';
 import { GlobalKeyboardListener } from 'node-global-key-listener';
 import { IPC_KEY } from '../const';
@@ -35,10 +35,11 @@ const createWindow = () => {
 const createOverlayWindow = () => {
   const { width: screen_width, height: screen_height } = screen.getPrimaryDisplay().workAreaSize;
   const vw = Math.floor(screen_width / 100);
+  const vh = Math.floor(screen_height / 100);
 
   lvcOverlayWindow = new BrowserWindow({
-    width: vw * 4.5,
-    height: vw * 20,
+    width: Math.floor(vw * 4.3),
+    height: Math.floor(vw * 20),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -50,8 +51,8 @@ const createOverlayWindow = () => {
     skipTaskbar: true,
     hasShadow: false,
     show: false,
-    x: 15,
-    y: 170,
+    x: Math.floor(vw * 1),
+    y: Math.floor(vh * 25),
   });
 
   // lvcOverlayWindow.setIgnoreMouseEvents(true, { forward: true });
