@@ -71,7 +71,7 @@ async function handleLoadEvent() {
     const { credentials, ws } = await onLeagueClientUx();
     const app = new LvcApplication(mainWindow.webContents, credentials, ws);
 
-    app.initialize().then(async () => {
+    app.initialize().then(() => {
       app.handle();
     });
   });
