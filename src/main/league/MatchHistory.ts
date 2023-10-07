@@ -2,7 +2,6 @@ import League from '../utils';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { plainToInstance } from 'class-transformer';
 import { CHAMPIONS } from '../constants';
 
 export interface SummonerStats {
@@ -39,11 +38,7 @@ export interface ChampionStats {
   playCount: string;
 }
 
-interface MatchHistoryData {
-  games: MatchData[];
-}
-
-interface MatchData {
+interface Match {
   gameId: number;
   gameCreationDate: string;
   gameDuration: number;
@@ -70,12 +65,20 @@ dayjs.extend(relativeTime);
 const RECENT_PVP_MATCH_COUNT = 10;
 
 export class MatchHistory {
-  games: MatchHistoryData;
+  private matches: Match[];
+
+  constructor(matches: Match[]) {
+    this.matches = matches;
+  }
 
   public static async fetch(puuid: string) {
     const url = `/lol-match-history/v1/products/lol/${puuid}/matches?begIndex=0&endIndex=99`;
     const matchHistoryData = await League.httpRequest(url);
-    return plainToInstance(MatchHistory, matchHistoryData);
+    const matches = matchHistoryData.games.games
+      .slice(0, 100)
+      .filter((match: Match) => match.gameType !== 'CUSTOM_GAME');
+
+    return new MatchHistory(matches);
   }
 
   public async getSummonerStats() {
@@ -92,53 +95,53 @@ export class MatchHistory {
     let gameCount = 0;
 
     const statsList: StatsData[] = await Promise.all(
-      this.getPvpMatchList()
-        .slice(0, RECENT_PVP_MATCH_COUNT)
-        .map(async (match: MatchData) => {
-          const participant: ParticipantData = match.participants[0];
-          //해당 챔피언으로 뛴 게임횟수 저장
-          this.addChampionCount(participant.championId, recentUsedChampionList);
+      this.matches.slice(0, RECENT_PVP_MATCH_COUNT).map(async (match: Match) => {
+        const participant: ParticipantData = match.participants[0];
+        //해당 챔피언으로 뛴 게임횟수 저장
+        this.addChampionCount(participant.championId, recentUsedChampionList);
 
-          const kills = participant.stats.kills;
-          const deaths = participant.stats.deaths;
-          const assists = participant.stats.assists;
+        const kills = participant.stats.kills;
+        const deaths = participant.stats.deaths;
+        const assists = participant.stats.assists;
 
-          killCount += kills;
-          deathCount += deaths;
-          assistCount += assists;
+        killCount += kills;
+        deathCount += deaths;
+        assistCount += assists;
 
-          totalDamage += participant.stats.totalDamageDealtToChampions;
-          totalCs += participant.stats.totalMinionsKilled + participant.stats.neutralMinionsKilled;
+        totalDamage += participant.stats.totalDamageDealtToChampions;
+        totalCs += participant.stats.totalMinionsKilled + participant.stats.neutralMinionsKilled;
 
-          //킬 관여
-          const myTeamTotalKill = await this.getMyTeamTotalKill(match.gameId, participant.teamId);
-          const killInvolvement = Math.floor(((kills + assists) / myTeamTotalKill) * 100);
+        //킬 관여
+        const myTeamTotalKill = await this.getMyTeamTotalKill(match.gameId, participant.teamId);
+        const killInvolvement = Math.floor(((kills + assists) / myTeamTotalKill) * 100);
 
-          const minutes = Math.floor(match.gameDuration / 60);
-          const seconds = match.gameDuration % 60;
+        const hours = match.gameDuration / 3600;
+        const minutes = Math.floor(match.gameDuration / 60);
+        const seconds = match.gameDuration % 60;
 
-          const date = new Date(match.gameCreationDate);
-          date.setMinutes(date.getMinutes() + minutes);
-          date.setSeconds(date.getSeconds() + seconds);
+        const date = new Date(match.gameCreationDate);
+        date.setHours(date.getHours() + hours);
+        date.setMinutes(date.getMinutes() + minutes);
+        date.setSeconds(date.getSeconds() + seconds);
 
-          const stats: StatsData = {
-            championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${participant.championId}/tile`,
-            kda: `${kills}/${deaths}/${assists}`,
-            isWin: participant.stats.win,
-            killInvolvement: `${killInvolvement}%`,
-            time: dayjs(date.toISOString()).fromNow(),
-          };
+        const stats: StatsData = {
+          championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${participant.championId}/tile`,
+          kda: `${kills}/${deaths}/${assists}`,
+          isWin: participant.stats.win,
+          killInvolvement: `${killInvolvement}%`,
+          time: dayjs(date.toISOString()).fromNow(),
+        };
 
-          if (participant.stats.win) {
-            winCount++;
-          } else {
-            failCount++;
-          }
+        if (participant.stats.win) {
+          winCount++;
+        } else {
+          failCount++;
+        }
 
-          gameCount++;
+        gameCount++;
 
-          return stats;
-        })
+        return stats;
+      })
     );
 
     const kda = `
@@ -183,7 +186,7 @@ export class MatchHistory {
 
   private async getMyTeamTotalKill(gameId: number, teamId: number) {
     const url = `/lol-match-history/v1/games/${gameId}`;
-    const game: MatchData = await League.httpRequest(url);
+    const game: Match = await League.httpRequest(url);
 
     let totalKill = 0;
     game.participants
@@ -217,7 +220,7 @@ export class MatchHistory {
     let totalCs = 0;
     let champCount = 0;
 
-    this.getPvpMatchList().forEach((match: MatchData) => {
+    this.matches.forEach((match: Match) => {
       const participant: ParticipantData = match.participants[0];
 
       if (participant.championId === championId) {
@@ -273,7 +276,7 @@ export class MatchHistory {
     let champAssists = 0;
     let champCount = 0;
 
-    this.getPvpMatchList().forEach((match: MatchData) => {
+    this.matches.forEach((match: Match) => {
       const participant: ParticipantData = match.participants[0];
 
       if (participant.championId === championId) {
@@ -304,11 +307,5 @@ export class MatchHistory {
     }
 
     return statsAverage;
-  }
-
-  private getPvpMatchList() {
-    return this.games.games
-      .slice(0, 100)
-      .filter((match: MatchData) => match.gameType !== 'CUSTOM_GAME');
   }
 }
