@@ -85,15 +85,15 @@ async function handleLoadEvent() {
 }
 
 ipcMain.on(IPC_KEY.SUMMONER_VISUALIZER, (event, value) => {
-  event.reply(value);
+  event.reply(IPC_KEY.SUMMONER_VISUALIZER, value);
 });
 
 ipcMain.on(IPC_KEY.OVERLAY_SUMMONER, (event, summoner) => {
-  event.reply(summoner);
+  event.reply(IPC_KEY.OVERLAY_SUMMONER, summoner);
 });
 
 ipcMain.on(IPC_KEY.OVERLAY_MY_TEAM_SUMMONERS, (event, summonerList) => {
-  event.reply(summonerList);
+  event.reply(IPC_KEY.OVERLAY_MY_TEAM_SUMMONERS, summonerList);
 });
 
 app.whenReady().then(() => {
