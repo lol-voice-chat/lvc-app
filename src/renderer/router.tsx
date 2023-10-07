@@ -4,20 +4,18 @@ import { PATH } from './const';
 import NavBar from './components/@layout/nav-bar';
 import SideMenuBar from './components/@layout/side-menu-bar';
 import GeneralChatRoom from './components/general-chat-room';
-import AppStartingModal from './components/@layout/app-starting-modal';
+import LvcOverlay from './components/lvc-overlay';
 
 function Router() {
-  const [onStartingModal, setOnStartingModal] = useState(true);
-
   return (
     <>
-      {/* {onStartingModal && <AppStartingModal setIsOnAppStartingModal={setOnStartingModal} />} */}
-
       <HashRouter>
         <NavBar />
 
         <Routes>
           <Route path={PATH.HOME} element={<GeneralChatRoom />} />
+
+          <Route path={'/lvc-overlay'} element={<LvcOverlay />} />
         </Routes>
 
         <SideMenuBar />

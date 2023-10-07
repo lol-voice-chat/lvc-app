@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { SummonerType } from '../../../@type/summoner';
 import { useRecoilState, useSetRecoilState } from 'recoil';
-import { summonerState, gameStatusState, summonerInfoListState } from '../../../@store/atom';
+import { summonerState, gameStatusState } from '../../../@store/atom';
 import { IPC_KEY, STORE_KEY } from '../../../../const';
 import electronStore from '../../../@store/electron';
 import VoiceRoomModal from '../../voice-room-modal';
@@ -14,7 +14,6 @@ const { ipcRenderer } = window.require('electron');
 function NavBar() {
   const [gameStatus, setGameStatus] = useRecoilState(gameStatusState);
   const setSummoner = useSetRecoilState(summonerState);
-  const setSummonerInfoList = useSetRecoilState(summonerInfoListState);
 
   const [onClickTag, setOnClickTag] = useState(PATH.HOME);
 
@@ -38,7 +37,6 @@ function NavBar() {
         if (teamVoiceRoomName === roomName) return;
 
         setGameStatus('loading');
-        setSummonerInfoList(summonerDataList);
         electronStore.set(STORE_KEY.LEAGUE_VOICE_ROOM_NAME, { roomName, teamName });
       });
     });
@@ -50,7 +48,7 @@ function NavBar() {
   };
 
   return (
-    <>
+    <div id="nav-bar">
       {gameStatus !== 'none' && <VoiceRoomModal />}
 
       <S.NavContainer>
@@ -62,7 +60,7 @@ function NavBar() {
           전체채팅
         </S.SubCategoryTag>
       </S.NavContainer>
-    </>
+    </div>
   );
 }
 

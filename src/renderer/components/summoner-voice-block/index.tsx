@@ -7,6 +7,8 @@ import { getSummonerSpeaker, micVolumeHandler } from '../../utils/audio';
 import { useRecoilValue } from 'recoil';
 import { userStreamState } from '../../@store/atom';
 import { Socket } from 'socket.io-client';
+import { IPC_KEY } from '../../../const';
+const { ipcRenderer } = window.require('electron');
 
 function SummonerVoiceBlock(props: {
   isMine: boolean;
@@ -14,7 +16,6 @@ function SummonerVoiceBlock(props: {
   selectedChampInfo: ChampionInfoType | null;
   managementSocket: Socket | null;
 }) {
-  // 스피커, 마이크 정보
   const userStream = useRecoilValue(userStreamState);
   const [speakerVolume, setSpeakerVolume] = useState(0.8);
   const [beforeMuteSpeakerVolume, setBeforeMuteSpeakerVolume] = useState(0.8);
@@ -26,17 +27,35 @@ function SummonerVoiceBlock(props: {
     /* 팀원 소환사 */
     if (!props.isMine) {
       props.managementSocket?.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
-        if (props.summoner.summonerId === summonerId) {
+        if (props.summoner.summonerId === summonerId && !isMuteSpeaker) {
+          ipcRenderer.send(IPC_KEY.SUMMONER_VISUALIZER, {
+            summonerId,
+            value: { visualizerVolume, isMuteSpeaker },
+          });
           setVisualizerVolume(visualizerVolume);
         }
       });
     }
+
+    /* 소환사 (자신) */
+    if (props.isMine) {
+      ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, () => {
+        setIsMuteMic((prev) => !prev);
+      });
+    }
+
+    return () => {
+      ipcRenderer.removeAllListeners(IPC_KEY.SUMMONER_MUTE);
+    };
   }, [props.managementSocket]);
 
   useEffect(() => {
     if (props.isMine) {
+      const summonerId = props.summoner.summonerId;
+
+      ipcRenderer.send(IPC_KEY.SUMMONER_VISUALIZER, { value: { visualizerVolume, isMuteSpeaker } });
       props.managementSocket?.emit('mic-visualizer', {
-        summonerId: props.summoner.summonerId,
+        summonerId,
         visualizerVolume,
       });
     }
@@ -44,13 +63,13 @@ function SummonerVoiceBlock(props: {
 
   useEffect(() => {
     let visualizerInterval;
-    if (userStream && props.isMine) {
+    if (props.isMine && !isMuteMic && userStream) {
       visualizerInterval = setInterval(() => {
         micVolumeHandler(userStream, setVisualizerVolume);
       }, 1000);
     }
     return () => clearInterval(visualizerInterval);
-  }, [userStream]);
+  }, [userStream, isMuteMic]);
 
   const handleChangeSpeakerVolume = (speakerVolume: number) => {
     const speaker = getSummonerSpeaker(props.summoner.summonerId);

@@ -48,7 +48,7 @@ function VoiceRoomModal() {
       setTeamManagementSocket(socket);
     });
 
-    /* 입장시 선택한 챔피언 리스트 받음 */
+    /* 입장시 팀원의 (자신포함) 챔피언 리스트 받음 */
     ipcRenderer.once('selected-champ-info-list', (_, championInfoList: ChampionInfoType[]) => {
       championInfoList.map((champInfo: ChampionInfoType) => {
         setSelectedChampList((prev) => new Map([...prev, [champInfo.summonerId, champInfo]]));
@@ -88,6 +88,15 @@ function VoiceRoomModal() {
       leagueManagementSocket?.disconnect();
     };
   }, [gameStatus]);
+
+  useEffect(() => {
+    if (summoner) {
+      ipcRenderer.send(IPC_KEY.OVERLAY_SUMMONER, summoner);
+    }
+    if (myTeamSummoners) {
+      ipcRenderer.send(IPC_KEY.OVERLAY_MY_TEAM_SUMMONERS, myTeamSummoners);
+    }
+  }, [summoner, myTeamSummoners]);
 
   return (
     <S.VoiceRoom>

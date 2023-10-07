@@ -19,7 +19,7 @@ type MessageInfoType = {
 function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType | null }) {
   const [messageList, setMessageList] = useState<MessageInfoType[] | null>(null);
 
-  const [messageEvent, setMessageEvent] = useState({ key: '' });
+  const [messageEvent, setMessageEvent] = useState({ key: 'none' });
 
   const [isReceiveNewMsg, setIsReceiveNewMsg] = useState(false);
 

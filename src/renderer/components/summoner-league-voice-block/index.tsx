@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import { SummonerInfoType, summonerInfoListState, userStreamState } from '../../@store/atom';
+import { userStreamState } from '../../@store/atom';
 import { SummonerType } from '../../@type/summoner';
 import { Socket } from 'socket.io-client';
 import { getSummonerSpeaker, micVolumeHandler } from '../../utils/audio';
@@ -13,11 +13,6 @@ function SummonerLeagueVoiceBlock(props: {
   summoner: SummonerType;
   managementSocket: Socket | null;
 }) {
-  // 소환사 정보
-  const summonerInfoList = useRecoilValue(summonerInfoListState);
-  const [summonerInfo, setSummonerInfo] = useState<SummonerInfoType | null>(null);
-
-  // 스피커, 마이크 정보
   const userStream = useRecoilValue(userStreamState);
   const [speakerVolume, setSpeakerVolume] = useState(0.8);
   const [beforeMuteSpeakerVolume, setBeforeMuteSpeakerVolume] = useState(0.8);
@@ -33,12 +28,6 @@ function SummonerLeagueVoiceBlock(props: {
         }
       });
     }
-
-    summonerInfoList?.map((summonerInfo) => {
-      if (props.summoner.summonerId === summonerInfo.summonerId) {
-        return setSummonerInfo(summonerInfo);
-      }
-    });
   }, [props.managementSocket]);
 
   useEffect(() => {
@@ -85,7 +74,7 @@ function SummonerLeagueVoiceBlock(props: {
     <S.SummonerBlock id={props.summoner.summonerId.toString()}>
       <S.ProfileImg
         visualize={!isMuteSpeaker && visualizerVolume > 20}
-        src={summonerInfo?.championIcon}
+        src={props.summoner.profileImage}
       />
 
       <S.SummonerInfo id="summoner-info">
@@ -136,17 +125,14 @@ function SummonerLeagueVoiceBlock(props: {
 
             <S.AverageKDA>
               <p>KDA</p>
-              <p id="value">{summonerInfo?.kda}</p>
+              <p id="value">{props.summoner.summonerStats.kda}</p>
             </S.AverageKDA>
 
             <S.KDAList>
-              {props.summoner.summonerStats.statsList.map((summonerStats, idx) => (
-                <div
-                  key={idx}
-                  style={{ backgroundColor: summonerStats.isWin ? '#0F3054' : '#50383B' }}
-                >
-                  <img src={summonerStats.championIcon} />
-                  <p>{summonerStats.kda}</p>
+              {props.summoner.summonerStats.statsList.map(({ isWin, kda, championIcon }, idx) => (
+                <div style={{ backgroundColor: isWin ? '#0F3054' : '#50383B' }} key={idx}>
+                  <img src={championIcon} />
+                  <p>{kda}</p>
                 </div>
               ))}
             </S.KDAList>
