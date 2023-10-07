@@ -5,17 +5,18 @@ import {
   LeagueWebSocket,
   createWebSocketConnection,
 } from 'league-connect';
+import { ChampionStats, MatchHistory, SummonerStats } from './MatchHistory';
 import { IPC_KEY } from '../../const';
 import { Summoner } from './Summoner';
 import { LeagueRanked } from './LeagueRanked';
-import { ChampionStats, MatchHistory, SummonerStats } from './MatchHistory';
-import request from '../utils';
 import { MemberChampionData, Team } from './Team';
+import { handleFriendRequestEvent } from './handleFriendRequestEvent';
+import request from '../utils';
 import axios from 'axios';
 import https from 'https';
-import { handleFriendRequestEvent } from './handleFriendRequestEvent';
 
 export let credentials: Credentials;
+
 let isJoinedRoom = false;
 let isStartedGameLoading = false;
 let isStartedInGame = false;
@@ -51,7 +52,7 @@ export class LvcApplication {
     handleFriendRequestEvent();
   }
 
-  public async fetchLeagueClient() {
+  private async fetchLeagueClient() {
     const summoner: Summoner = await Summoner.fetch();
 
     const [leagueRanked, matchHistory] = await Promise.all([
@@ -107,10 +108,8 @@ export class LvcApplication {
 
             let summonerId;
             if (summoner.id >= 5) {
-              if (summoner.id === 5) {
-                if (data.myTeam.filter((member: any) => member.team === 1).length > 0) {
-                  summonerId = data.myTeam[summoner.id - 1].summonerId;
-                }
+              if (summoner.id === 5 && data.myTeam.some((member: any) => member.team === 1)) {
+                summonerId = data.myTeam[summoner.id - 1].summonerId;
               } else {
                 summonerId = data.myTeam[summoner.id - 5].summonerId;
               }
