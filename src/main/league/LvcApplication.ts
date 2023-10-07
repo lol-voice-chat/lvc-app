@@ -219,34 +219,7 @@ export class LvcApplication {
       const { myTeam } = await request('/lol-champ-select/v1/session');
       this.joinTeamVoice(myTeam);
 
-      const myTeamSummonerChampionStatsList = await Promise.all(
-        myTeam
-          .filter((summoner: any) => summoner.championId !== 0)
-          .map((summoner: any) => {
-            if (summoner.championId !== 0) {
-              const championStats: ChampionStats = this.matchHistory.getChampionStats(
-                summoner.summonerId,
-                summoner.championId
-              );
-
-              return championStats;
-            }
-
-            const championStats = {
-              summonerId: summoner.summonerId,
-              championIcon: null,
-              name: null,
-              kda: null,
-              damage: null,
-              cs: null,
-              playCount: null,
-            };
-
-            return championStats;
-          })
-      );
-
-      this.webContents.send('selected-champ-info-list', myTeamSummonerChampionStatsList);
+      this.sendMyTeamChampionStatsList(myTeam);
       return;
     }
 
@@ -260,34 +233,7 @@ export class LvcApplication {
       const summoner = teamOneSummoners.findBySummonerId(this.summonerId);
       const myTeam = summoner ? teamOne : teamTwo;
 
-      const myTeamSummonerChampionStatsList = await Promise.all(
-        myTeam
-          .filter((summoner: any) => summoner.championId !== 0)
-          .map((summoner: any) => {
-            if (summoner.championId !== 0) {
-              const championStats: ChampionStats = this.matchHistory.getChampionStats(
-                summoner.summonerId,
-                summoner.championId
-              );
-
-              return championStats;
-            }
-
-            const championStats = {
-              summonerId: summoner.summonerId,
-              championIcon: null,
-              name: null,
-              kda: null,
-              damage: null,
-              cs: null,
-              playCount: null,
-            };
-
-            return championStats;
-          })
-      );
-
-      this.webContents.send('selected-champ-info-list', myTeamSummonerChampionStatsList);
+      this.sendMyTeamChampionStatsList(myTeam);
       return;
     }
 
@@ -313,34 +259,7 @@ export class LvcApplication {
           const summoner = teamOneSummoners.findBySummonerId(this.summonerId);
           const myTeam = summoner ? teamOne : teamTwo;
 
-          const myTeamSummonerChampionStatsList = await Promise.all(
-            myTeam
-              .filter((summoner: any) => summoner.championId !== 0)
-              .map((summoner: any) => {
-                if (summoner.championId !== 0) {
-                  const championStats: ChampionStats = this.matchHistory.getChampionStats(
-                    summoner.summonerId,
-                    summoner.championId
-                  );
-
-                  return championStats;
-                }
-
-                const championStats = {
-                  summonerId: summoner.summonerId,
-                  championIcon: null,
-                  name: null,
-                  kda: null,
-                  damage: null,
-                  cs: null,
-                  playCount: null,
-                };
-
-                return championStats;
-              })
-          );
-
-          this.webContents.send('selected-champ-info-list', myTeamSummonerChampionStatsList);
+          this.sendMyTeamChampionStatsList(myTeam);
           return;
         } else {
           isStartedInGame = true;
@@ -354,34 +273,7 @@ export class LvcApplication {
 
           this.webContents.send(IPC_KEY.START_IN_GAME);
 
-          const myTeamSummonerChampionStatsList = await Promise.all(
-            myTeam
-              .filter((summoner: any) => summoner.championId !== 0)
-              .map((summoner: any) => {
-                if (summoner.championId !== 0) {
-                  const championStats: ChampionStats = this.matchHistory.getChampionStats(
-                    summoner.summonerId,
-                    summoner.championId
-                  );
-
-                  return championStats;
-                }
-
-                const championStats = {
-                  summonerId: summoner.summonerId,
-                  championIcon: null,
-                  name: null,
-                  kda: null,
-                  damage: null,
-                  cs: null,
-                  playCount: null,
-                };
-
-                return championStats;
-              })
-          );
-
-          this.webContents.send('selected-champ-info-list', myTeamSummonerChampionStatsList);
+          this.sendMyTeamChampionStatsList(myTeam);
           return;
         }
       }
@@ -392,6 +284,35 @@ export class LvcApplication {
 
       throw new Error(error);
     }
+  }
+
+  private sendMyTeamChampionStatsList(myTeam: []) {
+    const myTeamChampionStatsList = myTeam
+      .filter((summoner: any) => summoner.championId !== 0)
+      .map((summoner: any) => {
+        if (summoner.championId !== 0) {
+          const championStats: ChampionStats = this.matchHistory.getChampionStats(
+            summoner.summonerId,
+            summoner.championId
+          );
+
+          return championStats;
+        }
+
+        const championStats = {
+          summonerId: summoner.summonerId,
+          championIcon: null,
+          name: null,
+          kda: null,
+          damage: null,
+          cs: null,
+          playCount: null,
+        };
+
+        return championStats;
+      });
+
+    this.webContents.send('selected-champ-info-list', myTeamChampionStatsList);
   }
 
   private joinTeamVoice(myTeam: []) {
