@@ -39,9 +39,7 @@ function SummonerVoiceBlock(props: {
 
     /* 소환사 (자신) */
     if (props.isMine) {
-      ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, () => {
-        setIsMuteMic((prev) => !prev);
-      });
+      ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, handleClickMuteMic);
     }
 
     return () => {
@@ -53,7 +51,10 @@ function SummonerVoiceBlock(props: {
     if (props.isMine) {
       const summonerId = props.summoner.summonerId;
 
-      ipcRenderer.send(IPC_KEY.SUMMONER_VISUALIZER, { value: { visualizerVolume, isMuteSpeaker } });
+      ipcRenderer.send(IPC_KEY.SUMMONER_VISUALIZER, {
+        summonerId,
+        value: { visualizerVolume, isMuteSpeaker },
+      });
       props.managementSocket?.emit('mic-visualizer', {
         summonerId,
         visualizerVolume,
