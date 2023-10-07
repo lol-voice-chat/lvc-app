@@ -1,6 +1,5 @@
 import { SummonerType } from '../@type/summoner';
 import { atom } from 'recoil';
-import { generalSettingsDefaultConfig } from '../components/general-setting-modal';
 
 type GameStatus = 'none' | 'champ-select' | 'loading' | 'in-game';
 
@@ -34,7 +33,7 @@ export type GeneralSettingsConfigType = {
   pressToTalkShortcutKey: string;
   muteMicShortcutKey: string;
 };
-export const generalSettingsConfigState = atom<GeneralSettingsConfigType>({
+export const generalSettingsConfigState = atom<GeneralSettingsConfigType | null>({
   key: 'general-settings-config',
-  default: generalSettingsDefaultConfig,
+  default: null,
 });

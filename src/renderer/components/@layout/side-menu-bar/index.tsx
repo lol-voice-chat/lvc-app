@@ -14,7 +14,7 @@ import { connectSocket } from '../../../utils/socket';
 import { Socket } from 'socket.io-client';
 import RecentSummonerList from './recent-summoner-list';
 import AppHeader from './app-header';
-import GeneralSettingModal, { generalSettingsDefaultConfig } from '../../general-setting-modal';
+import GeneralSettingModal from '../../general-setting-modal';
 import electronStore from '../../../@store/electron';
 const { ipcRenderer } = window.require('electron');
 
@@ -25,7 +25,7 @@ function SideMenuBar() {
   const [summonerStatusSocket, setSummonerStatusSocket] = useState<Socket | null>(null);
 
   const [generalSettingModal, setGeneralSettingModal] = useState(false);
-  const [settingsConfig, setSettingsConfig] = useRecoilState<GeneralSettingsConfigType>(
+  const [settingsConfig, setSettingsConfig] = useRecoilState<GeneralSettingsConfigType | null>(
     generalSettingsConfigState
   );
 
@@ -72,8 +72,9 @@ function SideMenuBar() {
   }, [summoner]);
 
   useEffect(() => {
-    electronStore.get('general-settings-config', generalSettingsDefaultConfig).then((config) => {
+    electronStore.get('general-settings-config').then((config) => {
       setSettingsConfig(config);
+      console.log(config);
     });
   }, [generalSettingModal]);
 

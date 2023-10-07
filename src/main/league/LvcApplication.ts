@@ -1,11 +1,11 @@
 import { WebContents, dialog, systemPreferences } from 'electron';
+import { ChampionStats, MatchHistory, SummonerStats } from './MatchHistory';
 import {
   Credentials,
   LeagueClient,
   LeagueWebSocket,
   createWebSocketConnection,
 } from 'league-connect';
-import { ChampionStats, MatchHistory, SummonerStats } from './MatchHistory';
 import { IPC_KEY } from '../../const';
 import { Summoner } from './Summoner';
 import { LeagueRanked } from './LeagueRanked';
