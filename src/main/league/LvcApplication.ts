@@ -1,4 +1,4 @@
-import { WebContents } from 'electron';
+import { WebContents, dialog, systemPreferences } from 'electron';
 import {
   Credentials,
   LeagueClient,
@@ -49,6 +49,19 @@ export class LvcApplication {
     });
 
     await this.fetchLeagueClient();
+
+    if (!systemPreferences.isTrustedAccessibilityClient(false)) {
+      const response = dialog.showMessageBoxSync({
+        type: 'question',
+        message: '오버레이를 사용하려면 롤보챗 앱을 허용하고 앱을 재시작해주세요',
+        buttons: ['허용', '거부'],
+      });
+
+      if (response === 0) {
+        systemPreferences.isTrustedAccessibilityClient(true);
+      }
+    }
+
     handleFriendRequestEvent();
   }
 
