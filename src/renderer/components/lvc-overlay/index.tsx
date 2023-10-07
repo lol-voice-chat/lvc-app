@@ -17,15 +17,18 @@ function LvcOverlay() {
   const [isMuteMic, setIsMuteMic] = useState(false);
 
   useEffect(() => {
-    /* 레이아웃 요소 제거 */
+    /* 초기화 - 레이아웃 요소 제거 */
     const navBar = document.getElementById('nav-bar');
     const sideMenuBar = document.getElementById('side-menu-bar');
 
     if (navBar && sideMenuBar) {
+      document.body.style.backgroundColor = '';
+      document.body.style.background = 'rgba(48, 50, 54, 0.3)';
       navBar.style.display = 'none';
       sideMenuBar.style.display = 'none';
     }
 
+    /* 초기화 - 눌러서 말하기 on, off 확인 */
     electronStore.get('general-settings-config').then(({ isPressToTalk }) => {
       setIsMuteMic(isPressToTalk);
     });
@@ -77,23 +80,21 @@ function LvcOverlay() {
 
   return (
     <_.OverlayContainer>
-      <div id="champ-container">
-        {summoner && (
-          <_.ChampIcon
-            src={summoner.profileImage}
-            visualize={getVisualizer(summoner.summonerId).isVisible}
-            isMute={isMuteMic}
-          />
-        )}
+      {summoner && (
+        <_.ChampIcon
+          src={summoner.profileImage}
+          visualize={getVisualizer(summoner.summonerId).isVisible}
+          isMute={isMuteMic}
+        />
+      )}
 
-        {myTeamSummoners?.map(({ summonerId, profileImage }) => (
-          <_.ChampIcon
-            src={profileImage}
-            visualize={getVisualizer(summonerId).isVisible}
-            isMute={getVisualizer(summonerId).isMute}
-          />
-        ))}
-      </div>
+      {myTeamSummoners?.map(({ summonerId, profileImage }) => (
+        <_.ChampIcon
+          src={profileImage}
+          visualize={getVisualizer(summonerId).isVisible}
+          isMute={getVisualizer(summonerId).isMute}
+        />
+      ))}
     </_.OverlayContainer>
   );
 }
