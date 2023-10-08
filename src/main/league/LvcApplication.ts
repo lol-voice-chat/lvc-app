@@ -14,6 +14,7 @@ import { handleFriendRequestEvent } from './handleFriendRequestEvent';
 import request from '../utils';
 import axios from 'axios';
 import https from 'https';
+import { createOverlayWindow, closeOverlay } from './createOverlayWindow';
 
 export let credentials: Credentials;
 
@@ -53,7 +54,7 @@ export class LvcApplication {
     if (!systemPreferences.isTrustedAccessibilityClient(false)) {
       const response = dialog.showMessageBoxSync({
         type: 'question',
-        message: '오버레이를 사용하려면 롤보챗 앱을 허용하고 앱을 재시작해주세요',
+        message: 'Mac에서 오버레이를 적용하기 위해 롤보챗 앱의 접근을 허용한 후 재시작해주세요.',
         buttons: ['허용', '거부'],
       });
 
@@ -151,6 +152,7 @@ export class LvcApplication {
     this.ws.subscribe('/lol-gameflow/v1/session', async (data) => {
       if (data.phase === 'InProgress' && data.gameClient.running && !isStartedGameLoading) {
         isStartedGameLoading = true;
+        createOverlayWindow(this.webContents);
 
         const { teamOne, teamTwo } = data.gameData;
         await this.joinLeagueVoice(teamOne, teamTwo);
@@ -175,18 +177,21 @@ export class LvcApplication {
 
       //게임로딩 도중 나감
       if (data.phase === 'None' && data.gameClient.running && isStartedGameLoading) {
+        closeOverlay();
         isStartedGameLoading = false;
         this.webContents.send(IPC_KEY.EXIT_IN_GAME);
       }
 
       //인게임 도중 나감
       if (data.phase === 'None' && data.gameClient.visible && isStartedInGame) {
+        closeOverlay();
         isStartedInGame = false;
         this.webContents.send(IPC_KEY.EXIT_IN_GAME);
       }
 
       //게임 종료
       if (data.phase === 'WaitingForStats' && !isEndGame) {
+        closeOverlay();
         isEndGame = true;
         this.webContents.send(IPC_KEY.EXIT_IN_GAME);
       }
@@ -237,6 +242,7 @@ export class LvcApplication {
 
     if (flow.phase === 'InProgress' && flow.gameClient.running) {
       isStartedInGame = true;
+      createOverlayWindow(this.webContents);
 
       const { teamOne, teamTwo } = flow.gameData;
       await this.joinLeagueVoice(teamOne, teamTwo);
@@ -259,6 +265,8 @@ export class LvcApplication {
       });
 
       if (response.data.gameData.gameTime) {
+        createOverlayWindow(this.webContents);
+
         const time = Math.floor(response.data.gameData.gameTime);
 
         if (time < 50) {
