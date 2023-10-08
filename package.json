@@ -18,6 +18,7 @@
     "axios": "^1.5.1",
     "class-transformer": "^0.5.1",
     "dayjs": "^1.11.10",
+    "electron-is-dev": "^2.0.0",
     "electron-store": "^8.1.0",
     "league-connect": "^6.0.0-rc12",
     "mediasoup-client": "^3.6.100",
@@ -41,7 +42,26 @@
     "electron-start": "npm run clean && tsc && electron .",
     "start": "concurrently \"npm run react-start\" \"wait-on http://localhost:3000\" \"npm run electron-start\"",
     "build": "react-scripts build",
-    "test": "react-scripts test"
+    "test": "react-scripts test",
+    "deploy:xos": "electron-builder --mac"
+  },
+  "build": {
+    "extends": null,
+    "productName": "lvc",
+    "appId": "com.lvc-app",
+    "asar": true,
+    "mac": {
+      "target": [
+        "default"
+      ]
+    },
+    "dmg": {
+      "title": "lvc"
+    },
+    "directories": {
+      "buildResources": "./build/",
+      "output": "./output/"
+    }
   },
   "eslintConfig": {
     "extends": [
@@ -66,6 +86,7 @@
     "assert": "^2.0.0",
     "concurrently": "^8.2.1",
     "electron": "^26.2.1",
+    "electron-builder": "^24.6.4",
     "wait-on": "^7.0.1"
   }
 }
