@@ -30,10 +30,6 @@ function SummonerVoiceBlock(props: {
     if (!props.isMine) {
       props.managementSocket?.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
         if (props.summoner.summonerId === summonerId && !isMuteSpeaker) {
-          ipcRenderer.send(IPC_KEY.SUMMONER_VISUALIZER, {
-            summonerId,
-            value: { visualizerVolume, isMuteSpeaker },
-          });
           setVisualizerVolume(visualizerVolume);
         }
       });
@@ -56,14 +52,8 @@ function SummonerVoiceBlock(props: {
 
   useEffect(() => {
     if (props.isMine) {
-      const summonerId = props.summoner.summonerId;
-
-      ipcRenderer.send(IPC_KEY.SUMMONER_VISUALIZER, {
-        summonerId,
-        value: { visualizerVolume, isMuteSpeaker },
-      });
       props.managementSocket?.emit('mic-visualizer', {
-        summonerId,
+        summonerId: props.summoner.summonerId,
         visualizerVolume,
       });
     }
