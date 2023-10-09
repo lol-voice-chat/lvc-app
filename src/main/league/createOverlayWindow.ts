@@ -1,6 +1,7 @@
 import { BrowserWindow, WebContents, app, ipcMain, screen } from 'electron';
 import { GlobalKeyboardListener } from 'node-global-key-listener';
 import { IPC_KEY } from '../../const/index';
+import { OverlayController, OVERLAY_WINDOW_OPTS } from 'electron-overlay-window';
 import { store } from '../store';
 
 let lvcOverlayWindow: BrowserWindow;
@@ -18,17 +19,15 @@ export const createOverlayWindow = (mainWIndowWebContents: WebContents) => {
       nodeIntegration: true,
       contextIsolation: false,
     },
+    ...OVERLAY_WINDOW_OPTS,
     frame: false,
     resizable: false,
-    autoHideMenuBar: true,
+    // autoHideMenuBar: true,
     transparent: true,
     skipTaskbar: true,
     hasShadow: false,
-    show: false,
-
-    // maximizable: false,
-    fullscreenable: false,
     alwaysOnTop: true,
+
     x: Math.floor(vw * 1),
     y: Math.floor(vh * 25),
   });
@@ -37,10 +36,8 @@ export const createOverlayWindow = (mainWIndowWebContents: WebContents) => {
   lvcOverlayWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
   lvcOverlayWindow.loadURL('http://localhost:3000/#/lvc-overlay');
-
-  lvcOverlayWindow.once('ready-to-show', () => {
-    lvcOverlayWindow.show();
-    app.dock.show();
+  OverlayController.attachByTitle(lvcOverlayWindow, 'League of Legends', {
+    hasTitleBarOnMac: true,
   });
 
   const handleChangeMuteMicSummoner = () => {
