@@ -89,15 +89,6 @@ function VoiceRoomModal() {
     };
   }, [gameStatus]);
 
-  useEffect(() => {
-    if (summoner) {
-      ipcRenderer.send(IPC_KEY.OVERLAY_SUMMONER, summoner);
-    }
-    if (myTeamSummoners) {
-      ipcRenderer.send(IPC_KEY.OVERLAY_MY_TEAM_SUMMONERS, myTeamSummoners);
-    }
-  }, [summoner, myTeamSummoners]);
-
   return (
     <S.VoiceRoom>
       {(gameStatus === 'champ-select' || gameStatus === 'in-game') && (

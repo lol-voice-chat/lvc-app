@@ -74,7 +74,6 @@ function SideMenuBar() {
   useEffect(() => {
     electronStore.get('general-settings-config').then((config) => {
       setSettingsConfig(config);
-      console.log(config);
     });
   }, [generalSettingModal]);
 
