@@ -1,4 +1,4 @@
-import { WebContents, dialog, systemPreferences } from 'electron';
+import { WebContents } from 'electron';
 import { ChampionStats, MatchHistory, SummonerStats } from './MatchHistory';
 import {
   Credentials,
@@ -49,19 +49,6 @@ export class LvcApplication {
     });
 
     await this.fetchLeagueClient();
-
-    if (!systemPreferences.isTrustedAccessibilityClient(false)) {
-      const response = dialog.showMessageBoxSync({
-        type: 'question',
-        message: 'Mac에서 오버레이를 적용하기 위해 롤보챗 앱의 접근을 허용한 후 재시작해주세요.',
-        buttons: ['허용', '거부'],
-      });
-
-      if (response === 0) {
-        systemPreferences.isTrustedAccessibilityClient(true);
-      }
-    }
-
     handleFriendRequestEvent();
   }
 
