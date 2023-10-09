@@ -33,12 +33,11 @@ function NavBar() {
 
     /* 인게임 전 로딩창 on */
     ipcRenderer.once(IPC_KEY.LEAGUE_JOIN_ROOM, (_, { roomName, teamName, summonerDataList }) => {
-      electronStore.get('league-voice-room-name').then((teamVoiceRoomName) => {
-        if (teamVoiceRoomName === roomName) return;
+      console.log(roomName, teamName, summonerDataList);
+      if (teamName === roomName) return;
 
-        setGameStatus('loading');
-        electronStore.set('league-voice-room-name', { roomName, teamName });
-      });
+      setGameStatus('loading');
+      electronStore.set('league-voice-room-name', { roomName, teamName });
     });
   }, []);
 
