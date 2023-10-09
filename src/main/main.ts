@@ -19,17 +19,12 @@ const createWindow = () => {
       contextIsolation: false,
     },
     frame: false,
-    show: false,
     autoHideMenuBar: true,
   });
 
   if (!store.has('general-settings-config')) {
     store.set('general-settings-config', generalSettingsDefaultConfig);
   }
-
-  mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
-  });
 
   if (isDev) {
     mainWindow.loadURL('http://localhost:3000');
