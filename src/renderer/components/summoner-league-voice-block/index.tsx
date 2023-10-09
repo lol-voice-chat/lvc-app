@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import { userStreamState } from '../../@store/atom';
+import { LeagueChampInfoType, leagueChampInfoListState, userStreamState } from '../../@store/atom';
 import { SummonerType } from '../../@type/summoner';
 import { Socket } from 'socket.io-client';
 import { getSummonerSpeaker, micVolumeHandler } from '../../utils/audio';
@@ -13,6 +13,9 @@ function SummonerLeagueVoiceBlock(props: {
   summoner: SummonerType;
   managementSocket: Socket | null;
 }) {
+  const leagueChampInfoList = useRecoilValue(leagueChampInfoListState);
+  const [myChampInfo, setMyChampInfo] = useState<LeagueChampInfoType | null>(null);
+
   const userStream = useRecoilValue(userStreamState);
   const [speakerVolume, setSpeakerVolume] = useState(0.8);
   const [beforeMuteSpeakerVolume, setBeforeMuteSpeakerVolume] = useState(0.8);
@@ -49,6 +52,16 @@ function SummonerLeagueVoiceBlock(props: {
     }
   }, [visualizerVolume]);
 
+  useEffect(() => {
+    if (leagueChampInfoList) {
+      leagueChampInfoList.map((champInfo) => {
+        if (props.summoner.summonerId === champInfo.summonerId) {
+          setMyChampInfo(champInfo);
+        }
+      });
+    }
+  }, [leagueChampInfoList]);
+
   const handleChangeSpeakerVolume = (speakerVolume: number) => {
     const speaker = getSummonerSpeaker(props.summoner.summonerId);
     speaker.volume = speakerVolume;
@@ -74,7 +87,7 @@ function SummonerLeagueVoiceBlock(props: {
     <S.SummonerBlock id={props.summoner.summonerId.toString()}>
       <S.ProfileImg
         visualize={!isMuteSpeaker && visualizerVolume > 20}
-        src={props.summoner.profileImage}
+        src={myChampInfo?.championIcon ?? props.summoner.profileImage}
       />
 
       <S.SummonerInfo id="summoner-info">
@@ -125,7 +138,7 @@ function SummonerLeagueVoiceBlock(props: {
 
             <S.AverageKDA>
               <p>KDA</p>
-              <p id="value">{props.summoner.summonerStats.kda}</p>
+              <p id="value">{myChampInfo?.kda ?? props.summoner.summonerStats.kda}</p>
             </S.AverageKDA>
 
             <S.KDAList>

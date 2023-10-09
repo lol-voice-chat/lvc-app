@@ -23,6 +23,12 @@ export const enemySummonersState = atom<SummonerType[] | null>({
   default: null,
 });
 
+export type LeagueChampInfoType = { summonerId: number; championIcon: string; kda: string };
+export const leagueChampInfoListState = atom<LeagueChampInfoType[] | null>({
+  key: 'league-champ-info-list',
+  default: null,
+});
+
 export const userStreamState = atom<MediaStream | null>({
   key: 'user-stream',
   default: null,
