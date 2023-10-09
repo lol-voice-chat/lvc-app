@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { SummonerType } from '../../../@type/summoner';
 import { useRecoilState, useSetRecoilState } from 'recoil';
-import { summonerState, gameStatusState } from '../../../@store/atom';
+import { summonerState, gameStatusState, leagueChampInfoListState } from '../../../@store/atom';
 import { IPC_KEY } from '../../../../const';
 import electronStore from '../../../@store/electron';
 import VoiceRoomModal from '../../voice-room-modal';
@@ -14,6 +14,7 @@ const { ipcRenderer } = window.require('electron');
 function NavBar() {
   const [gameStatus, setGameStatus] = useRecoilState(gameStatusState);
   const setSummoner = useSetRecoilState(summonerState);
+  const setLeagueChampInfoList = useSetRecoilState(leagueChampInfoListState);
 
   const [onClickTag, setOnClickTag] = useState(PATH.HOME);
 
@@ -33,10 +34,10 @@ function NavBar() {
 
     /* 인게임 전 로딩창 on */
     ipcRenderer.once(IPC_KEY.LEAGUE_JOIN_ROOM, (_, { roomName, teamName, summonerDataList }) => {
-      console.log(roomName, teamName, summonerDataList);
       if (teamName === roomName) return;
 
       setGameStatus('loading');
+      setLeagueChampInfoList(summonerDataList);
       electronStore.set('league-voice-room-name', { roomName, teamName });
     });
   }, []);
