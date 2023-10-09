@@ -14,6 +14,7 @@ const createWindow = () => {
     minHeight: 800,
     width: 1400,
     height: 850,
+    title: 'main',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
