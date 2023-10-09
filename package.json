@@ -63,9 +63,8 @@
       "output": "./output/"
     },
     "files": [
-      "**/*",
-      "build/**/*",
-      "main.js"
+      "dist",
+      "build"
     ]
   },
   "eslintConfig": {
