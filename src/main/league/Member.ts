@@ -8,13 +8,6 @@ interface MemberType {
   profileIconId: number;
 }
 
-export interface MemberInfo {
-  summonerId: number;
-  profileImage: string;
-  displayName: string;
-  puuid: string;
-}
-
 export class Member {
   summonerId: number;
   championId: number;

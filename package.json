@@ -3,18 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "main": "./dist/main/main.js",
-  "author": "lvc-app-authors",
+  "author": "lvc",
   "description": "lol voice chat app",
-  "homepage": "./",
+  "homepage": ".",
   "sideEffects": false,
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.46",
-    "@types/react": "^18.2.21",
-    "@types/react-dom": "^18.2.7",
     "axios": "^1.5.1",
     "class-transformer": "^0.5.1",
     "dayjs": "^1.11.10",
@@ -43,7 +39,40 @@
     "electron-start": "npm run clean && tsc && electron .",
     "start": "concurrently \"npm run react-start\" \"wait-on http://localhost:3000\" \"npm run electron-start\"",
     "build": "react-scripts build",
-    "test": "react-scripts test"
+    "test": "react-scripts test",
+    "deploy:xos": "electron-builder --mac"
+  },
+  "build": {
+    "extends": null,
+    "productName": "lvc",
+    "appId": "com.lvc-app",
+    "asar": true,
+    "mac": {
+      "target": [
+        "default"
+      ]
+    },
+    "dmg": {
+      "title": "lvc"
+    },
+    "directories": {
+      "buildResources": "./build/",
+      "output": "./release/build/"
+    },
+    "files": [
+      "**/*",
+      "!**/*.ts",
+      "!*.map",
+      "!package.json",
+      "!package-lock.json",
+      "build/**/*",
+      {
+        "from": "dist",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
   },
   "eslintConfig": {
     "extends": [
@@ -64,10 +93,15 @@
     ]
   },
   "devDependencies": {
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.46",
+    "@types/react": "^18.2.21",
+    "@types/react-dom": "^18.2.7",
     "@types/react-helmet": "^6.1.6",
     "assert": "^2.0.0",
     "concurrently": "^8.2.1",
     "electron": "^26.2.1",
+    "electron-builder": "^24.6.4",
     "wait-on": "^7.0.1"
   }
 }

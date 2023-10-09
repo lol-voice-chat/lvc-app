@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, Menu } from 'electron';
 import onElectronStore, { store } from './store';
 import { generalSettingsDefaultConfig } from '../const';
 import { LvcApplication } from './league/LvcApplication';
@@ -7,6 +7,7 @@ import path from 'path';
 import isDev from 'electron-is-dev';
 
 let mainWindow: BrowserWindow;
+// Menu.setApplicationMenu(null);
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -28,6 +29,7 @@ const createWindow = () => {
 
   if (isDev) {
     mainWindow.loadURL('http://localhost:3000');
+    mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, '../../build/index.html'));
   }
