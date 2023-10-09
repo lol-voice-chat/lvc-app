@@ -19,7 +19,6 @@
     "class-transformer": "^0.5.1",
     "dayjs": "^1.11.10",
     "electron-is-dev": "^2.0.0",
-    "electron-overlay-window": "^3.3.0",
     "electron-store": "^8.1.0",
     "league-connect": "^6.0.0-rc12",
     "mediasoup-client": "^3.6.100",
