@@ -11,10 +11,6 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.46",
-    "@types/react": "^18.2.21",
-    "@types/react-dom": "^18.2.7",
     "axios": "^1.5.1",
     "class-transformer": "^0.5.1",
     "dayjs": "^1.11.10",
@@ -60,11 +56,21 @@
     },
     "directories": {
       "buildResources": "./build/",
-      "output": "./output/"
+      "output": "./release/build/"
     },
     "files": [
-      "dist",
-      "build"
+      "**/*",
+      "!**/*.ts",
+      "!*.map",
+      "!package.json",
+      "!package-lock.json",
+      "build/**/*",
+      {
+        "from": "dist",
+        "filter": [
+          "**/*"
+        ]
+      }
     ]
   },
   "eslintConfig": {
@@ -86,6 +92,10 @@
     ]
   },
   "devDependencies": {
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.46",
+    "@types/react": "^18.2.21",
+    "@types/react-dom": "^18.2.7",
     "@types/react-helmet": "^6.1.6",
     "assert": "^2.0.0",
     "concurrently": "^8.2.1",
