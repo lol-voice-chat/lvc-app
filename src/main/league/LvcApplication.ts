@@ -15,6 +15,7 @@ import request from '../utils';
 import axios from 'axios';
 import https from 'https';
 import { createOverlayWindow, closeOverlay } from './createOverlayWindow';
+import { OverlayController } from 'electron-overlay-window';
 
 export let credentials: Credentials;
 
@@ -106,6 +107,7 @@ export class LvcApplication {
     this.ws.subscribe('/lol-champ-select/v1/session', async (data) => {
       if (!isJoinedRoom) {
         isJoinedRoom = true;
+        createOverlayWindow(this.webContents);
         this.joinTeamVoice(data.myTeam);
       }
 
@@ -152,7 +154,7 @@ export class LvcApplication {
     this.ws.subscribe('/lol-gameflow/v1/session', async (data) => {
       if (data.phase === 'InProgress' && data.gameClient.running && !isStartedGameLoading) {
         isStartedGameLoading = true;
-        createOverlayWindow(this.webContents);
+        // createOverlayWindow(this.webContents);
 
         const { teamOne, teamTwo } = data.gameData;
         await this.joinLeagueVoice(teamOne, teamTwo);
