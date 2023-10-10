@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as _ from './style';
 import electronStore from '../../@store/electron';
 import { GeneralSettingsConfigType } from '../../@store/atom';
+import { IPC_KEY } from '../../../const';
+import { getConnectedAudioDevices } from '../../utils/audio';
+const { ipcRenderer } = window.require('electron');
 
 function GeneralSettingModal(props: {
   handleClickModalTrigger: () => void;
@@ -14,7 +17,15 @@ function GeneralSettingModal(props: {
   const [muteMicShortcutKey, setMuteMicShortcutKey] = useState(
     props.settingsConfig.muteMicShortcutKey
   );
-  const [isGettingShortcutKey, setIsGettingShortcutKey] = useState(false);
+
+  useEffect(() => {
+    getConnectedAudioDevices('input').then((data) => {
+      console.log(data);
+    });
+    getConnectedAudioDevices('output').then((data) => {
+      console.log(data);
+    });
+  }, []);
 
   const handleClickSaveButton = () => {
     const config = {
@@ -26,28 +37,11 @@ function GeneralSettingModal(props: {
     props.handleClickModalTrigger();
   };
 
-  const handleKeyDown = (e: any) => {
-    // if (!isGettingShortcutKey) return;
-    // e.preventDefault();
-    // let { is한글, ko2en } = new Inko();
-    // let value = e.key;
-    // if (is한글(value)) {
-    //   value = ko2en(value);
-    // }
-    // isPressToTalk ? setPressToTalkShortcutKey(value) : setMuteMicShortcutKey(value);
-    // setIsGettingShortcutKey(false);
-  };
-
-  const handleClickGettingShortcutKey = () => {
-    // setIsGettingShortcutKey((prev) => !prev);
-    // document.getElementById('input-shortcut-key')?.focus();
-    window.addEventListener(
-      'keydown',
-      (e) => {
-        console.log(e);
-      },
-      true
-    );
+  const handleInputShortcutKey = () => {
+    ipcRenderer.send(IPC_KEY.INPUT_SHORTCUT_KEY);
+    ipcRenderer.once(IPC_KEY.INPUT_SHORTCUT_KEY, (_, keyName: string) => {
+      isPressToTalk ? setPressToTalkShortcutKey(keyName) : setMuteMicShortcutKey(keyName);
+    });
   };
 
   return (
@@ -63,11 +57,13 @@ function GeneralSettingModal(props: {
       {isPressToTalk ? (
         <>
           <div>눌러서 말하기 단축키 설정</div>
-          <div onClick={handleClickGettingShortcutKey}>{pressToTalkShortcutKey}</div>
-          {/* <input id="input-shortcut-key" onKeyDown={handleKeyDown} /> */}
+          <div onClick={handleInputShortcutKey}>{pressToTalkShortcutKey}</div>
         </>
       ) : (
-        <div>마이크 음소거 단축키 설정 - {muteMicShortcutKey}</div>
+        <>
+          <div>마이크 음소거 단축키 설정</div>
+          <div onClick={handleInputShortcutKey}>{muteMicShortcutKey}</div>
+        </>
       )}
     </_.SettingContainer>
   );

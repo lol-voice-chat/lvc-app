@@ -1,11 +1,13 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import onElectronStore, { store } from './store';
-import { generalSettingsDefaultConfig } from '../const';
+import { generalSettingsDefaultConfig, IPC_KEY } from '../const';
 import { LvcApplication } from './league/LvcApplication';
 import { authenticate, createWebSocketConnection } from 'league-connect';
 import path from 'path';
 import isDev from 'electron-is-dev';
+import { GlobalKeyboardListener } from 'node-global-key-listener';
 
+const globalKey = new GlobalKeyboardListener();
 let mainWindow: BrowserWindow;
 
 const createWindow = () => {
@@ -60,6 +62,16 @@ async function onLeagueClientUx() {
 
   return { credentials, ws };
 }
+
+ipcMain.on(IPC_KEY.INPUT_SHORTCUT_KEY, () => {
+  const calledOnce = (e: any) => {
+    if (e.state === 'DOWN') {
+      mainWindow.webContents.send(IPC_KEY.INPUT_SHORTCUT_KEY, e.name);
+      globalKey.removeListener(calledOnce);
+    }
+  };
+  globalKey.addListener(calledOnce);
+});
 
 app.whenReady().then(() => {
   createWindow();

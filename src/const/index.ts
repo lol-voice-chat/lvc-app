@@ -8,6 +8,7 @@ export const IPC_KEY = {
   CHAMP_INFO: 'champion-info',
   SHUTDOWN_APP: 'shutdown-app',
   SUMMONER_MUTE: 'summoner-mute',
+  INPUT_SHORTCUT_KEY: 'input-shortcut-key',
 };
 
 export const generalSettingsDefaultConfig = {
