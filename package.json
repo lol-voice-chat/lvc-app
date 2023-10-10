@@ -71,9 +71,7 @@
     "concurrently": "^8.2.1",
     "electron": "^26.2.1",
     "electron-builder": "^24.6.4",
-    "wait-on": "^7.0.1",
-    "webpack": "^5.88.2",
-    "webpack-cli": "^5.1.4"
+    "wait-on": "^7.0.1"
   },
   "build": {
     "extends": null,
