@@ -332,7 +332,10 @@ export class LvcApplication {
     const [teamOneSummonerChampionKdaList, teamTwoSummonerChampionKdaList]: [
       MemberChampionData[],
       MemberChampionData[]
-    ] = await Promise.all([teamOne.getMemberChampionKdaList(), teamTwo.getMemberChampionKdaList()]);
+    ] = await Promise.all([
+      teamOne.getMemberChampionKdaList(this.matchHistory.matchLength),
+      teamTwo.getMemberChampionKdaList(this.matchHistory.matchLength),
+    ]);
     const summonerDataList = teamOneSummonerChampionKdaList.concat(teamTwoSummonerChampionKdaList);
 
     this.webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName: teamName });

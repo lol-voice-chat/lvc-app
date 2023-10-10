@@ -31,9 +31,9 @@ export class Member {
     return this.summonerId === summonerId;
   }
 
-  public async getChampionKda() {
+  public async getChampionKda(myMatchLength: number) {
     const matchHistory: MatchHistory = await MatchHistory.fetch(this.puuid);
-    const championKda = matchHistory.getChampionKda(this.championId);
+    const championKda = matchHistory.getChampionKda(myMatchLength, this.championId);
     const summonerKda = {
       summonerId: this.summonerId,
       championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${this.championId}/tile`,
