@@ -42,7 +42,7 @@ export const getSummonerSpeaker = (summonerId: number) => {
   return speaker;
 };
 
-export const getConnectedDevices = async () => {
+export const getConnectedAudioDevices = async (type: 'input' | 'output') => {
   const devices = await navigator.mediaDevices.enumerateDevices();
-  return devices.filter((device) => device.kind === 'audioinput');
+  return devices.filter((device) => device.kind === 'audio' + type);
 };
