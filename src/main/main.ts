@@ -1,14 +1,17 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import onElectronStore, { store } from './store';
 import { generalSettingsDefaultConfig, IPC_KEY } from '../const';
-import { LvcApplication } from './league/LvcApplication';
+import { GlobalKeyboardListener } from 'node-global-key-listener';
+import { LvcApplication } from './lvc-application';
 import { authenticate, createWebSocketConnection } from 'league-connect';
 import path from 'path';
 import isDev from 'electron-is-dev';
-import { GlobalKeyboardListener } from 'node-global-key-listener';
+import { RedisClient } from './lib/redis-client';
+
 
 const globalKey = new GlobalKeyboardListener();
 let mainWindow: BrowserWindow;
+const redisClient = new RedisClient();
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -40,7 +43,7 @@ const createWindow = () => {
 async function handleLoadEvent() {
   mainWindow.webContents.on('did-finish-load', async () => {
     const { credentials, ws } = await onLeagueClientUx();
-    const app = new LvcApplication(mainWindow.webContents, credentials, ws);
+    const app = new LvcApplication(mainWindow.webContents, credentials, ws, redisClient);
 
     app.initialize().then(() => {
       app.handle();
