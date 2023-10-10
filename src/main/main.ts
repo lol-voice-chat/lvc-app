@@ -1,12 +1,14 @@
 import { app, BrowserWindow } from 'electron';
 import onElectronStore, { store } from './store';
 import { generalSettingsDefaultConfig } from '../const';
-import { LvcApplication } from './league/LvcApplication';
+import { LvcApplication } from './lvc-application';
 import { authenticate, createWebSocketConnection } from 'league-connect';
 import path from 'path';
 import isDev from 'electron-is-dev';
+import { RedisClient } from './lib/redis-client';
 
 let mainWindow: BrowserWindow;
+const redisClient = new RedisClient();
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -38,7 +40,7 @@ const createWindow = () => {
 async function handleLoadEvent() {
   mainWindow.webContents.on('did-finish-load', async () => {
     const { credentials, ws } = await onLeagueClientUx();
-    const app = new LvcApplication(mainWindow.webContents, credentials, ws);
+    const app = new LvcApplication(mainWindow.webContents, credentials, ws, redisClient);
 
     app.initialize().then(() => {
       app.handle();

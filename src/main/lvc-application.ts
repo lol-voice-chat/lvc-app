@@ -1,17 +1,18 @@
 import { WebContents } from 'electron';
-import { ChampionStats, MatchHistory, SummonerStats } from './MatchHistory';
+import { ChampionStats, MatchHistory, SummonerStats } from './models/match-history';
 import {
   Credentials,
   LeagueClient,
   LeagueWebSocket,
   createWebSocketConnection,
 } from 'league-connect';
-import { IPC_KEY } from '../../const';
-import { Summoner } from './Summoner';
-import { LeagueRanked } from './LeagueRanked';
-import { MemberChampionData, Team } from './Team';
-import { handleFriendRequestEvent } from './handleFriendRequestEvent';
-import request from '../utils';
+import { IPC_KEY } from '../const';
+import { Summoner } from './models/summoner';
+import { LeagueRanked } from './models/league-ranked';
+import { MemberChampionData, Team } from './models/team';
+import { friendRequestEvent } from './models/friend-requet-event';
+import request from './lib/request';
+import { RedisClient } from './lib/redis-client';
 import axios from 'axios';
 import https from 'https';
 
@@ -27,11 +28,18 @@ export class LvcApplication {
   private ws: LeagueWebSocket;
   private summonerId: number;
   private matchHistory: MatchHistory;
+  private redisClient: RedisClient;
 
-  constructor(webContents: WebContents, credential: Credentials, ws: LeagueWebSocket) {
+  constructor(
+    webContents: WebContents,
+    credential: Credentials,
+    ws: LeagueWebSocket,
+    redisClient: RedisClient
+  ) {
     credentials = credential;
     this.webContents = webContents;
     this.ws = ws;
+    this.redisClient = redisClient;
   }
 
   public async initialize() {
@@ -49,7 +57,7 @@ export class LvcApplication {
     });
 
     await this.fetchLeagueClient();
-    handleFriendRequestEvent();
+    friendRequestEvent.emit('friend-request');
   }
 
   private async fetchLeagueClient() {
@@ -79,6 +87,9 @@ export class LvcApplication {
 
     this.webContents.send('on-league-client', leagueClient);
     this.webContents.send('online-summoner', friendSummonerIdList);
+
+    const key = `match-length-${summoner.summonerId}`;
+    await this.redisClient.set(key, matchHistory.matchLength.toString());
 
     this.summonerId = summoner.summonerId;
     this.matchHistory = matchHistory;
@@ -333,8 +344,8 @@ export class LvcApplication {
       MemberChampionData[],
       MemberChampionData[]
     ] = await Promise.all([
-      teamOne.getMemberChampionKdaList(this.matchHistory.matchLength),
-      teamTwo.getMemberChampionKdaList(this.matchHistory.matchLength),
+      teamOne.getMemberChampionKdaList(this.redisClient),
+      teamTwo.getMemberChampionKdaList(this.redisClient),
     ]);
     const summonerDataList = teamOneSummonerChampionKdaList.concat(teamTwoSummonerChampionKdaList);
 
