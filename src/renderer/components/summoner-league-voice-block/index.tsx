@@ -137,7 +137,7 @@ function SummonerLeagueVoiceBlock(props: {
             </S.WinningPercentage>
 
             <S.AverageKDA>
-              <p>KDA</p>
+              <p>평균 KDA</p>
               <p id="value">{myChampInfo?.kda ?? props.summoner.summonerStats.kda}</p>
             </S.AverageKDA>
 

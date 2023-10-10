@@ -72,6 +72,7 @@ export class MatchHistory {
   }
 
   public static async fetch(puuid: string) {
+    console.log('puuid: ', puuid);
     const url = `/lol-match-history/v1/products/lol/${puuid}/matches?begIndex=0&endIndex=99`;
     const matchHistoryData = await request(url);
     const matches = matchHistoryData.games.games
@@ -288,6 +289,18 @@ export class MatchHistory {
         champCount++;
       }
     });
+    console.log(
+      '게임길이: ',
+      this.matches.length,
+      '킬: ',
+      champKill,
+      '데스: ',
+      champDeath,
+      '어시스트: ',
+      champAssists,
+      '챔피언 플레이 횟수: ',
+      champCount
+    );
 
     if (champCount === 0) {
       return '전적없음';
