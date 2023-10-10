@@ -185,7 +185,7 @@ export class LvcApplication {
       //게임 종료
       if (data.phase === 'WaitingForStats' && !isEndGame) {
         isEndGame = true;
-        this.webContents.send(IPC_KEY.EXIT_IN_GAME);
+        this.webContents.send(IPC_KEY.END_OF_THE_GAME);
 
         const matchHistory = await MatchHistory.fetch(this.summoner.puuid);
         const key = `match-length-${this.summoner.summonerId}`;
