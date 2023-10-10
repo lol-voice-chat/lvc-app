@@ -26,7 +26,7 @@ let isEndGame = false;
 export class LvcApplication {
   private webContents: WebContents;
   private ws: LeagueWebSocket;
-  private summonerId: number;
+  private summoner: Summoner;
   private matchHistory: MatchHistory;
   private redisClient: RedisClient;
 
@@ -91,7 +91,7 @@ export class LvcApplication {
     const key = `match-length-${summoner.summonerId}`;
     await this.redisClient.set(key, matchHistory.matchLength.toString());
 
-    this.summonerId = summoner.summonerId;
+    this.summoner = summoner;
     this.matchHistory = matchHistory;
   }
 
@@ -161,9 +161,9 @@ export class LvcApplication {
             const teamOneSummoners = new Team(teamOne);
             const teamTwoSummoners = new Team(teamTwo);
 
-            const summoner = teamOneSummoners.findBySummonerId(this.summonerId);
+            const summoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
             const myTeam = summoner ? teamOneSummoners : teamTwoSummoners;
-            const summonerIdList: number[] = myTeam.getSummonerIdList(this.summonerId);
+            const summonerIdList: number[] = myTeam.getSummonerIdList(this.summoner.summonerId);
 
             this.webContents.send(IPC_KEY.START_IN_GAME, summonerIdList);
           }, 1000 * 60 + 5000 - ms);
@@ -186,6 +186,11 @@ export class LvcApplication {
       if (data.phase === 'WaitingForStats' && !isEndGame) {
         isEndGame = true;
         this.webContents.send(IPC_KEY.EXIT_IN_GAME);
+
+        const matchHistory = await MatchHistory.fetch(this.summoner.puuid);
+        const key = `match-length-${this.summoner.summonerId}`;
+        await this.redisClient.set(key, matchHistory.matchLength.toString());
+        this.matchHistory = matchHistory;
       }
     });
   }
@@ -239,7 +244,7 @@ export class LvcApplication {
       await this.joinLeagueVoice(teamOne, teamTwo);
 
       const teamOneSummoners = new Team(teamOne);
-      const summoner = teamOneSummoners.findBySummonerId(this.summonerId);
+      const summoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
       const myTeam = summoner ? teamOne : teamTwo;
 
       this.sendMyTeamChampionStatsList(myTeam);
@@ -265,7 +270,7 @@ export class LvcApplication {
           await this.joinLeagueVoice(teamOne, teamTwo);
 
           const teamOneSummoners = new Team(teamOne);
-          const summoner = teamOneSummoners.findBySummonerId(this.summonerId);
+          const summoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
           const myTeam = summoner ? teamOne : teamTwo;
 
           this.sendMyTeamChampionStatsList(myTeam);
@@ -276,7 +281,7 @@ export class LvcApplication {
           const { teamOne, teamTwo } = flow.gameData;
 
           const teamOneSummoners = new Team(teamOne);
-          const summoner = teamOneSummoners.findBySummonerId(this.summonerId);
+          const summoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
           const myTeam = summoner ? teamOne : teamTwo;
           this.joinTeamVoice(myTeam);
 
@@ -336,7 +341,7 @@ export class LvcApplication {
 
     const roomName = teamOne.createVoiceRoomName() + teamTwo.createVoiceRoomName();
 
-    const summoner = teamOne.findBySummonerId(this.summonerId);
+    const summoner = teamOne.findBySummonerId(this.summoner.summonerId);
     const myTeam = summoner ? teamOne : teamTwo;
     const teamName = myTeam.createVoiceRoomName();
 

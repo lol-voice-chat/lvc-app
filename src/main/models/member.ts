@@ -34,7 +34,7 @@ export class Member {
 
   public async getChampionKda(redisClient: RedisClient) {
     const key = `match-length-${this.summonerId}`;
-    const [matchLength, matchHistory]: [string | null, MatchHistory] = await Promise.all([
+    const [matchLength, matchHistory]: [string, MatchHistory] = await Promise.all([
       redisClient.get(key),
       MatchHistory.fetch(this.puuid),
     ]);
