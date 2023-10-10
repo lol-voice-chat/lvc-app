@@ -81,6 +81,10 @@ export class MatchHistory {
     return new MatchHistory(matches);
   }
 
+  get matchLength() {
+    return this.matches.length;
+  }
+
   public async getSummonerStats() {
     const recentUsedChampionList = new Map<number, ChampCount>();
     let killCount = 0;
@@ -268,13 +272,13 @@ export class MatchHistory {
     return championStats;
   }
 
-  public getChampionKda(championId: number) {
+  public getChampionKda(myMatchLength: number, championId: number) {
     let champKill = 0;
     let champDeath = 0;
     let champAssists = 0;
     let champCount = 0;
 
-    this.matches.forEach((match: Match) => {
+    this.matches.slice(0, myMatchLength).forEach((match: Match) => {
       const participant: ParticipantData = match.participants[0];
 
       if (participant.championId === championId) {
