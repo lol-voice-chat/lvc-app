@@ -10,7 +10,7 @@ import { IPC_KEY } from '../const';
 import { Summoner } from './models/summoner';
 import { LeagueRanked } from './models/league-ranked';
 import { MemberChampionData, Team } from './models/team';
-import { friendRequestEvent } from './models/friend-requet-event';
+import { friendRequestEvent } from './event/friend-requet-event';
 import request from './lib/request';
 import { RedisClient } from './lib/redis-client';
 import axios from 'axios';
@@ -217,8 +217,10 @@ export class LvcApplication {
             clearInterval(interval);
             resolve(Math.floor(response.data.gameData.gameTime));
           }
-        } catch (error) {
-          //에러나도 게임 경과 시간 받아올 때까지 반복
+        } catch (error: any) {
+          if (!error.toString().includes('ECONNREFUSED') || error.toString().includes('Timeout')) {
+            throw new Error(error);
+          }
         }
       }, 5000);
     });
