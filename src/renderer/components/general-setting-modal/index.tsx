@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import * as _ from './style';
 import electronStore from '../../@store/electron';
 import { GeneralSettingsConfigType } from '../../@store/atom';
-import Inko from 'inko';
 
 function GeneralSettingModal(props: {
   handleClickModalTrigger: () => void;
@@ -28,22 +27,27 @@ function GeneralSettingModal(props: {
   };
 
   const handleKeyDown = (e: any) => {
-    if (!isGettingShortcutKey) return;
-    e.preventDefault();
-
-    let { is한글, ko2en } = new Inko();
-    let value = e.key;
-
-    if (is한글(value)) {
-      value = ko2en(value);
-    }
-    isPressToTalk ? setPressToTalkShortcutKey(value) : setMuteMicShortcutKey(value);
-    setIsGettingShortcutKey(false);
+    // if (!isGettingShortcutKey) return;
+    // e.preventDefault();
+    // let { is한글, ko2en } = new Inko();
+    // let value = e.key;
+    // if (is한글(value)) {
+    //   value = ko2en(value);
+    // }
+    // isPressToTalk ? setPressToTalkShortcutKey(value) : setMuteMicShortcutKey(value);
+    // setIsGettingShortcutKey(false);
   };
 
   const handleClickGettingShortcutKey = () => {
-    setIsGettingShortcutKey((prev) => !prev);
-    document.getElementById('input-shortcut-key')?.focus();
+    // setIsGettingShortcutKey((prev) => !prev);
+    // document.getElementById('input-shortcut-key')?.focus();
+    window.addEventListener(
+      'keydown',
+      (e) => {
+        console.log(e);
+      },
+      true
+    );
   };
 
   return (
@@ -60,7 +64,7 @@ function GeneralSettingModal(props: {
         <>
           <div>눌러서 말하기 단축키 설정</div>
           <div onClick={handleClickGettingShortcutKey}>{pressToTalkShortcutKey}</div>
-          <input id="input-shortcut-key" onKeyDown={handleKeyDown} />
+          {/* <input id="input-shortcut-key" onKeyDown={handleKeyDown} /> */}
         </>
       ) : (
         <div>마이크 음소거 단축키 설정 - {muteMicShortcutKey}</div>
