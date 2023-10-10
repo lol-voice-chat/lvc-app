@@ -8,7 +8,6 @@ import path from 'path';
 import isDev from 'electron-is-dev';
 import { RedisClient } from './lib/redis-client';
 
-
 const globalKey = new GlobalKeyboardListener();
 let mainWindow: BrowserWindow;
 const redisClient = new RedisClient();

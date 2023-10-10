@@ -1,6 +1,6 @@
 import { RedisClient } from '../lib/redis-client';
 import { MatchHistory } from './match-history';
-import { Member } from './Member';
+import { Member } from './member';
 
 export interface MemberMatchHistoryData {
   summonerId: number;
