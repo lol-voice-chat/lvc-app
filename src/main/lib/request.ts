@@ -1,5 +1,5 @@
 import { createHttp1Request } from 'league-connect';
-import { credentials } from '../league/LvcApplication';
+import { credentials } from '../lvc-application';
 
 export const request = async (url: string) => {
   try {
