@@ -3,7 +3,6 @@ import onElectronStore, { store } from './store';
 import { generalSettingsDefaultConfig, IPC_KEY } from '../const';
 import { GlobalKeyboardListener } from 'node-global-key-listener';
 import { LvcApplication } from './lvc-application';
-import { authenticate, createWebSocketConnection } from 'league-connect';
 import path from 'path';
 import isDev from 'electron-is-dev';
 import { RedisClient } from './lib/redis-client';
@@ -41,28 +40,12 @@ const createWindow = () => {
 
 async function handleLoadEvent() {
   mainWindow.webContents.on('did-finish-load', async () => {
-    const { credentials, ws } = await onLeagueClientUx();
-    const app = new LvcApplication(mainWindow.webContents, credentials, ws, redisClient);
+    const app = new LvcApplication(mainWindow.webContents, redisClient);
 
     app.initialize().then(() => {
       app.handle();
     });
   });
-}
-
-async function onLeagueClientUx() {
-  const [credentials, ws] = await Promise.all([
-    authenticate({
-      awaitConnection: true,
-    }),
-    createWebSocketConnection({
-      authenticationOptions: {
-        awaitConnection: true,
-      },
-    }),
-  ]);
-
-  return { credentials, ws };
 }
 
 ipcMain.on(IPC_KEY.INPUT_SHORTCUT_KEY, () => {

@@ -14,8 +14,12 @@ export class RedisClient {
       console.info('Redis 연결됨');
     });
 
-    client.on('error', (err) => {
-      console.error('Redis Client Error', err);
+    client.on('error', (err: any) => {
+      if (err.toString().includes('Timeout')) {
+        client.connect().then();
+        this.client = client;
+      }
+      throw new Error(err);
     });
 
     client.connect().then();
