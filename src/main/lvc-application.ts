@@ -4,6 +4,7 @@ import {
   Credentials,
   LeagueClient,
   LeagueWebSocket,
+  authenticate,
   createWebSocketConnection,
 } from 'league-connect';
 import { IPC_KEY } from '../const';
@@ -30,19 +31,13 @@ export class LvcApplication {
   private matchHistory: MatchHistory;
   private redisClient: RedisClient;
 
-  constructor(
-    webContents: WebContents,
-    credential: Credentials,
-    ws: LeagueWebSocket,
-    redisClient: RedisClient
-  ) {
-    credentials = credential;
+  constructor(webContents: WebContents, redisClient: RedisClient) {
     this.webContents = webContents;
-    this.ws = ws;
     this.redisClient = redisClient;
   }
 
   public async initialize() {
+    await this.onLeagueClientUx();
     const client = new LeagueClient(credentials);
     client.start();
 
@@ -58,6 +53,22 @@ export class LvcApplication {
 
     await this.fetchLeagueClient();
     friendRequestEvent.emit('friend-request');
+  }
+
+  private async onLeagueClientUx() {
+    const [_credentials, ws] = await Promise.all([
+      authenticate({
+        awaitConnection: true,
+      }),
+      createWebSocketConnection({
+        authenticationOptions: {
+          awaitConnection: true,
+        },
+      }),
+    ]);
+
+    credentials = _credentials;
+    this.ws = ws;
   }
 
   private async fetchLeagueClient() {
