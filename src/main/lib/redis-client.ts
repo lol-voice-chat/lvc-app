@@ -19,6 +19,7 @@ export class RedisClient {
         client.connect().then();
         this.client = client;
       }
+
       throw new Error(err);
     });
 
