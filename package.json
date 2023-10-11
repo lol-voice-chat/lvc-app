@@ -6,15 +6,14 @@
   "description": "lol voice chat app",
   "homepage": ".",
   "sideEffects": false,
-  "main": "./dist/main/main.js",
+  "main": "./src/main/main.ts",
   "scripts": {
     "react-start": "react-scripts start",
-    "clean": "rm -rf dist",
-    "electron-start": "npm run clean && tsc && electron .",
+    "electron-start": "electron -r ts-node/register .",
     "start": "concurrently \"npm run react-start\" \"wait-on http://localhost:3000\" \"npm run electron-start\"",
-    "build": "react-scripts build",
     "test": "react-scripts test",
-    "deploy:xos": "electron-builder --mac"
+    "build": "react-scripts build",
+    "deploy:xos": "npm run build && electron-builder --mac"
   },
   "eslintConfig": {
     "extends": [
@@ -76,6 +75,7 @@
     "sass-loader": "^13.3.2",
     "style-loader": "^3.3.3",
     "ts-loader": "^9.5.0",
+    "ts-node": "^10.9.1",
     "wait-on": "^7.0.1",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4",
