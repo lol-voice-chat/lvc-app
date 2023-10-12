@@ -29,11 +29,11 @@ const createWindow = () => {
     autoHideMenuBar: true,
   });
 
-  if (isDev) {
-    mainWindow.loadURL('http://localhost:3000');
-  } else {
-    mainWindow.loadFile(path.join(__dirname, '../../release/app/dist/renderer/index.html'));
-  }
+  mainWindow.loadURL(
+    isDev
+      ? 'http://localhost:3000'
+      : `file://${path.resolve(__dirname, '../renderer/', 'index.html')}`
+  );
 
   handleLoadEvent();
 };
