@@ -15,12 +15,12 @@ export class RedisClient {
     });
 
     client.on('error', (err: any) => {
-      if (err.toString().includes('Timeout')) {
+      if (err.toString().includes('Connection timeout')) {
         client.connect().then();
         this.client = client;
+      } else {
+        throw new Error(err);
       }
-
-      throw new Error(err);
     });
 
     client.connect().then();

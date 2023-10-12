@@ -1,0 +1,9 @@
+{
+  "name": "lvc-app",
+  "version": "0.1.0",
+  "description": "lol voice chat app",
+  "author": "lvc",
+  "main": "./dist/main/main.js",
+  "scripts": {},
+  "dependencies": {}
+}
