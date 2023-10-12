@@ -20,8 +20,7 @@ import https from 'https';
 export let credentials: Credentials;
 
 let isJoinedRoom = false;
-let isStartedGameLoading = false;
-let isStartedInGame = false;
+let isInProgress = false;
 let isEndGame = false;
 
 export class LvcApplication {
@@ -158,16 +157,14 @@ export class LvcApplication {
     });
 
     this.ws.subscribe('/lol-gameflow/v1/session', async (data) => {
-      if (data.phase === 'InProgress' && data.gameClient.running && !isStartedGameLoading) {
-        isStartedGameLoading = true;
+      if (data.phase === 'InProgress' && data.gameClient.running && !isInProgress) {
+        isInProgress = true;
         const { teamOne, teamTwo } = data.gameData;
         await this.joinLeagueVoice(teamOne, teamTwo);
 
         this.fetchTime().then((currentTime: number) => {
           const ms = currentTime * 1000;
           setTimeout(() => {
-            isStartedInGame = true;
-
             const { teamOne, teamTwo } = data.gameData;
             const teamOneSummoners = new Team(teamOne);
             const teamTwoSummoners = new Team(teamTwo);
@@ -181,15 +178,9 @@ export class LvcApplication {
         });
       }
 
-      //게임로딩 도중 나감
-      if (data.phase === 'None' && data.gameClient.running && isStartedGameLoading) {
-        isStartedGameLoading = false;
-        this.webContents.send(IPC_KEY.EXIT_IN_GAME);
-      }
-
-      //인게임 도중 나감
-      if (data.phase === 'None' && data.gameClient.visible && isStartedInGame) {
-        isStartedInGame = false;
+      //게임진행 도중 나감
+      if (data.phase === 'None' && isInProgress) {
+        isInProgress = false;
         this.webContents.send(IPC_KEY.EXIT_IN_GAME);
       }
 
@@ -229,7 +220,11 @@ export class LvcApplication {
             resolve(Math.floor(response.data.gameData.gameTime));
           }
         } catch (error: any) {
-          if (!error.toString().includes('ECONNREFUSED') || error.toString().includes('Timeout')) {
+          if (
+            !error.toString().includes('ECONNREFUSED') &&
+            !error.toString().includes('Timeout') &&
+            !error.toString().includes('404')
+          ) {
             throw new Error(error);
           }
         }
@@ -251,7 +246,7 @@ export class LvcApplication {
     }
 
     if (flow.phase === 'InProgress' && flow.gameClient.running) {
-      isStartedInGame = true;
+      isInProgress = true;
 
       const { teamOne, teamTwo } = flow.gameData;
       await this.joinLeagueVoice(teamOne, teamTwo);
@@ -277,7 +272,7 @@ export class LvcApplication {
         const time = Math.floor(response.data.gameData.gameTime);
 
         if (time < 50) {
-          isStartedInGame = true;
+          isInProgress = true;
 
           const { teamOne, teamTwo } = flow.gameData;
           await this.joinLeagueVoice(teamOne, teamTwo);
@@ -289,7 +284,7 @@ export class LvcApplication {
           this.sendMyTeamChampionStatsList(myTeam);
           return;
         } else {
-          isStartedInGame = true;
+          isInProgress = true;
 
           const { teamOne, teamTwo } = flow.gameData;
 
