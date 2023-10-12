@@ -41,7 +41,7 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
         const payload = JSON.parse(data);
 
         if (payload.key === 'init') {
-          setMessageList(payload.messageList.map((messageInfo) => JSON.parse(messageInfo)));
+          setMessageList(payload.messageList.map((messageInfo: string) => JSON.parse(messageInfo)));
           setMessageEvent({ key: 'init' });
         }
 
@@ -69,7 +69,7 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
           if (payload.isLast) setIsFetchEnd(true);
 
           setMessageList((msgList) => [
-            ...payload.messageList.map((messageInfo) => JSON.parse(messageInfo)),
+            ...payload.messageList.map((messageInfo: string) => JSON.parse(messageInfo)),
             ...(msgList ?? []),
           ]);
           setFetchingPage((page) => page + 1);

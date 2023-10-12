@@ -4,6 +4,7 @@ import {
   gameStatusState,
   myTeamSummonersState,
   summonerState,
+  userDeviceIdState,
   userStreamState,
 } from '../@store/atom';
 import * as mediasoup from 'mediasoup-client';
@@ -19,6 +20,7 @@ import { useEffect } from 'react';
 const { ipcRenderer } = window.require('electron');
 
 function useVoiceChat() {
+  const userDeviceId = useRecoilValue(userDeviceIdState);
   const setUserStream = useSetRecoilState(userStreamState);
 
   const setGameStatus = useSetRecoilState(gameStatusState);
@@ -28,7 +30,7 @@ function useVoiceChat() {
   const [enemySummoners, setEnemySummoners] = useRecoilState(enemySummonersState);
 
   useEffect(() => {
-    getUserAudioStream().then((stream) => {
+    getUserAudioStream(userDeviceId).then((stream) => {
       setUserStream(stream);
     });
   }, []);
@@ -51,7 +53,7 @@ function useVoiceChat() {
     })();
 
     const createSendTransport = (audioTrack: MediaStreamTrack) => {
-      socket.emit('create-producer-transport', (params) => {
+      socket.emit('create-producer-transport', (params: any) => {
         if (!device) return;
 
         producerTransport = device.createSendTransport(params);
@@ -91,12 +93,12 @@ function useVoiceChat() {
         .catch((err) => console.log('프로듀스 메서드 에러', err));
     };
 
-    socket.on('new-producer', ({ id, summoner }) => {
-      signalNewConsumerTransport(id, summoner);
+    socket.on('new-producer', (newProducer: { id: string; summoner: SummonerType }) => {
+      signalNewConsumerTransport(newProducer.id, newProducer.summoner);
     });
 
     const getProducers = () => {
-      socket.emit('get-producers', (producers) => {
+      socket.emit('get-producers', (producers: { id: string; summoner: SummonerType }[]) => {
         producers.forEach(({ id, summoner }) => {
           signalNewConsumerTransport(id, summoner);
         });
@@ -175,23 +177,27 @@ function useVoiceChat() {
     let consumerTransportList: ConsumerTransportType[] = [];
 
     electronStore.get('team-voice-room-name').then((roomName) => {
-      socket.emit('team-join-room', { roomName, summoner }, ({ rtpCapabilities }) => {
-        connectVoiceChat(
-          true,
-          socket,
-          device,
-          userStream,
-          rtpCapabilities,
-          producerTransport,
-          consumerTransportList
-        );
-      });
+      socket.emit(
+        'team-join-room',
+        { roomName, summoner },
+        (teamRoom: { rtpCapabilities: RtpCapabilities }) => {
+          connectVoiceChat(
+            true,
+            socket,
+            device,
+            userStream,
+            teamRoom.rtpCapabilities,
+            producerTransport,
+            consumerTransportList
+          );
+        }
+      );
     });
 
     /* 팀원 나감 */
-    socket.on('inform-exit-in-game', ({ summonerId }) => {
+    socket.on('inform-exit-in-game', (target: { summonerId: number }) => {
       consumerTransportList = consumerTransportList.filter((consumerTransport) => {
-        if (consumerTransport.summonerId === summonerId) {
+        if (consumerTransport.summonerId === target.summonerId) {
           consumerTransport.consumer.close();
           consumerTransport.consumerTransport.close();
           return false;
@@ -199,7 +205,7 @@ function useVoiceChat() {
         return true;
       });
       setMyTeamSummoners(
-        myTeamSummoners?.filter((summoner) => summoner.summonerId !== summonerId) ?? null
+        myTeamSummoners?.filter((summoner) => summoner.summonerId !== target.summonerId) ?? null
       );
     });
 
@@ -236,22 +242,26 @@ function useVoiceChat() {
     let consumerTransportList: ConsumerTransportType[] = [];
 
     electronStore.get('league-voice-room-name').then(({ roomName, teamName }) => {
-      socket.emit('league-join-room', { roomName, teamName, summoner }, ({ rtpCapabilities }) => {
-        connectVoiceChat(
-          false,
-          socket,
-          device,
-          userStream,
-          rtpCapabilities,
-          producerTransport,
-          consumerTransportList
-        );
-      });
+      socket.emit(
+        'league-join-room',
+        { roomName, teamName, summoner },
+        (leagueRoom: { rtpCapabilities: RtpCapabilities }) => {
+          connectVoiceChat(
+            false,
+            socket,
+            device,
+            userStream,
+            leagueRoom.rtpCapabilities,
+            producerTransport,
+            consumerTransportList
+          );
+        }
+      );
     });
 
-    socket.on('inform-exit-in-game', ({ summonerId }) => {
+    socket.on('inform-exit-in-game', (target: { summonerId: number }) => {
       consumerTransportList = consumerTransportList.filter((consumerTransport) => {
-        if (consumerTransport.summonerId === summonerId) {
+        if (consumerTransport.summonerId === target.summonerId) {
           consumerTransport.consumer.close();
           consumerTransport.consumerTransport.close();
           return false;
@@ -259,7 +269,7 @@ function useVoiceChat() {
         return true;
       });
       setEnemySummoners(
-        enemySummoners?.filter((summoner) => summoner.summonerId !== summonerId) ?? null
+        enemySummoners?.filter((summoner) => summoner.summonerId !== target.summonerId) ?? null
       );
     });
 

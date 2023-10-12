@@ -26,6 +26,7 @@
     "react-helmet": "^6.1.0",
     "react-router-dom": "^6.15.0",
     "react-scripts": "5.0.1",
+    "react-select": "^5.7.7",
     "recoil": "^0.7.7",
     "redis": "^4.6.10",
     "socket.io-client": "^4.7.2",

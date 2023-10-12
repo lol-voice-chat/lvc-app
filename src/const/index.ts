@@ -1,3 +1,5 @@
+import { GeneralSettingsConfigType } from '../renderer/@store/atom';
+
 export const IPC_KEY = {
   ON_LEAGUE_CLIENT: 'on-league-client',
   TEAM_JOIN_ROOM: 'team-join-room',
@@ -15,4 +17,6 @@ export const generalSettingsDefaultConfig = {
   isPressToTalk: false,
   pressToTalkShortcutKey: 'M',
   muteMicShortcutKey: 'M',
-};
+  micVolume: 100,
+  speakerVolume: 100,
+} as GeneralSettingsConfigType;

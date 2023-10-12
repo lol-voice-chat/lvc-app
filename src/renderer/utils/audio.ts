@@ -1,9 +1,9 @@
 import { Dispatch, SetStateAction } from 'react';
 
-export const getUserAudioStream = async () => {
+export const getUserAudioStream = async (deviceId: string) => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
+      audio: { deviceId },
     });
     return stream;
   } catch (err) {
