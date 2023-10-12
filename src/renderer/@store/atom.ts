@@ -29,6 +29,11 @@ export const leagueChampInfoListState = atom<LeagueChampInfoType[] | null>({
   default: null,
 });
 
+export const userDeviceIdState = atom<string>({
+  key: 'user-device-id',
+  default: 'default',
+});
+
 export const userStreamState = atom<MediaStream | null>({
   key: 'user-stream',
   default: null,
@@ -38,6 +43,8 @@ export type GeneralSettingsConfigType = {
   isPressToTalk: boolean;
   pressToTalkShortcutKey: string;
   muteMicShortcutKey: string;
+  micVolume: number;
+  speakerVolume: number;
 };
 export const generalSettingsConfigState = atom<GeneralSettingsConfigType | null>({
   key: 'general-settings-config',

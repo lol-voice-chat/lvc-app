@@ -40,7 +40,7 @@ function SideMenuBar() {
     setSummonerStatusSocket(socket);
 
     /* 롤 인게임 시작 */
-    ipcRenderer.once(IPC_KEY.START_IN_GAME, (_, summonerIdList) => {
+    ipcRenderer.once(IPC_KEY.START_IN_GAME, (_, summonerIdList: any) => {
       socket.emit('start-in-game', summonerIdList);
     });
 
@@ -54,7 +54,7 @@ function SideMenuBar() {
       setSummonerRecordInfo(summoner);
 
       /* 앱 시작 - 온라인 */
-      ipcRenderer.once('online-summoner', (_, friendSummonerIdList) => {
+      ipcRenderer.once('online-summoner', (_, friendSummonerIdList: any) => {
         summonerStatusSocket?.emit(
           'online-summoner',
           { summoner, friendSummonerIdList },

@@ -19,8 +19,10 @@ function SummonerVoiceBlock(props: {
   const userStream = useRecoilValue(userStreamState);
   const generalSettingsConfig = useRecoilValue(generalSettingsConfigState);
 
-  const [speakerVolume, setSpeakerVolume] = useState(0.8);
-  const [beforeMuteSpeakerVolume, setBeforeMuteSpeakerVolume] = useState(0.8);
+  const [speakerVolume, setSpeakerVolume] = useState(generalSettingsConfig?.speakerVolume ?? 0.8);
+  const [beforeMuteSpeakerVolume, setBeforeMuteSpeakerVolume] = useState(
+    generalSettingsConfig?.speakerVolume ?? 0.8
+  );
   const [isMuteSpeaker, setIsMuteSpeaker] = useState(false);
   const [isMuteMic, setIsMuteMic] = useState(false);
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
@@ -28,11 +30,14 @@ function SummonerVoiceBlock(props: {
   useEffect(() => {
     /* 팀원 소환사 */
     if (!props.isMine) {
-      props.managementSocket?.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
-        if (props.summoner.summonerId === summonerId && !isMuteSpeaker) {
-          setVisualizerVolume(visualizerVolume);
+      props.managementSocket?.on(
+        'mic-visualizer',
+        (summoner: { summonerId: number; visualizerVolume: number }) => {
+          if (props.summoner.summonerId === summoner.summonerId && !isMuteSpeaker) {
+            setVisualizerVolume(summoner.visualizerVolume);
+          }
         }
-      });
+      );
     }
   }, [props.managementSocket]);
 

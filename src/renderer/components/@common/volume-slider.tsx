@@ -11,7 +11,6 @@ type VolumeSliderPropsType = {
 function VolumeSlider(props: VolumeSliderPropsType) {
   return (
     <Slider id="volume-slider" volume={props.volume * 100} audiotype={props.audiotype}>
-      {/* <img id="volume-box" src="img/volume_box.svg" alt="볼륨 수치" /> */}
       <input
         type="range"
         min={0}
@@ -28,14 +27,7 @@ function VolumeSlider(props: VolumeSliderPropsType) {
 
 const Slider = styled.div<{ volume: number; audiotype: 'speaker' | 'mic' }>`
   position: relative;
-
-  #volume-box {
-    position: absolute;
-    top: ${({ audiotype }) => (audiotype === 'speaker' ? '-20px' : '-23px')};
-    left: calc(${({ volume }) => volume}% - 15 * ${({ volume }) => volume / 100}%);
-    width: 30px;
-    height: auto;
-  }
+  width: 100%;
 
   input[type='range'] {
     appearance: none;
@@ -64,7 +56,7 @@ const Slider = styled.div<{ volume: number; audiotype: 'speaker' | 'mic' }>`
       height: 6px;
       border-radius: 6px;
       background: ${({ volume }) =>
-        `linear-gradient(to right, ${PALETTE.YELLOW} ${volume}%, ${PALETTE.GRAY_2}
+        `linear-gradient(to right, ${PALETTE.GREEN} ${volume}%, ${PALETTE.GRAY_2}
  ${volume}% 100%)`};
       transition: all 0.5s;
       cursor: pointer;
