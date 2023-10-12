@@ -3,13 +3,17 @@ import onElectronStore, { store } from './store';
 import { generalSettingsDefaultConfig, IPC_KEY } from '../const';
 import { GlobalKeyboardListener } from 'node-global-key-listener';
 import { LvcApplication } from './lvc-application';
-import path from 'path';
 import isDev from 'electron-is-dev';
+import path from 'path';
 import { RedisClient } from './lib/redis-client';
 
 const globalKey = new GlobalKeyboardListener();
 let mainWindow: BrowserWindow;
 const redisClient = new RedisClient();
+
+if (!store.has('general-settings-config')) {
+  store.set('general-settings-config', generalSettingsDefaultConfig);
+}
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -25,14 +29,10 @@ const createWindow = () => {
     autoHideMenuBar: true,
   });
 
-  if (!store.has('general-settings-config')) {
-    store.set('general-settings-config', generalSettingsDefaultConfig);
-  }
-
   if (isDev) {
     mainWindow.loadURL('http://localhost:3000');
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../../build/index.html'));
+    mainWindow.loadFile(path.join(__dirname, '../../release/app/dist/renderer/index.html'));
   }
 
   handleLoadEvent();

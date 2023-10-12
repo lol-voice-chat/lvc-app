@@ -15,5 +15,6 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx"
-  }
+  },
+  "exclude": ["release/build", "release/app/dist"]
 }

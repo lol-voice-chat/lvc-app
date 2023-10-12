@@ -8,12 +8,14 @@
   "sideEffects": false,
   "main": "./src/main/main.ts",
   "scripts": {
-    "react-start": "react-scripts start",
-    "electron-start": "electron -r ts-node/register .",
-    "start": "concurrently \"npm run react-start\" \"wait-on http://localhost:3000\" \"npm run electron-start\"",
+    "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
+    "build:main": "webpack --config ./.erb/configs/webpack.config.main.prod.ts",
+    "build:renderer": "webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
+    "start:main": "electronmon -r ts-node/register .",
+    "start:renderer": "react-scripts start",
+    "start": "concurrently \"npm run start:renderer\" \"wait-on http://localhost:3000\" \"npm run start:main\"",
     "test": "react-scripts test",
-    "build": "react-scripts build",
-    "deploy:xos": "npm run build && electron-builder --mac"
+    "deploy:xos": "ts-node ./.erb/scripts/clean.ts && npm run build && electron-builder --mac"
   },
   "eslintConfig": {
     "extends": [
@@ -67,18 +69,23 @@
     "@types/react": "^18.2.21",
     "@types/react-dom": "^18.2.7",
     "@types/react-helmet": "^6.1.6",
+    "@types/webpack-bundle-analyzer": "^4.6.1",
+    "@types/webpack-node-externals": "^3.0.2",
     "assert": "^2.0.0",
     "concurrently": "^8.2.1",
-    "css-loader": "^6.8.1",
     "electron": "^26.2.1",
     "electron-builder": "^24.6.4",
+    "electronmon": "^2.0.2",
+    "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.5.3",
-    "sass-loader": "^13.3.2",
-    "style-loader": "^3.3.3",
+    "rimraf": "^5.0.5",
+    "terser-webpack-plugin": "^5.3.9",
     "ts-loader": "^9.5.0",
     "ts-node": "^10.9.1",
+    "tsconfig-paths-webpack-plugin": "^4.1.0",
     "wait-on": "^7.0.1",
     "webpack": "^5.88.2",
+    "webpack-bundle-analyzer": "^4.9.1",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1",
     "webpack-merge": "^5.9.0"
@@ -88,31 +95,28 @@
     "productName": "lvc",
     "appId": "com.lvc-app",
     "asar": true,
+    "asarUnpack": "**\\*.{node}",
+    "files": [
+      "dist",
+      "node_modules",
+      "package.json"
+    ],
     "mac": {
-      "target": [
-        "default"
-      ]
+      "target": {
+        "target": "default",
+        "arch": [
+          "arm64",
+          "x64"
+        ]
+      }
     },
     "dmg": {
       "title": "lvc"
     },
     "directories": {
-      "buildResources": "./build/",
-      "output": "./release/build/"
-    },
-    "files": [
-      "**/*",
-      "!**/*.ts",
-      "!*.map",
-      "!package.json",
-      "!package-lock.json",
-      "build/**/*",
-      {
-        "from": "dist",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ]
+      "app": "release/app",
+      "buildResources": "public/img",
+      "output": "release/build"
+    }
   }
 }
