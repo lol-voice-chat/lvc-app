@@ -68,10 +68,14 @@ function useVoiceChat() {
         });
         producerTransport.on('produce', ({ kind, rtpParameters }, callback, errback) => {
           try {
-            socket.emit('transport-produce', { kind, rtpParameters }, ({ id, producersExist }) => {
-              callback({ id });
-              producersExist && getProducers();
-            });
+            socket.emit(
+              'transport-produce',
+              { kind, rtpParameters },
+              (producer: { id: string; producersExist: boolean }) => {
+                callback({ id: producer.id });
+                producer.producersExist && getProducers();
+              }
+            );
           } catch (err) {
             errback(err as Error);
           }

@@ -1,7 +1,7 @@
 import React from 'react';
 import * as _ from './style';
 
-function AppHeader(props: { handleClickSettingModalTrigger }) {
+function AppHeader(props: { handleClickSettingModalTrigger: () => void }) {
   return (
     <_.AppHeader>
       <div id="tool-container">

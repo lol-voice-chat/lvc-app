@@ -34,13 +34,15 @@ function SummonerLeagueVoiceBlock(props: {
   }, [props.managementSocket]);
 
   useEffect(() => {
-    let visualizerInterval;
+    let visualizerInterval: NodeJS.Timer | null = null;
     if (userStream && props.isMine) {
       visualizerInterval = setInterval(() => {
         micVolumeHandler(userStream, setVisualizerVolume);
       }, 1000);
     }
-    return () => clearInterval(visualizerInterval);
+    return () => {
+      visualizerInterval && clearInterval(visualizerInterval);
+    };
   }, [userStream]);
 
   useEffect(() => {
