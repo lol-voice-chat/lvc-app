@@ -65,13 +65,15 @@ function SummonerVoiceBlock(props: {
   }, [visualizerVolume]);
 
   useEffect(() => {
-    let visualizerInterval;
+    let visualizerInterval: NodeJS.Timer | null = null;
     if (props.isMine && !isMuteMic && userStream) {
       visualizerInterval = setInterval(() => {
         micVolumeHandler(userStream, setVisualizerVolume);
       }, 1000);
     }
-    return () => clearInterval(visualizerInterval);
+    return () => {
+      visualizerInterval && clearInterval(visualizerInterval);
+    };
   }, [userStream, isMuteMic]);
 
   const handleChangeSpeakerVolume = (speakerVolume: number) => {
