@@ -6,7 +6,7 @@
   "description": "lol voice chat app",
   "homepage": ".",
   "sideEffects": false,
-  "main": "./src/main/main.ts",
+  "main": "src/main/main.ts",
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "webpack --config ./.erb/configs/webpack.config.main.prod.ts",
@@ -118,5 +118,12 @@
       "buildResources": "public/img",
       "output": "release/build"
     }
+  },
+  "electronmon": {
+    "patterns": [
+      "!**/**",
+      "src/main/**"
+    ],
+    "logLevel": "quiet"
   }
 }
