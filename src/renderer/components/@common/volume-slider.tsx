@@ -15,7 +15,7 @@ function VolumeSlider(props: VolumeSliderPropsType) {
         type="range"
         min={0}
         max={1}
-        step={0.02}
+        step={0.005}
         value={props.volume}
         onChange={(event) => {
           props.handleChangeVolume(event.target.valueAsNumber);

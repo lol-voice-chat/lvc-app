@@ -63,11 +63,6 @@ function SideMenuBar() {
           }
         );
       });
-
-      /* 롤 종료 - 오프라인 */
-      ipcRenderer.once('shutdown-app', () => {
-        // summonerStatusSocket?.emit('offline-summoner');
-      });
     }
   }, [summoner]);
 

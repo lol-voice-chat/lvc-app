@@ -1,15 +1,32 @@
 import { Dispatch, SetStateAction } from 'react';
 
-export const getUserAudioStream = async (deviceId: string) => {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: { deviceId },
-    });
+export const getUserAudioStream = async (userDeviceId: string) => {
+  /* 현재 deviceId가 연결된 상태인지 검증 */
+  const userStream = await getConnectedAudioDevices('input').then(async (deviceList) => {
+    let stream: MediaStream | null = null;
+    let isExist = false;
+
+    if (userDeviceId !== 'default') {
+      deviceList.map(({ deviceId }) => {
+        if (userDeviceId === deviceId) isExist = true;
+      });
+    } else {
+      isExist = true;
+    }
+
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: { deviceId: isExist ? userDeviceId : 'default' },
+      });
+    } catch (err) {
+      console.log('유저 미디어 스트림 획득 실패', err);
+      stream = null;
+    }
+
     return stream;
-  } catch (err) {
-    console.log('유저 미디어 스트림 획득 실패', err);
-    return null;
-  }
+  });
+
+  return userStream;
 };
 
 export const micVolumeHandler = (
