@@ -13,7 +13,7 @@ const { ipcRenderer } = window.require('electron');
 
 function NavBar() {
   const [gameStatus, setGameStatus] = useRecoilState(gameStatusState);
-  const [summoner, setSummoner] = useRecoilState(summonerState);
+  const setSummoner = useSetRecoilState(summonerState);
   const setLeagueChampInfoList = useSetRecoilState(leagueChampInfoListState);
 
   const [onClickTag, setOnClickTag] = useState(PATH.HOME);

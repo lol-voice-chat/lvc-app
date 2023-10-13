@@ -225,6 +225,12 @@ function useVoiceChat() {
     /* 게임 시작 */
     ipcRenderer.once(IPC_KEY.START_IN_GAME, () => {});
 
+    /* 게임 끝남 */
+    ipcRenderer.once(IPC_KEY.END_OF_THE_GAME, () => {
+      socket.emit('end-of-the-game');
+      disconnectVoiceChat();
+    });
+
     /* 게임 방 떠남 */
     ipcRenderer.once(IPC_KEY.EXIT_IN_GAME, () => {
       disconnectVoiceChat();
