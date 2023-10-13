@@ -2,6 +2,8 @@ import path from 'path';
 
 const rootPath = path.join(__dirname, '../..');
 
+const publicPath = path.join(rootPath, 'public');
+
 const srcPath = path.join(rootPath, 'src');
 const srcMainPath = path.join(srcPath, 'main');
 const srcRendererPath = path.join(srcPath, 'renderer');
@@ -16,6 +18,7 @@ const distRendererPath = path.join(distPath, 'renderer');
 const buildPath = path.join(releasePath, 'build');
 
 export default {
+  publicPath,
   srcPath,
   srcMainPath,
   srcRendererPath,

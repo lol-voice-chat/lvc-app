@@ -6,7 +6,7 @@
   "description": "lol voice chat app",
   "homepage": ".",
   "sideEffects": false,
-  "main": "src/main/main.ts",
+  "main": "./src/main/main.ts",
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "webpack --config ./.erb/configs/webpack.config.main.prod.ts",
@@ -14,7 +14,6 @@
     "start:main": "electronmon -r ts-node/register .",
     "start:renderer": "react-scripts start",
     "start": "concurrently \"npm run start:renderer\" \"wait-on http://localhost:3000\" \"npm run start:main\"",
-    "test": "react-scripts test",
     "deploy:xos": "ts-node ./.erb/scripts/clean.ts && npm run build && electron-builder --mac"
   },
   "eslintConfig": {
@@ -50,7 +49,7 @@
     "react-dom": "^18.2.0",
     "react-helmet": "^6.1.0",
     "react-router-dom": "^6.15.0",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
     "react-select": "^5.7.7",
     "recoil": "^0.7.7",
     "redis": "^4.6.10",

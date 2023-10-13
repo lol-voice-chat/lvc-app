@@ -16,8 +16,12 @@ export class LeagueRanked {
 
   public getTier() {
     const { division, tier } = this.highestRankedEntry;
-    const displayTier: string = tier[0];
 
+    if (division === 'NA' && tier === '') {
+      return 'Unrank';
+    }
+
+    const displayTier: string = tier[0];
     switch (division) {
       case 'I':
         return displayTier + 1;
