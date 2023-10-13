@@ -54,6 +54,10 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
               containerRef.current.scrollTop + containerRef.current.clientHeight >=
               containerRef.current.scrollHeight - 100;
 
+            /* 롤 클라이언트 꺼진 상태 */
+            if (!props.summoner) {
+              isScrollEnd ? setMessageEvent({ key: 'message' }) : setIsReceiveNewMsg(true);
+            }
             /* 내가 보낸 거 or 최신 메시지 보는 중 */
             if (props.summoner?.name === summoner.name || isScrollEnd) {
               setMessageEvent({ key: 'message' });
@@ -128,7 +132,11 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
             />
           ))}
 
-          {isReceiveNewMsg && <div id="new-message-alram" onClick={handleClickNewMessageAlram} />}
+          {isReceiveNewMsg && (
+            <div id="new-message-alram" onClick={handleClickNewMessageAlram}>
+              새로운 메시지가 왔습니다
+            </div>
+          )}
 
           <div ref={bottomRef} />
         </>
