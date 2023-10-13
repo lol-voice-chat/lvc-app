@@ -253,7 +253,6 @@ export class MatchHistory {
     });
 
     const championIcon = `https://lolcdn.darkintaqt.com/cdn/champion/${championId}/tile`;
-
     const championName: string = CHAMPIONS[championId.toString()];
 
     if (champCount === 0) {

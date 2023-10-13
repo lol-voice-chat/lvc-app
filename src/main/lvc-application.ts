@@ -42,8 +42,9 @@ export class LvcApplication {
 
     client.on('connect', async (newCredentials) => {
       credentials = newCredentials;
-      await this.fetchLeagueClient();
       this.ws = await createWebSocketConnection();
+      await this.fetchLeagueClient();
+      this.handle();
     });
 
     client.on('disconnect', () => {
