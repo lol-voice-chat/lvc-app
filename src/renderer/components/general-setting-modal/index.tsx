@@ -47,7 +47,6 @@ function GeneralSettingModal(props: {
     getConnectedAudioDevices('input').then((deviceList) => {
       let optionList = [] as OptionType[];
       let selectedOption: OptionType | null = null;
-      const defaultOption = optionList[0];
 
       deviceList?.map(({ label, deviceId }) => {
         const option = { label, value: deviceId };
@@ -55,14 +54,14 @@ function GeneralSettingModal(props: {
         if (userDeviceId === deviceId) selectedOption = option;
       });
 
-      if (!selectedOption || beforeDefaultDeviceName !== defaultOption.label) {
+      if (!selectedOption || beforeDefaultDeviceName !== optionList[0].label) {
         setUserDeviceId('default');
-        selectedOption = defaultOption;
+        selectedOption = optionList[0];
       }
 
       setDeviceOptionList([...optionList]);
       setCurDeviceOption(selectedOption);
-      setBeforeDefaultDeviceName(defaultOption.label);
+      setBeforeDefaultDeviceName(optionList[0].label);
     });
   };
 
