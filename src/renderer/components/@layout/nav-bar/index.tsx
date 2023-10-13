@@ -13,7 +13,7 @@ const { ipcRenderer } = window.require('electron');
 
 function NavBar() {
   const [gameStatus, setGameStatus] = useRecoilState(gameStatusState);
-  const setSummoner = useSetRecoilState(summonerState);
+  const [summoner, setSummoner] = useRecoilState(summonerState);
   const setLeagueChampInfoList = useSetRecoilState(leagueChampInfoListState);
 
   const [onClickTag, setOnClickTag] = useState(PATH.HOME);
@@ -22,30 +22,44 @@ function NavBar() {
 
   useEffect(() => {
     /* 롤 클라이언트 on */
-    ipcRenderer.once(IPC_KEY.ON_LEAGUE_CLIENT, (_, summoner: SummonerType) => {
+    ipcRenderer.on(IPC_KEY.ON_LEAGUE_CLIENT, (_, summoner: SummonerType) => {
       setSummoner(summoner);
     });
 
+    /* 롤 클라이언트 off */
+    ipcRenderer.on(IPC_KEY.SHUTDOWN_APP, () => {
+      setGameStatus('none');
+    });
+
     /* 챔피언 선택창 on */
-    ipcRenderer.once(IPC_KEY.TEAM_JOIN_ROOM, (_, { roomName }) => {
+    ipcRenderer.on(IPC_KEY.TEAM_JOIN_ROOM, (_, { roomName }) => {
       setGameStatus('champ-select');
       electronStore.set('team-voice-room-name', roomName);
     });
 
     /* 인게임 전 로딩창 on */
-    ipcRenderer.once(IPC_KEY.LEAGUE_JOIN_ROOM, (_, { roomName, teamName, summonerDataList }) => {
+    ipcRenderer.on(IPC_KEY.LEAGUE_JOIN_ROOM, (_, { roomName, teamName, summonerDataList }) => {
       if (teamName === roomName) return;
 
       setGameStatus('loading');
       setLeagueChampInfoList(summonerDataList);
       electronStore.set('league-voice-room-name', { roomName, teamName });
     });
+
+    return () => {
+      ipcRenderer.removeAllListeners(IPC_KEY.ON_LEAGUE_CLIENT);
+      ipcRenderer.removeAllListeners(IPC_KEY.SHUTDOWN_APP);
+      ipcRenderer.removeAllListeners(IPC_KEY.TEAM_JOIN_ROOM);
+      ipcRenderer.removeAllListeners(IPC_KEY.LEAGUE_JOIN_ROOM);
+    };
   }, []);
 
   const handleClickCategoryTag = (path: string) => {
     navigate(path);
     setOnClickTag(path);
   };
+
+  console.log(gameStatus);
 
   return (
     <div id="nav-bar">

@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import { LeagueChampInfoType, leagueChampInfoListState, userStreamState } from '../../@store/atom';
+import {
+  LeagueChampInfoType,
+  generalSettingsConfigState,
+  leagueChampInfoListState,
+  userStreamState,
+} from '../../@store/atom';
 import { SummonerType } from '../../@type/summoner';
 import { Socket } from 'socket.io-client';
 import { getSummonerSpeaker, micVolumeHandler } from '../../utils/audio';
@@ -15,10 +20,13 @@ function SummonerLeagueVoiceBlock(props: {
 }) {
   const leagueChampInfoList = useRecoilValue(leagueChampInfoListState);
   const [myChampInfo, setMyChampInfo] = useState<LeagueChampInfoType | null>(null);
+  const generalSettingsConfig = useRecoilValue(generalSettingsConfigState);
 
   const userStream = useRecoilValue(userStreamState);
-  const [speakerVolume, setSpeakerVolume] = useState(0.8);
-  const [beforeMuteSpeakerVolume, setBeforeMuteSpeakerVolume] = useState(0.8);
+  const [speakerVolume, setSpeakerVolume] = useState(generalSettingsConfig?.speakerVolume ?? 0.8);
+  const [beforeMuteSpeakerVolume, setBeforeMuteSpeakerVolume] = useState(
+    generalSettingsConfig?.speakerVolume ?? 0.8
+  );
   const [isMuteSpeaker, setIsMuteSpeaker] = useState(false);
   const [isMuteMic, setIsMuteMic] = useState(false);
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);

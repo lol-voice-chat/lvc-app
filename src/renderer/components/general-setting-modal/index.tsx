@@ -37,15 +37,17 @@ function GeneralSettingModal(props: {
 
   useEffect(() => {
     updateDeviceList();
-
-    navigator.mediaDevices.ondevicechange = updateDeviceList;
   }, []);
+
+  useEffect(() => {
+    navigator.mediaDevices.ondevicechange = updateDeviceList;
+  }, [userDeviceId, beforeDefaultDeviceName]);
 
   const updateDeviceList = () => {
     getConnectedAudioDevices('input').then((deviceList) => {
       let optionList = [] as OptionType[];
       let selectedOption: OptionType | null = null;
-      const defaultOption = { label: deviceList[0].label, value: deviceList[0].deviceId };
+      const defaultOption = optionList[0];
 
       deviceList?.map(({ label, deviceId }) => {
         const option = { label, value: deviceId };

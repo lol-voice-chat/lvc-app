@@ -31,6 +31,15 @@ function useVoiceChat() {
 
   useEffect(() => {
     getUserAudioStream(userDeviceId).then((stream) => {
+      // if (stream) {
+      //   const audioContext = new AudioContext();
+      //   const gainNode = audioContext.createGain();
+
+      //   const mediaStreamSource = audioContext.createMediaStreamSource(stream);
+      //   mediaStreamSource.connect(gainNode);
+      //   gainNode.gain.value = 1;
+      // }
+
       setUserStream(stream);
     });
   }, []);
@@ -280,13 +289,14 @@ function useVoiceChat() {
     /* 게임 시작 */
     ipcRenderer.once(IPC_KEY.START_IN_GAME, () => {
       socket.emit('start-in-game');
-      disconnectVoiceChat();
       setGameStatus('in-game');
+      disconnectVoiceChat();
     });
 
     /* 게임 나감 */
     ipcRenderer.once(IPC_KEY.EXIT_IN_GAME, () => {
       disconnectVoiceChat();
+      window.location.reload();
     });
 
     const disconnectVoiceChat = () => {
