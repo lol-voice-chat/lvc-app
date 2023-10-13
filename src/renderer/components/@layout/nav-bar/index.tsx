@@ -13,7 +13,7 @@ const { ipcRenderer } = window.require('electron');
 
 function NavBar() {
   const [gameStatus, setGameStatus] = useRecoilState(gameStatusState);
-  const [summoner, setSummoner] = useRecoilState(summonerState);
+  const setSummoner = useSetRecoilState(summonerState);
   const setLeagueChampInfoList = useSetRecoilState(leagueChampInfoListState);
 
   const [onClickTag, setOnClickTag] = useState(PATH.HOME);
@@ -27,12 +27,12 @@ function NavBar() {
     });
 
     /* 롤 클라이언트 off */
-    ipcRenderer.on(IPC_KEY.SHUTDOWN_APP, () => {
+    ipcRenderer.once(IPC_KEY.SHUTDOWN_APP, () => {
       setGameStatus('none');
     });
 
     /* 챔피언 선택창 on */
-    ipcRenderer.on(IPC_KEY.TEAM_JOIN_ROOM, (_, { roomName }) => {
+    ipcRenderer.once(IPC_KEY.TEAM_JOIN_ROOM, (_, { roomName }) => {
       setGameStatus('champ-select');
       electronStore.set('team-voice-room-name', roomName);
     });
@@ -49,8 +49,6 @@ function NavBar() {
     return () => {
       ipcRenderer.removeAllListeners(IPC_KEY.ON_LEAGUE_CLIENT);
       ipcRenderer.removeAllListeners(IPC_KEY.SHUTDOWN_APP);
-      ipcRenderer.removeAllListeners(IPC_KEY.TEAM_JOIN_ROOM);
-      ipcRenderer.removeAllListeners(IPC_KEY.LEAGUE_JOIN_ROOM);
     };
   }, []);
 
@@ -58,8 +56,6 @@ function NavBar() {
     navigate(path);
     setOnClickTag(path);
   };
-
-  console.log(gameStatus);
 
   return (
     <div id="nav-bar">
