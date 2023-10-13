@@ -228,7 +228,8 @@ export class MatchHistory {
       .reverse()
       .sort((a, b) => a.count - b.count)
       .slice(-3)
-      .map((champ) => `https://lolcdn.darkintaqt.com/cdn/champion/${champ.championId}/tile`);
+      .map((champ) => `https://lolcdn.darkintaqt.com/cdn/champion/${champ.championId}/tile`)
+      .reverse();
   }
 
   public getChampionStats(summonerId: number, championId: number) {
