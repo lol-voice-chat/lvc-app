@@ -63,7 +63,7 @@ const configuration: webpack.Configuration = {
 
     new HtmlWebpackPlugin({
       filename: 'index.html',
-      template: path.join(__dirname, '../../public/index.html'),
+      template: path.join(webpackPaths.publicPath, 'index.html'),
 
       minify: {
         collapseWhitespace: true,

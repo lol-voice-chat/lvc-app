@@ -86,6 +86,21 @@ export class MatchHistory {
   }
 
   public async getSummonerStats() {
+    if (this.matches.length === 0) {
+      const summonerStats: SummonerStats = {
+        kda: '전적없음',
+        damage: '전적없음',
+        cs: '전적없음',
+        mostChampionList: [],
+        odds: 0,
+        winCount: 0,
+        failCount: 0,
+        statsList: [],
+      };
+
+      return summonerStats;
+    }
+
     const recentUsedChampionList = new Map<number, ChampCount>();
     let killCount = 0;
     let deathCount = 0;
