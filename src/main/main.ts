@@ -3,9 +3,8 @@ import onElectronStore, { store } from './store';
 import { generalSettingsDefaultConfig, IPC_KEY } from '../const';
 import { GlobalKeyboardListener } from 'node-global-key-listener';
 import { LvcApplication } from './lvc-application';
-import isDev from 'electron-is-dev';
-import path from 'path';
 import { RedisClient } from './lib/redis-client';
+import { resolvePath } from './lib/common';
 
 const globalKey = new GlobalKeyboardListener();
 let mainWindow: BrowserWindow;
@@ -13,14 +12,6 @@ let mainWindow: BrowserWindow;
 if (!store.has('general-settings-config')) {
   store.set('general-settings-config', generalSettingsDefaultConfig);
 }
-
-const resolvePath = () => {
-  if (isDev) {
-    return 'http://localhost:3000';
-  }
-
-  return `file://${path.resolve(__dirname, '../renderer/', 'index.html')}`;
-};
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({

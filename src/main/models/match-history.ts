@@ -1,4 +1,4 @@
-import { request } from '../lib/request';
+import { request } from '../lib/common';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 import relativeTime from 'dayjs/plugin/relativeTime';

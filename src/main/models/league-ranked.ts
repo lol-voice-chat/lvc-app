@@ -1,5 +1,5 @@
 import { plainToInstance } from 'class-transformer';
-import { request } from '../lib/request';
+import { request } from '../lib/common';
 
 interface Entry {
   division: string;
