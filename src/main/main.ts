@@ -58,6 +58,14 @@ ipcMain.on(IPC_KEY.INPUT_SHORTCUT_KEY, () => {
   globalKey.addListener(calledOnce);
 });
 
+ipcMain.on(IPC_KEY.QUIT_APP, () => {
+  app.quit();
+});
+
+ipcMain.on(IPC_KEY.CLOSE_APP, () => {
+  mainWindow.minimize();
+});
+
 app.whenReady().then(() => {
   createWindow();
 
