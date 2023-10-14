@@ -1,11 +1,12 @@
 import React from 'react';
 import * as _ from './style';
 import { SummonerType } from '../../../@type/summoner';
+import { Socket } from 'socket.io-client';
 
 const ENTER = 13;
 const TAB = 9;
 
-function MessageInput(props: { socket: WebSocket | null; summoner: SummonerType | null }) {
+function MessageInput(props: { socket: Socket | null; summoner: SummonerType | null }) {
   const handleResizeHeight = () => {
     const textarea = document.getElementById('text-area') as HTMLTextAreaElement;
     textarea.style.height = 'auto';
@@ -50,7 +51,7 @@ function MessageInput(props: { socket: WebSocket | null; summoner: SummonerType 
       tier: sender.tier,
       tierImage: 'img/dummy_rank.png',
     };
-    props.socket?.send(JSON.stringify({ key: 'new-message', summoner, message }));
+    props.socket?.emit('new-message', { summoner, message });
   };
 
   const handleClickImgUpload = () => {

@@ -1,28 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as _ from './style';
 import MessageInput from '../@common/message-input';
 import ChattingList from './chatting-list';
 import { useRecoilValue } from 'recoil';
 import { summonerState } from '../../@store/atom';
+import { Socket } from 'socket.io-client';
+import { connectSocket } from '../../utils/socket';
 
 function GeneralChatRoom() {
   const summoner = useRecoilValue(summonerState);
 
-  const [generalChatSocket, setGeneralChatSocket] = useState<WebSocket | null>(null);
+  const chatSocket = useRef<Socket | null>(null);
 
   useEffect(() => {
-    const ws = new WebSocket(process.env.REACT_APP_WS_SERVER_URL as string);
-    setGeneralChatSocket(ws);
+    const socket = connectSocket('/general-chat');
+    chatSocket.current = socket;
 
     return () => {
-      ws.close();
+      socket.disconnect();
     };
   }, []);
 
   return (
     <_.GeneralChatRoomContainer>
-      <ChattingList socket={generalChatSocket} summoner={summoner} />
-      <MessageInput socket={generalChatSocket} summoner={summoner} />
+      <ChattingList socket={chatSocket.current} summoner={summoner} />
+      <MessageInput socket={chatSocket.current} summoner={summoner} />
     </_.GeneralChatRoomContainer>
   );
 }
