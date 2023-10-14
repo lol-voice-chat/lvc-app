@@ -9,11 +9,18 @@ import { RedisClient } from './lib/redis-client';
 
 const globalKey = new GlobalKeyboardListener();
 let mainWindow: BrowserWindow;
-const redisClient = new RedisClient();
 
 if (!store.has('general-settings-config')) {
   store.set('general-settings-config', generalSettingsDefaultConfig);
 }
+
+const resolvePath = () => {
+  if (isDev) {
+    return 'http://localhost:3000';
+  }
+
+  return `file://${path.resolve(__dirname, '../renderer/', 'index.html')}`;
+};
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -29,17 +36,14 @@ const createWindow = () => {
     autoHideMenuBar: true,
   });
 
-  mainWindow.loadURL(
-    isDev
-      ? 'http://localhost:3000'
-      : `file://${path.resolve(__dirname, '../renderer/', 'index.html')}`
-  );
+  mainWindow.loadURL(resolvePath());
 
   handleLoadEvent();
 };
 
 async function handleLoadEvent() {
   mainWindow.webContents.on('did-finish-load', async () => {
+    const redisClient = new RedisClient();
     const app = new LvcApplication(mainWindow.webContents, redisClient);
 
     app.initialize().then(() => {
