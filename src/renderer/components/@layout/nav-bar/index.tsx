@@ -32,7 +32,7 @@ function NavBar() {
     });
 
     /* 챔피언 선택창 on */
-    ipcRenderer.once(IPC_KEY.TEAM_JOIN_ROOM, (_, { roomName }) => {
+    ipcRenderer.on(IPC_KEY.TEAM_JOIN_ROOM, (_, { roomName }) => {
       setGameStatus('champ-select');
       electronStore.set('team-voice-room-name', roomName);
     });
@@ -49,6 +49,8 @@ function NavBar() {
     return () => {
       ipcRenderer.removeAllListeners(IPC_KEY.ON_LEAGUE_CLIENT);
       ipcRenderer.removeAllListeners(IPC_KEY.SHUTDOWN_APP);
+      ipcRenderer.removeAllListeners(IPC_KEY.TEAM_JOIN_ROOM);
+      ipcRenderer.removeAllListeners(IPC_KEY.LEAGUE_JOIN_ROOM);
     };
   }, []);
 
