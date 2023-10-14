@@ -7,7 +7,6 @@ import { RedisClient } from './lib/redis-client';
 import { GeneralSettingsConfigType } from '../renderer/@store/atom';
 import { resolvePath } from './lib/common';
 
-
 const globalKey = new GlobalKeyboardListener();
 let mainWindow: BrowserWindow;
 
@@ -29,11 +28,17 @@ const createWindow = () => {
       nodeIntegration: true,
       contextIsolation: false,
     },
+    show: false,
+    backgroundColor: '#313338',
     frame: false,
     autoHideMenuBar: true,
   });
 
   mainWindow.loadURL(resolvePath());
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+  });
 
   handleLoadEvent();
 };
