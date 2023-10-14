@@ -20,7 +20,7 @@ import EventEmitter from 'events';
 
 export let credentials: Credentials;
 
-const champSelectEvent = new EventEmitter();
+let champSelectEvent = new EventEmitter();
 
 let isInProgress = false;
 let isEndGame = false;
@@ -156,6 +156,7 @@ export class LvcApplication {
       if (isCloseWindow) {
         this.webContents.send(IPC_KEY.EXIT_CHAMP_SELECT);
         myTeamMembers = new Map();
+        champSelectEvent = new EventEmitter();
       }
     });
 
@@ -184,6 +185,8 @@ export class LvcApplication {
       if (data.phase === 'None' && isInProgress) {
         isInProgress = false;
         this.webContents.send(IPC_KEY.EXIT_IN_GAME);
+        myTeamMembers = new Map();
+        champSelectEvent = new EventEmitter();
       }
 
       if (data.phase === 'WaitingForStats' && !isEndGame) {
@@ -195,6 +198,9 @@ export class LvcApplication {
         const key = `match-length-${this.summoner.summonerId}`;
         await this.redisClient.set(key, matchHistory.matchLength.toString());
         this.matchHistory = matchHistory;
+
+        myTeamMembers = new Map();
+        champSelectEvent = new EventEmitter();
       }
     });
   }
