@@ -112,7 +112,10 @@
       "app": "release/app",
       "buildResources": "public/img",
       "output": "release/build"
-    }
+    },
+    "extraResources": [
+      "./public/img/**"
+    ]
   },
   "electronmon": {
     "patterns": [
