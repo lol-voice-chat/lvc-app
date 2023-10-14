@@ -117,36 +117,36 @@ export class LvcApplication {
           this.joinTeamVoice(data.myTeam);
           isJoinedRoom = true;
         }
-      }
 
-      if (data.actions[0]) {
-        for (const summoner of data.actions[0]) {
-          if (summoner.championId === 0) {
-            myTeamMembers.set(summoner.id, summoner.championId);
-            continue;
-          }
-          const championId = myTeamMembers.get(summoner.id);
-
-          if (championId !== summoner.championId) {
-            myTeamMembers.set(summoner.id, summoner.championId);
-
-            let summonerId;
-            if (summoner.id >= 5) {
-              if (summoner.id === 5 && data.myTeam.some((member: any) => member.team === 1)) {
-                summonerId = data.myTeam[summoner.id - 1].summonerId;
-              } else {
-                summonerId = data.myTeam[summoner.id - 5].summonerId;
-              }
-            } else {
-              summonerId = data.myTeam[summoner.id - 1].summonerId;
+        if (data.actions[0]) {
+          for (const summoner of data.actions[0]) {
+            if (summoner.championId === 0) {
+              myTeamMembers.set(summoner.id, summoner.championId);
+              continue;
             }
+            const championId = myTeamMembers.get(summoner.id);
 
-            const championStats: ChampionStats = this.matchHistory.getChampionStats(
-              summonerId,
-              summoner.championId
-            );
+            if (championId !== summoner.championId) {
+              myTeamMembers.set(summoner.id, summoner.championId);
 
-            this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
+              let summonerId;
+              if (summoner.id >= 5) {
+                if (summoner.id === 5 && data.myTeam.some((member: any) => member.team === 1)) {
+                  summonerId = data.myTeam[summoner.id - 1].summonerId;
+                } else {
+                  summonerId = data.myTeam[summoner.id - 5].summonerId;
+                }
+              } else {
+                summonerId = data.myTeam[summoner.id - 1].summonerId;
+              }
+
+              const championStats: ChampionStats = this.matchHistory.getChampionStats(
+                summonerId,
+                summoner.championId
+              );
+
+              this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
+            }
           }
         }
       }
