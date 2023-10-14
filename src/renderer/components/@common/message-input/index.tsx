@@ -1,12 +1,12 @@
 import React from 'react';
 import * as _ from './style';
 import { SummonerType } from '../../../@type/summoner';
-import { Socket } from 'socket.io-client';
+import { GeneralChatChildPropsType } from '../../general-chat-room';
 
 const ENTER = 13;
 const TAB = 9;
 
-function MessageInput(props: { socket: Socket | null; summoner: SummonerType | null }) {
+function MessageInput(props: GeneralChatChildPropsType) {
   const handleResizeHeight = () => {
     const textarea = document.getElementById('text-area') as HTMLTextAreaElement;
     textarea.style.height = 'auto';
@@ -45,13 +45,15 @@ function MessageInput(props: { socket: Socket | null; summoner: SummonerType | n
   };
 
   const sendMessage = (sender: SummonerType, message: string) => {
-    const summoner = {
-      name: sender.name,
-      profileImage: sender.profileImage,
-      tier: sender.tier,
-      tierImage: 'img/dummy_rank.png',
-    };
-    props.socket?.emit('new-message', { summoner, message });
+    if (props.isConnected) {
+      const summoner = {
+        name: sender.name,
+        profileImage: sender.profileImage,
+        tier: sender.tier,
+        tierImage: 'img/dummy_rank.png',
+      };
+      props.socket?.emit('new-message', { summoner, message });
+    }
   };
 
   const handleClickImgUpload = () => {
