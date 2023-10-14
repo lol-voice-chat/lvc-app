@@ -1,4 +1,4 @@
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   enemySummonersState,
   gameStatusState,
@@ -26,8 +26,8 @@ function useVoiceChat() {
   const setGameStatus = useSetRecoilState(gameStatusState);
 
   const summoner = useRecoilValue(summonerState);
-  const [myTeamSummoners, setMyTeamSummoners] = useRecoilState(myTeamSummonersState);
-  const [enemySummoners, setEnemySummoners] = useRecoilState(enemySummonersState);
+  const setMyTeamSummoners = useSetRecoilState(myTeamSummonersState);
+  const setEnemySummoners = useSetRecoilState(enemySummonersState);
 
   useEffect(() => {
     getUserAudioStream(userDeviceId).then((stream) => {
@@ -111,8 +111,8 @@ function useVoiceChat() {
 
     const signalNewConsumerTransport = (remoteProducerId: string, newSummoner: SummonerType) => {
       isTeamVoiceChat
-        ? setMyTeamSummoners([...(myTeamSummoners ?? []), newSummoner])
-        : setEnemySummoners([...(enemySummoners ?? []), newSummoner]);
+        ? setMyTeamSummoners((prev) => [...(prev ?? []), newSummoner])
+        : setEnemySummoners((prev) => [...(prev ?? []), newSummoner]);
 
       socket.emit('create-consumer-transport', remoteProducerId);
       socket.on('complete-create-consumer-transport', (params) => {
@@ -209,7 +209,7 @@ function useVoiceChat() {
         return true;
       });
       setMyTeamSummoners(
-        myTeamSummoners?.filter((summoner) => summoner.summonerId !== target.summonerId) ?? null
+        (prev) => prev?.filter((summoner) => summoner.summonerId !== target.summonerId) ?? null
       );
     });
 
@@ -240,7 +240,7 @@ function useVoiceChat() {
         consumer.close();
         consumerTransport.close();
       });
-      window.location.reload();
+      setGameStatus('none');
     };
   };
 
@@ -279,21 +279,21 @@ function useVoiceChat() {
         return true;
       });
       setEnemySummoners(
-        enemySummoners?.filter((summoner) => summoner.summonerId !== target.summonerId) ?? null
+        (prev) => prev?.filter((summoner) => summoner.summonerId !== target.summonerId) ?? null
       );
     });
 
     /* 게임 시작 */
     ipcRenderer.once(IPC_KEY.START_IN_GAME, () => {
       socket.emit('start-in-game');
-      setGameStatus('in-game');
       disconnectVoiceChat();
+      setGameStatus('in-game');
     });
 
     /* 게임 나감 */
     ipcRenderer.once(IPC_KEY.EXIT_IN_GAME, () => {
       disconnectVoiceChat();
-      window.location.reload();
+      setGameStatus('none');
     });
 
     const disconnectVoiceChat = () => {

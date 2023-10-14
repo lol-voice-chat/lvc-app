@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { RecentSummonerType } from '..';
 import { SummonerType } from '../../../../@type/summoner';
 import RankBadge from '../../../@common/rank-badge';
