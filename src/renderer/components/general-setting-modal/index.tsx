@@ -113,14 +113,14 @@ function GeneralSettingModal(props: {
             <div id="sk-select-bar" />
           )}
 
-          <div id="function">입력 음량 조절</div>
+          <div id="function">마이크 볼륨</div>
           <VolumeSlider
             audiotype="mic"
             volume={micVolume}
             handleChangeVolume={(volume: number) => setMicVolume(volume)}
           />
 
-          <div id="function">다른 소환사 음량 조절</div>
+          <div id="function">다른 소환사 보이스 볼륨</div>
           <VolumeSlider
             audiotype="speaker"
             volume={speakerVolume}

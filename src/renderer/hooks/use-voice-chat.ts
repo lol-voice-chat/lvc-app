@@ -31,15 +31,6 @@ function useVoiceChat() {
 
   useEffect(() => {
     getUserAudioStream(userDeviceId).then((stream) => {
-      // if (stream) {
-      //   const audioContext = new AudioContext();
-      //   const gainNode = audioContext.createGain();
-
-      //   const mediaStreamSource = audioContext.createMediaStreamSource(stream);
-      //   mediaStreamSource.connect(gainNode);
-      //   gainNode.gain.value = 1;
-      // }
-
       setUserStream(stream);
     });
   }, []);
