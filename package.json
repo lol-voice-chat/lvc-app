@@ -4,7 +4,7 @@
   "private": true,
   "author": "lvc",
   "description": "lol voice chat app",
-  "homepage": "./",
+  "homepage": ".",
   "sideEffects": false,
   "main": "./src/main/main.ts",
   "scripts": {
@@ -70,7 +70,7 @@
     "@types/webpack-node-externals": "^3.0.2",
     "assert": "^2.0.0",
     "concurrently": "^8.2.1",
-    "electron": "^26.2.1",
+    "electron": "^26.4.0",
     "electron-builder": "^24.6.4",
     "electronmon": "^2.0.2",
     "file-loader": "^6.2.0",
@@ -107,9 +107,7 @@
         ]
       }
     },
-    "dmg": {
-      "title": "lvc"
-    },
+    "dmg": {},
     "directories": {
       "app": "release/app",
       "buildResources": "public/img",
