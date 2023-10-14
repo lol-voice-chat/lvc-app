@@ -32,13 +32,19 @@ function SummonerLeagueVoiceBlock(props: {
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
 
   useEffect(() => {
-    if (!props.isMine) {
-      props.managementSocket?.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
-        if (props.summoner.summonerId === summonerId) {
-          setVisualizerVolume(visualizerVolume);
-        }
-      });
+    function micVisualizer(summoner: { summonerId: number; visualizerVolume: number }) {
+      if (props.summoner.summonerId === summoner.summonerId) {
+        setVisualizerVolume(visualizerVolume);
+      }
     }
+
+    if (!props.isMine) {
+      props.managementSocket?.on('mic-visualizer', micVisualizer);
+    }
+
+    return () => {
+      props.managementSocket?.off('mic-visualizer', micVisualizer);
+    };
   }, [props.managementSocket]);
 
   useEffect(() => {

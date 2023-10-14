@@ -27,7 +27,7 @@ function NavBar() {
     });
 
     /* 롤 클라이언트 off */
-    ipcRenderer.once(IPC_KEY.SHUTDOWN_APP, () => {
+    ipcRenderer.on(IPC_KEY.SHUTDOWN_APP, () => {
       setGameStatus('none');
     });
 

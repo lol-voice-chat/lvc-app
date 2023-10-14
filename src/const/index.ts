@@ -1,6 +1,10 @@
 import { GeneralSettingsConfigType } from '../renderer/@store/atom';
 
 export const IPC_KEY = {
+  QUIT_APP: 'quit-app',
+  CLOSE_APP: 'close-app',
+  SHUTDOWN_APP: 'shutdown-app',
+
   ON_LEAGUE_CLIENT: 'on-league-client',
   TEAM_JOIN_ROOM: 'team-join-room',
   LEAGUE_JOIN_ROOM: 'league-join-room',
@@ -9,7 +13,6 @@ export const IPC_KEY = {
   END_OF_THE_GAME: 'end-of-the-game',
   START_IN_GAME: 'start-in-game',
   CHAMP_INFO: 'champion-info',
-  SHUTDOWN_APP: 'shutdown-app',
   SUMMONER_MUTE: 'summoner-mute',
   INPUT_SHORTCUT_KEY: 'input-shortcut-key',
 };
