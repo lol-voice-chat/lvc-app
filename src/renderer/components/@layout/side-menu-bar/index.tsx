@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as _ from './style';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import {
@@ -22,7 +22,8 @@ export type RecentSummonerType = SummonerType & { isRequested: boolean };
 
 function SideMenuBar() {
   const summoner = useRecoilValue(summonerState);
-  const [summonerStatusSocket, setSummonerStatusSocket] = useState<Socket | null>(null);
+  const summonerStatusSocket = useRef<Socket | null>(null);
+  const [isConnectedSocket, setIsConnectedSocket] = useState(false);
 
   const [generalSettingModal, setGeneralSettingModal] = useState(false);
   const [settingsConfig, setSettingsConfig] = useRecoilState<GeneralSettingsConfigType | null>(
@@ -37,7 +38,10 @@ function SideMenuBar() {
 
   useEffect(() => {
     const socket = connectSocket('/summoner-status');
-    setSummonerStatusSocket(socket);
+    socket.on('connect', () => {
+      summonerStatusSocket.current = socket;
+      setIsConnectedSocket(true);
+    });
 
     /* 롤 인게임 시작 */
     ipcRenderer.once(IPC_KEY.START_IN_GAME, (_, summonerIdList: any) => {
@@ -54,17 +58,19 @@ function SideMenuBar() {
       setSummonerRecordInfo(summoner);
 
       /* 앱 시작 - 온라인 */
-      ipcRenderer.once('online-summoner', (_, friendSummonerIdList: any) => {
-        summonerStatusSocket?.emit(
-          'online-summoner',
-          { summoner, friendSummonerIdList },
-          (recentSummonerList: RecentSummonerType[]) => {
-            setRecentSummonerList(recentSummonerList);
-          }
-        );
-      });
+      if (isConnectedSocket) {
+        ipcRenderer.once('online-summoner', (_, friendSummonerIdList: any) => {
+          summonerStatusSocket.current?.emit(
+            'online-summoner',
+            { summoner, friendSummonerIdList },
+            (recentSummonerList: RecentSummonerType[]) => {
+              setRecentSummonerList(recentSummonerList);
+            }
+          );
+        });
+      }
     }
-  }, [summoner]);
+  }, [summoner, isConnectedSocket]);
 
   useEffect(() => {
     electronStore.get('general-settings-config').then((config) => {
@@ -93,7 +99,7 @@ function SideMenuBar() {
       );
     }
     ipcRenderer.send('friend-request', recentSummonerInfo);
-    summonerStatusSocket?.emit('friend-request', recentSummonerInfo.summonerId);
+    summonerStatusSocket.current?.emit('friend-request', recentSummonerInfo.summonerId);
   };
 
   return (
