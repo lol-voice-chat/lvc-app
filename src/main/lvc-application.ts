@@ -16,8 +16,11 @@ import { request } from './lib/common';
 import { RedisClient } from './lib/redis-client';
 import axios from 'axios';
 import https from 'https';
+import EventEmitter from 'events';
 
 export let credentials: Credentials;
+
+const champSelectEvent = new EventEmitter();
 
 let isJoinedRoom = false;
 let isInProgress = false;
@@ -53,6 +56,10 @@ export class LvcApplication {
 
     await this.fetchLeagueClient();
     friendRequestEvent.emit('friend-request');
+
+    champSelectEvent.once('champ-select', (myTeam) => {
+      this.joinTeamVoice(myTeam);
+    });
   }
 
   private async onLeagueClientUx() {
@@ -112,10 +119,7 @@ export class LvcApplication {
     //챔피언 선택
     let myTeamMembers: Map<number, number> = new Map();
     this.ws.subscribe('/lol-champ-select/v1/session', async (data) => {
-      if (!isJoinedRoom) {
-        isJoinedRoom = true;
-        this.joinTeamVoice(data.myTeam);
-      }
+      champSelectEvent.emit('champ-select', data.myTeam);
 
       if (data.actions[0]) {
         for (const summoner of data.actions[0]) {
