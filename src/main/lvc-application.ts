@@ -22,7 +22,6 @@ export let credentials: Credentials;
 
 const champSelectEvent = new EventEmitter();
 
-let isJoinedRoom = false;
 let isInProgress = false;
 let isEndGame = false;
 
@@ -155,7 +154,6 @@ export class LvcApplication {
 
       const isCloseWindow = await this.isCloseChampionSelectionWindow(data.timer.phase);
       if (isCloseWindow) {
-        isJoinedRoom = false;
         this.webContents.send(IPC_KEY.EXIT_CHAMP_SELECT);
         myTeamMembers = new Map();
       }
@@ -204,7 +202,7 @@ export class LvcApplication {
   private async isCloseChampionSelectionWindow(phase: string) {
     const gameflowPhase = await request('/lol-gameflow/v1/gameflow-phase');
     const isNotChampSelect: boolean = gameflowPhase === 'None' || gameflowPhase === 'Lobby';
-    return isJoinedRoom && phase === '' && isNotChampSelect;
+    return phase === '' && isNotChampSelect;
   }
 
   private fetchTime(): Promise<number> {
@@ -240,11 +238,9 @@ export class LvcApplication {
     const flow = await request('/lol-gameflow/v1/session');
 
     if (flow.phase === 'ChampSelect') {
-      isJoinedRoom = true;
-
       const { myTeam } = await request('/lol-champ-select/v1/session');
-      this.joinTeamVoice(myTeam);
 
+      this.joinTeamVoice(myTeam);
       this.sendMyTeamChampionStatsList(myTeam);
       return;
     }
