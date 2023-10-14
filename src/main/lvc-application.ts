@@ -12,12 +12,15 @@ import { Summoner } from './models/summoner';
 import { LeagueRanked } from './models/league-ranked';
 import { MemberChampionData, Team } from './models/team';
 import { friendRequestEvent } from './event/friend-requet-event';
-import request from './lib/request';
+import { request } from './lib/common';
 import { RedisClient } from './lib/redis-client';
 import axios from 'axios';
 import https from 'https';
+import EventEmitter from 'events';
 
 export let credentials: Credentials;
+
+const champSelectEvent = new EventEmitter();
 
 let isJoinedRoom = false;
 let isInProgress = false;
@@ -53,6 +56,10 @@ export class LvcApplication {
 
     await this.fetchLeagueClient();
     friendRequestEvent.emit('friend-request');
+
+    champSelectEvent.once('champ-select', (myTeam) => {
+      this.joinTeamVoice(myTeam);
+    });
   }
 
   private async onLeagueClientUx() {
@@ -112,10 +119,7 @@ export class LvcApplication {
     //챔피언 선택
     let myTeamMembers: Map<number, number> = new Map();
     this.ws.subscribe('/lol-champ-select/v1/session', async (data) => {
-      if (!isJoinedRoom) {
-        isJoinedRoom = true;
-        this.joinTeamVoice(data.myTeam);
-      }
+      champSelectEvent.emit('champ-select', data.myTeam);
 
       if (data.actions[0]) {
         for (const summoner of data.actions[0]) {
@@ -179,17 +183,16 @@ export class LvcApplication {
         });
       }
 
-      //게임진행 도중 나감
       if (data.phase === 'None' && isInProgress) {
         isInProgress = false;
         this.webContents.send(IPC_KEY.EXIT_IN_GAME);
       }
 
-      //게임 종료
       if (data.phase === 'WaitingForStats' && !isEndGame) {
         isEndGame = true;
         this.webContents.send(IPC_KEY.END_OF_THE_GAME);
 
+        //전적 업데이트
         const matchHistory = await MatchHistory.fetch(this.summoner.puuid);
         const key = `match-length-${this.summoner.summonerId}`;
         await this.redisClient.set(key, matchHistory.matchLength.toString());

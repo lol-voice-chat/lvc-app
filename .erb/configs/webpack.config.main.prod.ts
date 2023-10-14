@@ -7,6 +7,12 @@ import { merge } from 'webpack-merge';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 const configuration: webpack.Configuration = {
+  externals: {
+    //ws 외부 종속성 번들링 제외
+    bufferutil: 'bufferutil',
+    'utf-8-validate': 'utf-8-validate',
+  },
+
   devtool: 'source-map',
 
   mode: 'production',
@@ -32,9 +38,8 @@ const configuration: webpack.Configuration = {
   },
 
   plugins: [
-    //번들 크기 시각화
     new BundleAnalyzerPlugin({
-      analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
+      analyzerMode: 'disabled',
       analyzerPort: 8888,
     }),
   ],

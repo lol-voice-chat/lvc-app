@@ -3,14 +3,13 @@ import onElectronStore, { store } from './store';
 import { generalSettingsDefaultConfig, IPC_KEY } from '../const';
 import { GlobalKeyboardListener } from 'node-global-key-listener';
 import { LvcApplication } from './lvc-application';
-import isDev from 'electron-is-dev';
-import path from 'path';
 import { RedisClient } from './lib/redis-client';
 import { GeneralSettingsConfigType } from '../renderer/@store/atom';
+import { resolvePath } from './lib/common';
+
 
 const globalKey = new GlobalKeyboardListener();
 let mainWindow: BrowserWindow;
-const redisClient = new RedisClient();
 
 if (
   !store.has('general-settings-config') ||
@@ -34,17 +33,14 @@ const createWindow = () => {
     autoHideMenuBar: true,
   });
 
-  mainWindow.loadURL(
-    isDev
-      ? 'http://localhost:3000'
-      : `file://${path.resolve(__dirname, '../renderer/', 'index.html')}`
-  );
+  mainWindow.loadURL(resolvePath());
 
   handleLoadEvent();
 };
 
 async function handleLoadEvent() {
   mainWindow.webContents.on('did-finish-load', async () => {
+    const redisClient = new RedisClient();
     const app = new LvcApplication(mainWindow.webContents, redisClient);
 
     app.initialize().then(() => {

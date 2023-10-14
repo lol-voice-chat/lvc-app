@@ -55,9 +55,8 @@ const configuration: webpack.Configuration = {
   },
 
   plugins: [
-    //번들 크기 시각화
     new BundleAnalyzerPlugin({
-      analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
+      analyzerMode: 'disabled',
       analyzerPort: 8889,
     }),
 
