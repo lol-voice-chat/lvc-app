@@ -12,7 +12,7 @@ import { Summoner } from './models/summoner';
 import { LeagueRanked } from './models/league-ranked';
 import { MemberChampionData, Team } from './models/team';
 import { friendRequestEvent } from './event/friend-requet-event';
-import request from './lib/request';
+import { request } from './lib/common';
 import { RedisClient } from './lib/redis-client';
 import axios from 'axios';
 import https from 'https';
