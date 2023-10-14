@@ -7,7 +7,6 @@ export const ProfileContainer = styled.div<{ isBackground: boolean }>`
 
   width: 70%;
   height: 68.5px;
-
   padding: 2.5px 20px;
 
   border-radius: 7.5px;
@@ -60,12 +59,21 @@ export const Information = styled.div<{ nameLength: number }>`
     #badge-bundle {
       display: flex;
       align-items: center;
-      #rank-badge {
-        margin-right: 75px;
-      }
-      #friend-add-badge {
-        height: 13.5px;
-        width: auto;
+
+      #friend-request-box {
+        position: relative;
+        width: 18.41px;
+
+        #friend-request-badge {
+          height: 13.5px;
+          width: auto;
+          margin-left: 65px;
+        }
+
+        #info-text {
+          font-size: 12px;
+          color: ${PALETTE.WHITE_1};
+        }
       }
     }
   }
