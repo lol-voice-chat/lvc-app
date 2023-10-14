@@ -92,7 +92,15 @@ body {
   * {
     font-family: 'Inter', sans-serif;
     font-weight: ${FONT.MEDIUM};
+
+    img {
+      -webkit-user-drag: none;
+    }
   }    
+
+  overflow: hidden;
+  background-color: #303236;
+
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-use-select: none;
@@ -107,9 +115,6 @@ body {
       cursor: text;
     }
   }
-
-  overflow: hidden;
-  background-color: #303236;
 }
 article,
 aside,

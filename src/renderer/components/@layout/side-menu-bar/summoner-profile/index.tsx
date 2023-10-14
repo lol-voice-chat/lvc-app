@@ -1,39 +1,59 @@
+import React, { useRef } from 'react';
 import { RecentSummonerType } from '..';
 import { SummonerType } from '../../../../@type/summoner';
 import RankBadge from '../../../@common/rank-badge';
 import * as _ from './style';
-import React from 'react';
-const { ipcRenderer } = window.require('electron');
+import InfoBox from '../../../@common/info-box';
+import useHover from '../../../../hooks/use-hover';
 
-function SummonerProfile(props: {
+type SummonerProfilePropsType = {
   summoner: SummonerType | RecentSummonerType | null;
   isMine: SummonerType | null;
   isBackground: boolean;
   handleClickSummonerProfile: (isMine: boolean) => void;
   handleClickAddFriend: (summonerInfo: RecentSummonerType) => void;
-}) {
+};
+
+function SummonerProfile(props: SummonerProfilePropsType) {
+  const { state } = useHover({ elementIds: ['friend-request-badge'] });
+
+  const handleClickRequestFriend = (e: any) => {
+    if (document.getElementById('friend-request-badge') !== e.target) {
+      props.handleClickSummonerProfile(props.isMine === props.summoner);
+    }
+  };
+
   return (
-    <_.ProfileContainer
-      isBackground={props.isBackground}
-      onClick={() => props.handleClickSummonerProfile(props.isMine === props.summoner)}
-    >
+    <_.ProfileContainer isBackground={props.isBackground} onClick={handleClickRequestFriend}>
       {props.summoner ? (
         <>
           <img id="profile-icon" src={props.summoner.profileImage} />
+
           <_.Information nameLength={props.summoner.name.length}>
             <div id="summoner-info">
               <p id="name">{props.summoner.name}</p>
+
               <div id="badge-bundle">
                 <RankBadge size="small" tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
+
                 {!(props.isMine === props.summoner) &&
                   !(props.summoner as RecentSummonerType).isRequested && (
-                    <img
-                      id="friend-add-badge"
-                      src="img/friend_add_icon.svg"
-                      onClick={() =>
-                        props.handleClickAddFriend(props.summoner as RecentSummonerType)
-                      }
-                    />
+                    <div id="friend-request-box">
+                      {state.get('friend-request-badge') && (
+                        <InfoBox
+                          width={65}
+                          height={27.5}
+                          infoElement={<p id="info-text">친구 요청</p>}
+                        />
+                      )}
+                      <img
+                        id="friend-request-badge"
+                        src="img/friend_request_icon.svg"
+                        onClick={() =>
+                          props.handleClickAddFriend(props.summoner as RecentSummonerType)
+                        }
+                      />
+                    </div>
                   )}
               </div>
             </div>

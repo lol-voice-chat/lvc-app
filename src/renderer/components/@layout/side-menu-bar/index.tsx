@@ -16,6 +16,7 @@ import RecentSummonerList from './recent-summoner-list';
 import AppHeader from './app-header';
 import GeneralSettingModal from '../../general-setting-modal';
 import electronStore from '../../../@store/electron';
+import InfoBox from '../../@common/info-box';
 const { ipcRenderer } = window.require('electron');
 
 export type RecentSummonerType = SummonerType & { isRequested: boolean };

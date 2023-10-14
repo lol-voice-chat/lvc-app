@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { PALETTE } from '../../../const';
+import { FONT, PALETTE } from '../../../const';
 
 export const SideBarContainer = styled.div`
   position: absolute;
