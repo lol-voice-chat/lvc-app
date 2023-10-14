@@ -1,13 +1,10 @@
 import webpack from 'webpack';
 import webpackPaths from './webpack.paths';
 import TsconfigPathsPlugins from 'tsconfig-paths-webpack-plugin';
+import { dependencies as externals } from '../../release/app/package.json';
 
 const configuration: webpack.Configuration = {
-  externals: {
-    //ws 외부 종속성 번들링 제외
-    bufferutil: 'bufferutil',
-    'utf-8-validate': 'utf-8-validate',
-  },
+  externals: [...Object.keys(externals || {})],
 
   module: {
     rules: [
