@@ -179,17 +179,16 @@ export class LvcApplication {
         });
       }
 
-      //게임진행 도중 나감
       if (data.phase === 'None' && isInProgress) {
         isInProgress = false;
         this.webContents.send(IPC_KEY.EXIT_IN_GAME);
       }
 
-      //게임 종료
       if (data.phase === 'WaitingForStats' && !isEndGame) {
         isEndGame = true;
         this.webContents.send(IPC_KEY.END_OF_THE_GAME);
 
+        //전적 업데이트
         const matchHistory = await MatchHistory.fetch(this.summoner.puuid);
         const key = `match-length-${this.summoner.summonerId}`;
         await this.redisClient.set(key, matchHistory.matchLength.toString());
