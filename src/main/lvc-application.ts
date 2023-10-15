@@ -20,8 +20,8 @@ import EventEmitter from 'events';
 
 export let credentials: Credentials;
 
-let champSelectEvent = new EventEmitter();
-
+const onceTeamJoinRoomEvent = new EventEmitter();
+let isJoinedRoom = false;
 let isInProgress = false;
 let isEndGame = false;
 
@@ -55,10 +55,6 @@ export class LvcApplication {
 
     await this.fetchLeagueClient();
     friendRequestEvent.emit('friend-request');
-
-    champSelectEvent.once('champ-select', (myTeam) => {
-      this.joinTeamVoice(myTeam);
-    });
   }
 
   private async onLeagueClientUx() {
@@ -114,49 +110,51 @@ export class LvcApplication {
 
   public async handle() {
     await this.handleCurrentPhase();
+    this.handleOnceTeamJoinRoomEvent();
 
-    //챔피언 선택
     let myTeamMembers: Map<number, number> = new Map();
     this.ws.subscribe('/lol-champ-select/v1/session', async (data) => {
-      champSelectEvent.emit('champ-select', data.myTeam);
+      if (data.timer.phase === 'BAN_PICK' || data.timer.phase === 'FINALIZATION') {
+        onceTeamJoinRoomEvent.emit('once-team-join-room', data.myTeam);
 
-      if (data.actions[0]) {
-        for (const summoner of data.actions[0]) {
-          if (summoner.championId === 0) {
-            myTeamMembers.set(summoner.id, summoner.championId);
-            continue;
-          }
-          const championId = myTeamMembers.get(summoner.id);
-
-          if (championId !== summoner.championId) {
-            myTeamMembers.set(summoner.id, summoner.championId);
-
-            let summonerId;
-            if (summoner.id >= 5) {
-              if (summoner.id === 5 && data.myTeam.some((member: any) => member.team === 1)) {
-                summonerId = data.myTeam[summoner.id - 1].summonerId;
-              } else {
-                summonerId = data.myTeam[summoner.id - 5].summonerId;
-              }
-            } else {
-              summonerId = data.myTeam[summoner.id - 1].summonerId;
+        if (data.actions[0]) {
+          for (const summoner of data.actions[0]) {
+            if (summoner.championId === 0) {
+              myTeamMembers.set(summoner.id, summoner.championId);
+              continue;
             }
+            const championId = myTeamMembers.get(summoner.id);
 
-            const championStats: ChampionStats = this.matchHistory.getChampionStats(
-              summonerId,
-              summoner.championId
-            );
+            if (championId !== summoner.championId) {
+              myTeamMembers.set(summoner.id, summoner.championId);
 
-            this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
+              let summonerId;
+              if (summoner.id >= 5) {
+                if (summoner.id === 5 && data.myTeam.some((member: any) => member.team === 1)) {
+                  summonerId = data.myTeam[summoner.id - 1].summonerId;
+                } else {
+                  summonerId = data.myTeam[summoner.id - 5].summonerId;
+                }
+              } else {
+                summonerId = data.myTeam[summoner.id - 1].summonerId;
+              }
+
+              const championStats: ChampionStats = this.matchHistory.getChampionStats(
+                summonerId,
+                summoner.championId
+              );
+
+              this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
+            }
           }
         }
       }
 
       const isCloseWindow = await this.isCloseChampionSelectionWindow(data.timer.phase);
       if (isCloseWindow) {
+        isJoinedRoom = false;
         this.webContents.send(IPC_KEY.EXIT_CHAMP_SELECT);
         myTeamMembers = new Map();
-        champSelectEvent = new EventEmitter();
       }
     });
 
@@ -185,8 +183,6 @@ export class LvcApplication {
       if (data.phase === 'None' && isInProgress) {
         isInProgress = false;
         this.webContents.send(IPC_KEY.EXIT_IN_GAME);
-        myTeamMembers = new Map();
-        champSelectEvent = new EventEmitter();
       }
 
       if (data.phase === 'WaitingForStats' && !isEndGame) {
@@ -198,9 +194,6 @@ export class LvcApplication {
         const key = `match-length-${this.summoner.summonerId}`;
         await this.redisClient.set(key, matchHistory.matchLength.toString());
         this.matchHistory = matchHistory;
-
-        myTeamMembers = new Map();
-        champSelectEvent = new EventEmitter();
       }
     });
   }
@@ -208,7 +201,7 @@ export class LvcApplication {
   private async isCloseChampionSelectionWindow(phase: string) {
     const gameflowPhase = await request('/lol-gameflow/v1/gameflow-phase');
     const isNotChampSelect: boolean = gameflowPhase === 'None' || gameflowPhase === 'Lobby';
-    return phase === '' && isNotChampSelect;
+    return isJoinedRoom && phase === '' && isNotChampSelect;
   }
 
   private fetchTime(): Promise<number> {
@@ -244,9 +237,11 @@ export class LvcApplication {
     const flow = await request('/lol-gameflow/v1/session');
 
     if (flow.phase === 'ChampSelect') {
-      const { myTeam } = await request('/lol-champ-select/v1/session');
+      isJoinedRoom = true;
 
+      const { myTeam } = await request('/lol-champ-select/v1/session');
       this.joinTeamVoice(myTeam);
+
       this.sendMyTeamChampionStatsList(myTeam);
       return;
     }
@@ -373,6 +368,15 @@ export class LvcApplication {
       roomName,
       teamName,
       summonerDataList,
+    });
+  }
+
+  private handleOnceTeamJoinRoomEvent() {
+    onceTeamJoinRoomEvent.on('once-team-join-room', (myTeam) => {
+      if (!isJoinedRoom) {
+        this.joinTeamVoice(myTeam);
+        isJoinedRoom = true;
+      }
     });
   }
 }
