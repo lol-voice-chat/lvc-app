@@ -16,11 +16,9 @@ import { request } from './lib/common';
 import { RedisClient } from './lib/redis-client';
 import axios from 'axios';
 import https from 'https';
-import EventEmitter from 'events';
 
 export let credentials: Credentials;
 
-const onceTeamJoinRoomEvent = new EventEmitter();
 let isJoinedRoom = false;
 let isInProgress = false;
 let isEndGame = false;
@@ -110,12 +108,26 @@ export class LvcApplication {
 
   public async handle() {
     await this.handleCurrentPhase();
-    this.handleOnceTeamJoinRoomEvent();
 
     let myTeamMembers: Map<number, number> = new Map();
     this.ws.subscribe('/lol-champ-select/v1/session', async (data) => {
       if (data.timer.phase === 'BAN_PICK' || data.timer.phase === 'FINALIZATION') {
-        onceTeamJoinRoomEvent.emit('once-team-join-room', data.myTeam);
+        if (!isJoinedRoom) {
+          this.joinTeamVoice(data.myTeam);
+
+          const team = new Team(data.myTeam);
+          const summoner = team.findBySummonerId(this.summoner.summonerId);
+          if (summoner && summoner.championId !== 0) {
+            const championStats: ChampionStats = this.matchHistory.getChampionStats(
+              this.summoner.summonerId,
+              summoner.championId
+            );
+
+            this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
+          }
+
+          isJoinedRoom = true;
+        }
 
         if (data.actions[0]) {
           for (const summoner of data.actions[0]) {
@@ -368,27 +380,6 @@ export class LvcApplication {
       roomName,
       teamName,
       summonerDataList,
-    });
-  }
-
-  private handleOnceTeamJoinRoomEvent() {
-    onceTeamJoinRoomEvent.on('once-team-join-room', (myTeam) => {
-      if (!isJoinedRoom) {
-        this.joinTeamVoice(myTeam);
-
-        const team = new Team(myTeam);
-        const summoner = team.findBySummonerId(this.summoner.summonerId);
-        if (summoner && summoner.championId !== 0) {
-          const championStats: ChampionStats = this.matchHistory.getChampionStats(
-            this.summoner.summonerId,
-            summoner.championId
-          );
-
-          this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
-        }
-
-        isJoinedRoom = true;
-      }
     });
   }
 }
