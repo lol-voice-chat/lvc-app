@@ -25,6 +25,7 @@ function useLeagueHandler() {
 
     /* 챔피언 선택창 on */
     ipcRenderer.on(IPC_KEY.TEAM_JOIN_ROOM, (_, { roomName }) => {
+      console.log('챔선');
       setGameStatus('champ-select');
       electronStore.set('team-voice-room-name', roomName);
     });

@@ -10,9 +10,11 @@ function Router() {
     <>
       <HashRouter>
         <NavBar />
+
         <Routes>
           <Route path={PATH.HOME} element={<GeneralChatRoom />} />
         </Routes>
+
         <SideMenuBar />
       </HashRouter>
     </>
