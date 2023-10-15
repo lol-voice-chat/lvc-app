@@ -111,7 +111,6 @@ export class MatchHistory {
 
     let winCount = 0;
     let failCount = 0;
-    let gameCount = 0;
 
     const statsList: StatsData[] = await Promise.all(
       this.matches.slice(0, RECENT_PVP_MATCH_COUNT).map(async (match: Match) => {
@@ -157,19 +156,17 @@ export class MatchHistory {
           failCount++;
         }
 
-        gameCount++;
-
         return stats;
       })
     );
 
     const kda = `
-      ${this.getStatsAverage(killCount, gameCount)}/
-      ${this.getStatsAverage(deathCount, gameCount)}/
-      ${this.getStatsAverage(assistCount, gameCount)}
+      ${this.getStatsAverage(killCount, RECENT_PVP_MATCH_COUNT)}/
+      ${this.getStatsAverage(deathCount, RECENT_PVP_MATCH_COUNT)}/
+      ${this.getStatsAverage(assistCount, RECENT_PVP_MATCH_COUNT)}
       `;
-    const damage = Math.floor(totalDamage / gameCount).toString();
-    const cs = this.getStatsAverage(totalCs, gameCount);
+    const damage = Math.floor(totalDamage / RECENT_PVP_MATCH_COUNT).toString();
+    const cs = this.getStatsAverage(totalCs, RECENT_PVP_MATCH_COUNT);
     const mostChampionList = this.getMostChampionList(recentUsedChampionList);
     const odds = (winCount / RECENT_PVP_MATCH_COUNT) * 100;
 
