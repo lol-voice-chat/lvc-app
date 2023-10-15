@@ -375,6 +375,18 @@ export class LvcApplication {
     onceTeamJoinRoomEvent.on('once-team-join-room', (myTeam) => {
       if (!isJoinedRoom) {
         this.joinTeamVoice(myTeam);
+
+        const team = new Team(myTeam);
+        const summoner = team.findBySummonerId(this.summoner.summonerId);
+        if (summoner && summoner.championId !== 0) {
+          const championStats: ChampionStats = this.matchHistory.getChampionStats(
+            this.summoner.summonerId,
+            summoner.championId
+          );
+
+          this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
+        }
+
         isJoinedRoom = true;
       }
     });
