@@ -83,8 +83,8 @@ function useVoiceChat() {
     const disconnectVoiceChat = () => {
       socket.disconnect();
       setUserStream(null);
-      disconnectAllTeam();
       setGameStatus('none');
+      disconnectAllTeam();
     };
   };
 

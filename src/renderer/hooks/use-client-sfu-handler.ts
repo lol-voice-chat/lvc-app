@@ -162,14 +162,20 @@ function useClientSfuHandler() {
       });
 
       if (voiceRoomType === 'team') {
-        setMyTeamSummoners(
-          (prev) => prev?.filter((summoner) => summoner.summonerId !== targetId) ?? null
-        );
+        setMyTeamSummoners((prev) => {
+          if (prev) {
+            return [...prev.filter((summoner) => summoner.summonerId !== targetId)];
+          }
+          return null;
+        });
       }
       if (voiceRoomType === 'league') {
-        setEnemySummoners(
-          (prev) => prev?.filter((summoner) => summoner.summonerId !== targetId) ?? null
-        );
+        setEnemySummoners((prev) => {
+          if (prev) {
+            return [...prev.filter((summoner) => summoner.summonerId !== targetId)];
+          }
+          return null;
+        });
       }
     };
 
