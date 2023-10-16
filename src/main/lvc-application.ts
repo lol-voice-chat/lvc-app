@@ -93,7 +93,7 @@ export class LvcApplication {
     this.webContents.send('online-summoner', recentSummonerList);
 
     const matchHistory = await MatchHistory.fetch(summoner.puuid);
-    const key = this.summoner.summonerId.toString() + 'match-length';
+    const key = summoner.summonerId.toString() + 'match-length';
     await this.redisClient.set(key, matchHistory.matchLength);
 
     this.summoner = summoner;
