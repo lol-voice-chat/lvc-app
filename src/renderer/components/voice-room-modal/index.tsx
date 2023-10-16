@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import useVoiceChat from '../../hooks/use-voice-chat';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import {
   enemySummonersState,
   gameStatusState,
+  mySummonerStatsState,
   myTeamSummonersState,
   summonerState,
   userStreamState,
@@ -15,7 +16,7 @@ import { IPC_KEY } from '../../../const';
 import electronStore from '../../@store/electron';
 import { Socket } from 'socket.io-client';
 import SummonerLeagueVoiceBlock from '../summoner-league-voice-block';
-import { ChampionInfoType } from '../../@type/summoner';
+import { ChampionInfoType, SummonerStatsType } from '../../@type/summoner';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -28,6 +29,7 @@ function VoiceRoomModal() {
   const myTeamSummoners = useRecoilValue(myTeamSummonersState);
   const enemySummoners = useRecoilValue(enemySummonersState);
 
+  const [mySummonerStats, setMySummonerStats] = useRecoilState(mySummonerStatsState);
   const [selectedChampList, setSelectedChampList] = useState<Map<number, ChampionInfoType>>(
     new Map()
   );
@@ -46,6 +48,11 @@ function VoiceRoomModal() {
       const socket = connectSocket('/team-voice-chat/manage');
       socket.emit('team-manage-join-room', roomName);
       setTeamManagementSocket(socket);
+    });
+
+    ipcRenderer.send(IPC_KEY.FETCH_MATCH_HISTORY, { puuid: summoner?.puuid, isMine: true });
+    ipcRenderer.once(IPC_KEY.FETCH_MATCH_HISTORY, (_, summonerStats: SummonerStatsType) => {
+      setMySummonerStats(summonerStats);
     });
 
     /* 입장시 팀원의 (자신포함) 챔피언 리스트 받음 */
@@ -93,10 +100,10 @@ function VoiceRoomModal() {
     <S.VoiceRoom>
       {(gameStatus === 'champ-select' || gameStatus === 'in-game') && (
         <>
-          {summoner && (
+          {summoner && mySummonerStats && (
             <SummonerVoiceBlock
               isMine={true}
-              summoner={summoner}
+              summoner={{ ...summoner, summonerStats: mySummonerStats }}
               selectedChampInfo={selectedChampList.get(summoner.summonerId) ?? null}
               managementSocket={teamManagementSocket}
             />
@@ -125,10 +132,10 @@ function VoiceRoomModal() {
           </S.TeamBlocks>
 
           <S.TeamBlocks isMyTeam={true}>
-            {summoner && (
+            {summoner && mySummonerStats && (
               <SummonerLeagueVoiceBlock
                 isMine={true}
-                summoner={summoner}
+                summoner={{ ...summoner, summonerStats: mySummonerStats }}
                 managementSocket={leagueManagementSocket}
               />
             )}

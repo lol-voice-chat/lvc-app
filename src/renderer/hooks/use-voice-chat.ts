@@ -2,6 +2,7 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   enemySummonersState,
   gameStatusState,
+  mySummonerStatsState,
   myTeamSummonersState,
   summonerState,
   userDeviceIdState,
@@ -23,7 +24,9 @@ function useVoiceChat() {
   const { connect } = useClientSfuHandler();
 
   const setGameStatus = useSetRecoilState(gameStatusState);
+
   const summoner = useRecoilValue(summonerState);
+  const mySummonerStats = useRecoilValue(mySummonerStatsState);
 
   useEffect(() => {
     getUserAudioStream(userDeviceId).then((stream) => {
@@ -40,7 +43,7 @@ function useVoiceChat() {
     electronStore.get('team-voice-room-name').then((roomName) => {
       socket.emit(
         'team-join-room',
-        { roomName, summoner },
+        { roomName, summoner: { ...summoner, summonerStats: mySummonerStats } },
         (teamRoom: { rtpCapabilities: RtpCapabilities }) => {
           const { disconnectAll, closeConsumer } = connect({
             voiceRoomType: 'team',
@@ -98,7 +101,7 @@ function useVoiceChat() {
     electronStore.get('league-voice-room-name').then(({ roomName, teamName }) => {
       socket.emit(
         'league-join-room',
-        { roomName, teamName, summoner },
+        { roomName, teamName, summoner: { ...summoner, summonerStats: mySummonerStats } },
         (leagueRoom: { rtpCapabilities: RtpCapabilities }) => {
           const { disconnectAll, closeConsumer } = connect({
             voiceRoomType: 'league',
