@@ -43,8 +43,9 @@ export class LvcApplication {
     client.on('connect', async (newCredentials) => {
       credentials = newCredentials;
       this.ws = await createWebSocketConnection();
-      await this.fetchLeagueClient();
-      this.handle();
+      this.fetchLeagueClient().then(() => {
+        this.handle();
+      });
     });
 
     client.on('disconnect', () => {
@@ -203,6 +204,9 @@ export class LvcApplication {
 
         //전적 업데이트
         const matchHistory = await MatchHistory.fetch(this.summoner.puuid);
+        const summonerStats: SummonerStats = await matchHistory.getSummonerStats();
+        this.webContents.send(IPC_KEY.END_OF_THE_GAME, summonerStats);
+
         const key = `match-length-${this.summoner.summonerId}`;
         await this.redisClient.set(key, matchHistory.matchLength.toString());
         this.matchHistory = matchHistory;
