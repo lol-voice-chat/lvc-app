@@ -74,9 +74,8 @@ export class MatchHistory {
   public static async fetch(puuid: string) {
     const url = `/lol-match-history/v1/products/lol/${puuid}/matches?begIndex=0&endIndex=99`;
     const matchHistoryData = await request(url);
-    const matches = matchHistoryData.games.games
-      .slice(0, 100)
-      .filter((match: Match) => match.gameType !== 'CUSTOM_GAME');
+    const matches = matchHistoryData.games.games.slice(0, 100);
+    // .filter((match: Match) => match.gameType !== 'CUSTOM_GAME');
 
     return new MatchHistory(matches);
   }
