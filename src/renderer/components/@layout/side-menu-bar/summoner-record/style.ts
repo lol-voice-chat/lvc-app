@@ -160,7 +160,6 @@ export const RecentlyPlayList = styled.div`
   #category-tag {
     display: flex;
     justify-content: space-between;
-
     width: 100%;
     margin-bottom: 15px;
 
@@ -188,11 +187,9 @@ export const RecentlyPlayList = styled.div`
         display: flex;
         justify-content: center;
         align-items: center;
-
         width: 80px;
         height: 25px;
         margin-right: 7.5px;
-
         font-size: 14px;
         color: ${PALETTE.WHITE_1};
       }
@@ -206,6 +203,22 @@ export const RecentlyPlayList = styled.div`
     #kill-involvement {
       font-size: 15px;
       color: ${PALETTE.WHITE_1};
+    }
+  }
+
+  #none-game-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    img {
+      width: 27%;
+      height: auto;
+      margin: 17px;
+    }
+    p {
+      font-size: 16.5px;
+      color: ${PALETTE.GRAY_1};
     }
   }
 
