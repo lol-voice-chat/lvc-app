@@ -52,7 +52,7 @@ export class Summoner {
   public getTier() {
     const { rankedLeagueDivision, rankedLeagueTier } = this.lol;
 
-    if (rankedLeagueDivision === 'NA' && rankedLeagueTier === '') {
+    if (!rankedLeagueDivision && !rankedLeagueTier) {
       return 'Unrank';
     }
 
