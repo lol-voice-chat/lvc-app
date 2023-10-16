@@ -9,7 +9,6 @@ interface SelectorPorpsType {
   placeholder: string;
   menuPosition: 'top' | 'bottom' | 'auto';
   value: OptionType;
-  defaultOption: OptionType;
 }
 
 function SelectBar(props: SelectorPorpsType) {
@@ -22,7 +21,6 @@ function SelectBar(props: SelectorPorpsType) {
       menuPlacement={props.menuPosition}
       isSearchable={false}
       value={props.value}
-      defaultValue={props.defaultOption}
     />
   );
 }
