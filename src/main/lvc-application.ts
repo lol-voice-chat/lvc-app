@@ -8,8 +8,7 @@ import {
   createWebSocketConnection,
 } from 'league-connect';
 import { IPC_KEY } from '../const';
-import { Summoner } from './models/summoner';
-import { LeagueRanked } from './models/league-ranked';
+import { Summoner, OnlineSummoner } from './models/summoner';
 import { MemberChampionData, Team } from './models/team';
 import { friendRequestEvent } from './event/friend-requet-event';
 import { request } from './lib/common';
@@ -74,15 +73,8 @@ export class LvcApplication {
 
   private async fetchLeagueClient() {
     const summoner: Summoner = await Summoner.fetch();
-
-    const [leagueRanked, matchHistory] = await Promise.all([
-      LeagueRanked.fetch(summoner.puuid),
-      MatchHistory.fetch(summoner.puuid),
-    ]);
-
+    const matchHistory = await MatchHistory.fetch(summoner.puuid);
     const summonerStats: SummonerStats = await matchHistory.getSummonerStats();
-    const friendList = await request('/lol-chat/v1/friends');
-    const friendSummonerIdList = friendList.map((friend: any) => friend.summonerId);
 
     const leagueClient = {
       gameName: summoner.gameName,
@@ -92,16 +84,20 @@ export class LvcApplication {
       pid: summoner.pid,
       puuid: summoner.puuid,
       summonerId: summoner.summonerId,
-      profileImage: summoner.getMyProfileImage(),
-      tier: leagueRanked.getTier(),
+      profileImage: summoner.getProfileImage(),
+      tier: summoner.getTier(),
       summonerStats,
     };
 
     this.webContents.send('on-league-client', leagueClient);
-    this.webContents.send('online-summoner', friendSummonerIdList);
 
-    const key = `match-length-${summoner.summonerId}`;
-    await this.redisClient.set(key, matchHistory.matchLength.toString());
+    const recentSummonerList = await summoner.getRecentSummonerList(
+      this.redisClient,
+      summonerStats,
+      matchHistory.matchLength
+    );
+
+    this.webContents.send('online-summoner', recentSummonerList);
 
     this.summoner = summoner;
     this.matchHistory = matchHistory;
@@ -177,38 +173,52 @@ export class LvcApplication {
         const { teamOne, teamTwo } = data.gameData;
         await this.joinLeagueVoice(teamOne, teamTwo);
 
-        this.fetchTime().then((currentTime: number) => {
-          const ms = currentTime * 1000;
-          setTimeout(() => {
-            const { teamOne, teamTwo } = data.gameData;
-            const teamOneSummoners = new Team(teamOne);
-            const teamTwoSummoners = new Team(teamTwo);
-
-            const summoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
-            const myTeam = summoner ? teamOneSummoners : teamTwoSummoners;
-            const summonerIdList: number[] = myTeam.getSummonerIdList(this.summoner.summonerId);
-
-            this.webContents.send(IPC_KEY.START_IN_GAME, summonerIdList);
-          }, 1000 * 60 + 5000 - ms);
-        });
+        const inGameCurrentTime = await this.fetchTime();
+        setTimeout(() => {
+          this.webContents.send(IPC_KEY.START_IN_GAME);
+        }, 1000 * 60 + 5000 - inGameCurrentTime * 1000);
       }
 
       if (data.phase === 'None' && isInProgress) {
         isInProgress = false;
         this.webContents.send(IPC_KEY.EXIT_IN_GAME);
+        myTeamMembers = new Map();
       }
 
       if (data.phase === 'WaitingForStats' && !isEndGame) {
         isEndGame = true;
-        this.webContents.send(IPC_KEY.END_OF_THE_GAME);
 
-        //전적 업데이트
         const matchHistory = await MatchHistory.fetch(this.summoner.puuid);
         const summonerStats: SummonerStats = await matchHistory.getSummonerStats();
-        this.webContents.send(IPC_KEY.END_OF_THE_GAME, summonerStats);
 
-        const key = `match-length-${this.summoner.summonerId}`;
-        await this.redisClient.set(key, matchHistory.matchLength.toString());
+        const { teamOne, teamTwo } = data.gameData;
+        const teamOneSummoners = new Team(teamOne);
+        const teamTwoSummoners = new Team(teamTwo);
+
+        const existsSummoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
+        const myTeam = existsSummoner ? teamOneSummoners : teamTwoSummoners;
+        const summonerIdList: number[] = myTeam.getSummonerIdList(this.summoner.summonerId);
+
+        //최근 함께한 소환사 업데이트
+        const recentSummonerKey = this.summoner.summonerId.toString() + 'recent';
+        const summoner: OnlineSummoner = await this.redisClient.get(recentSummonerKey);
+
+        summoner.recentSummonerIdList = summoner.recentSummonerIdList.concat(summonerIdList);
+        summoner.details.summonerStats = summonerStats;
+        summoner.matchLength = matchHistory.matchLength;
+        await this.redisClient.set(recentSummonerKey, JSON.stringify(summoner));
+
+        const recentSummonerList = await this.summoner.getRecentSummonerList(
+          this.redisClient,
+          summonerStats,
+          matchHistory.matchLength
+        );
+
+        this.webContents.send(IPC_KEY.END_OF_THE_GAME, {
+          summonerStats,
+          recentSummonerList,
+        });
+
         this.matchHistory = matchHistory;
       }
     });
@@ -366,16 +376,20 @@ export class LvcApplication {
 
     const roomName = teamOne.createVoiceRoomName() + teamTwo.createVoiceRoomName();
 
-    const summoner = teamOne.findBySummonerId(this.summoner.summonerId);
-    const myTeam = summoner ? teamOne : teamTwo;
+    const existsSummoner = teamOne.findBySummonerId(this.summoner.summonerId);
+    const myTeam = existsSummoner ? teamOne : teamTwo;
     const teamName = myTeam.createVoiceRoomName();
+
+    const key = this.summoner.summonerId.toString() + 'recent';
+    const summoner = await this.redisClient.get(key);
+    const matchLength = summoner.matchLength;
 
     const [teamOneSummonerChampionKdaList, teamTwoSummonerChampionKdaList]: [
       MemberChampionData[],
       MemberChampionData[]
     ] = await Promise.all([
-      teamOne.getMemberChampionKdaList(this.redisClient),
-      teamTwo.getMemberChampionKdaList(this.redisClient),
+      teamOne.getMemberChampionKdaList(matchLength),
+      teamTwo.getMemberChampionKdaList(matchLength),
     ]);
     const summonerDataList = teamOneSummonerChampionKdaList.concat(teamTwoSummonerChampionKdaList);
 

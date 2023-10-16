@@ -284,13 +284,13 @@ export class MatchHistory {
     return championStats;
   }
 
-  public getChampionKda(myMatchLength: number, championId: number) {
+  public getChampionKda(matchLength: number, championId: number) {
     let champKill = 0;
     let champDeath = 0;
     let champAssists = 0;
     let champCount = 0;
 
-    this.matches.slice(0, myMatchLength).forEach((match: Match) => {
+    this.matches.slice(0, matchLength).forEach((match: Match) => {
       const participant: ParticipantData = match.participants[0];
 
       if (participant.championId === championId) {
