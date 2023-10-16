@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as _ from './style';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 import {
   GeneralSettingsConfigType,
   generalSettingsConfigState,
@@ -51,10 +51,12 @@ function SideMenuBar() {
         _,
         update: { summonerStats: SummonerStatsType; recentSummonerList: RecentSummonerType[] }
       ) => {
+        console.log(update);
         setSummoner((prev) => {
           if (prev) {
-            prev.summonerStats = update.summonerStats;
-            return { ...prev };
+            const newSummoner = { ...prev };
+            newSummoner.summonerStats = update.summonerStats;
+            return newSummoner;
           }
           return null;
         });
@@ -73,13 +75,11 @@ function SideMenuBar() {
       setSummonerRecordInfo(summoner);
 
       /* 앱 켬 - 최근 소환사 불러오기 */
-      if (isConnectedSocket) {
-        ipcRenderer.once('online-summoner', (_, recentSummonerList: RecentSummonerType[]) => {
-          setRecentSummonerList(recentSummonerList);
-        });
-      }
+      ipcRenderer.once('online-summoner', (_, recentSummonerList: RecentSummonerType[]) => {
+        setRecentSummonerList(recentSummonerList);
+      });
     }
-  }, [summoner, isConnectedSocket]);
+  }, [summoner]);
 
   useEffect(() => {
     electronStore.get('general-settings-config').then((config) => {
