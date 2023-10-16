@@ -27,6 +27,9 @@ function SummonerRecord(props: { summonerData: SummonerType | null }) {
                   <img src={championIcon} />
                 ))}
               </div>
+              {props.summonerData.summonerStats.mostChampionList.length === 0 && (
+                <p id="value">전적없음</p>
+              )}
             </div>
           </_.AverageInfo>
 
@@ -53,6 +56,7 @@ function SummonerRecord(props: { summonerData: SummonerType | null }) {
               <p>최근 플레이</p>
               <p>킬관여</p>
             </div>
+
             {props.summonerData.summonerStats.statsList.map(
               ({ championIcon, kda, isWin, time, killInvolvement }, idx) => (
                 <div id="game-info" key={idx}>
@@ -64,6 +68,13 @@ function SummonerRecord(props: { summonerData: SummonerType | null }) {
                   <p id="kill-involvement">{killInvolvement}</p>
                 </div>
               )
+            )}
+
+            {props.summonerData.summonerStats.statsList.length === 0 && (
+              <div id="none-game-info">
+                <img src="img/warning_icon.svg" />
+                <p>전적이 없습니다.</p>
+              </div>
             )}
           </_.RecentlyPlayList>
         </>

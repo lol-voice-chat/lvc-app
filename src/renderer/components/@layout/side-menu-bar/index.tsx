@@ -16,13 +16,12 @@ import RecentSummonerList from './recent-summoner-list';
 import AppHeader from './app-header';
 import GeneralSettingModal from '../../general-setting-modal';
 import electronStore from '../../../@store/electron';
-import InfoBox from '../../@common/info-box';
 const { ipcRenderer } = window.require('electron');
 
 export type RecentSummonerType = SummonerType & { isRequested: boolean };
 
 function SideMenuBar() {
-  const summoner = useRecoilValue(summonerState);
+  const [summoner, setSummoner] = useRecoilState(summonerState);
   const summonerStatusSocket = useRef<Socket | null>(null);
   const [isConnectedSocket, setIsConnectedSocket] = useState(false);
 
@@ -39,24 +38,32 @@ function SideMenuBar() {
 
   useEffect(() => {
     const socket = connectSocket('/summoner-manager');
+
     socket.on('connect', () => {
       summonerStatusSocket.current = socket;
       setIsConnectedSocket(true);
     });
 
-    /* 롤 인게임 시작 */
-    ipcRenderer.on(IPC_KEY.START_IN_GAME, (_, summonerIdList: string[]) => {
-      socket.emit('start-in-game', summonerIdList);
-    });
-
-    /* 롤 게임 끝 */
-    ipcRenderer.on(IPC_KEY.END_OF_THE_GAME, (_, summonerStats: SummonerStatsType) => {
-      socket.emit('end-of-the-game', summonerStats);
-    });
+    /* 롤 게임 끝 - 소환사 전적, 최근 함께한 소환사 업데이트 */
+    ipcRenderer.on(
+      IPC_KEY.END_OF_THE_GAME,
+      (
+        _,
+        update: { summonerStats: SummonerStatsType; recentSummonerList: RecentSummonerType[] }
+      ) => {
+        setSummoner((prev) => {
+          if (prev) {
+            prev.summonerStats = update.summonerStats;
+            return { ...prev };
+          }
+          return null;
+        });
+        setRecentSummonerList(update.recentSummonerList);
+      }
+    );
 
     return () => {
       socket.disconnect();
-      ipcRenderer.removeAllListeners(IPC_KEY.START_IN_GAME);
       ipcRenderer.removeAllListeners(IPC_KEY.END_OF_THE_GAME);
     };
   }, []);
@@ -65,16 +72,10 @@ function SideMenuBar() {
     if (summoner) {
       setSummonerRecordInfo(summoner);
 
-      /* 앱 시작 - 온라인 */
+      /* 앱 켬 - 최근 소환사 불러오기 */
       if (isConnectedSocket) {
-        ipcRenderer.once('online-summoner', (_, friendSummonerIdList: any) => {
-          summonerStatusSocket.current?.emit(
-            'online-summoner',
-            { summoner, friendSummonerIdList },
-            (recentSummonerList: RecentSummonerType[]) => {
-              setRecentSummonerList(recentSummonerList);
-            }
-          );
+        ipcRenderer.once('online-summoner', (_, recentSummonerList: RecentSummonerType[]) => {
+          setRecentSummonerList(recentSummonerList);
         });
       }
     }

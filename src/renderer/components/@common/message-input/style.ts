@@ -44,9 +44,7 @@ export const MessageInputContainer = styled.div<{ isOnClient: boolean }>`
     }
     #text-area {
       width: calc(100% - 50px);
-      height: 35px;
       max-height: 400px;
-      line-height: 35px;
       border-radius: 0 7.5px 7.5px 0;
 
       word-break: break-all;
