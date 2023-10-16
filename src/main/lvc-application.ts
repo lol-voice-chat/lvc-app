@@ -75,7 +75,6 @@ export class LvcApplication {
 
   private async fetchLeagueClient() {
     const summoner: Summoner = await Summoner.fetch();
-    const matchHistory = await MatchHistory.fetch(summoner.puuid);
 
     const leagueClient = {
       gameName: summoner.gameName,
@@ -93,6 +92,7 @@ export class LvcApplication {
     const recentSummonerList = await summoner.getRecentSummonerList(this.redisClient);
     this.webContents.send('online-summoner', recentSummonerList);
 
+    const matchHistory = await MatchHistory.fetch(summoner.puuid);
     const key = this.summoner.summonerId.toString() + 'match-length';
     await this.redisClient.set(key, matchHistory.matchLength);
 

@@ -3,8 +3,8 @@ import { MatchHistory } from '../models/match-history';
 import { IPC_KEY } from '../../const';
 
 export const handleFetchMatchHistoryEvent = (matchHistory: MatchHistory) => {
-  ipcMain.on(IPC_KEY.FETCH_MATCH_HISTORY, async (event, { puuid, isMe }) => {
-    if (isMe) {
+  ipcMain.on(IPC_KEY.FETCH_MATCH_HISTORY, async (event, { puuid, isMine }) => {
+    if (isMine) {
       const summonerStats = await matchHistory.getSummonerStats();
       event.reply(IPC_KEY.FETCH_MATCH_HISTORY, summonerStats);
       return;
