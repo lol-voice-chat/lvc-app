@@ -10,7 +10,7 @@ type SummonerProfilePropsType = {
   summoner: SummonerType | RecentSummonerType | null;
   isMine: SummonerType | null;
   isBackground: boolean;
-  handleClickSummonerProfile: (isMine: boolean) => void;
+  handleClickSummonerProfile: (summoner: SummonerType) => void;
   handleClickAddFriend: (summonerInfo: RecentSummonerType) => void;
 };
 
@@ -18,13 +18,20 @@ function SummonerProfile(props: SummonerProfilePropsType) {
   const { state } = useHover({ elementIds: ['friend-request-badge'] });
 
   const handleClickRequestFriend = (e: any) => {
-    if (document.getElementById('friend-request-badge') !== e.target) {
-      props.handleClickSummonerProfile(props.isMine === props.summoner);
-    }
+    // if (document.getElementById('friend-request-badge') !== e.target) {
+    //   props.handleClickSummonerProfile(props.isMine === props.summoner);
+    // }
   };
 
   return (
-    <_.ProfileContainer isBackground={props.isBackground} onClick={handleClickRequestFriend}>
+    <_.ProfileContainer
+      isBackground={props.isBackground}
+      onClick={() => {
+        if (props.summoner) {
+          props.handleClickSummonerProfile(props.summoner);
+        }
+      }}
+    >
       {props.summoner ? (
         <>
           <img id="profile-icon" src={props.summoner.profileImage} />

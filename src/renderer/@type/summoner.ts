@@ -10,7 +10,6 @@ export type SummonerType = {
   name: string;
   profileImage: string;
   tier: string;
-  summonerStats: SummonerStatsType;
 };
 
 export type SummonerStatsType = {

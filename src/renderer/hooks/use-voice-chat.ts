@@ -1,4 +1,4 @@
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   enemySummonersState,
   gameStatusState,
@@ -18,7 +18,7 @@ const { ipcRenderer } = window.require('electron');
 
 function useVoiceChat() {
   const userDeviceId = useRecoilValue(userDeviceIdState);
-  const setUserStream = useSetRecoilState(userStreamState);
+  const [userStream, setUserStream] = useRecoilState(userStreamState);
 
   const { connect } = useClientSfuHandler();
 
@@ -82,6 +82,7 @@ function useVoiceChat() {
 
     const disconnectVoiceChat = () => {
       socket.disconnect();
+      userStream?.removeTrack(userStream.getAudioTracks()[0]);
       setUserStream(null);
       setGameStatus('none');
       disconnectAllTeam();
