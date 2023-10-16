@@ -3,7 +3,7 @@ import { Socket } from 'socket.io-client';
 import { getSummonerSpeaker } from '../utils/audio';
 import * as mediasoup from 'mediasoup-client';
 import { ConsumerTransportType, DeviceType, TransportType } from '../@type/webRtc';
-import { SummonerType } from '../@type/summoner';
+import { SummonerStatsType, SummonerType } from '../@type/summoner';
 import { useSetRecoilState } from 'recoil';
 import { enemySummonersState, myTeamSummonersState } from '../@store/atom';
 
@@ -73,19 +73,33 @@ function useClientSfuHandler() {
         .catch((err) => console.log('프로듀스 메서드 에러', err));
     };
 
-    socket.on('new-producer', (newProducer: { id: string; summoner: SummonerType }) => {
-      signalNewConsumerTransport(newProducer.id, newProducer.summoner);
-    });
+    socket.on(
+      'new-producer',
+      (newProducer: {
+        id: string;
+        summoner: SummonerType & { summonerStats: SummonerStatsType };
+      }) => {
+        signalNewConsumerTransport(newProducer.id, newProducer.summoner);
+      }
+    );
 
     const getProducers = () => {
-      socket.emit('get-producers', (producers: { id: string; summoner: SummonerType }[]) => {
-        producers.forEach(({ id, summoner }) => {
-          signalNewConsumerTransport(id, summoner);
-        });
-      });
+      socket.emit(
+        'get-producers',
+        (
+          producers: { id: string; summoner: SummonerType & { summonerStats: SummonerStatsType } }[]
+        ) => {
+          producers.forEach(({ id, summoner }) => {
+            signalNewConsumerTransport(id, summoner);
+          });
+        }
+      );
     };
 
-    const signalNewConsumerTransport = (remoteProducerId: string, newSummoner: SummonerType) => {
+    const signalNewConsumerTransport = (
+      remoteProducerId: string,
+      newSummoner: SummonerType & { summonerStats: SummonerStatsType }
+    ) => {
       if (voiceRoomType === 'team') {
         setMyTeamSummoners((prev) => [...(prev ?? []), newSummoner]);
       }
