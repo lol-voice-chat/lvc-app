@@ -1,5 +1,5 @@
 import { WebContents } from 'electron';
-import { ChampionStats, MatchHistory, SummonerStats } from './models/match-history';
+import { ChampionStats, MatchHistory } from './models/match-history';
 import {
   Credentials,
   LeagueClient,
@@ -8,13 +8,14 @@ import {
   createWebSocketConnection,
 } from 'league-connect';
 import { IPC_KEY } from '../const';
-import { Summoner, OnlineSummoner } from './models/summoner';
+import { Summoner, SummonerInfo } from './models/summoner';
 import { MemberChampionData, Team } from './models/team';
-import { friendRequestEvent } from './event/friend-requet-event';
+import handleFriendRequestEvent from './event/friend-requet-event';
 import { request } from './lib/common';
 import { RedisClient } from './lib/redis-client';
 import axios from 'axios';
 import https from 'https';
+import handleFetchMatchHistoryEvent from './event/fetch-match-history';
 
 export let credentials: Credentials;
 
@@ -52,7 +53,8 @@ export class LvcApplication {
     });
 
     await this.fetchLeagueClient();
-    friendRequestEvent.emit('friend-request');
+    handleFriendRequestEvent();
+    handleFetchMatchHistoryEvent(this.matchHistory);
   }
 
   private async onLeagueClientUx() {
@@ -74,7 +76,6 @@ export class LvcApplication {
   private async fetchLeagueClient() {
     const summoner: Summoner = await Summoner.fetch();
     const matchHistory = await MatchHistory.fetch(summoner.puuid);
-    const summonerStats: SummonerStats = await matchHistory.getSummonerStats();
 
     const leagueClient = {
       gameName: summoner.gameName,
@@ -86,18 +87,14 @@ export class LvcApplication {
       summonerId: summoner.summonerId,
       profileImage: summoner.getProfileImage(),
       tier: summoner.getTier(),
-      summonerStats,
     };
-
     this.webContents.send('on-league-client', leagueClient);
 
-    const recentSummonerList = await summoner.getRecentSummonerList(
-      this.redisClient,
-      summonerStats,
-      matchHistory.matchLength
-    );
-
+    const recentSummonerList = await summoner.getRecentSummonerList(this.redisClient);
     this.webContents.send('online-summoner', recentSummonerList);
+
+    const key = this.summoner.summonerId.toString() + 'match-length';
+    await this.redisClient.set(key, matchHistory.matchLength);
 
     this.summoner = summoner;
     this.matchHistory = matchHistory;
@@ -189,8 +186,11 @@ export class LvcApplication {
         isEndGame = true;
 
         const matchHistory = await MatchHistory.fetch(this.summoner.puuid);
-        const summonerStats: SummonerStats = await matchHistory.getSummonerStats();
 
+        const key = this.summoner.summonerId.toString() + 'match-length';
+        await this.redisClient.set(key, matchHistory.matchLength);
+
+        //최근 함께한 소환사 업데이트
         const { teamOne, teamTwo } = data.gameData;
         const teamOneSummoners = new Team(teamOne);
         const teamTwoSummoners = new Team(teamTwo);
@@ -199,25 +199,14 @@ export class LvcApplication {
         const myTeam = existsSummoner ? teamOneSummoners : teamTwoSummoners;
         const summonerIdList: number[] = myTeam.getSummonerIdList(this.summoner.summonerId);
 
-        //최근 함께한 소환사 업데이트
         const recentSummonerKey = this.summoner.summonerId.toString() + 'recent';
-        const summoner: OnlineSummoner = await this.redisClient.get(recentSummonerKey);
+        const summoner: SummonerInfo = await this.redisClient.get(recentSummonerKey);
 
         summoner.recentSummonerIdList = summoner.recentSummonerIdList.concat(summonerIdList);
-        summoner.details.summonerStats = summonerStats;
-        summoner.matchLength = matchHistory.matchLength;
         await this.redisClient.set(recentSummonerKey, JSON.stringify(summoner));
 
-        const recentSummonerList = await this.summoner.getRecentSummonerList(
-          this.redisClient,
-          summonerStats,
-          matchHistory.matchLength
-        );
-
-        this.webContents.send(IPC_KEY.END_OF_THE_GAME, {
-          summonerStats,
-          recentSummonerList,
-        });
+        const recentSummonerList = await this.summoner.getRecentSummonerList(this.redisClient);
+        this.webContents.send(IPC_KEY.END_OF_THE_GAME, recentSummonerList);
 
         this.matchHistory = matchHistory;
       }
@@ -380,9 +369,8 @@ export class LvcApplication {
     const myTeam = existsSummoner ? teamOne : teamTwo;
     const teamName = myTeam.createVoiceRoomName();
 
-    const key = this.summoner.summonerId.toString() + 'recent';
-    const summoner = await this.redisClient.get(key);
-    const matchLength = summoner.matchLength;
+    const key = this.summoner.summonerId.toString() + 'match-length';
+    const matchLength = await this.redisClient.get(key);
 
     const [teamOneSummonerChampionKdaList, teamTwoSummonerChampionKdaList]: [
       MemberChampionData[],

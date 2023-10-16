@@ -1,12 +1,10 @@
 import { request } from '../lib/common';
 import { plainToInstance } from 'class-transformer';
 import { RedisClient } from '../lib/redis-client';
-import { SummonerStats } from './match-history';
 
-export interface OnlineSummoner {
+export interface SummonerInfo {
   details: any;
   recentSummonerIdList: number[];
-  matchLength: number;
 }
 
 interface LeagueRanked {
@@ -73,11 +71,7 @@ export class Summoner {
     }
   }
 
-  public async getRecentSummonerList(
-    redisClient: RedisClient,
-    summonerStats: SummonerStats,
-    matchLength: number
-  ) {
+  public async getRecentSummonerList(redisClient: RedisClient) {
     const friendList = await request('/lol-chat/v1/friends');
     const friendSummonerIdList = friendList.map((friend: any) => friend.summonerId);
 
@@ -85,7 +79,7 @@ export class Summoner {
     const existsSummoner = await redisClient.exists(key);
 
     if (existsSummoner) {
-      const summoner: OnlineSummoner = await redisClient.get(key);
+      const summoner: SummonerInfo = await redisClient.get(key);
       if (summoner.recentSummonerIdList.length === 0) {
         return [];
       }
@@ -127,14 +121,12 @@ export class Summoner {
       summonerId: this.summonerId,
       profileImage: this.getProfileImage(),
       tier: this.getTier(),
-      summonerStats,
       isRequested: false,
     };
 
-    const summoner: OnlineSummoner = {
+    const summoner: SummonerInfo = {
       details,
       recentSummonerIdList: [],
-      matchLength,
     };
 
     await redisClient.set(key, JSON.stringify(summoner));
