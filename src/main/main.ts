@@ -10,11 +10,11 @@ import { resolvePath } from './lib/common';
 const globalKey = new GlobalKeyboardListener();
 let mainWindow: BrowserWindow;
 
-if (
-  !store.has('general-settings-config') ||
+const isDifferentGeneralSetting =
   Object.keys(store.get('general-settings-config') ?? {}).length !==
-    Object.keys(generalSettingsDefaultConfig).length
-) {
+  Object.keys(generalSettingsDefaultConfig).length;
+
+if (!store.has('general-settings-config') || isDifferentGeneralSetting) {
   store.set('general-settings-config', generalSettingsDefaultConfig);
 }
 
