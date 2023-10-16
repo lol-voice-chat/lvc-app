@@ -33,10 +33,10 @@ export class Team {
     return summonerIds.sort().join('').toString();
   }
 
-  public async getMemberChampionKdaList(redisClient: RedisClient) {
+  public async getMemberChampionKdaList(matchLength: number) {
     const memberChampionKdaList: MemberChampionData[] = await Promise.all(
       this.members.map((member) => {
-        return member.getChampionKda(redisClient);
+        return member.getChampionKda(matchLength);
       })
     );
 

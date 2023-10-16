@@ -31,13 +31,21 @@ export class RedisClient {
     return await this.client.set(key, value);
   }
 
-  public async get(key: string): Promise<string> {
+  public async get(key: string): Promise<any> {
     const value = await this.client.get(key);
 
     if (!value) {
       throw new Error('redis 응답값이 null입니다.');
     }
 
-    return value;
+    return JSON.parse(value);
+  }
+
+  public async exists(key: string) {
+    return await this.client.exists(key);
+  }
+
+  public async expire(key: string, duration: number) {
+    await this.client.expire(key, duration);
   }
 }
