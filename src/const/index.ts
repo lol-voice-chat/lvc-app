@@ -15,6 +15,7 @@ export const IPC_KEY = {
   CHAMP_INFO: 'champion-info',
   SUMMONER_MUTE: 'summoner-mute',
   INPUT_SHORTCUT_KEY: 'input-shortcut-key',
+  FETCH_MATCH_HISTORY: 'fetch-match-history',
 };
 
 export const generalSettingsDefaultConfig = {
