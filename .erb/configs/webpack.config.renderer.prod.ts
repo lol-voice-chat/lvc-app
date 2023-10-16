@@ -29,6 +29,10 @@ const configuration: webpack.Configuration = {
     //svg
     rules: [
       {
+        test: /\.png$/,
+        type: 'asset/resource',
+      },
+      {
         test: /\.svg$/,
         use: [
           {
