@@ -9,7 +9,7 @@ import {
 import SummonerProfile from './summoner-profile';
 import SummonerRecord from './summoner-record';
 import { IPC_KEY } from '../../../../const';
-import { SummonerType } from '../../../@type/summoner';
+import { SummonerStatsType, SummonerType } from '../../../@type/summoner';
 import { connectSocket } from '../../../utils/socket';
 import { Socket } from 'socket.io-client';
 import RecentSummonerList from './recent-summoner-list';
@@ -38,19 +38,26 @@ function SideMenuBar() {
   const [recentSummonerList, setRecentSummonerList] = useState<RecentSummonerType[] | null>(null);
 
   useEffect(() => {
-    const socket = connectSocket('/summoner-status');
+    const socket = connectSocket('/summoner-manager');
     socket.on('connect', () => {
       summonerStatusSocket.current = socket;
       setIsConnectedSocket(true);
     });
 
     /* 롤 인게임 시작 */
-    ipcRenderer.once(IPC_KEY.START_IN_GAME, (_, summonerIdList: any) => {
+    ipcRenderer.on(IPC_KEY.START_IN_GAME, (_, summonerIdList: string[]) => {
       socket.emit('start-in-game', summonerIdList);
+    });
+
+    /* 롤 게임 끝 */
+    ipcRenderer.on(IPC_KEY.END_OF_THE_GAME, (_, summonerStats: SummonerStatsType) => {
+      socket.emit('end-of-the-game', summonerStats);
     });
 
     return () => {
       socket.disconnect();
+      ipcRenderer.removeAllListeners(IPC_KEY.START_IN_GAME);
+      ipcRenderer.removeAllListeners(IPC_KEY.END_OF_THE_GAME);
     };
   }, []);
 
