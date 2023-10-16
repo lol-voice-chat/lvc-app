@@ -54,7 +54,10 @@ function GeneralSettingModal(props: {
         if (userDeviceId === deviceId) selectedOption = option;
       });
 
-      if (!selectedOption || beforeDefaultDeviceName !== optionList[0].label) {
+      if (
+        !selectedOption ||
+        (beforeDefaultDeviceName !== null && beforeDefaultDeviceName !== optionList[0].label)
+      ) {
         setUserDeviceId('default');
         selectedOption = optionList[0];
       }
@@ -104,7 +107,6 @@ function GeneralSettingModal(props: {
             <SelectBar
               options={deviceOptionList}
               handleChangeOption={handleClickDeviceOption}
-              defaultOption={curDeviceOption}
               menuPosition="bottom"
               placeholder=""
               value={curDeviceOption}
