@@ -1,26 +1,26 @@
 import { MatchHistory } from './match-history';
 
+export interface ChampionData {
+  summonerId: number;
+  championIcon: string;
+  kda: string;
+}
+
 interface MemberType {
   summonerId: number;
   championId: number;
   puuid: string;
-  summonerName: string;
-  profileIconId: number;
 }
 
 export class Member {
   summonerId: number;
   championId: number;
   puuid: string;
-  summonerName: string;
-  profileIconId: number;
 
   constructor(member: MemberType) {
     this.summonerId = member.summonerId;
     this.championId = member.championId;
     this.puuid = member.puuid;
-    this.summonerName = member.summonerName;
-    this.profileIconId = member.profileIconId;
   }
 
   public static valueOf = (summoner: MemberType) => {
@@ -35,12 +35,12 @@ export class Member {
     const matchHistory = await MatchHistory.fetch(this.puuid);
 
     const championKda = matchHistory.getChampionKda(matchLength, this.championId);
-    const summonerKda = {
+    const data: ChampionData = {
       summonerId: this.summonerId,
       championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${this.championId}/tile`,
       kda: championKda,
     };
 
-    return summonerKda;
+    return data;
   }
 }
