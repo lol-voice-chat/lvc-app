@@ -1,17 +1,4 @@
-import { RedisClient } from '../lib/redis-client';
-import { MatchHistory } from './match-history';
-import { Member } from './member';
-
-export interface MemberMatchHistoryData {
-  summonerId: number;
-  matchHistory: MatchHistory;
-}
-
-export interface MemberChampionData {
-  summonerId: number;
-  championIcon: string;
-  kda: string;
-}
+import { Member, ChampionData } from './member';
 
 export class Team {
   private members: Member[];
@@ -34,7 +21,7 @@ export class Team {
   }
 
   public async getMemberChampionKdaList(matchLength: number) {
-    const memberChampionKdaList: MemberChampionData[] = await Promise.all(
+    const memberChampionKdaList: ChampionData[] = await Promise.all(
       this.members.map((member) => {
         return member.getChampionKda(matchLength);
       })

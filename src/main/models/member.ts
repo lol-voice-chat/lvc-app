@@ -1,5 +1,11 @@
 import { MatchHistory } from './match-history';
 
+export interface ChampionData {
+  summonerId: number;
+  championIcon: string;
+  kda: string;
+}
+
 interface MemberType {
   summonerId: number;
   championId: number;
@@ -35,12 +41,12 @@ export class Member {
     const matchHistory = await MatchHistory.fetch(this.puuid);
 
     const championKda = matchHistory.getChampionKda(matchLength, this.championId);
-    const summonerKda = {
+    const data: ChampionData = {
       summonerId: this.summonerId,
       championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${this.championId}/tile`,
       kda: championKda,
     };
 
-    return summonerKda;
+    return data;
   }
 }
