@@ -10,12 +10,12 @@ import {
 import { IPC_KEY } from '../const';
 import { Summoner, SummonerInfo } from './models/summoner';
 import { MemberChampionData, Team } from './models/team';
+import handleFetchMatchHistoryEvent from './event/fetch-match-history';
 import handleFriendRequestEvent from './event/friend-requet-event';
 import { request } from './lib/common';
 import { RedisClient } from './lib/redis-client';
 import axios from 'axios';
 import https from 'https';
-import handleFetchMatchHistoryEvent from './event/fetch-match-history';
 
 export let credentials: Credentials;
 
