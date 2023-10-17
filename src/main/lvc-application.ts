@@ -9,7 +9,7 @@ import {
 } from 'league-connect';
 import { IPC_KEY } from '../const';
 import { Summoner, SummonerInfo } from './models/summoner';
-import { MemberChampionData, Team } from './models/team';
+import { Team } from './models/team';
 import handleFetchMatchHistoryEvent from './event/fetch-match-history';
 import handleFriendRequestEvent from './event/friend-requet-event';
 import { request } from './lib/common';
@@ -186,11 +186,11 @@ export class LvcApplication {
         isEndGame = true;
 
         const matchHistory = await MatchHistory.fetch(this.summoner.puuid);
-
         const key = this.summoner.summonerId.toString() + 'match-length';
         await this.redisClient.set(key, matchHistory.matchLength);
 
-        //최근 함께한 소환사 업데이트
+        this.matchHistory = matchHistory;
+
         const { teamOne, teamTwo } = data.gameData;
         const teamOneSummoners = new Team(teamOne);
         const teamTwoSummoners = new Team(teamTwo);
@@ -199,16 +199,16 @@ export class LvcApplication {
         const myTeam = existsSummoner ? teamOneSummoners : teamTwoSummoners;
         const summonerIdList: number[] = myTeam.getSummonerIdList(this.summoner.summonerId);
 
+        //최근 함께한 소환사 업데이트
         const recentSummonerKey = this.summoner.summonerId.toString() + 'recent';
         const summoner: SummonerInfo = await this.redisClient.get(recentSummonerKey);
-
         summoner.recentSummonerIdList = summoner.recentSummonerIdList.concat(summonerIdList);
+
         await this.redisClient.set(recentSummonerKey, JSON.stringify(summoner));
 
+        //업데이트된 최근 함께한 소환사 리스트 전달
         const recentSummonerList = await this.summoner.getRecentSummonerList(this.redisClient);
         this.webContents.send(IPC_KEY.END_OF_THE_GAME, recentSummonerList);
-
-        this.matchHistory = matchHistory;
       }
     });
   }
@@ -366,10 +366,7 @@ export class LvcApplication {
     const key = this.summoner.summonerId.toString() + 'match-length';
     const matchLength = await this.redisClient.get(key);
 
-    const [teamOneSummonerChampionKdaList, teamTwoSummonerChampionKdaList]: [
-      MemberChampionData[],
-      MemberChampionData[]
-    ] = await Promise.all([
+    const [teamOneSummonerChampionKdaList, teamTwoSummonerChampionKdaList] = await Promise.all([
       teamOne.getMemberChampionKdaList(matchLength),
       teamTwo.getMemberChampionKdaList(matchLength),
     ]);
