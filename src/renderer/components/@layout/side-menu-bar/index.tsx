@@ -78,7 +78,13 @@ function SideMenuBar() {
   }, [summoner]);
 
   const handleClickSummonerProfile = (target: SummonerType) => {
-    setCurSummonerProfile(isRecordPage ? summoner : target);
+    if (isRecordPage) {
+      setCurSummonerProfile(summoner);
+      setIsFriendSummoner(true);
+    } else {
+      setCurSummonerProfile(target);
+    }
+
     setIsRecordPage((prev) => !prev);
   };
 
