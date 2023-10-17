@@ -104,7 +104,7 @@ function SideMenuBar() {
         {isRecordPage ? (
           // 소환사 전적
           <SummonerRecord
-            isMine={curSummonerProfile === summoner}
+            isMine={curSummonerProfile?.name === summoner?.name}
             puuid={curSummonerProfile?.puuid ?? ''}
             setIsFriend={setIsFriendSummoner}
           />

@@ -14,7 +14,7 @@ function MessageBlock(props: {
   image?: string;
 }) {
   const handleClickLoadSummonerRecord = (e: any) => {
-    if (e.target.id === 'summoner-icon' || e.target.id === 'name' || e.target.id === 'rank-badge') {
+    if (e.target.id === 'summoner-icon' || e.target.id === 'name') {
       ipcRenderer.send(IPC_KEY.CLICK_SUMMONER_PROFILE, props.summoner);
     }
   };
@@ -73,10 +73,6 @@ const BlockContainer = styled.div`
       }
       #rank-badge {
         margin-right: 7px;
-        &,
-        * {
-          cursor: pointer;
-        }
       }
       #time {
         font-size: 11px;
