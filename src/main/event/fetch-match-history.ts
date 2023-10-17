@@ -8,20 +8,17 @@ export const handleFetchMatchHistoryEvent = (matchHistory: MatchHistory) => {
     if (isMine) {
       const isFriend = true;
       const summonerStats = await matchHistory.getSummonerStats();
-      console.log(summonerStats);
       event.reply(IPC_KEY.FETCH_MATCH_HISTORY, { summonerStats, isFriend });
-      return;
+    } else {
+      const [friends, _matchHistory]: [Friends, MatchHistory] = await Promise.all([
+        Friends.fetch(),
+        MatchHistory.fetch(puuid),
+      ]);
+
+      const summonerStats = await _matchHistory.getSummonerStats();
+      const isFriend = friends.isFriend(puuid);
+      event.reply(IPC_KEY.FETCH_MATCH_HISTORY, { summonerStats, isFriend });
     }
-
-    const [friends, _matchHistory]: [Friends, MatchHistory] = await Promise.all([
-      Friends.fetch(),
-      MatchHistory.fetch(puuid),
-    ]);
-
-    const summonerStats = await _matchHistory.getSummonerStats();
-    const isFriend = friends.isFriend(puuid);
-    event.reply(IPC_KEY.FETCH_MATCH_HISTORY, { summonerStats, isFriend });
-    return;
   });
 };
 

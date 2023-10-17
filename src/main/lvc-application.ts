@@ -98,7 +98,7 @@ export class LvcApplication {
     this.matchHistory = matchHistory;
 
     handleFriendRequestEvent();
-    handleFetchMatchHistoryEvent(this.matchHistory);
+    handleFetchMatchHistoryEvent(matchHistory);
   }
 
   public async handle() {
