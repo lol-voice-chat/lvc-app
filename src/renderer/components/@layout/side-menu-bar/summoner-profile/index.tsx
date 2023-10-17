@@ -17,7 +17,7 @@ function SummonerProfile(props: SummonerProfilePropsType) {
   const { state } = useHover({ elementIds: ['friend-request-badge'] });
 
   const handleClickProfile = (e: any) => {
-    if (props.summoner && e.target !== document.getElementById('friend-request-badge')) {
+    if (props.summoner && e.target.id !== 'friend-request-badge') {
       props.summoner && props.handleClickSummonerProfile(props.summoner);
     }
   };

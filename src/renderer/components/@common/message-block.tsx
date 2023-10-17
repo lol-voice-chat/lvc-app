@@ -53,6 +53,7 @@ const BlockContainer = styled.div`
     height: 45px;
     border-radius: 50%;
     margin-right: 12px;
+    cursor: pointer;
   }
   #message-info {
     display: flex;
@@ -68,9 +69,14 @@ const BlockContainer = styled.div`
         font-size: 14px;
         color: ${PALETTE.WHITE_1};
         margin-right: 7px;
+        cursor: pointer;
       }
       #rank-badge {
         margin-right: 7px;
+        &,
+        * {
+          cursor: pointer;
+        }
       }
       #time {
         font-size: 11px;
