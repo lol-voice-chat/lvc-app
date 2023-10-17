@@ -156,8 +156,8 @@ export class LvcApplication {
         }
       }
 
-      const isCloseWindow = await this.isCloseChampionSelectionWindow(data.timer.phase);
-      if (isCloseWindow) {
+      //매칭 종료
+      if (isJoinedRoom && data.timer.phase === '' && !isInProgress) {
         isJoinedRoom = false;
         this.webContents.send(IPC_KEY.EXIT_CHAMP_SELECT);
         myTeamMembers = new Map();
@@ -170,7 +170,7 @@ export class LvcApplication {
         const { teamOne, teamTwo } = data.gameData;
         await this.joinLeagueVoice(teamOne, teamTwo);
 
-        const inGameCurrentTime = await this.fetchTime();
+        const inGameCurrentTime = await this.fetchInGameTime();
         setTimeout(() => {
           this.webContents.send(IPC_KEY.START_IN_GAME);
         }, 1000 * 60 + 5000 - inGameCurrentTime * 1000);
@@ -213,13 +213,7 @@ export class LvcApplication {
     });
   }
 
-  private async isCloseChampionSelectionWindow(phase: string) {
-    const gameflowPhase = await request('/lol-gameflow/v1/gameflow-phase');
-    const isNotChampSelect: boolean = gameflowPhase === 'None' || gameflowPhase === 'Lobby';
-    return isJoinedRoom && phase === '' && isNotChampSelect;
-  }
-
-  private fetchTime(): Promise<number> {
+  private fetchInGameTime(): Promise<number> {
     return new Promise((resolve) => {
       let interval = setInterval(async () => {
         try {
