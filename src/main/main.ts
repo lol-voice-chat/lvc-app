@@ -1,13 +1,11 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import onElectronStore, { store } from './store';
 import { generalSettingsDefaultConfig, IPC_KEY } from '../const';
-import { GlobalKeyboardListener } from 'node-global-key-listener';
 import { LvcApplication } from './lvc-application';
 import { RedisClient } from './lib/redis-client';
-import { GeneralSettingsConfigType } from '../renderer/@store/atom';
 import { resolvePath } from './lib/common';
+import handleGlobalKeyEvent from './event/global-key-event';
 
-const globalKey = new GlobalKeyboardListener();
 let mainWindow: BrowserWindow;
 
 const isDifferentGeneralSetting =
@@ -40,6 +38,7 @@ const createWindow = () => {
     mainWindow.show();
   });
 
+  handleGlobalKeyEvent(mainWindow);
   handleLoadEvent();
 };
 
@@ -54,48 +53,12 @@ async function handleLoadEvent() {
   });
 }
 
-ipcMain.on(IPC_KEY.INPUT_SHORTCUT_KEY, () => {
-  const calledOnce = (e: any) => {
-    if (e.state === 'DOWN') {
-      mainWindow.webContents.send(IPC_KEY.INPUT_SHORTCUT_KEY, e.name);
-      globalKey.removeListener(calledOnce);
-    }
-  };
-  globalKey.addListener(calledOnce);
-});
-
 ipcMain.on(IPC_KEY.QUIT_APP, () => {
   app.quit();
 });
 
 ipcMain.on(IPC_KEY.CLOSE_APP, () => {
   mainWindow.minimize();
-});
-
-let isPressingKey = false;
-
-globalKey.addListener((e) => {
-  let settingsConfig = store.get('general-settings-config') as GeneralSettingsConfigType;
-
-  if (settingsConfig) {
-    const { isPressToTalk, pressToTalkShortcutKey, muteMicShortcutKey } = settingsConfig;
-
-    /* 눌러서 말하기 off - default */
-    if (!isPressToTalk && e.name === muteMicShortcutKey && e.state === 'DOWN') {
-      mainWindow.webContents.send(IPC_KEY.SUMMONER_MUTE);
-    }
-    /* 눌러서 말하기 on */
-    if (isPressToTalk && e.name === pressToTalkShortcutKey) {
-      if (!isPressingKey && e.state === 'DOWN') {
-        mainWindow.webContents.send(IPC_KEY.SUMMONER_MUTE);
-        isPressingKey = true;
-      }
-      if (e.state === 'UP') {
-        mainWindow.webContents.send(IPC_KEY.SUMMONER_MUTE);
-        isPressingKey = false;
-      }
-    }
-  }
 });
 
 app.whenReady().then(() => {
