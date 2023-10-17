@@ -10,23 +10,17 @@ interface MemberType {
   summonerId: number;
   championId: number;
   puuid: string;
-  summonerName: string;
-  profileIconId: number;
 }
 
 export class Member {
   summonerId: number;
   championId: number;
   puuid: string;
-  summonerName: string;
-  profileIconId: number;
 
   constructor(member: MemberType) {
     this.summonerId = member.summonerId;
     this.championId = member.championId;
     this.puuid = member.puuid;
-    this.summonerName = member.summonerName;
-    this.profileIconId = member.profileIconId;
   }
 
   public static valueOf = (summoner: MemberType) => {
