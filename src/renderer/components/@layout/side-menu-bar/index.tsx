@@ -18,8 +18,6 @@ import GeneralSettingModal from '../../general-setting-modal';
 import electronStore from '../../../@store/electron';
 const { ipcRenderer } = window.require('electron');
 
-export type RecentSummonerType = SummonerType & { isRequested: boolean };
-
 function SideMenuBar() {
   const summoner = useRecoilValue(summonerState);
   const summonerStatusSocket = useRef<Socket | null>(null);
@@ -30,11 +28,9 @@ function SideMenuBar() {
   );
 
   const [isRecordPage, setIsRecordPage] = useState(false);
-  const [curSummonerProfile, setCurSummonerProfile] = useState<
-    SummonerType | RecentSummonerType | null
-  >(null);
-
-  const [recentSummonerList, setRecentSummonerList] = useState<RecentSummonerType[] | null>(null);
+  const [curSummonerProfile, setCurSummonerProfile] = useState<SummonerType | null>(null);
+  const [isFriendSummoner, setIsFriendSummoner] = useState(true);
+  const [recentSummonerList, setRecentSummonerList] = useState<SummonerType[] | null>(null);
 
   useEffect(() => {
     const socket = connectSocket('/summoner-manager');
@@ -44,12 +40,12 @@ function SideMenuBar() {
     });
 
     /* 롤보챗 on - 최근 소환사 불러오기 */
-    ipcRenderer.once('online-summoner', (_, recentSummonerList: RecentSummonerType[]) => {
+    ipcRenderer.once('online-summoner', (_, recentSummonerList: SummonerType[]) => {
       setRecentSummonerList(recentSummonerList);
     });
 
     /* 롤 게임 end - 최근 함께한 소환사 갱신 */
-    ipcRenderer.on(IPC_KEY.END_OF_THE_GAME, (_, recentSummonerList: RecentSummonerType[]) => {
+    ipcRenderer.on(IPC_KEY.END_OF_THE_GAME, (_, recentSummonerList: SummonerType[]) => {
       setRecentSummonerList(recentSummonerList);
     });
 
@@ -67,25 +63,23 @@ function SideMenuBar() {
   }, [generalSettingModal]);
 
   useEffect(() => {
-    setCurSummonerProfile(summoner);
+    if (summoner) {
+      setCurSummonerProfile(summoner);
+    }
+
+    ipcRenderer.on(IPC_KEY.CLICK_SUMMONER_PROFILE, (_, summoner: SummonerType) => {
+      setCurSummonerProfile(summoner);
+      setIsRecordPage(true);
+    });
+
+    return () => {
+      ipcRenderer.removeAllListeners(IPC_KEY.CLICK_SUMMONER_PROFILE);
+    };
   }, [summoner]);
 
   const handleClickSummonerProfile = (target: SummonerType) => {
     setCurSummonerProfile(isRecordPage ? summoner : target);
     setIsRecordPage((prev) => !prev);
-  };
-
-  const handleClickAddFriend = (recentSummonerInfo: RecentSummonerType) => {
-    if (recentSummonerList) {
-      setRecentSummonerList(
-        [...recentSummonerList].map((recentSummoner) => {
-          recentSummoner.isRequested = recentSummonerInfo === recentSummoner;
-          return recentSummoner;
-        })
-      );
-    }
-    ipcRenderer.send('friend-request', recentSummonerInfo);
-    summonerStatusSocket.current?.emit('friend-request', recentSummonerInfo.summonerId);
   };
 
   return (
@@ -102,10 +96,9 @@ function SideMenuBar() {
 
         <SummonerProfile
           summoner={isRecordPage ? curSummonerProfile : summoner}
-          isMine={summoner}
+          isFriend={isFriendSummoner}
           isBackground={!isRecordPage}
           handleClickSummonerProfile={handleClickSummonerProfile}
-          handleClickAddFriend={handleClickAddFriend}
         />
 
         {isRecordPage ? (
@@ -113,6 +106,7 @@ function SideMenuBar() {
           <SummonerRecord
             isMine={curSummonerProfile === summoner}
             puuid={curSummonerProfile?.puuid ?? ''}
+            setIsFriend={setIsFriendSummoner}
           />
         ) : (
           // 최근 보이스한 소환사 리스트

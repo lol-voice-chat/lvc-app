@@ -16,6 +16,7 @@ export const IPC_KEY = {
   SUMMONER_MUTE: 'summoner-mute',
   INPUT_SHORTCUT_KEY: 'input-shortcut-key',
   FETCH_MATCH_HISTORY: 'fetch-match-history',
+  CLICK_SUMMONER_PROFILE: 'click-summoner-profile',
 };
 
 export const generalSettingsDefaultConfig = {
