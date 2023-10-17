@@ -8,6 +8,7 @@ export const handleFetchMatchHistoryEvent = (matchHistory: MatchHistory) => {
     if (isMine) {
       const isFriend = true;
       const summonerStats = await matchHistory.getSummonerStats();
+      console.log(summonerStats);
       event.reply(IPC_KEY.FETCH_MATCH_HISTORY, { summonerStats, isFriend });
       return;
     }

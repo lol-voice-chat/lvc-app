@@ -53,8 +53,6 @@ export class LvcApplication {
     });
 
     await this.fetchLeagueClient();
-    handleFriendRequestEvent();
-    handleFetchMatchHistoryEvent(this.matchHistory);
   }
 
   private async onLeagueClientUx() {
@@ -98,6 +96,9 @@ export class LvcApplication {
 
     this.summoner = summoner;
     this.matchHistory = matchHistory;
+
+    handleFriendRequestEvent();
+    handleFetchMatchHistoryEvent(this.matchHistory);
   }
 
   public async handle() {
