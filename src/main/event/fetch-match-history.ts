@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import { MatchHistory } from '../models/match-history';
 import { IPC_KEY } from '../../const';
-import { request } from '../lib/common';
+import { Friends } from '../models/friends';
 
 export const handleFetchMatchHistoryEvent = (matchHistory: MatchHistory) => {
   ipcMain.on(IPC_KEY.FETCH_MATCH_HISTORY, async (event, { puuid, isMine }) => {
@@ -12,13 +12,13 @@ export const handleFetchMatchHistoryEvent = (matchHistory: MatchHistory) => {
       return;
     }
 
-    const [friendList, _matchHistory] = await Promise.all([
-      request('/lol-chat/v1/friends'),
+    const [friends, _matchHistory]: [Friends, MatchHistory] = await Promise.all([
+      Friends.fetch(),
       MatchHistory.fetch(puuid),
     ]);
 
     const summonerStats = await _matchHistory.getSummonerStats();
-    const isFriend = friendList.some((friend: any) => friend.puuid === puuid);
+    const isFriend = friends.isFriend(puuid);
     event.reply(IPC_KEY.FETCH_MATCH_HISTORY, { summonerStats, isFriend });
     return;
   });
