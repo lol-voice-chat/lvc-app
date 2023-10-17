@@ -75,7 +75,7 @@ export class MatchHistory {
     const url = `/lol-match-history/v1/products/lol/${puuid}/matches?begIndex=0&endIndex=50`;
     const matchHistoryData = await request(url);
     const matches = matchHistoryData.games.games
-      .slice(0, 100)
+      .slice(0, 50)
       .filter((match: Match) => match.gameType !== 'CUSTOM_GAME');
 
     return new MatchHistory(matches);
