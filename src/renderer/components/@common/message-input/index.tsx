@@ -32,7 +32,7 @@ function MessageInput(props: GeneralChatChildPropsType) {
     sendMessage(sender, event.target.value.trim());
     event.target.value = '';
     const textarea = document.getElementById('text-area') as HTMLTextAreaElement;
-    textarea.style.height = '35px';
+    textarea.style.height = 'auto';
   };
 
   const handleTab = (event: any) => {
@@ -44,14 +44,8 @@ function MessageInput(props: GeneralChatChildPropsType) {
     return false;
   };
 
-  const sendMessage = (sender: SummonerType, message: string) => {
+  const sendMessage = (summoner: SummonerType, message: string) => {
     if (props.isConnected) {
-      const summoner = {
-        name: sender.name,
-        profileImage: sender.profileImage,
-        tier: sender.tier,
-        tierImage: 'img/dummy_rank.png',
-      };
       props.socket?.emit('new-message', { summoner, message });
     }
   };

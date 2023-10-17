@@ -4,14 +4,10 @@ import * as _ from './style';
 import useObserver from '../../../hooks/use-observer';
 import SkeletonChattingList from './skeleton';
 import { GeneralChatChildPropsType } from '..';
+import { SummonerType } from '../../../@type/summoner';
 
 type MessageInfoType = {
-  summoner: {
-    name: string;
-    profileImage: string;
-    tier: string;
-    tierImage: string;
-  };
+  summoner: SummonerType;
   message: string;
   time: string;
 };
@@ -132,10 +128,7 @@ function ChattingList(props: GeneralChatChildPropsType) {
 
           {messageList?.map(({ summoner, message, time }, idx) => (
             <MessageBlock
-              summonerIcon={summoner.profileImage}
-              tier={summoner.tier}
-              tierImg={summoner.tierImage}
-              name={summoner.name}
+              summoner={summoner}
               time={time}
               messageType="text"
               message={message}

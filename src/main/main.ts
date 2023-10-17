@@ -54,6 +54,10 @@ async function handleLoadEvent() {
   });
 }
 
+ipcMain.on(IPC_KEY.CLICK_SUMMONER_PROFILE, (_, summonerData) => {
+  mainWindow.webContents.send(IPC_KEY.CLICK_SUMMONER_PROFILE, summonerData);
+});
+
 ipcMain.on(IPC_KEY.INPUT_SHORTCUT_KEY, () => {
   const calledOnce = (e: any) => {
     if (e.state === 'DOWN') {

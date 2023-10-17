@@ -2,25 +2,31 @@ import React from 'react';
 import styled from 'styled-components';
 import RankBadge from './rank-badge';
 import { FONT, PALETTE } from '../../const';
+import { SummonerType } from '../../@type/summoner';
+import { IPC_KEY } from '../../../const';
+const { ipcRenderer } = window.require('electron');
 
 function MessageBlock(props: {
-  summonerIcon: string;
-  tierImg: string;
-  tier: string;
-  name: string;
+  summoner: SummonerType;
   time: string;
   messageType: 'image' | 'text';
   message?: string;
   image?: string;
 }) {
+  const handleClickLoadSummonerRecord = (e: any) => {
+    if (e.target.id === 'summoner-icon' || e.target.id === 'name' || e.target.id === 'rank-badge') {
+      ipcRenderer.send(IPC_KEY.CLICK_SUMMONER_PROFILE, props.summoner);
+    }
+  };
+
   return (
-    <BlockContainer>
-      <img id="summoner-icon" src={props.summonerIcon} />
+    <BlockContainer onClick={(e) => handleClickLoadSummonerRecord(e)}>
+      <img id="summoner-icon" src={props.summoner.profileImage} />
 
       <div className="drag-able" id="message-info">
         <div id="summoner-info">
-          <p id="name">{props.name}</p>
-          <RankBadge size="small" tierImg={props.tierImg} tier={props.tier} />
+          <p id="name">{props.summoner.name}</p>
+          <RankBadge size="small" tierImg={'img/dummy_rank.png'} tier={props.summoner.tier} />
           <p id="time">{props.time}</p>
         </div>
         {props.messageType === 'text' ? (

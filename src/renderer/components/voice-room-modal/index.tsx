@@ -17,7 +17,6 @@ import electronStore from '../../@store/electron';
 import { Socket } from 'socket.io-client';
 import SummonerLeagueVoiceBlock from '../summoner-league-voice-block';
 import { ChampionInfoType, SummonerStatsType } from '../../@type/summoner';
-
 const { ipcRenderer } = window.require('electron');
 
 function VoiceRoomModal() {

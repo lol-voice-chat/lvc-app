@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import * as _ from './style';
 import { SummonerStatsType } from '../../../../@type/summoner';
+import { IPC_KEY } from '../../../../../const';
 const { ipcRenderer } = window.require('electron');
 
 type SummonerRecrodPropsType = {
   isMine: boolean;
   puuid: string;
+  setIsFriend: Dispatch<SetStateAction<boolean>>;
 };
 
 function SummonerRecord(props: SummonerRecrodPropsType) {
@@ -13,11 +15,15 @@ function SummonerRecord(props: SummonerRecrodPropsType) {
 
   useEffect(() => {
     if (props.puuid !== '') {
-      ipcRenderer.send('fetch-match-history', props);
+      ipcRenderer.send(IPC_KEY.FETCH_MATCH_HISTORY, { isMine: props.isMine, puuid: props.puuid });
 
-      ipcRenderer.once('fetch-match-history', (_, summonerStats) => {
-        setRecord(summonerStats);
-      });
+      ipcRenderer.once(
+        IPC_KEY.FETCH_MATCH_HISTORY,
+        (_, summoner: { summonerStats: SummonerStatsType; isFriend: boolean }) => {
+          setRecord(summoner.summonerStats);
+          props.setIsFriend(summoner.isFriend);
+        }
+      );
     }
   }, [props]);
 
