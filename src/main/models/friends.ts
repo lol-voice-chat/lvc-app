@@ -6,8 +6,13 @@ export class Friends {
   private friends: Friend[];
 
   public static async fetch() {
-    const friendsData = await request('/lol-chat/v1/friends');
-    return plainToInstance(Friends, friendsData);
+    const friendsData: any[] = await request('/lol-chat/v1/friends');
+    const _friends: Friend[] = plainToInstance(Friend, friendsData);
+    return new Friends(_friends);
+  }
+
+  constructor(friends: Friend[]) {
+    this.friends = friends;
   }
 
   public isFriend(puuid: string) {
