@@ -14,12 +14,9 @@ export const handleFetchMatchHistoryEvent = (matchHistory: MatchHistory) => {
         Friends.fetch(),
         MatchHistory.fetch(puuid),
       ]);
-      console.log('1');
 
       const summonerStats = await _matchHistory.getSummonerStats();
-      console.log('2');
       const isFriend = friends.isFriend(puuid);
-      console.log('3');
       event.reply(IPC_KEY.FETCH_MATCH_HISTORY, { summonerStats, isFriend });
     }
   });
