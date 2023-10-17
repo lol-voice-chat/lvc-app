@@ -72,9 +72,6 @@ export class Summoner {
   }
 
   public async getRecentSummonerList(redisClient: RedisClient) {
-    const friendList = await request('/lol-chat/v1/friends');
-    const friendSummonerIdList = friendList.map((friend: any) => friend.summonerId);
-
     const key = this.summonerId.toString() + 'recent';
     const existsSummoner = await redisClient.exists(key);
 
@@ -94,11 +91,6 @@ export class Summoner {
             newRecentSummonerIdList.push(recentSummonerId);
 
             const recentSummoner = await redisClient.get(key);
-            if (friendSummonerIdList.includes(recentSummonerId)) {
-              recentSummoner.details.isRequested = true;
-              await redisClient.set(key, JSON.stringify(recentSummoner));
-            }
-
             return recentSummoner.details;
           }
         })
@@ -121,7 +113,6 @@ export class Summoner {
       summonerId: this.summonerId,
       profileImage: this.getProfileImage(),
       tier: this.getTier(),
-      isRequested: false,
     };
 
     const summoner: SummonerInfo = {
