@@ -20,6 +20,7 @@ function SummonerRecord(props: SummonerRecrodPropsType) {
       ipcRenderer.once(
         IPC_KEY.FETCH_MATCH_HISTORY,
         (_, summoner: { summonerStats: SummonerStatsType; isFriend: boolean }) => {
+          console.log(summoner.isFriend, 'isMine : ', props.isMine);
           setRecord(summoner.summonerStats);
           props.setIsFriend(summoner.isFriend);
         }
