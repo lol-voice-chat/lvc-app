@@ -65,6 +65,7 @@ function SideMenuBar() {
   useEffect(() => {
     if (summoner) {
       setCurSummonerProfile(summoner);
+      setIsRecordPage(false);
     }
 
     ipcRenderer.on(IPC_KEY.CLICK_SUMMONER_PROFILE, (_, summoner: SummonerType) => {

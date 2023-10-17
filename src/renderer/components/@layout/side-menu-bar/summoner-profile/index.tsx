@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { SummonerType } from '../../../../@type/summoner';
 import RankBadge from '../../../@common/rank-badge';
 import * as _ from './style';
@@ -14,12 +14,19 @@ type SummonerProfilePropsType = {
 };
 
 function SummonerProfile(props: SummonerProfilePropsType) {
+  const [isRequested, setIsRequested] = useState(false);
+
   const { state } = useHover({ elementIds: ['friend-request-badge'] });
 
   const handleClickProfile = (e: any) => {
     if (props.summoner && e.target.id !== 'friend-request-badge') {
       props.summoner && props.handleClickSummonerProfile(props.summoner);
     }
+  };
+
+  const handleClickRequestFriend = () => {
+    ipcRenderer.send('friend-request', props.summoner);
+    setIsRequested(true);
   };
 
   return (
@@ -47,9 +54,7 @@ function SummonerProfile(props: SummonerProfilePropsType) {
                     <img
                       id="friend-request-badge"
                       src="img/friend_request_icon.svg"
-                      onClick={() => {
-                        ipcRenderer.send('friend-request', props.summoner);
-                      }}
+                      onClick={handleClickRequestFriend}
                     />
                   </div>
                 )}

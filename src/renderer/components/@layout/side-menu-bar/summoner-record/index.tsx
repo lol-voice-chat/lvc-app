@@ -15,17 +15,21 @@ function SummonerRecord(props: SummonerRecrodPropsType) {
 
   useEffect(() => {
     if (props.puuid !== '') {
+      console.log(props.puuid);
       ipcRenderer.send(IPC_KEY.FETCH_MATCH_HISTORY, { isMine: props.isMine, puuid: props.puuid });
 
       ipcRenderer.once(
         IPC_KEY.FETCH_MATCH_HISTORY,
         (_, summoner: { summonerStats: SummonerStatsType; isFriend: boolean }) => {
-          console.log(summoner.isFriend, 'isMine : ', props.isMine);
           setRecord(summoner.summonerStats);
           props.setIsFriend(summoner.isFriend);
         }
       );
     }
+
+    return () => {
+      setRecord(null);
+    };
   }, [props]);
 
   return (
