@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import useVoiceChat from '../../hooks/use-voice-chat';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import {
   enemySummonersState,
@@ -17,6 +16,7 @@ import electronStore from '../../@store/electron';
 import { Socket } from 'socket.io-client';
 import SummonerLeagueVoiceBlock from '../summoner-league-voice-block';
 import { ChampionInfoType, SummonerStatsType } from '../../@type/summoner';
+import useVoiceRoom from '../../hooks/use-voice-room';
 const { ipcRenderer } = window.require('electron');
 
 function VoiceRoomModal() {
@@ -36,7 +36,7 @@ function VoiceRoomModal() {
   const [teamManagementSocket, setTeamManagementSocket] = useState<Socket | null>(null);
   const [leagueManagementSocket, setLeagueManagementSocket] = useState<Socket | null>(null);
 
-  const { onTeamVoiceRoom, onLeagueVoiceRoom } = useVoiceChat();
+  const { onTeamVoiceRoom, onLeagueVoiceRoom } = useVoiceRoom();
 
   useEffect(() => {
     userStream && onTeamVoiceRoom(userStream);
