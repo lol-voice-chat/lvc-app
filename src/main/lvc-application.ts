@@ -10,7 +10,6 @@ import {
 import { IPC_KEY } from '../const';
 import { Summoner, SummonerInfo } from './models/summoner';
 import { Team } from './models/team';
-import handleFetchMatchHistoryEvent from './event/fetch-match-history';
 import handleFriendRequestEvent from './event/friend-requet-event';
 import { request } from './lib/common';
 import { redisClient } from './lib/redis-client';
@@ -53,9 +52,7 @@ export class LvcApplication {
     });
 
     await this.fetchLeagueClient();
-
     handleFriendRequestEvent();
-    handleFetchMatchHistoryEvent();
   }
 
   private async onLeagueClientUx() {
