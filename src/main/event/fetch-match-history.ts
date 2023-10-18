@@ -4,7 +4,7 @@ import { IPC_KEY } from '../../const';
 import { Friends } from '../models/friends';
 
 export const handleFetchMatchHistoryEvent = () => {
-  ipcMain.on(IPC_KEY.FETCH_MATCH_HISTORY, async (event, { puuid, isMine }) => {
+  ipcMain.handle(IPC_KEY.FETCH_MATCH_HISTORY, async (event, { puuid, isMine }) => {
     const [friends, _matchHistory]: [Friends, MatchHistory] = await Promise.all([
       Friends.fetch(),
       MatchHistory.fetch(puuid),
@@ -12,7 +12,7 @@ export const handleFetchMatchHistoryEvent = () => {
 
     const summonerStats = await _matchHistory.getSummonerStats();
     const isFriend = isMine ? true : friends.isFriend(puuid);
-    event.reply(IPC_KEY.FETCH_MATCH_HISTORY, { summonerStats, isFriend });
+    return { summonerStats, isFriend };
   });
 };
 
