@@ -4,6 +4,7 @@ import { generalSettingsDefaultConfig, IPC_KEY } from '../const';
 import { LvcApplication } from './lvc-application';
 import { resolvePath } from './lib/common';
 import handleGlobalKeyEvent from './event/global-key-event';
+import localShortcut from 'electron-localshortcut';
 
 let mainWindow: BrowserWindow;
 
@@ -35,6 +36,10 @@ const createWindow = () => {
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
+  });
+
+  localShortcut.register(mainWindow, 'Esc', () => {
+    mainWindow.webContents.send(IPC_KEY.SETTINGS_SHORTCUT_KEY);
   });
 
   handleGlobalKeyEvent(mainWindow);

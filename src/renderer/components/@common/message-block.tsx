@@ -20,7 +20,7 @@ function MessageBlock(props: {
   };
 
   return (
-    <BlockContainer className="message-block" onClick={(e) => handleClickLoadSummonerRecord(e)}>
+    <BlockContainer onClick={(e) => handleClickLoadSummonerRecord(e)}>
       <img id="summoner-icon" src={props.summoner.profileImage} />
 
       <div className="drag-able" id="message-info">

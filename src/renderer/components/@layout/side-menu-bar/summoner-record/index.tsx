@@ -12,15 +12,20 @@ type SummonerRecrodPropsType = {
 
 function SummonerRecord(props: SummonerRecrodPropsType) {
   const [record, setRecord] = useState<SummonerStatsType | null>(null);
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     if (props.puuid !== 'leage-client-off') {
       ipcRenderer
         .invoke(IPC_KEY.FETCH_MATCH_HISTORY, { isMine: props.isMine, puuid: props.puuid })
-        .then((summoner: { summonerStats: SummonerStatsType; isFriend: boolean }) => {
-          setRecord(summoner.summonerStats);
-          props.setIsFriend(summoner.isFriend);
-        });
+        .then(
+          (payload: { summonerStats: SummonerStatsType; isFriend: boolean; isError: boolean }) => {
+            if (payload.isError) return setIsError(true);
+
+            setRecord(payload.summonerStats);
+            props.setIsFriend(payload.isFriend);
+          }
+        );
     }
 
     return () => {
@@ -30,7 +35,9 @@ function SummonerRecord(props: SummonerRecrodPropsType) {
 
   return (
     <_.RecordContainer>
-      {record ? (
+      {isError && <></>}
+
+      {!isError && record ? (
         <>
           <_.AverageInfo>
             <div id="info-category">
