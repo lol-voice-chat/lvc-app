@@ -9,8 +9,8 @@ export const RecordContainer = styled.div`
   width: 70%;
   margin-top: 15px;
   padding: 20px;
-
   border-radius: 10px;
+
   background-color: #313338;
   box-shadow: 0 5px 18px -7px rgba(0, 0, 0, 0.3);
 
