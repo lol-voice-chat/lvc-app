@@ -46,6 +46,12 @@ function useLeagueHandler() {
     };
   }, []);
 
+  useEffect(() => {
+    if (gameStatus === 'none') {
+      ipcRenderer.send(IPC_KEY.UPDATE_MATCH_HISTORY);
+    }
+  }, [gameStatus]);
+
   return { gameStatus };
 }
 
