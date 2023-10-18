@@ -188,16 +188,6 @@ export class LvcApplication {
       if (data.phase === 'WaitingForStats' && !isEndGame) {
         isEndGame = true;
 
-        const matchHistory = await MatchHistory.fetch(this.summoner.puuid);
-
-        const key = this.summoner.puuid + 'match';
-        await redisClient.hSet(key, {
-          summonerStats: JSON.stringify(await matchHistory.getSummonerStats()),
-          length: matchHistory.matchLength.toString(),
-        });
-
-        this.matchHistory = matchHistory;
-
         const { teamOne, teamTwo } = data.gameData;
         const teamOneSummoners = new Team(teamOne);
         const teamTwoSummoners = new Team(teamTwo);
@@ -215,9 +205,18 @@ export class LvcApplication {
           await redisClient.set(recentSummonerKey, JSON.stringify(_summoner));
         }
 
-        //업데이트된 최근 함께한 소환사 리스트 전달
         const recentSummonerList = await this.summoner.getRecentSummonerList();
         this.webContents.send(IPC_KEY.END_OF_THE_GAME, recentSummonerList);
+
+        //전적업데이트
+        const matchHistory = await MatchHistory.fetch(this.summoner.puuid);
+        const key = this.summoner.puuid + 'match';
+        await redisClient.hSet(key, {
+          summonerStats: JSON.stringify(await matchHistory.getSummonerStats()),
+          length: matchHistory.matchLength.toString(),
+        });
+
+        this.matchHistory = matchHistory;
       }
     });
   }
