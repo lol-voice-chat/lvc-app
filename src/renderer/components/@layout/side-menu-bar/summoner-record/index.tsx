@@ -18,19 +18,9 @@ function SummonerRecord(props: SummonerRecrodPropsType) {
       ipcRenderer
         .invoke(IPC_KEY.FETCH_MATCH_HISTORY, { isMine: props.isMine, puuid: props.puuid })
         .then((summoner: { summonerStats: SummonerStatsType; isFriend: boolean }) => {
-          console.log('받음', summoner);
           setRecord(summoner.summonerStats);
           props.setIsFriend(summoner.isFriend);
         });
-
-      // ipcRenderer.on(
-      //   IPC_KEY.FETCH_MATCH_HISTORY,
-      //   (_, summoner: { summonerStats: SummonerStatsType; isFriend: boolean }) => {
-      //     console.log('받음', summoner);
-      //     setRecord(summoner.summonerStats);
-      //     props.setIsFriend(summoner.isFriend);
-      //   }
-      // );
     }
 
     return () => {

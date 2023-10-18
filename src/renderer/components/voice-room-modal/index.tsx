@@ -50,10 +50,11 @@ function VoiceRoomModal() {
     });
 
     /* 내 최신 전적 불러오기 */
-    ipcRenderer.send(IPC_KEY.FETCH_MATCH_HISTORY, { puuid: summoner?.puuid, isMine: true });
-    ipcRenderer.once(IPC_KEY.FETCH_MATCH_HISTORY, (_, my: { summonerStats: SummonerStatsType }) => {
-      setMySummonerStats(my.summonerStats);
-    });
+    ipcRenderer
+      .invoke(IPC_KEY.FETCH_MATCH_HISTORY, { isMine: true, puuid: summoner?.puuid })
+      .then((summoner: { summonerStats: SummonerStatsType }) => {
+        setMySummonerStats(summoner.summonerStats);
+      });
 
     /* 입장시 팀원의 (자신포함) 챔피언 리스트 받음 */
     ipcRenderer.once('selected-champ-info-list', (_, championInfoList: ChampionInfoType[]) => {
