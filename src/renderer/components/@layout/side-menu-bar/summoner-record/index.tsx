@@ -35,8 +35,6 @@ function SummonerRecord(props: SummonerRecrodPropsType) {
 
   return (
     <_.RecordContainer>
-      {isError && <></>}
-
       {!isError && record ? (
         <>
           <_.AverageInfo>

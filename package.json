@@ -44,7 +44,7 @@
     "electron-localshortcut": "^3.2.1",
     "electron-store": "^8.1.0",
     "league-connect": "^6.0.0-rc12",
-    "mediasoup-client": "^3.6.100",
+    "mediasoup-client": "^3.6.101",
     "node-global-key-listener": "^0.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
