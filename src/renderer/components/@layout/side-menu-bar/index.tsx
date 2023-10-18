@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as _ from './style';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   GeneralSettingsConfigType,
   generalSettingsConfigState,
+  generalSettingsModalState,
   summonerState,
 } from '../../../@store/atom';
 import SummonerProfile from './summoner-profile';
@@ -14,18 +15,13 @@ import { connectSocket } from '../../../utils/socket';
 import { Socket } from 'socket.io-client';
 import RecentSummonerList from './recent-summoner-list';
 import AppHeader from './app-header';
-import GeneralSettingModal from '../../general-setting-modal';
-import electronStore from '../../../@store/electron';
 const { ipcRenderer } = window.require('electron');
 
 function SideMenuBar() {
   const summoner = useRecoilValue(summonerState);
   const summonerStatusSocket = useRef<Socket | null>(null);
 
-  const [generalSettingModal, setGeneralSettingModal] = useState(false);
-  const [settingsConfig, setSettingsConfig] = useRecoilState<GeneralSettingsConfigType | null>(
-    generalSettingsConfigState
-  );
+  const setGeneralSettingsState = useSetRecoilState(generalSettingsModalState);
 
   const [isRecordPage, setIsRecordPage] = useState(false);
   const [curSummonerProfile, setCurSummonerProfile] = useState<SummonerType | null>(null);
@@ -56,16 +52,8 @@ function SideMenuBar() {
   }, []);
 
   useEffect(() => {
-    /* 전체 설정 갱신 */
-    electronStore.get('general-settings-config').then((config) => {
-      setSettingsConfig(config);
-    });
-  }, [generalSettingModal]);
-
-  useEffect(() => {
     if (summoner) {
       setCurSummonerProfile(summoner);
-      setIsRecordPage(false);
     }
 
     ipcRenderer.on(IPC_KEY.CLICK_SUMMONER_PROFILE, (_, summoner: SummonerType) => {
@@ -90,40 +78,31 @@ function SideMenuBar() {
   };
 
   return (
-    <>
-      {generalSettingModal && settingsConfig && (
-        <GeneralSettingModal
-          settingsConfig={settingsConfig}
-          handleClickModalTrigger={() => setGeneralSettingModal((prev) => !prev)}
+    <_.SideBarContainer>
+      <AppHeader handleClickSettingModalTrigger={() => setGeneralSettingsState((prev) => !prev)} />
+
+      <SummonerProfile
+        summoner={isRecordPage ? curSummonerProfile : summoner}
+        isFriend={isFriendSummoner}
+        isBackground={!isRecordPage}
+        handleClickSummonerProfile={handleClickSummonerProfile}
+      />
+
+      {isRecordPage ? (
+        /* 소환사 전적 */
+        <SummonerRecord
+          isMine={curSummonerProfile?.name === summoner?.name}
+          puuid={curSummonerProfile?.puuid ?? ''}
+          setIsFriend={setIsFriendSummoner}
+        />
+      ) : (
+        /* 최근 보이스한 소환사 리스트 */
+        <RecentSummonerList
+          recentSummonerList={recentSummonerList}
+          handleClickSummonerBlock={handleClickSummonerProfile}
         />
       )}
-
-      <_.SideBarContainer id="side-menu-bar">
-        <AppHeader handleClickSettingModalTrigger={() => setGeneralSettingModal((prev) => !prev)} />
-
-        <SummonerProfile
-          summoner={isRecordPage ? curSummonerProfile : summoner}
-          isFriend={isFriendSummoner}
-          isBackground={!isRecordPage}
-          handleClickSummonerProfile={handleClickSummonerProfile}
-        />
-
-        {isRecordPage ? (
-          // 소환사 전적
-          <SummonerRecord
-            isMine={curSummonerProfile?.name === summoner?.name}
-            puuid={curSummonerProfile?.puuid ?? ''}
-            setIsFriend={setIsFriendSummoner}
-          />
-        ) : (
-          // 최근 보이스한 소환사 리스트
-          <RecentSummonerList
-            recentSummonerList={recentSummonerList}
-            handleClickSummonerBlock={handleClickSummonerProfile}
-          />
-        )}
-      </_.SideBarContainer>
-    </>
+    </_.SideBarContainer>
   );
 }
 

@@ -59,3 +59,8 @@ export const generalSettingsConfigState = atom<GeneralSettingsConfigType | null>
   key: 'general-settings-config',
   default: null,
 });
+
+export const generalSettingsModalState = atom<boolean>({
+  key: 'general-settings-modal',
+  default: false,
+});
