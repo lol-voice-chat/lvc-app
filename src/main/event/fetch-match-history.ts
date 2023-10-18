@@ -21,16 +21,15 @@ export const handleFetchMatchHistoryEvent = () => {
     ]);
 
     const isFriend = isMine ? true : friends.isFriend(puuid);
+    const isError = false;
+
     if (summonerStatsData) {
       const summonerStats = JSON.parse(summonerStatsData);
-      const isError = false;
-
       return { summonerStats, isFriend, isError };
     }
 
     const matchHistory: MatchHistory = await MatchHistory.fetch(puuid);
     const summonerStats: SummonerStats = await matchHistory.getSummonerStats();
-    const isError = summonerStats === null ? true : false;
     return { summonerStats, isFriend, isError };
   });
 };
