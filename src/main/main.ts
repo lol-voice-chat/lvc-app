@@ -4,6 +4,7 @@ import { generalSettingsDefaultConfig, IPC_KEY } from '../const';
 import { LvcApplication } from './lvc-application';
 import { resolvePath } from './lib/common';
 import handleGlobalKeyEvent from './event/global-key-event';
+import handleFetchMatchHistoryEvent from './event/fetch-match-history';
 
 let mainWindow: BrowserWindow;
 
@@ -38,6 +39,7 @@ const createWindow = () => {
   });
 
   handleGlobalKeyEvent(mainWindow);
+  handleFetchMatchHistoryEvent();
   handleLoadEvent();
 };
 
