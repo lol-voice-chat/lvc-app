@@ -16,7 +16,7 @@ import { redisClient } from './lib/redis-client';
 import axios from 'axios';
 import https from 'https';
 
-export let credentials: Credentials;
+export let credentials: Credentials | null = null;
 
 let isJoinedRoom = false;
 let isInProgress = false;
@@ -34,7 +34,7 @@ export class LvcApplication {
 
   public async initialize() {
     await this.onLeagueClientUx();
-    const client = new LeagueClient(credentials);
+    const client = new LeagueClient(credentials!);
     client.start();
 
     client.on('connect', async (newCredentials) => {
@@ -46,6 +46,8 @@ export class LvcApplication {
     });
 
     client.on('disconnect', () => {
+      credentials = null;
+
       redisClient.del(this.summoner.puuid + 'match').then(() => {
         this.webContents.send(IPC_KEY.SHUTDOWN_APP);
       });
