@@ -48,6 +48,13 @@ export const handleFetchMatchHistoryEvent = () => {
 
     const matchHistory: MatchHistory = await MatchHistory.fetch(puuid);
     const summonerStats: SummonerStats = await matchHistory.getSummonerStats();
+
+    const key = puuid + 'match';
+    await redisClient.hSet(key, {
+      summonerStats: JSON.stringify(summonerStats),
+      length: matchHistory.matchLength.toString(),
+    });
+
     return { summonerStats, isFriend, isError };
   });
 };
