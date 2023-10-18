@@ -6,7 +6,7 @@ export const ChatContainer = styled.div`
   flex-direction: column;
 
   width: 100%;
-  height: 90vh;
+  height: calc(100vh - 40px);
   background-color: #303236;
 
   overflow-x: hidden;
@@ -14,6 +14,10 @@ export const ChatContainer = styled.div`
 
   &::-webkit-scrollbar {
     display: none;
+  }
+
+  div:nth-last-child(1) {
+    margin-bottom: 25px;
   }
 
   #new-message-alram {

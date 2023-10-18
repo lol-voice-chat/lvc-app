@@ -25,6 +25,7 @@ function SummonerVoiceBlock(props: {
   const [isMuteSpeaker, setIsMuteSpeaker] = useState(false);
   const [isMuteMic, setIsMuteMic] = useState(false);
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
+
   useEffect(() => {
     function micVisualizer(summoner: { summonerId: number; visualizerVolume: number }) {
       if (props.summoner.summonerId === summoner.summonerId && !isMuteSpeaker) {
@@ -39,6 +40,7 @@ function SummonerVoiceBlock(props: {
       props.managementSocket?.off('mic-visualizer', micVisualizer);
     };
   }, [props.managementSocket]);
+
   useEffect(() => {
     if (props.isMine && generalSettingsConfig) {
       if (generalSettingsConfig.isPressToTalk) {
@@ -51,6 +53,7 @@ function SummonerVoiceBlock(props: {
       ipcRenderer.removeAllListeners(IPC_KEY.SUMMONER_MUTE);
     };
   }, [userStream, generalSettingsConfig]);
+
   useEffect(() => {
     if (props.isMine) {
       props.managementSocket?.emit('mic-visualizer', {
@@ -59,6 +62,7 @@ function SummonerVoiceBlock(props: {
       });
     }
   }, [visualizerVolume]);
+
   useEffect(() => {
     let visualizerInterval: NodeJS.Timer | null = null;
     if (props.isMine && !isMuteMic && userStream) {
@@ -70,12 +74,14 @@ function SummonerVoiceBlock(props: {
       visualizerInterval && clearInterval(visualizerInterval);
     };
   }, [userStream, isMuteMic]);
+
   const handleChangeSpeakerVolume = (speakerVolume: number) => {
     const speaker = getSummonerSpeaker(props.summoner.summonerId);
     speaker.volume = speakerVolume;
     setSpeakerVolume(speakerVolume);
     setIsMuteSpeaker(speakerVolume === 0);
   };
+
   const handleClickMuteSpeaker = () => {
     if (isMuteSpeaker) {
       handleChangeSpeakerVolume(beforeMuteSpeakerVolume);
@@ -84,10 +90,12 @@ function SummonerVoiceBlock(props: {
       handleChangeSpeakerVolume(0);
     }
   };
+
   const handleClickMuteMic = () => {
     userStream?.getAudioTracks().forEach((track) => (track.enabled = !track.enabled));
     setIsMuteMic((prev) => !prev);
   };
+
   return (
     <S.SummonerBlock id={props.summoner.summonerId.toString()}>
       <S.ProfileImg

@@ -15,10 +15,9 @@ function SummonerRecord(props: SummonerRecrodPropsType) {
 
   useEffect(() => {
     if (props.puuid !== '') {
-      console.log(props.puuid);
       ipcRenderer.send(IPC_KEY.FETCH_MATCH_HISTORY, { isMine: props.isMine, puuid: props.puuid });
 
-      ipcRenderer.once(
+      ipcRenderer.on(
         IPC_KEY.FETCH_MATCH_HISTORY,
         (_, summoner: { summonerStats: SummonerStatsType; isFriend: boolean }) => {
           setRecord(summoner.summonerStats);
