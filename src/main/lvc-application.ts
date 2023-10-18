@@ -13,7 +13,7 @@ import { Team } from './models/team';
 import handleFetchMatchHistoryEvent from './event/fetch-match-history';
 import handleFriendRequestEvent from './event/friend-requet-event';
 import { request } from './lib/common';
-import { RedisClient } from './lib/redis-client';
+import { redisClient } from './lib/redis-client';
 import axios from 'axios';
 import https from 'https';
 
@@ -28,11 +28,9 @@ export class LvcApplication {
   private ws: LeagueWebSocket;
   private summoner: Summoner;
   private matchHistory: MatchHistory;
-  private redisClient: RedisClient;
 
-  constructor(webContents: WebContents, redisClient: RedisClient) {
+  constructor(webContents: WebContents) {
     this.webContents = webContents;
-    this.redisClient = redisClient;
   }
 
   public async initialize() {
@@ -49,10 +47,13 @@ export class LvcApplication {
     });
 
     client.on('disconnect', () => {
-      this.webContents.send(IPC_KEY.SHUTDOWN_APP);
+      redisClient.del(this.summoner.puuid + 'match').then(() => {
+        this.webContents.send(IPC_KEY.SHUTDOWN_APP);
+      });
     });
 
     await this.fetchLeagueClient();
+
     handleFriendRequestEvent();
     handleFetchMatchHistoryEvent();
   }
@@ -89,12 +90,15 @@ export class LvcApplication {
     };
     this.webContents.send('on-league-client', leagueClient);
 
-    const recentSummonerList = await summoner.getRecentSummonerList(this.redisClient);
+    const recentSummonerList = await summoner.getRecentSummonerList();
     this.webContents.send('online-summoner', recentSummonerList);
 
     const matchHistory = await MatchHistory.fetch(summoner.puuid);
-    const key = summoner.summonerId.toString() + 'match-length';
-    await this.redisClient.set(key, matchHistory.matchLength);
+    const key = summoner.puuid + 'match';
+    await redisClient.hSet(key, {
+      summonerStats: JSON.stringify(await matchHistory.getSummonerStats()),
+      length: matchHistory.matchLength.toString(),
+    });
 
     this.summoner = summoner;
     this.matchHistory = matchHistory;
@@ -186,8 +190,12 @@ export class LvcApplication {
         isEndGame = true;
 
         const matchHistory = await MatchHistory.fetch(this.summoner.puuid);
-        const key = this.summoner.summonerId.toString() + 'match-length';
-        await this.redisClient.set(key, matchHistory.matchLength);
+
+        const key = this.summoner.puuid + 'match';
+        await redisClient.hSet(key, {
+          summonerStats: JSON.stringify(await matchHistory.getSummonerStats()),
+          length: matchHistory.matchLength.toString(),
+        });
 
         this.matchHistory = matchHistory;
 
@@ -201,13 +209,15 @@ export class LvcApplication {
 
         //최근 함께한 소환사 업데이트
         const recentSummonerKey = this.summoner.summonerId.toString() + 'recent';
-        const summoner: SummonerInfo = await this.redisClient.get(recentSummonerKey);
-        summoner.recentSummonerIdList = summoner.recentSummonerIdList.concat(summonerIdList);
-
-        await this.redisClient.set(recentSummonerKey, JSON.stringify(summoner));
+        const summoner: string | null = await redisClient.get(recentSummonerKey);
+        if (summoner) {
+          const _summoner: SummonerInfo = JSON.parse(summoner);
+          _summoner.recentSummonerIdList = _summoner.recentSummonerIdList.concat(summonerIdList);
+          await redisClient.set(recentSummonerKey, JSON.stringify(_summoner));
+        }
 
         //업데이트된 최근 함께한 소환사 리스트 전달
-        const recentSummonerList = await this.summoner.getRecentSummonerList(this.redisClient);
+        const recentSummonerList = await this.summoner.getRecentSummonerList();
         this.webContents.send(IPC_KEY.END_OF_THE_GAME, recentSummonerList);
       }
     });
@@ -363,12 +373,12 @@ export class LvcApplication {
     const myTeam = existsSummoner ? teamOne : teamTwo;
     const teamName = myTeam.createVoiceRoomName();
 
-    const key = this.summoner.summonerId.toString() + 'match-length';
-    const matchLength = await this.redisClient.get(key);
+    const key = this.summoner.puuid + 'match';
+    const matchLength: string = (await redisClient.hGet(key, 'length')) ?? '0';
 
     const [teamOneSummonerChampionKdaList, teamTwoSummonerChampionKdaList] = await Promise.all([
-      teamOne.getMemberChampionKdaList(matchLength),
-      teamTwo.getMemberChampionKdaList(matchLength),
+      teamOne.getMemberChampionKdaList(parseInt(matchLength)),
+      teamTwo.getMemberChampionKdaList(parseInt(matchLength)),
     ]);
     const summonerDataList = teamOneSummonerChampionKdaList.concat(teamTwoSummonerChampionKdaList);
 

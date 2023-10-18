@@ -1,6 +1,6 @@
 import { request } from '../lib/common';
 import { plainToInstance } from 'class-transformer';
-import { RedisClient } from '../lib/redis-client';
+import { redisClient } from '../lib/redis-client';
 
 export interface SummonerInfo {
   details: any;
@@ -71,33 +71,33 @@ export class Summoner {
     }
   }
 
-  public async getRecentSummonerList(redisClient: RedisClient) {
+  public async getRecentSummonerList() {
     const key = this.summonerId.toString() + 'recent';
-    const existsSummoner = await redisClient.exists(key);
+    const summoner: string | null = await redisClient.get(key);
 
-    if (existsSummoner) {
-      const summoner: SummonerInfo = await redisClient.get(key);
-      if (summoner.recentSummonerIdList.length === 0) {
+    if (summoner) {
+      const _summoner: SummonerInfo = JSON.parse(summoner);
+      if (_summoner.recentSummonerIdList.length === 0) {
         return [];
       }
 
       const newRecentSummonerIdList: number[] = [];
       const recentSummonerList = await Promise.all(
-        summoner.recentSummonerIdList.map(async (recentSummonerId: number) => {
+        _summoner.recentSummonerIdList.map(async (recentSummonerId: number) => {
           const key = recentSummonerId.toString() + 'recent';
-          const existsRecentSummoner = await redisClient.exists(key);
+          const recentSummoner: string | null = await redisClient.get(key);
 
-          if (existsRecentSummoner) {
+          if (recentSummoner) {
             newRecentSummonerIdList.push(recentSummonerId);
 
-            const recentSummoner = await redisClient.get(key);
-            return recentSummoner.details;
+            const _recentSummoner = JSON.parse(recentSummoner);
+            return _recentSummoner.details;
           }
         })
       );
 
-      summoner.recentSummonerIdList = newRecentSummonerIdList;
-      await redisClient.set(key, JSON.stringify(summoner));
+      _summoner.recentSummonerIdList = newRecentSummonerIdList;
+      await redisClient.set(key, JSON.stringify(_summoner));
       await redisClient.expire(key, EXPIRE_TIME);
 
       return recentSummonerList;
@@ -115,12 +115,12 @@ export class Summoner {
       tier: this.getTier(),
     };
 
-    const summoner: SummonerInfo = {
+    const newSummoner: SummonerInfo = {
       details,
       recentSummonerIdList: [],
     };
 
-    await redisClient.set(key, JSON.stringify(summoner));
+    await redisClient.set(key, JSON.stringify(newSummoner));
     await redisClient.expire(key, EXPIRE_TIME);
     return [];
   }

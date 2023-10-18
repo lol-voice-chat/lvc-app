@@ -2,7 +2,6 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import onElectronStore, { store } from './store';
 import { generalSettingsDefaultConfig, IPC_KEY } from '../const';
 import { LvcApplication } from './lvc-application';
-import { RedisClient } from './lib/redis-client';
 import { resolvePath } from './lib/common';
 import handleGlobalKeyEvent from './event/global-key-event';
 
@@ -44,8 +43,7 @@ const createWindow = () => {
 
 async function handleLoadEvent() {
   mainWindow.webContents.on('did-finish-load', async () => {
-    const redisClient = new RedisClient();
-    const app = new LvcApplication(mainWindow.webContents, redisClient);
+    const app = new LvcApplication(mainWindow.webContents);
 
     app.initialize().then(() => {
       app.handle();
