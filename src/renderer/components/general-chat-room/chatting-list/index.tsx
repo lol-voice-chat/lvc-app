@@ -142,7 +142,7 @@ function ChattingList(props: GeneralChatChildPropsType) {
             </div>
           )}
 
-          <div ref={bottomRef} />
+          <div ref={bottomRef} style={{ marginBottom: '25px' }} />
         </>
       ) : (
         <>

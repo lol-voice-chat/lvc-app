@@ -5,6 +5,8 @@ import GeneralSettingModal from '../../general-setting-modal';
 import electronStore from '../../../@store/electron';
 import useLeagueHandler from '../../../hooks/use-league-handler';
 import VoiceRoomModal from '../../voice-room-modal';
+import { IPC_KEY } from '../../../../const';
+const { ipcRenderer } = window.require('electron');
 
 function ModalBundle() {
   const [generalSettingState, setGeneralSettingState] = useRecoilState(generalSettingsModalState);
@@ -13,6 +15,14 @@ function ModalBundle() {
   );
 
   const { gameStatus } = useLeagueHandler();
+
+  useEffect(() => {
+    ipcRenderer.on(IPC_KEY.SETTINGS_SHORTCUT_KEY, () => setGeneralSettingState((prev) => !prev));
+
+    return () => {
+      ipcRenderer.removeAllListeners(IPC_KEY.SETTINGS_SHORTCUT_KEY);
+    };
+  }, []);
 
   useEffect(() => {
     /* 전체 설정 갱신 */

@@ -2,7 +2,7 @@ import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
 import { Socket } from 'socket.io-client';
 import { getSummonerSpeaker } from '../utils/audio';
 import * as mediasoup from 'mediasoup-client';
-import { ConsumerTransportType, DeviceType, TransportType } from '../@type/webRtc';
+import { ConsumerTransportType, TransportType } from '../@type/webRtc';
 import { SummonerStatsType, SummonerType } from '../@type/summoner';
 import { useSetRecoilState } from 'recoil';
 import { enemySummonersState, myTeamSummonersState } from '../@store/atom';

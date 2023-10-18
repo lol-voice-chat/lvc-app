@@ -16,10 +16,6 @@ export const ChatContainer = styled.div`
     display: none;
   }
 
-  div:last-child {
-    margin-bottom: 25px;
-  }
-
   #new-message-alram {
     position: absolute;
     bottom: 100px;
