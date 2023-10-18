@@ -92,7 +92,7 @@ function SideMenuBar() {
         /* 소환사 전적 */
         <SummonerRecord
           isMine={curSummonerProfile?.name === summoner?.name}
-          puuid={curSummonerProfile?.puuid ?? ''}
+          puuid={curSummonerProfile?.puuid ?? 'leage-client-off'}
           setIsFriend={setIsFriendSummoner}
         />
       ) : (

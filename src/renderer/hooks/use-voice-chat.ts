@@ -84,8 +84,10 @@ function useVoiceChat() {
     });
 
     const disconnectVoiceChat = () => {
+      const curTrack = userStream?.getAudioTracks()[0];
+      if (curTrack) userStream?.removeTrack(curTrack);
+
       socket.disconnect();
-      userStream?.removeTrack(userStream.getAudioTracks()[0]);
       setUserStream(null);
       setGameStatus('none');
       disconnectAllTeam();
