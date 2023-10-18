@@ -36,7 +36,7 @@ export const handleFriendRequestEvent = () => {
             summonerId: recipient.summonerId,
           },
         },
-        credentials
+        credentials!
       );
     } catch (error) {
       throw new Error('친구요청중 오류가 발생했습니다: ' + error);
