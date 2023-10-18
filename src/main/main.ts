@@ -5,6 +5,7 @@ import { LvcApplication } from './lvc-application';
 import { resolvePath } from './lib/common';
 import handleGlobalKeyEvent from './event/global-key-event';
 import localShortcut from 'electron-localshortcut';
+import handleFetchMatchHistoryEvent from './event/fetch-match-history';
 
 let mainWindow: BrowserWindow;
 
@@ -43,6 +44,7 @@ const createWindow = () => {
   });
 
   handleGlobalKeyEvent(mainWindow);
+  handleFetchMatchHistoryEvent();
   handleLoadEvent();
 };
 
