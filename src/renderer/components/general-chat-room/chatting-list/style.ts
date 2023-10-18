@@ -16,7 +16,7 @@ export const ChatContainer = styled.div`
     display: none;
   }
 
-  div:nth-last-child(1) {
+  div:last-child {
     margin-bottom: 25px;
   }
 

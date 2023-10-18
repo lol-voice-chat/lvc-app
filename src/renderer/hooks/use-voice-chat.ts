@@ -1,147 +1,220 @@
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import {
-  enemySummonersState,
-  gameStatusState,
-  mySummonerStatsState,
-  myTeamSummonersState,
-  summonerState,
-  userDeviceIdState,
-  userStreamState,
-} from '../@store/atom';
 import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
-import { IPC_KEY } from '../../const';
-import electronStore from '../@store/electron';
-import { connectSocket } from '../utils/socket';
-import { getUserAudioStream } from '../utils/audio';
-import { useEffect } from 'react';
-import useClientSfuHandler from './use-client-sfu-handler';
-const { ipcRenderer } = window.require('electron');
+import { Socket } from 'socket.io-client';
+import { getSummonerSpeaker } from '../utils/audio';
+import * as mediasoup from 'mediasoup-client';
+import { ConsumerTransportType, DeviceType, TransportType } from '../@type/webRtc';
+import { SummonerStatsType, SummonerType } from '../@type/summoner';
+import { useSetRecoilState } from 'recoil';
+import { enemySummonersState, myTeamSummonersState } from '../@store/atom';
 
 function useVoiceChat() {
-  const userDeviceId = useRecoilValue(userDeviceIdState);
-  const [userStream, setUserStream] = useRecoilState(userStreamState);
+  const setMyTeamSummoners = useSetRecoilState(myTeamSummonersState);
+  const setEnemySummoners = useSetRecoilState(enemySummonersState);
 
-  const { connect } = useClientSfuHandler();
+  const connect = (params: {
+    voiceRoomType: 'team' | 'league';
+    socket: Socket;
+    stream: MediaStream;
+    routerRtpCapabilities: RtpCapabilities;
+  }) => {
+    const { voiceRoomType, socket, stream, routerRtpCapabilities } = params;
 
-  const setGameStatus = useSetRecoilState(gameStatusState);
+    let device = new mediasoup.Device();
+    let producerTransport: TransportType | null = null;
+    let consumerTransportList: ConsumerTransportType[] = [];
 
-  const summoner = useRecoilValue(summonerState);
-  const mySummonerStats = useRecoilValue(mySummonerStatsState);
+    device
+      .load({ routerRtpCapabilities })
+      .then(() => createSendTransport(stream.getAudioTracks()[0]))
+      .catch((err) => console.log('디바이스 로드 에러', err));
 
-  useEffect(() => {
-    getUserAudioStream(userDeviceId).then((stream) => {
-      setUserStream(stream);
-    });
-  }, []);
+    const createSendTransport = (audioTrack: MediaStreamTrack) => {
+      socket.emit('create-producer-transport', (params: any) => {
+        if (!device) return;
 
-  const onTeamVoiceRoom = (stream: MediaStream) => {
-    const socket = connectSocket('/team-voice-chat');
+        producerTransport = device.createSendTransport(params);
 
-    let disconnectAllTeam: () => void;
-    let closeConsumerTeam: (summonerId: number) => void;
+        producerTransport.on('connect', ({ dtlsParameters }, callback, errback) => {
+          try {
+            socket.emit('transport-connect', dtlsParameters);
+            callback();
+          } catch (err) {
+            errback(err as Error);
+          }
+        });
+        producerTransport.on('produce', ({ kind, rtpParameters }, callback, errback) => {
+          try {
+            socket.emit(
+              'transport-produce',
+              { kind, rtpParameters },
+              (producer: { id: string; producersExist: boolean }) => {
+                callback({ id: producer.id });
+                producer.producersExist && getProducers();
+              }
+            );
+          } catch (err) {
+            errback(err as Error);
+          }
+        });
 
-    electronStore.get('team-voice-room-name').then((roomName) => {
+        connectSendTransport(audioTrack);
+      });
+    };
+
+    const connectSendTransport = async (audioTrack: MediaStreamTrack) => {
+      if (!producerTransport || !audioTrack) return console.log('프로듀서 or 오디오 없음');
+
+      producerTransport
+        .produce({ track: audioTrack })
+        .then((audioProducer) => {
+          audioProducer.on('trackended', () => console.log('audio track ended'));
+          audioProducer.on('transportclose', () => console.log('audio transport ended'));
+        })
+        .catch((err) => console.log('프로듀스 메서드 에러', err));
+    };
+
+    socket.on(
+      'new-producer',
+      (newProducer: {
+        id: string;
+        summoner: SummonerType & { summonerStats: SummonerStatsType };
+      }) => {
+        signalNewConsumerTransport(newProducer.id, newProducer.summoner);
+      }
+    );
+
+    const getProducers = () => {
       socket.emit(
-        'team-join-room',
-        { roomName, summoner: { ...summoner, summonerStats: mySummonerStats } },
-        (teamRoom: { rtpCapabilities: RtpCapabilities }) => {
-          const { disconnectAll, closeConsumer } = connect({
-            voiceRoomType: 'team',
-            socket: socket,
-            stream: stream,
-            routerRtpCapabilities: teamRoom.rtpCapabilities,
+        'get-producers',
+        (
+          producers: { id: string; summoner: SummonerType & { summonerStats: SummonerStatsType } }[]
+        ) => {
+          producers.forEach(({ id, summoner }) => {
+            signalNewConsumerTransport(id, summoner);
           });
-
-          disconnectAllTeam = disconnectAll;
-          closeConsumerTeam = closeConsumer;
         }
       );
-    });
-
-    /* 팀원 나감 */
-    socket.on('inform-exit-in-game', (target: { summonerId: number }) => {
-      closeConsumerTeam(target.summonerId);
-    });
-
-    /* 게임 시작 */
-    ipcRenderer.once(IPC_KEY.START_IN_GAME, () => {});
-
-    /* 게임 끝남 */
-    ipcRenderer.once(IPC_KEY.END_OF_THE_GAME, () => {
-      socket.emit('end-of-the-game');
-      disconnectVoiceChat();
-    });
-
-    /* 게임 방 떠남 */
-    ipcRenderer.once(IPC_KEY.EXIT_IN_GAME, () => {
-      disconnectVoiceChat();
-    });
-
-    /* 챔피언 선택창에서 닷지 */
-    ipcRenderer.once(IPC_KEY.EXIT_CHAMP_SELECT, () => {
-      socket.emit('exit-champ-select');
-      disconnectVoiceChat();
-    });
-
-    const disconnectVoiceChat = () => {
-      const curTrack = userStream?.getAudioTracks()[0];
-      if (curTrack) userStream?.removeTrack(curTrack);
-
-      socket.disconnect();
-      setUserStream(null);
-      setGameStatus('none');
-      disconnectAllTeam();
     };
-  };
 
-  const onLeagueVoiceRoom = (stream: MediaStream) => {
-    const socket = connectSocket('/league-voice-chat');
+    const signalNewConsumerTransport = (
+      remoteProducerId: string,
+      newSummoner: SummonerType & { summonerStats: SummonerStatsType }
+    ) => {
+      if (voiceRoomType === 'team') {
+        setMyTeamSummoners((prev) => [...(prev ?? []), newSummoner]);
+      }
+      if (voiceRoomType === 'league') {
+        setEnemySummoners((prev) => [...(prev ?? []), newSummoner]);
+      }
 
-    let disconnectAllLeague: () => void;
-    let closeConsumerLeague: (summonerId: number) => void;
+      socket.emit('create-consumer-transport', remoteProducerId);
+      socket.on('complete-create-consumer-transport', (params) => {
+        if (!device) return;
 
-    electronStore.get('league-voice-room-name').then(({ roomName, teamName }) => {
+        const consumerTransport = device.createRecvTransport(params);
+
+        consumerTransport.on('connect', ({ dtlsParameters }, callback, errback) => {
+          try {
+            socket.emit('transport-recv-connect', {
+              dtlsParameters,
+              remoteProducerId,
+            });
+            callback();
+          } catch (err) {
+            errback(err as Error);
+          }
+        });
+        connectRecvTransport(newSummoner.summonerId, remoteProducerId, consumerTransport);
+      });
+    };
+
+    const connectRecvTransport = (
+      summonerId: number,
+      remoteProducerId: string,
+      consumerTransport: TransportType
+    ) => {
+      if (!device) return;
+
       socket.emit(
-        'league-join-room',
-        { roomName, teamName, summoner: { ...summoner, summonerStats: mySummonerStats } },
-        (leagueRoom: { rtpCapabilities: RtpCapabilities }) => {
-          const { disconnectAll, closeConsumer } = connect({
-            voiceRoomType: 'league',
-            socket: socket,
-            stream: stream,
-            routerRtpCapabilities: leagueRoom.rtpCapabilities,
+        'consume',
+        {
+          rtpCapabilities: device.rtpCapabilities,
+          remoteProducerId,
+        },
+        async ({ params }: any) => {
+          const consumer = await consumerTransport.consume({
+            id: params.id,
+            producerId: params.producerId,
+            kind: params.kind,
+            rtpParameters: params.rtpParameters,
           });
 
-          disconnectAllLeague = disconnectAll;
-          closeConsumerLeague = closeConsumer;
+          consumerTransportList.push({
+            summonerId,
+            remoteProducerId,
+            remoteConsumerId: params.id,
+            consumer,
+            consumerTransport,
+          });
+
+          const newSummonerAudio = getSummonerSpeaker(summonerId);
+          newSummonerAudio.srcObject = new MediaStream([consumer.track]);
+
+          socket.emit('consumer-resume', remoteProducerId);
         }
       );
-    });
-
-    socket.on('inform-exit-in-game', (target: { summonerId: number }) => {
-      closeConsumerLeague(target.summonerId);
-    });
-
-    /* 게임 시작 */
-    ipcRenderer.once(IPC_KEY.START_IN_GAME, () => {
-      socket.emit('start-in-game');
-      disconnectVoiceChat();
-      setGameStatus('in-game');
-    });
-
-    /* 게임 나감 */
-    ipcRenderer.once(IPC_KEY.EXIT_IN_GAME, () => {
-      disconnectVoiceChat();
-      setGameStatus('none');
-    });
-
-    const disconnectVoiceChat = () => {
-      socket.disconnect();
-      disconnectAllLeague();
     };
+
+    const closeConsumer = (targetId: number) => {
+      consumerTransportList = consumerTransportList.filter((consumerTransport) => {
+        if (consumerTransport.summonerId === targetId) {
+          consumerTransport.consumer.close();
+          consumerTransport.consumerTransport.close();
+          return false;
+        }
+        return true;
+      });
+
+      if (voiceRoomType === 'team') {
+        setMyTeamSummoners((prev) => {
+          if (prev) {
+            return [...prev.filter((summoner) => summoner.summonerId !== targetId)];
+          }
+          return null;
+        });
+      }
+      if (voiceRoomType === 'league') {
+        setEnemySummoners((prev) => {
+          if (prev) {
+            return [...prev.filter((summoner) => summoner.summonerId !== targetId)];
+          }
+          return null;
+        });
+      }
+    };
+
+    const disconnectAll = () => {
+      producerTransport?.close();
+      consumerTransportList?.map(({ consumer, consumerTransport }) => {
+        consumer.close();
+        consumerTransport.close();
+      });
+
+      producerTransport = null;
+      consumerTransportList = [];
+
+      if (voiceRoomType === 'team') {
+        setMyTeamSummoners(null);
+      }
+      if (voiceRoomType === 'league') {
+        setEnemySummoners(null);
+      }
+    };
+
+    return { closeConsumer, disconnectAll };
   };
 
-  return { onTeamVoiceRoom, onLeagueVoiceRoom };
+  return { connect };
 }
 
 export default useVoiceChat;
