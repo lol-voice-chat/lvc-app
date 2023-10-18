@@ -18,7 +18,7 @@ export const request = async (url: string) => {
         method: 'GET',
         url,
       },
-      credentials
+      credentials!
     );
 
     return JSON.parse(response.text());
