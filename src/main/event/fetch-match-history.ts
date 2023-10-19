@@ -1,10 +1,11 @@
 import { ipcMain } from 'electron';
-import { MatchHistory, SummonerStats } from '../models/match-history';
+import { MatchHistory, StatsData, SummonerStats } from '../models/match-history';
 import { IPC_KEY } from '../../const';
 import { Friends } from '../models/friends';
 import { redisClient } from '../lib/redis-client';
 import { credentials } from '../lvc-application';
 import { createHttp1Request } from 'league-connect';
+import dayjs from 'dayjs';
 
 export const handleFetchMatchHistoryEvent = () => {
   ipcMain.handle(IPC_KEY.FETCH_MATCH_HISTORY, async (event, { puuid, isMine }) => {
@@ -42,7 +43,17 @@ export const handleFetchMatchHistoryEvent = () => {
     const isError = false;
 
     if (summonerStatsData) {
-      const summonerStats = JSON.parse(summonerStatsData);
+      const summonerStats: SummonerStats = JSON.parse(summonerStatsData);
+      const statsList = summonerStats.statsList.map((stats: StatsData) => {
+        const _stats: StatsData = {
+          ...stats,
+          time: dayjs(stats.time).fromNow(),
+        };
+
+        return _stats;
+      });
+      summonerStats.statsList = statsList;
+
       return { summonerStats, isFriend, isError };
     }
 
@@ -54,6 +65,16 @@ export const handleFetchMatchHistoryEvent = () => {
       summonerStats: JSON.stringify(summonerStats),
       length: matchHistory.matchLength.toString(),
     });
+
+    const statsList = summonerStats.statsList.map((stats: StatsData) => {
+      const _stats: StatsData = {
+        ...stats,
+        time: dayjs(stats.time).fromNow(),
+      };
+
+      return _stats;
+    });
+    summonerStats.statsList = statsList;
 
     return { summonerStats, isFriend, isError };
   });

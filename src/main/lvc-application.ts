@@ -1,5 +1,5 @@
 import { WebContents } from 'electron';
-import { ChampionStats, MatchHistory } from './models/match-history';
+import { ChampionStats, MatchHistory, SummonerStats } from './models/match-history';
 import {
   Credentials,
   LeagueClient,
@@ -15,6 +15,7 @@ import { request } from './lib/common';
 import { redisClient } from './lib/redis-client';
 import axios from 'axios';
 import https from 'https';
+import { summonerState } from '../renderer/@store/atom';
 
 export let credentials: Credentials | null = null;
 
@@ -191,16 +192,19 @@ export class LvcApplication {
 
         //전적 업데이트
         const timeout = setTimeout(async () => {
-          const matchHistory = await MatchHistory.fetch(this.summoner.puuid);
-          this.matchHistory = matchHistory;
+          MatchHistory.fetch(this.summoner.puuid).then((_matchHistory: MatchHistory) => {
+            this.matchHistory = _matchHistory;
 
-          const key = this.summoner.puuid + 'match';
-          await redisClient.hSet(key, {
-            summonerStats: JSON.stringify(await matchHistory.getSummonerStats()),
-            length: matchHistory.matchLength.toString(),
+            _matchHistory.getSummonerStats().then((summonerState: SummonerStats) => {
+              const key = this.summoner.puuid + 'match';
+              redisClient
+                .hSet(key, {
+                  summonerStats: JSON.stringify(summonerState),
+                  length: _matchHistory.matchLength.toString(),
+                })
+                .then(() => clearTimeout(timeout));
+            });
           });
-
-          clearTimeout(timeout);
         }, 1000 * 10);
 
         const { teamOne, teamTwo } = data.gameData;
