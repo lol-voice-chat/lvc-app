@@ -1,6 +1,7 @@
 import { GeneralSettingsConfigType } from '../../renderer/@store/atom';
 import { GlobalKeyboardListener } from 'node-global-key-listener';
 import { BrowserWindow, ipcMain } from 'electron';
+import localShortcut from 'electron-localshortcut';
 import { IPC_KEY } from '../../const';
 import { store } from '../store';
 
@@ -8,6 +9,10 @@ const globalKey = new GlobalKeyboardListener();
 let isPressingKey = false;
 
 export const handleGlobalKeyEvent = (mainWindow: BrowserWindow) => {
+  localShortcut.register(mainWindow, 'Esc', () => {
+    mainWindow.webContents.send(IPC_KEY.SETTINGS_SHORTCUT_KEY);
+  });
+
   ipcMain.on(IPC_KEY.INPUT_SHORTCUT_KEY, () => {
     const calledOnce = (e: any) => {
       if (e.state === 'DOWN') {
