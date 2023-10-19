@@ -1,4 +1,4 @@
-import { WebContents, ipcMain } from 'electron';
+import { WebContents } from 'electron';
 import { ChampionStats, MatchHistory } from './models/match-history';
 import {
   Credentials,
@@ -55,21 +55,6 @@ export class LvcApplication {
 
     await this.fetchLeagueClient();
     handleFriendRequestEvent();
-    this.handleUpdateMatchHistoryEvent();
-  }
-
-  private handleUpdateMatchHistoryEvent() {
-    ipcMain.on('update-match-history', async () => {
-      const matchHistory = await MatchHistory.fetch(this.summoner.puuid);
-      const key = this.summoner.puuid + 'match';
-
-      await redisClient.hSet(key, {
-        summonerStats: JSON.stringify(await matchHistory.getSummonerStats()),
-        length: matchHistory.matchLength.toString(),
-      });
-
-      this.matchHistory = matchHistory;
-    });
   }
 
   private async onLeagueClientUx() {
@@ -222,6 +207,21 @@ export class LvcApplication {
 
         const recentSummonerList = await this.summoner.getRecentSummonerList();
         this.webContents.send(IPC_KEY.END_OF_THE_GAME, recentSummonerList);
+
+        //전적 업데이트
+        const timeout = setTimeout(async () => {
+          const matchHistory = await MatchHistory.fetch(this.summoner.puuid);
+          const key = this.summoner.puuid + 'match';
+
+          await redisClient.hSet(key, {
+            summonerStats: JSON.stringify(await matchHistory.getSummonerStats()),
+            length: matchHistory.matchLength.toString(),
+          });
+
+          this.matchHistory = matchHistory;
+
+          clearTimeout(timeout);
+        }, 1000 * 10);
       }
     });
   }
