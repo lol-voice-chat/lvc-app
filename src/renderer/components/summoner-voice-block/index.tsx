@@ -27,10 +27,6 @@ function SummonerVoiceBlock(props: {
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
 
   useEffect(() => {
-    console.log('ㅍㄹㅅ', props.summoner.summonerStats);
-  }, []);
-
-  useEffect(() => {
     function micVisualizer(summoner: { summonerId: number; visualizerVolume: number }) {
       if (props.summoner.summonerId === summoner.summonerId && !isMuteSpeaker) {
         setVisualizerVolume(summoner.visualizerVolume);

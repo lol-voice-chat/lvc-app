@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import {
   enemySummonersState,
   gameStatusState,
@@ -15,7 +15,7 @@ import { IPC_KEY } from '../../../const';
 import electronStore from '../../@store/electron';
 import { Socket } from 'socket.io-client';
 import SummonerLeagueVoiceBlock from '../summoner-league-voice-block';
-import { ChampionInfoType, SummonerStatsType } from '../../@type/summoner';
+import { ChampionInfoType } from '../../@type/summoner';
 import useVoiceRoom from '../../hooks/use-voice-room';
 const { ipcRenderer } = window.require('electron');
 
@@ -28,7 +28,7 @@ function VoiceRoomModal() {
   const myTeamSummoners = useRecoilValue(myTeamSummonersState);
   const enemySummoners = useRecoilValue(enemySummonersState);
 
-  const [mySummonerStats, setMySummonerStats] = useRecoilState(mySummonerStatsState);
+  const mySummonerStats = useRecoilValue(mySummonerStatsState);
   const [selectedChampList, setSelectedChampList] = useState<Map<number, ChampionInfoType>>(
     new Map()
   );
@@ -66,17 +66,6 @@ function VoiceRoomModal() {
       ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
     };
   }, []);
-
-  useEffect(() => {
-    /* 내 최신 전적 불러오기 */
-    if (summoner) {
-      ipcRenderer
-        .invoke(IPC_KEY.FETCH_MATCH_HISTORY, { isMine: true, puuid: summoner.puuid })
-        .then((summoner: { summonerStats: SummonerStatsType }) => {
-          setMySummonerStats(summoner.summonerStats);
-        });
-    }
-  }, [summoner]);
 
   useEffect(() => {
     if (gameStatus === 'loading' && userStream) {

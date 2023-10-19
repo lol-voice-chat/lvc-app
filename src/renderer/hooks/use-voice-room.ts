@@ -15,6 +15,7 @@ import { connectSocket } from '../utils/socket';
 import { getUserAudioStream } from '../utils/audio';
 import { useEffect } from 'react';
 import useVoiceChat from './use-voice-chat';
+import { SummonerStatsType } from '../@type/summoner';
 const { ipcRenderer } = window.require('electron');
 
 function useVoiceRoom() {
@@ -23,7 +24,7 @@ function useVoiceRoom() {
   const setGameStatus = useSetRecoilState(gameStatusState);
 
   const summoner = useRecoilValue(summonerState);
-  const mySummonerStats = useRecoilValue(mySummonerStatsState);
+  const [mySummonerStats, setMySummonerStats] = useRecoilState(mySummonerStatsState);
   const setMyTeamSummoners = useSetRecoilState(myTeamSummonersState);
   const setEnemySummoners = useSetRecoilState(enemySummonersState);
 
@@ -42,21 +43,27 @@ function useVoiceRoom() {
     let closeConsumerTeamVoice: (summonerId: number) => void;
 
     electronStore.get('team-voice-room-name').then((roomName) => {
-      socket.emit(
-        'team-join-room',
-        { roomName, summoner: { ...summoner, summonerStats: mySummonerStats } },
-        (teamRoom: { rtpCapabilities: RtpCapabilities }) => {
-          const { disconnectAll, closeConsumer } = connect({
-            voiceRoomType: 'team',
-            socket: socket,
-            stream: stream,
-            routerRtpCapabilities: teamRoom.rtpCapabilities,
-          });
+      ipcRenderer
+        /* 내 최신 전적 불러오기 */
+        .invoke(IPC_KEY.FETCH_MATCH_HISTORY, { isMine: true, puuid: summoner?.puuid })
+        .then((my: { summonerStats: SummonerStatsType }) => {
+          setMySummonerStats(my.summonerStats);
 
-          disconnectAllTeamVoice = disconnectAll;
-          closeConsumerTeamVoice = closeConsumer;
-        }
-      );
+          socket.emit(
+            'team-join-room',
+            { roomName, summoner: { ...summoner, summonerStats: my.summonerStats } },
+            (teamRoom: { rtpCapabilities: RtpCapabilities }) => {
+              const { disconnectAll, closeConsumer } = connect({
+                voiceRoomType: 'team',
+                socket: socket,
+                stream: stream,
+                routerRtpCapabilities: teamRoom.rtpCapabilities,
+              });
+              disconnectAllTeamVoice = disconnectAll;
+              closeConsumerTeamVoice = closeConsumer;
+            }
+          );
+        });
     });
 
     /* 팀원 나감 */
