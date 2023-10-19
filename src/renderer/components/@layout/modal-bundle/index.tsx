@@ -1,28 +1,59 @@
-import React, { useEffect } from 'react';
-import { useRecoilState } from 'recoil';
-import { generalSettingsConfigState, generalSettingsModalState } from '../../../@store/atom';
+import React, { useEffect, useRef } from 'react';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import {
+  generalSettingsConfigState,
+  generalSettingsModalState,
+  summonerState,
+} from '../../../@store/atom';
 import GeneralSettingModal from '../../general-setting-modal';
 import electronStore from '../../../@store/electron';
 import useLeagueHandler from '../../../hooks/use-league-handler';
 import VoiceRoomModal from '../../voice-room-modal';
 import { IPC_KEY } from '../../../../const';
+import { Socket } from 'socket.io-client';
+import { connectSocket } from '../../../utils/socket';
 const { ipcRenderer } = window.require('electron');
 
 function ModalBundle() {
+  const manageSocket = useRef<Socket | null>(null);
+
+  const { gameStatus } = useLeagueHandler();
+
+  const summoner = useRecoilValue(summonerState);
+
   const [generalSettingState, setGeneralSettingState] = useRecoilState(generalSettingsModalState);
   const [generalSettingsConfig, setGeneralSettingsConfig] = useRecoilState(
     generalSettingsConfigState
   );
 
-  const { gameStatus } = useLeagueHandler();
-
   useEffect(() => {
+    const socket = connectSocket('/manage');
+
+    socket.on('connect', () => {
+      manageSocket.current = socket;
+    });
+
+    /* 설정 단축키 */
     ipcRenderer.on(IPC_KEY.SETTINGS_SHORTCUT_KEY, () => setGeneralSettingState((prev) => !prev));
 
     return () => {
+      socket.disconnect();
       ipcRenderer.removeAllListeners(IPC_KEY.SETTINGS_SHORTCUT_KEY);
     };
   }, []);
+
+  useEffect(() => {
+    /* 앱 꺼짐 */
+    ipcRenderer.on(IPC_KEY.QUIT_APP, () => {
+      if (summoner) {
+        manageSocket.current?.emit('quit-app', summoner.puuid);
+      }
+    });
+
+    return () => {
+      ipcRenderer.removeAllListeners(IPC_KEY.QUIT_APP);
+    };
+  }, [summoner]);
 
   useEffect(() => {
     /* 전체 설정 갱신 */

@@ -20,6 +20,7 @@ export const IPC_KEY = {
   UPDATE_MATCH_HISTORY: 'update-match-history',
   CLICK_SUMMONER_PROFILE: 'click-summoner-profile',
   SETTINGS_SHORTCUT_KEY: 'settings-shortcut-key',
+  RECENT_SUMMONER: 'recent-summoner',
 };
 
 export const generalSettingsDefaultConfig = {
