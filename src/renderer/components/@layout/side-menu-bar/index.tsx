@@ -6,6 +6,7 @@ import {
   generalSettingsConfigState,
   generalSettingsModalState,
   summonerState,
+  userStreamState,
 } from '../../../@store/atom';
 import SummonerProfile from './summoner-profile';
 import SummonerRecord from './summoner-record';
@@ -27,6 +28,10 @@ function SideMenuBar() {
   const [curSummonerProfile, setCurSummonerProfile] = useState<SummonerType | null>(null);
   const [isFriendSummoner, setIsFriendSummoner] = useState(true);
   const [recentSummonerList, setRecentSummonerList] = useState<SummonerType[] | null>(null);
+
+  const userStream = useRecoilValue(userStreamState);
+
+  console.log('현재 스트림', userStream);
 
   useEffect(() => {
     const socket = connectSocket('/summoner-manager');

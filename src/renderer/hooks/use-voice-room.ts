@@ -19,14 +19,15 @@ const { ipcRenderer } = window.require('electron');
 
 function useVoiceRoom() {
   const userDeviceId = useRecoilValue(userDeviceIdState);
-  const [userStream, setUserStream] = useRecoilState(userStreamState);
-
-  const { connect } = useVoiceChat();
-
+  const setUserStream = useSetRecoilState(userStreamState);
   const setGameStatus = useSetRecoilState(gameStatusState);
 
   const summoner = useRecoilValue(summonerState);
   const mySummonerStats = useRecoilValue(mySummonerStatsState);
+  const setMyTeamSummoners = useSetRecoilState(myTeamSummonersState);
+  const setEnemySummoners = useSetRecoilState(enemySummonersState);
+
+  const { connect } = useVoiceChat();
 
   useEffect(() => {
     getUserAudioStream(userDeviceId).then((stream) => {
@@ -37,8 +38,8 @@ function useVoiceRoom() {
   const onTeamVoiceRoom = (stream: MediaStream) => {
     const socket = connectSocket('/team-voice-chat');
 
-    let disconnectAllTeam: () => void;
-    let closeConsumerTeam: (summonerId: number) => void;
+    let disconnectAllTeamVoice: () => void;
+    let closeConsumerTeamVoice: (summonerId: number) => void;
 
     electronStore.get('team-voice-room-name').then((roomName) => {
       socket.emit(
@@ -52,15 +53,18 @@ function useVoiceRoom() {
             routerRtpCapabilities: teamRoom.rtpCapabilities,
           });
 
-          disconnectAllTeam = disconnectAll;
-          closeConsumerTeam = closeConsumer;
+          disconnectAllTeamVoice = disconnectAll;
+          closeConsumerTeamVoice = closeConsumer;
         }
       );
     });
 
     /* 팀원 나감 */
     socket.on('inform-exit-in-game', (target: { summonerId: number }) => {
-      closeConsumerTeam(target.summonerId);
+      setMyTeamSummoners((prev) =>
+        prev ? [...prev.filter(({ summonerId }) => summonerId !== target.summonerId)] : null
+      );
+      closeConsumerTeamVoice(target.summonerId);
     });
 
     /* 게임 시작 */
@@ -84,13 +88,9 @@ function useVoiceRoom() {
     });
 
     const disconnectVoiceChat = () => {
-      const track = userStream?.getAudioTracks()[0];
-      if (track) userStream.removeTrack(track);
-
-      socket?.disconnect();
-      setUserStream(null);
       setGameStatus('none');
-      disconnectAllTeam();
+      setMyTeamSummoners(null);
+      disconnectAllTeamVoice();
     };
   };
 
@@ -119,6 +119,9 @@ function useVoiceRoom() {
     });
 
     socket.on('inform-exit-in-game', (target: { summonerId: number }) => {
+      setEnemySummoners((prev) =>
+        prev ? [...prev.filter(({ summonerId }) => summonerId !== target.summonerId)] : null
+      );
       closeConsumerLeague(target.summonerId);
     });
 
@@ -138,6 +141,7 @@ function useVoiceRoom() {
     const disconnectVoiceChat = () => {
       socket.disconnect();
       // todo : 초기화 셋팅 추가
+      setEnemySummoners(null);
       disconnectAllLeague();
     };
   };
