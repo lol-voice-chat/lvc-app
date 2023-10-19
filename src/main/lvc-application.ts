@@ -15,7 +15,6 @@ import { request } from './lib/common';
 import { redisClient } from './lib/redis-client';
 import axios from 'axios';
 import https from 'https';
-import { summonerState } from '../renderer/@store/atom';
 
 export let credentials: Credentials | null = null;
 

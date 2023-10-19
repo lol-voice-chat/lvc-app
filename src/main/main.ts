@@ -5,6 +5,7 @@ import { LvcApplication } from './lvc-application';
 import { resolvePath } from './lib/common';
 import handleGlobalKeyEvent from './event/global-key-event';
 import handleFetchMatchHistoryEvent from './event/fetch-match-history';
+import * as client from './lib/redis-client';
 
 let mainWindow: BrowserWindow;
 
@@ -45,6 +46,7 @@ const createWindow = () => {
 
 async function handleLoadEvent() {
   mainWindow.webContents.on('did-finish-load', async () => {
+    client.connect();
     const app = new LvcApplication(mainWindow.webContents);
 
     app.initialize().then(() => {
