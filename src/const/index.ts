@@ -3,9 +3,10 @@ import { GeneralSettingsConfigType } from '../renderer/@store/atom';
 export const IPC_KEY = {
   QUIT_APP: 'quit-app',
   CLOSE_APP: 'close-app',
-  SHUTDOWN_APP: 'shutdown-app',
+  SHUTDOWN_APP: 'shutdown-lol',
 
   ON_LEAGUE_CLIENT: 'on-league-client',
+  RECENT_SUMMONER: 'recent-summoner',
   TEAM_JOIN_ROOM: 'team-join-room',
   LEAGUE_JOIN_ROOM: 'league-join-room',
   EXIT_CHAMP_SELECT: 'exit-champ-select',

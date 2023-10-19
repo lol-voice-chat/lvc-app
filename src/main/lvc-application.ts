@@ -48,9 +48,8 @@ export class LvcApplication {
     client.on('disconnect', () => {
       credentials = null;
 
-      redisClient.del(this.summoner.puuid + 'match').then(() => {
-        this.webContents.send(IPC_KEY.SHUTDOWN_APP);
-      });
+      this.webContents.send(IPC_KEY.QUIT_APP);
+      this.webContents.send(IPC_KEY.SHUTDOWN_APP);
     });
 
     await this.fetchLeagueClient();
@@ -87,10 +86,10 @@ export class LvcApplication {
       profileImage: summoner.getProfileImage(),
       tier: summoner.getTier(),
     };
-    this.webContents.send('on-league-client', leagueClient);
+    this.webContents.send(IPC_KEY.ON_LEAGUE_CLIENT, leagueClient);
 
     const recentSummonerList = await summoner.getRecentSummonerList();
-    this.webContents.send('online-summoner', recentSummonerList);
+    this.webContents.send(IPC_KEY.RECENT_SUMMONER, recentSummonerList);
 
     const matchHistory = await MatchHistory.fetch(summoner.puuid);
     const key = summoner.puuid + 'match';
