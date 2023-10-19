@@ -174,8 +174,9 @@ export class LvcApplication {
         await this.joinLeagueVoice(teamOne, teamTwo);
 
         const inGameCurrentTime = await this.fetchInGameTime();
-        setTimeout(() => {
+        const timeout = setTimeout(() => {
           this.webContents.send(IPC_KEY.START_IN_GAME);
+          clearTimeout(timeout);
         }, 1000 * 60 + 5000 - inGameCurrentTime * 1000);
       }
 
@@ -211,14 +212,13 @@ export class LvcApplication {
         //전적 업데이트
         const timeout = setTimeout(async () => {
           const matchHistory = await MatchHistory.fetch(this.summoner.puuid);
-          const key = this.summoner.puuid + 'match';
+          this.matchHistory = matchHistory;
 
+          const key = this.summoner.puuid + 'match';
           await redisClient.hSet(key, {
             summonerStats: JSON.stringify(await matchHistory.getSummonerStats()),
             length: matchHistory.matchLength.toString(),
           });
-
-          this.matchHistory = matchHistory;
 
           clearTimeout(timeout);
         }, 1000 * 10);
