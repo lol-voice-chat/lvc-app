@@ -44,7 +44,7 @@ export const handleFetchMatchHistoryEvent = () => {
 
     if (summonerStatsData) {
       const summonerStats: SummonerStats = JSON.parse(summonerStatsData);
-      summonerStats.statsList = setTimeFromNow(summonerStats);
+      summonerStats.statsList = setStatsTimeFromNow(summonerStats);
       return { summonerStats, isFriend, isError };
     }
 
@@ -57,12 +57,12 @@ export const handleFetchMatchHistoryEvent = () => {
       length: matchHistory.matchLength.toString(),
     });
 
-    summonerStats.statsList = setTimeFromNow(summonerStats);
+    summonerStats.statsList = setStatsTimeFromNow(summonerStats);
     return { summonerStats, isFriend, isError };
   });
 };
 
-function setTimeFromNow(summonerStats: SummonerStats) {
+function setStatsTimeFromNow(summonerStats: SummonerStats) {
   const statsList = summonerStats.statsList.map((stats: StatsData) => {
     const _stats: StatsData = {
       ...stats,
