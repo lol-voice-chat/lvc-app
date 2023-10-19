@@ -49,13 +49,6 @@ function VoiceRoomModal() {
       setTeamManagementSocket(socket);
     });
 
-    /* 내 최신 전적 불러오기 */
-    ipcRenderer
-      .invoke(IPC_KEY.FETCH_MATCH_HISTORY, { isMine: true, puuid: summoner?.puuid })
-      .then((summoner: { summonerStats: SummonerStatsType }) => {
-        setMySummonerStats(summoner.summonerStats);
-      });
-
     /* 입장시 팀원의 (자신포함) 챔피언 리스트 받음 */
     ipcRenderer.once('selected-champ-info-list', (_, championInfoList: ChampionInfoType[]) => {
       championInfoList.map((champInfo: ChampionInfoType) => {
@@ -73,6 +66,17 @@ function VoiceRoomModal() {
       ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
     };
   }, []);
+
+  useEffect(() => {
+    /* 내 최신 전적 불러오기 */
+    if (summoner) {
+      ipcRenderer
+        .invoke(IPC_KEY.FETCH_MATCH_HISTORY, { isMine: true, puuid: summoner.puuid })
+        .then((summoner: { summonerStats: SummonerStatsType }) => {
+          setMySummonerStats(summoner.summonerStats);
+        });
+    }
+  }, [summoner]);
 
   useEffect(() => {
     if (gameStatus === 'loading' && userStream) {
@@ -96,6 +100,8 @@ function VoiceRoomModal() {
       leagueManagementSocket?.disconnect();
     };
   }, [gameStatus]);
+
+  console.log(mySummonerStats);
 
   return (
     <S.VoiceRoom>
