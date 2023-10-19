@@ -26,7 +26,6 @@ const configuration: webpack.Configuration = {
   },
 
   module: {
-    //svg
     rules: [
       {
         test: /\.png$/,

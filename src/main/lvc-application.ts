@@ -47,9 +47,8 @@ export class LvcApplication {
 
     client.on('disconnect', () => {
       credentials = null;
-
       this.webContents.send(IPC_KEY.QUIT_APP);
-      this.webContents.send(IPC_KEY.SHUTDOWN_APP);
+      this.webContents.send(IPC_KEY.SHUTDOWN_LOL);
     });
 
     await this.fetchLeagueClient();
