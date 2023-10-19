@@ -4,7 +4,6 @@ import electronStore from '../@store/electron';
 import { useEffect } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import { gameStatusState, leagueChampInfoListState, summonerState } from '../@store/atom';
-
 const { ipcRenderer } = window.require('electron');
 
 function useLeagueHandler() {
@@ -13,13 +12,13 @@ function useLeagueHandler() {
   const setLeagueChampInfoList = useSetRecoilState(leagueChampInfoListState);
 
   useEffect(() => {
-    /* 롤 클라이언트 on */
+    /* 롤 클라이언트 켜짐 */
     ipcRenderer.on(IPC_KEY.ON_LEAGUE_CLIENT, (_, summoner: SummonerType) => {
       setSummoner(summoner);
     });
 
-    /* 롤 클라이언트 off */
-    ipcRenderer.on(IPC_KEY.SHUTDOWN_APP, () => {
+    /* 롤 클라이언트 꺼짐 */
+    ipcRenderer.on(IPC_KEY.SHUTDOWN_LOL, () => {
       setGameStatus('none');
     });
 
@@ -40,7 +39,7 @@ function useLeagueHandler() {
 
     return () => {
       ipcRenderer.removeAllListeners(IPC_KEY.ON_LEAGUE_CLIENT);
-      ipcRenderer.removeAllListeners(IPC_KEY.SHUTDOWN_APP);
+      ipcRenderer.removeAllListeners(IPC_KEY.SHUTDOWN_LOL);
       ipcRenderer.removeAllListeners(IPC_KEY.TEAM_JOIN_ROOM);
       ipcRenderer.removeAllListeners(IPC_KEY.LEAGUE_JOIN_ROOM);
     };

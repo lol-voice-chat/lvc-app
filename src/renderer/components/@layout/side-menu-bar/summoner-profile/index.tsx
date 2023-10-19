@@ -18,6 +18,10 @@ function SummonerProfile(props: SummonerProfilePropsType) {
 
   const { state } = useHover({ elementIds: ['friend-request-badge'] });
 
+  useEffect(() => {
+    setIsRequested(false);
+  }, [props.summoner]);
+
   const handleClickProfile = (e: any) => {
     if (props.summoner && e.target.id !== 'friend-request-badge') {
       props.summoner && props.handleClickSummonerProfile(props.summoner);
@@ -42,7 +46,7 @@ function SummonerProfile(props: SummonerProfilePropsType) {
               <div id="badge-bundle">
                 <RankBadge size="small" tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
 
-                {!props.isFriend && (
+                {!props.isFriend && !isRequested && (
                   <div id="friend-request-box">
                     {state.get('friend-request-badge') && (
                       <InfoBox

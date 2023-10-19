@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as _ from './style';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import {
@@ -12,15 +12,12 @@ import SummonerProfile from './summoner-profile';
 import SummonerRecord from './summoner-record';
 import { IPC_KEY } from '../../../../const';
 import { SummonerType } from '../../../@type/summoner';
-import { connectSocket } from '../../../utils/socket';
-import { Socket } from 'socket.io-client';
 import RecentSummonerList from './recent-summoner-list';
 import AppHeader from './app-header';
 const { ipcRenderer } = window.require('electron');
 
 function SideMenuBar() {
   const summoner = useRecoilValue(summonerState);
-  const summonerStatusSocket = useRef<Socket | null>(null);
 
   const setGeneralSettingsState = useSetRecoilState(generalSettingsModalState);
 
@@ -29,17 +26,9 @@ function SideMenuBar() {
   const [isFriendSummoner, setIsFriendSummoner] = useState(true);
   const [recentSummonerList, setRecentSummonerList] = useState<SummonerType[] | null>(null);
 
-  const userStream = useRecoilValue(userStreamState);
-
   useEffect(() => {
-    const socket = connectSocket('/summoner-manager');
-
-    socket.on('connect', () => {
-      summonerStatusSocket.current = socket;
-    });
-
     /* 롤보챗 on - 최근 소환사 불러오기 */
-    ipcRenderer.once('online-summoner', (_, recentSummonerList: SummonerType[]) => {
+    ipcRenderer.once(IPC_KEY.RECENT_SUMMONER, (_, recentSummonerList: SummonerType[]) => {
       setRecentSummonerList(recentSummonerList);
     });
 
@@ -49,7 +38,6 @@ function SideMenuBar() {
     });
 
     return () => {
-      socket.disconnect();
       ipcRenderer.removeAllListeners(IPC_KEY.END_OF_THE_GAME);
     };
   }, []);
@@ -76,7 +64,6 @@ function SideMenuBar() {
     } else {
       setCurSummonerProfile(target);
     }
-
     setIsRecordPage((prev) => !prev);
   };
 

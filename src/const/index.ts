@@ -3,7 +3,7 @@ import { GeneralSettingsConfigType } from '../renderer/@store/atom';
 export const IPC_KEY = {
   QUIT_APP: 'quit-app',
   CLOSE_APP: 'close-app',
-  SHUTDOWN_APP: 'shutdown-app',
+  SHUTDOWN_LOL: 'shutdown-lol',
 
   ON_LEAGUE_CLIENT: 'on-league-client',
   TEAM_JOIN_ROOM: 'team-join-room',
@@ -19,6 +19,7 @@ export const IPC_KEY = {
   UPDATE_MATCH_HISTORY: 'update-match-history',
   CLICK_SUMMONER_PROFILE: 'click-summoner-profile',
   SETTINGS_SHORTCUT_KEY: 'settings-shortcut-key',
+  RECENT_SUMMONER: 'recent-summoner',
 };
 
 export const generalSettingsDefaultConfig = {
