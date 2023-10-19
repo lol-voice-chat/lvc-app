@@ -4,10 +4,12 @@ import { getSummonerSpeaker } from '../utils/audio';
 import * as mediasoup from 'mediasoup-client';
 import { ConsumerTransportType, TransportType } from '../@type/webRtc';
 import { SummonerStatsType, SummonerType } from '../@type/summoner';
-import { useSetRecoilState } from 'recoil';
-import { enemySummonersState, myTeamSummonersState } from '../@store/atom';
+import { useRecoilState, useSetRecoilState } from 'recoil';
+import { enemySummonersState, myTeamSummonersState, userStreamState } from '../@store/atom';
 
 function useVoiceChat() {
+  const setUserStream = useSetRecoilState(userStreamState);
+
   const setMyTeamSummoners = useSetRecoilState(myTeamSummonersState);
   const setEnemySummoners = useSetRecoilState(enemySummonersState);
 
@@ -174,40 +176,26 @@ function useVoiceChat() {
         }
         return true;
       });
-
-      if (voiceRoomType === 'team') {
-        setMyTeamSummoners((prev) => {
-          if (prev) {
-            return [...prev.filter((summoner) => summoner.summonerId !== targetId)];
-          }
-          return null;
-        });
-      }
-      if (voiceRoomType === 'league') {
-        setEnemySummoners((prev) => {
-          if (prev) {
-            return [...prev.filter((summoner) => summoner.summonerId !== targetId)];
-          }
-          return null;
-        });
-      }
     };
 
+    // 두번 호출되면 안됨
     const disconnectAll = () => {
-      producerTransport?.close();
-      consumerTransportList?.map(({ consumer, consumerTransport }) => {
-        consumer.close();
-        consumerTransport.close();
-      });
+      if (socket.connected) {
+        socket.disconnect();
 
-      producerTransport = null;
-      consumerTransportList = [];
+        if (voiceRoomType === 'team' && stream) {
+          stream.getTracks().forEach((track) => track.stop());
+          stream.removeTrack(stream.getAudioTracks()[0]);
+          setUserStream(null);
+        }
+        producerTransport?.close();
+        consumerTransportList?.map(({ consumer, consumerTransport }) => {
+          consumer.close();
+          consumerTransport.close();
+        });
 
-      if (voiceRoomType === 'team') {
-        setMyTeamSummoners(null);
-      }
-      if (voiceRoomType === 'league') {
-        setEnemySummoners(null);
+        producerTransport = null;
+        consumerTransportList = [];
       }
     };
 

@@ -5,7 +5,7 @@ export const SettingContainer = styled.div`
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 99999;
+  z-index: 998;
 
   display: flex;
   justify-content: center;

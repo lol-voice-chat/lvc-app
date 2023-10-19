@@ -18,7 +18,7 @@ function ChattingList(props: GeneralChatChildPropsType) {
   const [messageList, setMessageList] = useState<MessageInfoType[] | null>(null);
   const [messageEvent, setMessageEvent] = useState<{ key: MessageEventType }>({ key: 'none' });
 
-  const [isReceiveNewMsg, setIsReceiveNewMsg] = useState(false);
+  const [isReceiveNewMsg, setIsReceiveNewMsg] = useState(true);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const topRef = useRef<HTMLDivElement | null>(null);
@@ -113,6 +113,10 @@ function ChattingList(props: GeneralChatChildPropsType) {
         setIsFetchLoading(true);
       }
     }
+  });
+
+  useObserver(bottomRef, ([entry]: any) => {
+    if (entry.isIntersecting && isReceiveNewMsg) setIsReceiveNewMsg(false);
   });
 
   const handleClickNewMessageAlram = () => {
