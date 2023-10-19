@@ -189,6 +189,20 @@ export class LvcApplication {
       if (data.phase === 'WaitingForStats' && !isEndGame) {
         isEndGame = true;
 
+        //전적 업데이트
+        const timeout = setTimeout(async () => {
+          const matchHistory = await MatchHistory.fetch(this.summoner.puuid);
+          this.matchHistory = matchHistory;
+
+          const key = this.summoner.puuid + 'match';
+          await redisClient.hSet(key, {
+            summonerStats: JSON.stringify(await matchHistory.getSummonerStats()),
+            length: matchHistory.matchLength.toString(),
+          });
+
+          clearTimeout(timeout);
+        }, 1000 * 10);
+
         const { teamOne, teamTwo } = data.gameData;
         const teamOneSummoners = new Team(teamOne);
         const teamTwoSummoners = new Team(teamTwo);
@@ -208,20 +222,6 @@ export class LvcApplication {
 
         const recentSummonerList = await this.summoner.getRecentSummonerList();
         this.webContents.send(IPC_KEY.END_OF_THE_GAME, recentSummonerList);
-
-        //전적 업데이트
-        const timeout = setTimeout(async () => {
-          const matchHistory = await MatchHistory.fetch(this.summoner.puuid);
-          this.matchHistory = matchHistory;
-
-          const key = this.summoner.puuid + 'match';
-          await redisClient.hSet(key, {
-            summonerStats: JSON.stringify(await matchHistory.getSummonerStats()),
-            length: matchHistory.matchLength.toString(),
-          });
-
-          clearTimeout(timeout);
-        }, 1000 * 10);
       }
     });
   }
