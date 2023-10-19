@@ -15,7 +15,7 @@ export interface SummonerStats {
   statsList: StatsData[];
 }
 
-interface StatsData {
+export interface StatsData {
   championIcon: string;
   kda: string;
   isWin: boolean;
@@ -147,7 +147,7 @@ export class MatchHistory {
           kda: `${kills}/${deaths}/${assists}`,
           isWin: participant.stats.win,
           killInvolvement: `${killInvolvement}%`,
-          time: dayjs(date.toISOString()).fromNow(),
+          time: date.toISOString(),
         };
 
         if (participant.stats.win) {
