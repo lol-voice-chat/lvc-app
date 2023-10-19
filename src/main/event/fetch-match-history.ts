@@ -7,6 +7,8 @@ import { credentials } from '../lvc-application';
 import { createHttp1Request } from 'league-connect';
 import dayjs from 'dayjs';
 
+const MATCH_EXPIRE_TIME = 1800; //30분
+
 export const handleFetchMatchHistoryEvent = () => {
   ipcMain.handle(IPC_KEY.FETCH_MATCH_HISTORY, async (event, { puuid, isMine }) => {
     if (!credentials) {
@@ -56,6 +58,7 @@ export const handleFetchMatchHistoryEvent = () => {
       summonerStats: JSON.stringify(summonerStats),
       length: matchHistory.matchLength.toString(),
     });
+    await redisClient.expire(key, MATCH_EXPIRE_TIME);
 
     summonerStats.statsList = setStatsTimeFromNow(summonerStats);
     return { summonerStats, isFriend, isError };
