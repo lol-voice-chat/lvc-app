@@ -27,6 +27,10 @@ function SummonerVoiceBlock(props: {
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
 
   useEffect(() => {
+    console.log('ㅍㄹㅅ', props.summoner.summonerStats);
+  }, []);
+
+  useEffect(() => {
     function micVisualizer(summoner: { summonerId: number; visualizerVolume: number }) {
       if (props.summoner.summonerId === summoner.summonerId && !isMuteSpeaker) {
         setVisualizerVolume(summoner.visualizerVolume);
@@ -150,7 +154,7 @@ function SummonerVoiceBlock(props: {
       </S.AverageGameData>
       <S.GameRecord>
         {/* 이번 시즌 전적이 없을 경우 알림창 */}
-        {props.summoner.summonerStats.statsList.length !== 0 ? (
+        {props.summoner.summonerStats.statsList.length > 0 ? (
           <S.WinningPercentage>
             <S.Text>
               <p>승률</p>

@@ -105,7 +105,7 @@ function VoiceRoomModal() {
     <S.VoiceRoom>
       {(gameStatus === 'champ-select' || gameStatus === 'in-game') && (
         <>
-          {summoner && mySummonerStats && (
+          {summoner && mySummonerStats?.statsList && (
             <SummonerVoiceBlock
               isMine={true}
               summoner={{ ...summoner, summonerStats: mySummonerStats }}
