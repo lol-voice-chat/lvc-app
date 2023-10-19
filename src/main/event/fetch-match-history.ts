@@ -50,7 +50,8 @@ export const handleFetchMatchHistoryEvent = () => {
       return { summonerStats, isFriend, isError };
     }
 
-    const matchHistory: MatchHistory = await MatchHistory.fetch(puuid);
+    //캐싱
+    const matchHistory: MatchHistory = await MatchHistory.fetch(puuid, false);
     const summonerStats: SummonerStats = await matchHistory.getSummonerStats();
 
     const key = puuid + 'match';

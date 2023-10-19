@@ -81,4 +81,8 @@ app.on('window-all-closed', () => {
   app.quit();
 });
 
+app.on('before-quit', () => {
+  mainWindow.webContents.send(IPC_KEY.QUIT_APP);
+});
+
 onElectronStore();

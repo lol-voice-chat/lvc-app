@@ -71,10 +71,20 @@ export class MatchHistory {
     this.matches = matches;
   }
 
-  public static async fetch(puuid: string) {
+  public static async fetch(puuid: string, isMine: boolean = true) {
+    if (!isMine) {
+      const url = `/lol-match-history/v1/products/lol/${puuid}/matches`;
+      const matchHistory = await request(url);
+      const matches = matchHistory.games.games.filter(
+        (match: Match) => match.gameType !== 'CUSTOM_GAME'
+      );
+
+      return new MatchHistory(matches);
+    }
+
     const url = `/lol-match-history/v1/products/lol/${puuid}/matches?begIndex=0&endIndex=99`;
-    const matchHistoryData = await request(url);
-    const matches = matchHistoryData.games.games
+    const matchHistory = await request(url);
+    const matches = matchHistory.games.games
       .slice(0, 100)
       .filter((match: Match) => match.gameType !== 'CUSTOM_GAME');
 
