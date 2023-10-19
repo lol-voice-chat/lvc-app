@@ -31,8 +31,6 @@ function SideMenuBar() {
 
   const userStream = useRecoilValue(userStreamState);
 
-  console.log('현재 스트림', userStream);
-
   useEffect(() => {
     const socket = connectSocket('/summoner-manager');
 

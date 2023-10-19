@@ -37,7 +37,7 @@ function useVoiceRoom() {
 
   const onTeamVoiceRoom = (stream: MediaStream) => {
     const socket = connectSocket('/team-voice-chat');
-
+    let isClosed = false;
     let disconnectAllTeamVoice: () => void;
     let closeConsumerTeamVoice: (summonerId: number) => void;
 
@@ -88,9 +88,12 @@ function useVoiceRoom() {
     });
 
     const disconnectVoiceChat = () => {
-      setGameStatus('none');
-      setMyTeamSummoners(null);
-      disconnectAllTeamVoice();
+      if (!isClosed) {
+        isClosed = true;
+        setGameStatus('none');
+        setMyTeamSummoners(null);
+        disconnectAllTeamVoice();
+      }
     };
   };
 

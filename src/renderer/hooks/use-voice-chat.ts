@@ -180,23 +180,22 @@ function useVoiceChat() {
 
     // 두번 호출되면 안됨
     const disconnectAll = () => {
-      if (socket.connected) {
-        socket.disconnect();
+      socket.disconnect();
 
-        if (voiceRoomType === 'team' && stream) {
-          stream.getTracks().forEach((track) => track.stop());
-          stream.removeTrack(stream.getAudioTracks()[0]);
-          setUserStream(null);
-        }
-        producerTransport?.close();
-        consumerTransportList?.map(({ consumer, consumerTransport }) => {
-          consumer.close();
-          consumerTransport.close();
-        });
-
-        producerTransport = null;
-        consumerTransportList = [];
+      if (voiceRoomType === 'team' && stream) {
+        stream.getTracks().forEach((track) => track.stop());
+        stream.removeTrack(stream.getAudioTracks()[0]);
+        setUserStream(null);
       }
+
+      producerTransport?.close();
+      consumerTransportList?.map(({ consumer, consumerTransport }) => {
+        consumer.close();
+        consumerTransport.close();
+      });
+
+      producerTransport = null;
+      consumerTransportList = [];
     };
 
     return { closeConsumer, disconnectAll };
