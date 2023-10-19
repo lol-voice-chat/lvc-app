@@ -101,8 +101,6 @@ function VoiceRoomModal() {
     };
   }, [gameStatus]);
 
-  console.log(mySummonerStats);
-
   return (
     <S.VoiceRoom>
       {(gameStatus === 'champ-select' || gameStatus === 'in-game') && (
