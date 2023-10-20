@@ -1,3 +1,4 @@
+import { redisClient } from '../lib/redis-client';
 import { MatchHistory } from './match-history';
 
 export interface ChampionData {
@@ -31,10 +32,12 @@ export class Member {
     return this.summonerId === summonerId;
   }
 
-  public async getChampionKda(matchLength: number) {
+  public async getChampionKda() {
     const matchHistory = await MatchHistory.fetch(this.puuid);
+    const key = this.puuid + 'match';
+    const matchLength: string = (await redisClient.hGet(key, 'length')) ?? '0';
 
-    const championKda = matchHistory.getChampionKda(matchLength, this.championId);
+    const championKda = matchHistory.getChampionKda(parseInt(matchLength), this.championId);
     const data: ChampionData = {
       summonerId: this.summonerId,
       championIcon: `https://lolcdn.darkintaqt.com/cdn/champion/${this.championId}/tile`,
