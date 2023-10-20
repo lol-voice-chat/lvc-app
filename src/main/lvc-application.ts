@@ -51,8 +51,8 @@ export class LvcApplication {
       this.webContents.send(IPC_KEY.SHUTDOWN_LOL);
     });
 
-    await this.fetchLeagueClient();
     handleFriendRequestEvent();
+    await this.fetchLeagueClient();
   }
 
   private async onLeagueClientUx() {
@@ -87,14 +87,18 @@ export class LvcApplication {
     };
     this.webContents.send(IPC_KEY.ON_LEAGUE_CLIENT, leagueClient);
 
-    const recentSummonerList = await summoner.getRecentSummonerList();
+    const [recentSummonerList, matchHistory] = await Promise.all([
+      summoner.getRecentSummonerList(),
+      MatchHistory.fetch(summoner.puuid),
+    ]);
     this.webContents.send(IPC_KEY.RECENT_SUMMONER, recentSummonerList);
 
-    const matchHistory = await MatchHistory.fetch(summoner.puuid);
     const key = summoner.puuid + 'match';
-    await redisClient.hSet(key, {
-      summonerStats: JSON.stringify(await matchHistory.getSummonerStats()),
-      length: matchHistory.matchLength.toString(),
+    matchHistory.getSummonerStats().then(async (summonerStats: SummonerStats) => {
+      await redisClient.hSet(key, {
+        summonerStats: JSON.stringify(summonerStats),
+        length: matchHistory.matchLength.toString(),
+      });
     });
 
     this.summoner = summoner;
@@ -188,21 +192,23 @@ export class LvcApplication {
         isEndGame = true;
 
         //전적 업데이트
-        const timeout = setTimeout(async () => {
-          MatchHistory.fetch(this.summoner.puuid).then((_matchHistory: MatchHistory) => {
-            this.matchHistory = _matchHistory;
+        MatchHistory.fetch(this.summoner.puuid).then((_matchHistory: MatchHistory) => {
+          this.matchHistory = _matchHistory;
 
-            _matchHistory.getSummonerStats().then((summonerState: SummonerStats) => {
-              const key = this.summoner.puuid + 'match';
-              redisClient
-                .hSet(key, {
-                  summonerStats: JSON.stringify(summonerState),
-                  length: _matchHistory.matchLength.toString(),
-                })
-                .then(() => clearTimeout(timeout));
-            });
-          });
-        }, 1000 * 10);
+          if (!data.gameData.isCustomGame) {
+            const timeout = setTimeout(() => {
+              _matchHistory.getSummonerStats().then((summonerState: SummonerStats) => {
+                const key = this.summoner.puuid + 'match';
+                redisClient
+                  .hSet(key, {
+                    summonerStats: JSON.stringify(summonerState),
+                    length: _matchHistory.matchLength.toString(),
+                  })
+                  .then(() => clearTimeout(timeout));
+              });
+            }, 1000 * 10);
+          }
+        });
 
         const { teamOne, teamTwo } = data.gameData;
         const teamOneSummoners = new Team(teamOne);
@@ -213,12 +219,12 @@ export class LvcApplication {
         const summonerIdList: number[] = myTeam.getSummonerIdList(this.summoner.summonerId);
 
         //최근 함께한 소환사 업데이트
-        const recentSummonerKey = this.summoner.summonerId.toString() + 'recent';
-        const summoner: string | null = await redisClient.get(recentSummonerKey);
+        const key = this.summoner.summonerId.toString() + 'recent';
+        const summoner: string | null = await redisClient.get(key);
         if (summoner) {
           const _summoner: SummonerInfo = JSON.parse(summoner);
           _summoner.recentSummonerIdList = _summoner.recentSummonerIdList.concat(summonerIdList);
-          await redisClient.set(recentSummonerKey, JSON.stringify(_summoner));
+          await redisClient.set(key, JSON.stringify(_summoner));
         }
 
         const recentSummonerList = await this.summoner.getRecentSummonerList();
