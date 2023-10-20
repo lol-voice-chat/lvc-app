@@ -26,15 +26,14 @@ function ModalBundle() {
     generalSettingsConfigState
   );
 
+  const generalSettingsRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     const socket = connectSocket('/manage');
 
     socket.on('connect', () => {
       manageSocket.current = socket;
     });
-
-    /* 설정 단축키 */
-    ipcRenderer.on(IPC_KEY.SETTINGS_SHORTCUT_KEY, () => setGeneralSettingState((prev) => !prev));
 
     return () => {
       socket.disconnect();
@@ -56,10 +55,23 @@ function ModalBundle() {
   }, [summoner]);
 
   useEffect(() => {
+    /* 설정 단축키 */
+    ipcRenderer.on(IPC_KEY.SETTINGS_SHORTCUT_KEY, () => {
+      if (generalSettingState) {
+        generalSettingsRef.current?.click();
+      } else {
+        setGeneralSettingState(true);
+      }
+    });
+
     /* 전체 설정 갱신 */
     electronStore.get('general-settings-config').then((config) => {
       setGeneralSettingsConfig(config);
     });
+
+    return () => {
+      ipcRenderer.removeAllListeners(IPC_KEY.SETTINGS_SHORTCUT_KEY);
+    };
   }, [generalSettingState]);
 
   return (
@@ -69,6 +81,7 @@ function ModalBundle() {
         <GeneralSettingModal
           settingsConfig={generalSettingsConfig}
           handleClickModalTrigger={() => setGeneralSettingState((prev) => !prev)}
+          modalRef={generalSettingsRef}
         />
       )}
 
