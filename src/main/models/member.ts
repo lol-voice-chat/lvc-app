@@ -33,9 +33,11 @@ export class Member {
   }
 
   public async getChampionKda() {
-    const matchHistory = await MatchHistory.fetch(this.puuid);
     const key = this.puuid + 'match';
-    const matchLength: string = (await redisClient.hGet(key, 'length')) ?? '0';
+    const [matchHistory, matchLength]: [MatchHistory, string] = await Promise.all([
+      MatchHistory.fetch(this.puuid),
+      redisClient.hGet(key, 'length') ?? '0',
+    ]);
 
     const championKda = matchHistory.getChampionKda(parseInt(matchLength), this.championId);
     const data: ChampionData = {
