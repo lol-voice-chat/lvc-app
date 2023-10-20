@@ -20,10 +20,10 @@ export class Team {
     return summonerIds.sort().join('').toString();
   }
 
-  public async getMemberChampionKdaList(matchLength: number) {
+  public async getMemberChampionKdaList() {
     const memberChampionKdaList: ChampionData[] = await Promise.all(
       this.members.map((member) => {
-        return member.getChampionKda(matchLength);
+        return member.getChampionKda();
       })
     );
 

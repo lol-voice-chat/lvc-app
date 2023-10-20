@@ -377,12 +377,9 @@ export class LvcApplication {
     const myTeam = existsSummoner ? teamOne : teamTwo;
     const teamName = myTeam.createVoiceRoomName();
 
-    const key = this.summoner.puuid + 'match';
-    const matchLength: string = (await redisClient.hGet(key, 'length')) ?? '0';
-
     const [teamOneSummonerChampionKdaList, teamTwoSummonerChampionKdaList] = await Promise.all([
-      teamOne.getMemberChampionKdaList(parseInt(matchLength)),
-      teamTwo.getMemberChampionKdaList(parseInt(matchLength)),
+      teamOne.getMemberChampionKdaList(),
+      teamTwo.getMemberChampionKdaList(),
     ]);
     const summonerDataList = teamOneSummonerChampionKdaList.concat(teamTwoSummonerChampionKdaList);
 
