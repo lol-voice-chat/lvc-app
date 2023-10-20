@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { MutableRefObject, RefObject, useEffect, useRef, useState } from 'react';
 import * as _ from './style';
 import electronStore from '../../@store/electron';
 import { GeneralSettingsConfigType, userDeviceIdState } from '../../@store/atom';
@@ -14,9 +14,8 @@ const { ipcRenderer } = window.require('electron');
 function GeneralSettingModal(props: {
   handleClickModalTrigger: () => void;
   settingsConfig: GeneralSettingsConfigType;
+  modalRef: MutableRefObject<HTMLDivElement | null>;
 }) {
-  const modalRef = useRef<HTMLDivElement | null>(null);
-
   /* 단축키 관련 설정 */
   const [isPressToTalk, setIsPressToTalk] = useState(props.settingsConfig.isPressToTalk);
   const [isGettingKey, setIsGettingKey] = useState(false);
@@ -83,7 +82,7 @@ function GeneralSettingModal(props: {
   };
 
   const handleClickSaveCloseModal = (e: any) => {
-    if (modalRef.current === e.target) {
+    if (props.modalRef.current === e.target) {
       const config = {
         isPressToTalk,
         pressToTalkShortcutKey,
@@ -97,7 +96,7 @@ function GeneralSettingModal(props: {
   };
 
   return (
-    <_.SettingContainer ref={modalRef} onClick={handleClickSaveCloseModal}>
+    <_.SettingContainer ref={props.modalRef} onClick={handleClickSaveCloseModal}>
       <div id="settings-block">
         <div>
           <div id="category">입력장치 설정</div>
@@ -152,7 +151,7 @@ function GeneralSettingModal(props: {
             </>
           ) : (
             <>
-              <div id="function">{isPressToTalk ? '음성 키' : '음소거 키'} - 인게임</div>
+              <div id="function">{isPressToTalk ? '음소거 전환키' : '음소거 키'} - 인게임</div>
               <div
                 id="shortcut-key-box"
                 style={{
