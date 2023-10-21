@@ -292,7 +292,8 @@ export class LvcApplication {
 
         const time = Math.floor(response.data.gameData.gameTime);
         if (time < 60) {
-          //미니언 나오기 시간 전이라면 전체보이스 참가
+          //미니언이 나오는 시간 전이라면 전체보이스 참가
+          //미니언이 나오면 팀원보이스로 이동
           const timeout = setTimeout(() => {
             this.webContents.send(IPC_KEY.START_IN_GAME);
             clearTimeout(timeout);
@@ -322,6 +323,7 @@ export class LvcApplication {
       } catch (error: any) {
         if (error.toString().includes('ECONNREFUSED')) {
           //아직 게임로딩이라면 전체보이스 참가
+          //미니언이 나오면 팀원보이스로 이동
           const { teamOne, teamTwo } = flow.gameData;
           await this.joinLeagueVoice(teamOne, teamTwo);
 
