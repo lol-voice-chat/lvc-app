@@ -184,6 +184,8 @@ function useVoiceChat() {
     const disconnectAll = (voiceRoomType: 'team' | 'league') => {
       socket.disconnect();
 
+      console.log('뭐고', voiceRoomType);
+
       if (voiceRoomType === 'team' && stream) {
         console.log('스트림 컷');
         stream.getTracks().forEach((track) => track.stop());
