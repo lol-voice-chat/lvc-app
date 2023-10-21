@@ -24,7 +24,6 @@ function useVoiceRoom() {
   const setGameStatus = useSetRecoilState(gameStatusState);
 
   const summoner = useRecoilValue(summonerState);
-  const [mySummonerStats, setMySummonerStats] = useRecoilState(mySummonerStatsState);
   const setMyTeamSummoners = useSetRecoilState(myTeamSummonersState);
   const setEnemySummoners = useSetRecoilState(enemySummonersState);
 
@@ -36,34 +35,27 @@ function useVoiceRoom() {
     });
   }, [userDeviceId]);
 
-  const onTeamVoiceRoom = (stream: MediaStream) => {
+  const onTeamVoiceRoom = (stream: MediaStream, summonerStats: SummonerStatsType) => {
     const socket = connectSocket('/team-voice-chat');
     let isClosed = false;
-    let disconnectAllTeamVoice: () => void;
+    let disconnectAllTeamVoice: (voiceRoomType: 'team' | 'league') => void;
     let closeConsumerTeamVoice: (summonerId: number) => void;
 
     electronStore.get('team-voice-room-name').then((roomName) => {
-      ipcRenderer
-        /* 내 최신 전적 불러오기 */
-        .invoke(IPC_KEY.FETCH_MATCH_HISTORY, { isMine: true, puuid: summoner?.puuid })
-        .then((my: { summonerStats: SummonerStatsType }) => {
-          setMySummonerStats(my.summonerStats);
-
-          socket.emit(
-            'team-join-room',
-            { roomName, summoner: { ...summoner, summonerStats: my.summonerStats } },
-            (teamRoom: { rtpCapabilities: RtpCapabilities }) => {
-              const { disconnectAll, closeConsumer } = connect({
-                voiceRoomType: 'team',
-                socket: socket,
-                stream: stream,
-                routerRtpCapabilities: teamRoom.rtpCapabilities,
-              });
-              disconnectAllTeamVoice = disconnectAll;
-              closeConsumerTeamVoice = closeConsumer;
-            }
-          );
-        });
+      socket.emit(
+        'team-join-room',
+        { roomName, summoner: { ...summoner, summonerStats } },
+        (teamRoom: { rtpCapabilities: RtpCapabilities }) => {
+          const { disconnectAll, closeConsumer } = connect({
+            voiceRoomType: 'team',
+            socket: socket,
+            stream: stream,
+            routerRtpCapabilities: teamRoom.rtpCapabilities,
+          });
+          disconnectAllTeamVoice = disconnectAll;
+          closeConsumerTeamVoice = closeConsumer;
+        }
+      );
     });
 
     /* 팀원 나감 */
@@ -99,21 +91,21 @@ function useVoiceRoom() {
         isClosed = true;
         setGameStatus('none');
         setMyTeamSummoners(null);
-        disconnectAllTeamVoice();
+        disconnectAllTeamVoice('team');
       }
     };
   };
 
-  const onLeagueVoiceRoom = (stream: MediaStream) => {
+  const onLeagueVoiceRoom = (stream: MediaStream, summonerStats: SummonerStatsType) => {
     const socket = connectSocket('/league-voice-chat');
 
-    let disconnectAllLeague: () => void;
+    let disconnectAllLeague: (voiceRoomType: 'team' | 'league') => void;
     let closeConsumerLeague: (summonerId: number) => void;
 
     electronStore.get('league-voice-room-name').then(({ roomName, teamName }) => {
       socket.emit(
         'league-join-room',
-        { roomName, teamName, summoner: { ...summoner, summonerStats: mySummonerStats } },
+        { roomName, teamName, summoner: { ...summoner, summonerStats } },
         (leagueRoom: { rtpCapabilities: RtpCapabilities }) => {
           const { disconnectAll, closeConsumer } = connect({
             voiceRoomType: 'league',
@@ -150,7 +142,7 @@ function useVoiceRoom() {
     const disconnectVoiceChat = () => {
       socket.disconnect();
       setEnemySummoners(null);
-      disconnectAllLeague();
+      disconnectAllLeague('league');
     };
   };
 

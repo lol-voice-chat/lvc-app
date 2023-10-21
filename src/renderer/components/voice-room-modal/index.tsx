@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import {
   enemySummonersState,
   gameStatusState,
@@ -15,7 +15,7 @@ import { IPC_KEY } from '../../../const';
 import electronStore from '../../@store/electron';
 import { Socket } from 'socket.io-client';
 import SummonerLeagueVoiceBlock from '../summoner-league-voice-block';
-import { ChampionInfoType } from '../../@type/summoner';
+import { ChampionInfoType, SummonerStatsType } from '../../@type/summoner';
 import useVoiceRoom from '../../hooks/use-voice-room';
 import { VoiceRoomAudioOptionType } from '../../@type/voice';
 const { ipcRenderer } = window.require('electron');
@@ -28,7 +28,7 @@ function VoiceRoomModal() {
   const myTeamSummoners = useRecoilValue(myTeamSummonersState);
   const enemySummoners = useRecoilValue(enemySummonersState);
 
-  const mySummonerStats = useRecoilValue(mySummonerStatsState);
+  const [mySummonerStats, setMySummonerStats] = useRecoilState(mySummonerStatsState);
   const [selectedChampList, setSelectedChampList] = useState<Map<number, ChampionInfoType>>(
     new Map()
   );
@@ -42,8 +42,40 @@ function VoiceRoomModal() {
   const { onTeamVoiceRoom, onLeagueVoiceRoom } = useVoiceRoom();
 
   useEffect(() => {
-    userStream && onTeamVoiceRoom(userStream);
-  }, [userStream]);
+    /* 소환사 최신 전적 불러오기 */
+    ipcRenderer
+      .invoke(IPC_KEY.FETCH_MATCH_HISTORY, { isMine: true, puuid: summoner?.puuid })
+      .then((my: { summonerStats: SummonerStatsType }) => {
+        setMySummonerStats(my.summonerStats);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (userStream && mySummonerStats) {
+      if (gameStatus === 'champ-select') {
+        onTeamVoiceRoom(userStream, mySummonerStats);
+      }
+
+      if (gameStatus === 'loading') {
+        onLeagueVoiceRoom(userStream, mySummonerStats);
+
+        const socket = connectSocket('/league-voice-chat/manage');
+
+        electronStore.get('league-voice-room-name').then(({ roomName }) => {
+          // socket.emit('league-manage-join-room', roomName);
+          setLeagueManagementSocket(socket);
+        });
+      }
+
+      if (gameStatus === 'in-game') {
+        leagueManagementSocket?.disconnect();
+      }
+    }
+
+    return () => {
+      leagueManagementSocket?.disconnect();
+    };
+  }, [userStream, gameStatus, mySummonerStats]);
 
   useEffect(() => {
     const socket = connectSocket('/team-voice-chat/manage');
@@ -70,30 +102,6 @@ function VoiceRoomModal() {
       ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
     };
   }, []);
-
-  useEffect(() => {
-    if (gameStatus === 'loading' && userStream) {
-      onLeagueVoiceRoom(userStream);
-    }
-  }, [gameStatus, userStream]);
-
-  useEffect(() => {
-    if (gameStatus === 'loading') {
-      const socket = connectSocket('/league-voice-chat/manage');
-
-      electronStore.get('league-voice-room-name').then(({ roomName }) => {
-        // socket.emit('league-manage-join-room', roomName);
-        setLeagueManagementSocket(socket);
-      });
-    }
-    if (gameStatus === 'in-game') {
-      leagueManagementSocket?.disconnect();
-    }
-
-    return () => {
-      leagueManagementSocket?.disconnect();
-    };
-  }, [gameStatus]);
 
   return (
     <S.VoiceRoom>
