@@ -181,7 +181,7 @@ export class MatchHistory {
     const damage = Math.floor(totalDamage / gameCount).toString();
     const cs = this.getStatsAverage(totalCs, gameCount);
     const mostChampionList = this.getMostChampionList(recentUsedChampionList);
-    const odds = (winCount / gameCount) * 100;
+    const odds = Math.floor((winCount / gameCount) * 100);
 
     const summonerStats: SummonerStats = {
       kda,

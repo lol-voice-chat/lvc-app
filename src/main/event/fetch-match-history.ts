@@ -21,13 +21,22 @@ export const handleFetchMatchHistoryEvent = () => {
 
     try {
       //롤 프로그램이 완전히 꺼지기 전 체크
-      await createHttp1Request(
+      const response = await createHttp1Request(
         {
           method: 'GET',
           url: '/lol-chat/v1/me',
         },
         credentials!
       );
+
+      console.log(response);
+      if (!response) {
+        return {
+          summonerStats: null,
+          isFriend: null,
+          isError: true,
+        };
+      }
     } catch (error) {
       return {
         summonerStats: null,
