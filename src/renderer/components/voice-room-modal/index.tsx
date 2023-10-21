@@ -54,6 +54,25 @@ function VoiceRoomModal() {
     if (userStream && mySummonerStats) {
       if (gameStatus === 'champ-select') {
         onTeamVoiceRoom(userStream, mySummonerStats);
+
+        const socket = connectSocket('/team-voice-chat/manage');
+
+        electronStore.get('team-voice-room-name').then((roomName) => {
+          // socket.emit('team-manage-join-room', { roomName, name: summoner?.name });
+          setTeamManagementSocket(socket);
+        });
+
+        /* 입장시 팀원의 (자신포함) 챔피언 리스트 받음 */
+        ipcRenderer.once('selected-champ-info-list', (_, championInfoList: ChampionInfoType[]) => {
+          championInfoList.map((champInfo: ChampionInfoType) => {
+            setSelectedChampList((prev) => new Map([...prev, [champInfo.summonerId, champInfo]]));
+          });
+        });
+
+        /* 실시간 챔피언 선택 */
+        ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
+          setSelectedChampList((prev) => new Map(prev).set(championInfo.summonerId, championInfo));
+        });
       }
 
       if (gameStatus === 'loading') {
@@ -73,35 +92,11 @@ function VoiceRoomModal() {
     }
 
     return () => {
+      teamManagementSocket?.disconnect();
       leagueManagementSocket?.disconnect();
-    };
-  }, [userStream, gameStatus, mySummonerStats]);
-
-  useEffect(() => {
-    const socket = connectSocket('/team-voice-chat/manage');
-
-    electronStore.get('team-voice-room-name').then((roomName) => {
-      // socket.emit('team-manage-join-room', { roomName, name: summoner?.name });
-      setTeamManagementSocket(socket);
-    });
-
-    /* 입장시 팀원의 (자신포함) 챔피언 리스트 받음 */
-    ipcRenderer.once('selected-champ-info-list', (_, championInfoList: ChampionInfoType[]) => {
-      championInfoList.map((champInfo: ChampionInfoType) => {
-        setSelectedChampList((prev) => new Map([...prev, [champInfo.summonerId, champInfo]]));
-      });
-    });
-
-    /* 실시간 챔피언 선택 */
-    ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
-      setSelectedChampList((prev) => new Map(prev).set(championInfo.summonerId, championInfo));
-    });
-
-    return () => {
-      socket?.disconnect();
       ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
     };
-  }, []);
+  }, [userStream, gameStatus, mySummonerStats]);
 
   return (
     <S.VoiceRoom>

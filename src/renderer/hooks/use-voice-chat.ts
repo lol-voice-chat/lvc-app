@@ -185,6 +185,7 @@ function useVoiceChat() {
       socket.disconnect();
 
       if (voiceRoomType === 'team' && stream) {
+        console.log('스트림 컷');
         stream.getTracks().forEach((track) => track.stop());
         stream.removeTrack(stream.getAudioTracks()[0]);
         setUserStream(null);
