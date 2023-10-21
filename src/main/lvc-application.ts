@@ -303,6 +303,11 @@ export class LvcApplication {
         if (time < 50) {
           isInProgress = true;
 
+          const timeout = setTimeout(() => {
+            this.webContents.send(IPC_KEY.START_IN_GAME);
+            clearTimeout(timeout);
+          }, 1000 * 60 + 5000 - time * 1000);
+
           const { teamOne, teamTwo } = flow.gameData;
           await this.joinLeagueVoice(teamOne, teamTwo);
 
@@ -322,12 +327,13 @@ export class LvcApplication {
           const myTeam = summoner ? teamOne : teamTwo;
           this.joinTeamVoice(myTeam);
 
-          this.webContents.send(IPC_KEY.START_IN_GAME);
-
           this.sendMyTeamChampionStatsList(myTeam);
+          this.webContents.send(IPC_KEY.START_IN_GAME);
           return;
         }
       }
+
+      return;
     } catch (error: any) {
       if (error.toString().includes('ECONNREFUSED')) {
         return;
