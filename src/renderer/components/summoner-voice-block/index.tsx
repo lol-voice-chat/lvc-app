@@ -49,8 +49,6 @@ function SummonerVoiceBlock(props: {
       if (props.gameStatus === 'in-game' && props.voiceOption) {
         setIsMuteMic(props.voiceOption.isMuteMic);
       }
-
-      ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, handleClickMuteMic);
     }
 
     return () => {
