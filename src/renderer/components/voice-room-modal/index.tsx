@@ -46,8 +46,9 @@ function VoiceRoomModal() {
   }, [userStream]);
 
   useEffect(() => {
+    const socket = connectSocket('/team-voice-chat/manage');
+
     electronStore.get('team-voice-room-name').then((roomName) => {
-      const socket = connectSocket('/team-voice-chat/manage');
       // socket.emit('team-manage-join-room', { roomName, name: summoner?.name });
       setTeamManagementSocket(socket);
     });
@@ -65,7 +66,7 @@ function VoiceRoomModal() {
     });
 
     return () => {
-      teamManagementSocket?.disconnect();
+      socket?.disconnect();
       ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
     };
   }, []);
@@ -78,8 +79,9 @@ function VoiceRoomModal() {
 
   useEffect(() => {
     if (gameStatus === 'loading') {
+      const socket = connectSocket('/league-voice-chat/manage');
+
       electronStore.get('league-voice-room-name').then(({ roomName }) => {
-        const socket = connectSocket('/league-voice-chat/manage');
         // socket.emit('league-manage-join-room', roomName);
         setLeagueManagementSocket(socket);
       });
