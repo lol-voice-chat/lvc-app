@@ -96,7 +96,6 @@ function useVoiceRoom() {
 
     const disconnectVoiceChat = () => {
       if (!isClosed) {
-        console.log('종료~');
         isClosed = true;
         setGameStatus('none');
         setMyTeamSummoners(null);
