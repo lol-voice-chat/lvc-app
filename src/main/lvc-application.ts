@@ -8,7 +8,7 @@ import {
   createWebSocketConnection,
 } from 'league-connect';
 import { IPC_KEY } from '../const';
-import { Summoner, SummonerInfo } from './models/summoner';
+import { Summoner, SummonerType } from './models/summoner';
 import { Team } from './models/team';
 import handleFriendRequestEvent from './event/friend-requet-event';
 import { request } from './lib/common';
@@ -221,7 +221,7 @@ export class LvcApplication {
         const key = this.summoner.summonerId.toString() + 'recent';
         const summoner: string | null = await redisClient.get(key);
         if (summoner) {
-          const _summoner: SummonerInfo = JSON.parse(summoner);
+          const _summoner: SummonerType = JSON.parse(summoner);
           _summoner.recentSummonerIdList = _summoner.recentSummonerIdList.concat(summonerIdList);
           await redisClient.set(key, JSON.stringify(_summoner));
         }

@@ -2,7 +2,7 @@ import { request } from '../lib/common';
 import { plainToInstance } from 'class-transformer';
 import { redisClient } from '../lib/redis-client';
 
-export interface SummonerInfo {
+export interface SummonerType {
   details: any;
   recentSummonerIdList: number[];
 }
@@ -75,9 +75,23 @@ export class Summoner {
     const key = this.summonerId.toString() + 'recent';
     const summoner: string | null = await redisClient.get(key);
 
+    const details = {
+      gameName: this.gameName,
+      gameTag: this.gameTag,
+      id: this.id,
+      name: this.name,
+      pid: this.pid,
+      puuid: this.puuid,
+      summonerId: this.summonerId,
+      profileImage: this.getProfileImage(),
+      tier: this.getTier(),
+    };
+
     if (summoner) {
-      const _summoner: SummonerInfo = JSON.parse(summoner);
+      const _summoner: SummonerType = JSON.parse(summoner);
       if (_summoner.recentSummonerIdList.length === 0) {
+        _summoner.details = details;
+        await redisClient.set(key, JSON.stringify(_summoner));
         return [];
       }
 
@@ -97,25 +111,13 @@ export class Summoner {
       );
 
       _summoner.recentSummonerIdList = newRecentSummonerIdList;
+      _summoner.details = details;
       await redisClient.set(key, JSON.stringify(_summoner));
-      await redisClient.expire(key, EXPIRE_TIME);
 
       return recentSummonerList;
     }
 
-    const details = {
-      gameName: this.gameName,
-      gameTag: this.gameTag,
-      id: this.id,
-      name: this.name,
-      pid: this.pid,
-      puuid: this.puuid,
-      summonerId: this.summonerId,
-      profileImage: this.getProfileImage(),
-      tier: this.getTier(),
-    };
-
-    const newSummoner: SummonerInfo = {
+    const newSummoner: SummonerType = {
       details,
       recentSummonerIdList: [],
     };
