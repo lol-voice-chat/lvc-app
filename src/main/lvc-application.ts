@@ -261,7 +261,7 @@ export class LvcApplication {
             console.log(error);
           }
         }
-      }, 5000);
+      }, 1000 * 10);
     });
   }
 
