@@ -41,7 +41,7 @@ function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
 
   useEffect(() => {
-    /* 팀 보이스에서 저장했던 옵션 받아오기  */
+    /* 팀 보이스에서 저장했던 옵션 받아오기 */
     if (!props.isMine && props.voiceOption) {
       setBeforeMuteSpeakerVolume(props.voiceOption.beforeMuteSpeakerVolume);
       handleChangeSpeakerVolume(props.voiceOption.speakerVolume);
@@ -52,7 +52,6 @@ function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
       if (props.voiceOption?.isMuteMic) {
         setIsMuteMic(true);
       }
-      userStream?.getAudioTracks().forEach((track) => (track.enabled = true));
 
       ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, handleClickMuteMic);
     }
@@ -89,7 +88,7 @@ function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
     if (props.isMine && !isMuteMic && userStream) {
       micVisualizer(userStream, setVisualizerVolume);
     }
-  }, [isMuteMic]);
+  }, [userStream, isMuteMic]);
 
   useEffect(() => {
     if (props.isMine) {

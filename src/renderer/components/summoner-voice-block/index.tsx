@@ -48,6 +48,9 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
         setIsMuteMic(true);
       }
       if (props.gameStatus === 'in-game' && props.voiceOption) {
+        console.log(userStream);
+        userStream?.getAudioTracks().forEach((track) => (track.enabled = true));
+
         setIsMuteMic(props.voiceOption.isMuteMic);
       }
 
@@ -88,7 +91,7 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
     if (props.isMine && !isMuteMic && userStream) {
       micVisualizer(userStream, setVisualizerVolume);
     }
-  }, [isMuteMic]);
+  }, [userStream, isMuteMic]);
 
   useEffect(() => {
     if (props.isMine) {
@@ -114,8 +117,6 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
       handleChangeSpeakerVolume(0);
     }
   };
-
-  console.log(visualizerVolume);
 
   const handleClickMuteMic = () => {
     userStream?.getAudioTracks().forEach((track) => (track.enabled = !track.enabled));
