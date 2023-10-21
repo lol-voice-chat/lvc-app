@@ -11,7 +11,7 @@ import { IPC_KEY } from '../../../const';
 import { VoiceRoomAudioOptionType } from '../../@type/voice';
 const { ipcRenderer } = window.require('electron');
 
-function SummonerVoiceBlock(props: {
+type SummonerVoiceBlockPropsType = {
   isMine: boolean;
   summoner: SummonerType & { summonerStats: SummonerStatsType };
   selectedChampInfo: ChampionInfoType | null;
@@ -19,7 +19,9 @@ function SummonerVoiceBlock(props: {
   setVoiceOptionList: Dispatch<SetStateAction<Map<number, VoiceRoomAudioOptionType>>>;
   managementSocket: Socket | null;
   gameStatus: 'champ-select' | 'in-game';
-}) {
+};
+
+function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
   const userStream = useRecoilValue(userStreamState);
   const generalSettingsConfig = useRecoilValue(generalSettingsConfigState);
 
@@ -47,7 +49,9 @@ function SummonerVoiceBlock(props: {
         }
       }
       if (props.gameStatus === 'in-game' && props.voiceOption) {
-        setIsMuteMic(props.voiceOption.isMuteMic);
+        const isMute = props.voiceOption?.isMuteMic;
+        userStream?.getAudioTracks().forEach((track) => (track.enabled = !isMute));
+        setIsMuteMic(isMute);
       }
 
       ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, handleClickMuteMic);
