@@ -169,7 +169,6 @@ export class LvcApplication {
     this.ws.subscribe('/lol-gameflow/v1/session', async (data) => {
       const hasData = data.gameData.teamOne[0]?.championId || data.gameData.teamTwo[0]?.championId;
       if (data.phase === 'InProgress' && data.gameClient.running && !isInProgress && hasData) {
-        console.log('ok');
         isInProgress = true;
         myTeamMembers = new Map();
 
@@ -290,10 +289,6 @@ export class LvcApplication {
           }),
         });
 
-        if (!response.data.gameData.gameTime) {
-          throw new Error('ECONNREFUSED');
-        }
-
         const time = Math.floor(response.data.gameData.gameTime);
         if (time < 60) {
           //미니언이 나오는 시간 전이라면 전체보이스 참가
@@ -325,7 +320,7 @@ export class LvcApplication {
 
         return;
       } catch (error: any) {
-        if (error.toString().includes('ECONNREFUSED')) {
+        if (error.toString().includes('ECONNREFUSED') || error.toString().includes('404')) {
           //아직 게임로딩이라면 전체보이스 참가
           //미니언이 나오면 팀원보이스로 이동
           const { teamOne, teamTwo } = flow.gameData;
@@ -346,7 +341,7 @@ export class LvcApplication {
           return;
         }
 
-        throw new Error(error);
+        return;
       }
     }
   }
