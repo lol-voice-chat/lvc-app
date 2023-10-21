@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import {
   LeagueChampInfoType,
   generalSettingsConfigState,
@@ -8,7 +8,7 @@ import {
 } from '../../@store/atom';
 import { SummonerStatsType, SummonerType } from '../../@type/summoner';
 import { Socket } from 'socket.io-client';
-import { getSummonerSpeaker, micVolumeHandler } from '../../utils/audio';
+import { getSummonerSpeaker, micVisualizer } from '../../utils/audio';
 import VolumeSlider from '../@common/volume-slider';
 import * as S from './style';
 import RankBadge from '../@common/rank-badge';
@@ -68,30 +68,25 @@ function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
   }, [speakerVolume, beforeMuteSpeakerVolume, isMuteMic]);
 
   useEffect(() => {
-    function micVisualizer(summoner: { summonerId: number; visualizerVolume: number }) {
+    const onVisualizer = (summoner: { summonerId: number; visualizerVolume: number }) => {
       if (props.summoner.summonerId === summoner.summonerId && !isMuteSpeaker) {
         setVisualizerVolume(summoner.visualizerVolume);
       }
-    }
-    /* 팀 or 적팀 소환사 */
+    };
+
+    /* 적팀 or 팀원 */
     if (!props.isMine) {
-      props.managementSocket?.on('mic-visualizer', micVisualizer);
+      props.managementSocket?.on('mic-visualizer', onVisualizer);
     }
     return () => {
-      props.managementSocket?.off('mic-visualizer', micVisualizer);
+      props.managementSocket?.off('mic-visualizer', onVisualizer);
     };
   }, [props.managementSocket, isMuteSpeaker]);
 
   useEffect(() => {
-    let visualizerInterval: NodeJS.Timer | null = null;
     if (props.isMine && !isMuteMic && userStream) {
-      // visualizerInterval = setInterval(() => {
-      //   micVolumeHandler(userStream, setVisualizerVolume);
-      // }, 1000);
+      micVisualizer(userStream, setVisualizerVolume);
     }
-    return () => {
-      visualizerInterval && clearInterval(visualizerInterval);
-    };
   }, [userStream, isMuteMic]);
 
   useEffect(() => {

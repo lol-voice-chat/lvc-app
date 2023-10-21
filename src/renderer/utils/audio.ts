@@ -29,10 +29,7 @@ export const getUserAudioStream = async (userDeviceId: string) => {
   return userStream;
 };
 
-export const micVolumeHandler = (
-  stream: MediaStream,
-  setVolume: Dispatch<SetStateAction<number>>
-) => {
+export const micVisualizer = (stream: MediaStream, setVolume: Dispatch<SetStateAction<number>>) => {
   const audioContext = new AudioContext();
   const analyser = audioContext.createAnalyser();
   const microphone = audioContext.createMediaStreamSource(stream);
@@ -51,6 +48,7 @@ export const micVolumeHandler = (
     setVolume(total / bufferLength);
     requestAnimationFrame(updateMicVolume);
   };
+
   updateMicVolume();
 };
 
