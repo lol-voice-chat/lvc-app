@@ -70,6 +70,7 @@ function SummonerLeagueVoiceBlock(props: {
       }
     }
 
+    /* 팀 or 적팀 소환사 */
     if (!props.isMine) {
       props.managementSocket?.on('mic-visualizer', micVisualizer);
     }
