@@ -67,7 +67,10 @@ function SummonerVoiceBlock(props: {
   useEffect(() => {
     /* 음소거 단축키 이벤트 */
     if (props.isMine && generalSettingsConfig) {
-      if (generalSettingsConfig.isPressToTalk || props.voiceOption?.isMuteMic) {
+      if (
+        (generalSettingsConfig.isPressToTalk && props.voiceOption?.isMuteMic) ||
+        props.voiceOption?.isMuteMic
+      ) {
         userStream?.getAudioTracks().forEach((track) => (track.enabled = false));
         setIsMuteMic(true);
       }
