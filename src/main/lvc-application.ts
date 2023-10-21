@@ -250,6 +250,8 @@ export class LvcApplication {
             clearInterval(interval);
             resolve(Math.floor(response.data.gameData.gameTime));
           }
+
+          throw new Error('404');
         } catch (error: any) {
           if (
             !error.toString().includes('ECONNREFUSED') &&
