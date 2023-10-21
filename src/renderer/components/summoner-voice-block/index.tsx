@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import * as S from './style';
 import RankBadge from '../@common/rank-badge';
 import { ChampionInfoType, SummonerStatsType, SummonerType } from '../../@type/summoner';
@@ -8,23 +8,46 @@ import { useRecoilValue } from 'recoil';
 import { generalSettingsConfigState, userStreamState } from '../../@store/atom';
 import { Socket } from 'socket.io-client';
 import { IPC_KEY } from '../../../const';
+import { VoiceRoomAudioOptionType } from '../../@type/voice';
 const { ipcRenderer } = window.require('electron');
 
 function SummonerVoiceBlock(props: {
   isMine: boolean;
   summoner: SummonerType & { summonerStats: SummonerStatsType };
   selectedChampInfo: ChampionInfoType | null;
+  voiceOption: VoiceRoomAudioOptionType | null;
+  setVoiceOptionList: Dispatch<SetStateAction<Map<number, VoiceRoomAudioOptionType>>>;
   managementSocket: Socket | null;
 }) {
   const userStream = useRecoilValue(userStreamState);
   const generalSettingsConfig = useRecoilValue(generalSettingsConfigState);
-  const [speakerVolume, setSpeakerVolume] = useState(generalSettingsConfig?.speakerVolume ?? 0.8);
+
+  const [speakerVolume, setSpeakerVolume] = useState(generalSettingsConfig?.speakerVolume ?? 1);
   const [beforeMuteSpeakerVolume, setBeforeMuteSpeakerVolume] = useState(
-    generalSettingsConfig?.speakerVolume ?? 0.8
+    generalSettingsConfig?.speakerVolume ?? 1
   );
   const [isMuteSpeaker, setIsMuteSpeaker] = useState(false);
   const [isMuteMic, setIsMuteMic] = useState(false);
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
+
+  useEffect(() => {
+    // 옵션 null -> 챔프 선택창
+    // 옵션 있음 -> 인게임
+    if (props.voiceOption) {
+      setBeforeMuteSpeakerVolume(props.voiceOption.beforeMuteSpeakerVolume);
+      handleChangeSpeakerVolume(props.voiceOption.speakerVolume);
+    }
+  }, []);
+
+  useEffect(() => {
+    /* 팀 -> 리그 보이스로 넘어갈 때 저장 */
+    return () => {
+      const summonerId = props.summoner.summonerId;
+      const option = { speakerVolume, beforeMuteSpeakerVolume, isMuteMic };
+
+      props.setVoiceOptionList((prev) => new Map([...prev, [summonerId, option]]));
+    };
+  }, [speakerVolume, isMuteSpeaker, isMuteMic]);
 
   useEffect(() => {
     function micVisualizer(summoner: { summonerId: number; visualizerVolume: number }) {
@@ -42,8 +65,9 @@ function SummonerVoiceBlock(props: {
   }, [props.managementSocket]);
 
   useEffect(() => {
+    /* 음소거 단축키 이벤트 */
     if (props.isMine && generalSettingsConfig) {
-      if (generalSettingsConfig.isPressToTalk) {
+      if (generalSettingsConfig.isPressToTalk || props.voiceOption?.isMuteMic) {
         userStream?.getAudioTracks().forEach((track) => (track.enabled = false));
         setIsMuteMic(true);
       }

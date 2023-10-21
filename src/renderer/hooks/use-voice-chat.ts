@@ -2,9 +2,9 @@ import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
 import { Socket } from 'socket.io-client';
 import { getSummonerSpeaker } from '../utils/audio';
 import * as mediasoup from 'mediasoup-client';
-import { ConsumerTransportType, TransportType } from '../@type/webRtc';
+import { ConsumerTransportType, TransportType } from '../@type/voice';
 import { SummonerStatsType, SummonerType } from '../@type/summoner';
-import { useRecoilState, useSetRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { enemySummonersState, myTeamSummonersState, userStreamState } from '../@store/atom';
 
 function useVoiceChat() {
@@ -168,14 +168,16 @@ function useVoiceChat() {
     };
 
     const closeConsumer = (targetId: number) => {
-      consumerTransportList = consumerTransportList.filter((consumerTransport) => {
-        if (consumerTransport.summonerId === targetId) {
-          consumerTransport.consumer.close();
-          consumerTransport.consumerTransport.close();
-          return false;
+      consumerTransportList = consumerTransportList.filter(
+        ({ summonerId, consumer, consumerTransport }) => {
+          if (summonerId === targetId) {
+            consumer.close();
+            consumerTransport.close();
+            return false;
+          }
+          return true;
         }
-        return true;
-      });
+      );
     };
 
     // 두번 호출되면 안됨
