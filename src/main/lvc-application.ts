@@ -131,8 +131,8 @@ export class LvcApplication {
               myTeamMembers.set(summoner.id, summoner.championId);
               continue;
             }
-            const championId = myTeamMembers.get(summoner.id);
 
+            const championId = myTeamMembers.get(summoner.id);
             if (championId !== summoner.championId) {
               myTeamMembers.set(summoner.id, summoner.championId);
 
@@ -169,6 +169,8 @@ export class LvcApplication {
     this.ws.subscribe('/lol-gameflow/v1/session', async (data) => {
       if (data.phase === 'InProgress' && data.gameClient.running && !isInProgress) {
         isInProgress = true;
+        myTeamMembers = new Map();
+
         const { teamOne, teamTwo } = data.gameData;
         await this.joinLeagueVoice(teamOne, teamTwo);
 
@@ -189,17 +191,17 @@ export class LvcApplication {
         isEndGame = true;
 
         //전적 업데이트
-        MatchHistory.fetch(this.summoner.puuid).then((_matchHistory: MatchHistory) => {
-          this.matchHistory = _matchHistory;
+        MatchHistory.fetch(this.summoner.puuid).then((matchHistory: MatchHistory) => {
+          this.matchHistory = matchHistory;
 
           if (!data.gameData.isCustomGame) {
             const timeout = setTimeout(() => {
-              _matchHistory.getSummonerStats().then((summonerState: SummonerStats) => {
+              matchHistory.getSummonerStats().then((summonerState: SummonerStats) => {
                 const key = this.summoner.puuid + 'match';
                 redisClient
                   .hSet(key, {
                     summonerStats: JSON.stringify(summonerState),
-                    length: _matchHistory.matchLength.toString(),
+                    length: matchHistory.matchLength.toString(),
                   })
                   .then(() => clearTimeout(timeout));
               });
@@ -278,8 +280,8 @@ export class LvcApplication {
       const { teamOne, teamTwo } = flow.gameData;
       await this.joinLeagueVoice(teamOne, teamTwo);
 
-      const teamOneSummoners = new Team(teamOne);
-      const summoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
+      const _teamOne = new Team(teamOne);
+      const summoner = _teamOne.findBySummonerId(this.summoner.summonerId);
       const myTeam = summoner ? teamOne : teamTwo;
 
       this.sendMyTeamChampionStatsList(myTeam);
@@ -304,8 +306,8 @@ export class LvcApplication {
           const { teamOne, teamTwo } = flow.gameData;
           await this.joinLeagueVoice(teamOne, teamTwo);
 
-          const teamOneSummoners = new Team(teamOne);
-          const summoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
+          const _teamOne = new Team(teamOne);
+          const summoner = _teamOne.findBySummonerId(this.summoner.summonerId);
           const myTeam = summoner ? teamOne : teamTwo;
 
           this.sendMyTeamChampionStatsList(myTeam);
@@ -315,8 +317,8 @@ export class LvcApplication {
 
           const { teamOne, teamTwo } = flow.gameData;
 
-          const teamOneSummoners = new Team(teamOne);
-          const summoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
+          const _teamOne = new Team(teamOne);
+          const summoner = _teamOne.findBySummonerId(this.summoner.summonerId);
           const myTeam = summoner ? teamOne : teamTwo;
           this.joinTeamVoice(myTeam);
 
@@ -370,20 +372,20 @@ export class LvcApplication {
     this.webContents.send(IPC_KEY.TEAM_JOIN_ROOM, { roomName });
   }
 
-  private async joinLeagueVoice(teamOneData: [], teamTwoData: []) {
-    console.log('test: ', teamOneData, teamTwoData);
-    const teamOne = new Team(teamOneData);
-    const teamTwo = new Team(teamTwoData);
+  private async joinLeagueVoice(teamOne: [], teamTwo: []) {
+    console.log('test: ', teamOne, teamTwo);
+    const _teamOne = new Team(teamOne);
+    const _teamTwo = new Team(teamTwo);
 
-    const roomName = teamOne.createVoiceRoomName() + teamTwo.createVoiceRoomName();
+    const roomName = _teamOne.createVoiceRoomName() + _teamTwo.createVoiceRoomName();
 
-    const existsSummoner = teamOne.findBySummonerId(this.summoner.summonerId);
-    const myTeam = existsSummoner ? teamOne : teamTwo;
+    const existsSummoner = _teamOne.findBySummonerId(this.summoner.summonerId);
+    const myTeam = existsSummoner ? _teamOne : _teamTwo;
     const teamName = myTeam.createVoiceRoomName();
 
     const [teamOneSummonerChampionKdaList, teamTwoSummonerChampionKdaList] = await Promise.all([
-      teamOne.getMemberChampionKdaList(),
-      teamTwo.getMemberChampionKdaList(),
+      _teamOne.getMemberChampionKdaList(),
+      _teamTwo.getMemberChampionKdaList(),
     ]);
     const summonerDataList = teamOneSummonerChampionKdaList.concat(teamTwoSummonerChampionKdaList);
 

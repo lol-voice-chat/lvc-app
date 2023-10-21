@@ -67,7 +67,7 @@ export class Summoner {
       case 'V':
         return displayTier + 5;
       default:
-        throw new Error('존재하지 않는 랭크등급입니다.');
+        return displayTier;
     }
   }
 
