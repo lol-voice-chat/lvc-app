@@ -105,6 +105,7 @@ function VoiceRoomModal() {
               voiceOption={voiceOptionList.get(summoner.summonerId) ?? null}
               setVoiceOptionList={setVoiceOptionList}
               managementSocket={teamManagementSocket}
+              gameStatus={gameStatus}
             />
           )}
           {myTeamSummoners?.map((myTeamSummoner) => (
@@ -115,6 +116,7 @@ function VoiceRoomModal() {
               voiceOption={voiceOptionList.get(myTeamSummoner.summonerId) ?? null}
               setVoiceOptionList={setVoiceOptionList}
               managementSocket={teamManagementSocket}
+              gameStatus={gameStatus}
             />
           ))}
         </>

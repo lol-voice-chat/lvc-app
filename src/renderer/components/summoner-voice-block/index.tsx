@@ -18,6 +18,7 @@ function SummonerVoiceBlock(props: {
   voiceOption: VoiceRoomAudioOptionType | null;
   setVoiceOptionList: Dispatch<SetStateAction<Map<number, VoiceRoomAudioOptionType>>>;
   managementSocket: Socket | null;
+  gameStatus: 'champ-select' | 'in-game';
 }) {
   const userStream = useRecoilValue(userStreamState);
   const generalSettingsConfig = useRecoilValue(generalSettingsConfigState);
@@ -31,23 +32,38 @@ function SummonerVoiceBlock(props: {
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
 
   useEffect(() => {
-    // 옵션 null -> 챔프 선택창
-    // 옵션 있음 -> 인게임
-    if (props.voiceOption) {
+    /* 팀원 소환사 스피커 설정 유지 */
+    if (!props.isMine && props.voiceOption) {
       setBeforeMuteSpeakerVolume(props.voiceOption.beforeMuteSpeakerVolume);
       handleChangeSpeakerVolume(props.voiceOption.speakerVolume);
     }
+
+    /* 소환사 마이크 설정 유지 + 음소거 단축키 이벤트 */
+    if (props.isMine && generalSettingsConfig) {
+      if (props.gameStatus === 'champ-select') {
+        if (generalSettingsConfig.isPressToTalk) {
+          userStream?.getAudioTracks().forEach((track) => (track.enabled = false));
+          setIsMuteMic(true);
+        }
+      }
+      if (props.gameStatus === 'in-game' && props.voiceOption) {
+        setIsMuteMic(props.voiceOption.isMuteMic);
+      }
+
+      ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, handleClickMuteMic);
+    }
+
+    return () => {
+      ipcRenderer.removeAllListeners(IPC_KEY.SUMMONER_MUTE);
+    };
   }, []);
 
   useEffect(() => {
-    /* 팀 -> 리그 보이스로 넘어갈 때 저장 */
-    return () => {
-      const summonerId = props.summoner.summonerId;
-      const option = { speakerVolume, beforeMuteSpeakerVolume, isMuteMic };
+    const summonerId = props.summoner.summonerId;
+    const option = { speakerVolume, beforeMuteSpeakerVolume, isMuteMic };
 
-      props.setVoiceOptionList((prev) => new Map([...prev, [summonerId, option]]));
-    };
-  }, [speakerVolume, isMuteSpeaker, isMuteMic]);
+    props.setVoiceOptionList((prev) => new Map([...prev, [summonerId, option]]));
+  }, [speakerVolume, beforeMuteSpeakerVolume, isMuteMic]);
 
   useEffect(() => {
     function micVisualizer(summoner: { summonerId: number; visualizerVolume: number }) {
@@ -63,23 +79,6 @@ function SummonerVoiceBlock(props: {
       props.managementSocket?.off('mic-visualizer', micVisualizer);
     };
   }, [props.managementSocket]);
-
-  useEffect(() => {
-    /* 음소거 단축키 이벤트 */
-    if (props.isMine && generalSettingsConfig) {
-      if (
-        (generalSettingsConfig.isPressToTalk && props.voiceOption?.isMuteMic) ||
-        props.voiceOption?.isMuteMic
-      ) {
-        userStream?.getAudioTracks().forEach((track) => (track.enabled = false));
-        setIsMuteMic(true);
-      }
-      ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, handleClickMuteMic);
-    }
-    return () => {
-      ipcRenderer.removeAllListeners(IPC_KEY.SUMMONER_MUTE);
-    };
-  }, [userStream, generalSettingsConfig]);
 
   useEffect(() => {
     if (props.isMine) {

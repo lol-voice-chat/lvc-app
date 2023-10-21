@@ -43,17 +43,25 @@ function SummonerLeagueVoiceBlock(props: {
       setBeforeMuteSpeakerVolume(props.voiceOption.beforeMuteSpeakerVolume);
       handleChangeSpeakerVolume(props.voiceOption.speakerVolume);
     }
+
+    /* 소환사 마이크 설정 유지 + 음소거 단축키 이벤트 */
+    if (props.isMine && props.voiceOption) {
+      setIsMuteMic(props.voiceOption.isMuteMic);
+
+      ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, handleClickMuteMic);
+    }
+
+    return () => {
+      ipcRenderer.removeAllListeners(IPC_KEY.SUMMONER_MUTE);
+    };
   }, []);
 
   useEffect(() => {
-    // 리그 -> 팀 보이스로 넘어갈 때 저장
-    return () => {
-      const summonerId = props.summoner.summonerId;
-      const option = { speakerVolume, beforeMuteSpeakerVolume, isMuteMic };
+    const summonerId = props.summoner.summonerId;
+    const option = { speakerVolume, beforeMuteSpeakerVolume, isMuteMic };
 
-      props.setVoiceOptionList((prev) => new Map(prev).set(summonerId, option));
-    };
-  }, [speakerVolume, isMuteSpeaker, isMuteMic]);
+    props.setVoiceOptionList((prev) => new Map(prev).set(summonerId, option));
+  }, [speakerVolume, beforeMuteSpeakerVolume, isMuteMic]);
 
   useEffect(() => {
     function micVisualizer(summoner: { summonerId: number; visualizerVolume: number }) {
@@ -69,23 +77,6 @@ function SummonerLeagueVoiceBlock(props: {
       props.managementSocket?.off('mic-visualizer', micVisualizer);
     };
   }, [props.managementSocket]);
-
-  useEffect(() => {
-    /* 음소거 단축키 이벤트 */
-    if (props.isMine && generalSettingsConfig) {
-      if (
-        (generalSettingsConfig.isPressToTalk && props.voiceOption?.isMuteMic) ||
-        props.voiceOption?.isMuteMic
-      ) {
-        userStream?.getAudioTracks().forEach((track) => (track.enabled = false));
-        setIsMuteMic(true);
-      }
-      ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, handleClickMuteMic);
-    }
-    return () => {
-      ipcRenderer.removeAllListeners(IPC_KEY.SUMMONER_MUTE);
-    };
-  }, [userStream, generalSettingsConfig]);
 
   useEffect(() => {
     let visualizerInterval: NodeJS.Timer | null = null;
