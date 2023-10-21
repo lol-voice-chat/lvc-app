@@ -18,7 +18,8 @@ const { ipcRenderer } = window.require('electron');
 
 type SummonerLeagueVoiceBlock = {
   isMine: boolean;
-  summoner: SummonerType & { summonerStats: SummonerStatsType };
+  summoner: SummonerType;
+  summonerStats: SummonerStatsType | null;
   voiceOption: VoiceRoomAudioOptionType | null;
   setVoiceOptionList: Dispatch<SetStateAction<Map<number, VoiceRoomAudioOptionType>>>;
   managementSocket: Socket | null;
@@ -51,6 +52,7 @@ function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
       if (props.voiceOption?.isMuteMic) {
         setIsMuteMic(true);
       }
+      userStream?.getAudioTracks().forEach((track) => (track.enabled = true));
 
       ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, handleClickMuteMic);
     }
@@ -166,27 +168,25 @@ function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
           )}
         </S.SoundBox>
 
-        {props.summoner.summonerStats.statsList.length > 0 ? (
+        {props.summonerStats && props.summonerStats.statsList.length > 0 ? (
           <>
-            <S.WinningPercentage odds={props.summoner.summonerStats.odds}>
+            <S.WinningPercentage odds={props.summonerStats.odds}>
               <S.ProgressBar>
                 <progress
-                  value={props.summoner.summonerStats.winCount}
-                  max={
-                    props.summoner.summonerStats.winCount + props.summoner.summonerStats.failCount
-                  }
+                  value={props.summonerStats.winCount}
+                  max={props.summonerStats.winCount + props.summonerStats.failCount}
                 />
-                <p id="win">{props.summoner.summonerStats.winCount}W</p>
-                <p id="fail">{props.summoner.summonerStats.failCount}L</p>
+                <p id="win">{props.summonerStats.winCount}W</p>
+                <p id="fail">{props.summonerStats.failCount}L</p>
               </S.ProgressBar>
-              <p id="odds">{props.summoner.summonerStats.odds}%</p>
+              <p id="odds">{props.summonerStats.odds}%</p>
             </S.WinningPercentage>
             <S.AverageKDA>
               <p>평균 KDA</p>
-              <p id="value">{myChampInfo?.kda ?? props.summoner.summonerStats.kda}</p>
+              <p id="value">{myChampInfo?.kda ?? props.summonerStats.kda}</p>
             </S.AverageKDA>
             <S.KDAList>
-              {props.summoner.summonerStats.statsList.map(({ isWin, kda, championIcon }, idx) => (
+              {props.summonerStats.statsList.map(({ isWin, kda, championIcon }, idx) => (
                 <div style={{ backgroundColor: isWin ? '#0F3054' : '#50383B' }} key={idx}>
                   <img src={championIcon} />
                   <p>{kda}</p>

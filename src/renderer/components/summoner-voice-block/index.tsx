@@ -13,7 +13,8 @@ const { ipcRenderer } = window.require('electron');
 
 type SummonerVoiceBlockPropsType = {
   isMine: boolean;
-  summoner: SummonerType & { summonerStats: SummonerStatsType };
+  summoner: SummonerType;
+  summonerStats: SummonerStatsType | null;
   selectedChampInfo: ChampionInfoType | null;
   voiceOption: VoiceRoomAudioOptionType | null;
   setVoiceOptionList: Dispatch<SetStateAction<Map<number, VoiceRoomAudioOptionType>>>;
@@ -114,6 +115,8 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
     }
   };
 
+  console.log(visualizerVolume);
+
   const handleClickMuteMic = () => {
     userStream?.getAudioTracks().forEach((track) => (track.enabled = !track.enabled));
     setIsMuteMic((prev) => !prev);
@@ -173,22 +176,22 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
       </S.AverageGameData>
       <S.GameRecord>
         {/* 이번 시즌 전적이 없을 경우 알림창 */}
-        {props.summoner.summonerStats.statsList.length > 0 ? (
+        {props.summonerStats && props.summonerStats.statsList.length > 0 ? (
           <S.WinningPercentage>
             <S.Text>
               <p>승률</p>
-              <p id="value">{props.summoner.summonerStats.odds}%</p>
+              <p id="value">{props.summonerStats.odds}%</p>
             </S.Text>
             <S.ProgressBar>
               <progress
-                value={props.summoner.summonerStats.winCount}
-                max={props.summoner.summonerStats.winCount + props.summoner.summonerStats.failCount}
+                value={props.summonerStats.winCount}
+                max={props.summonerStats.winCount + props.summonerStats.failCount}
               />
-              <p id="win">{props.summoner.summonerStats.winCount}W</p>
-              <p id="fail">{props.summoner.summonerStats.failCount}L</p>
+              <p id="win">{props.summonerStats.winCount}W</p>
+              <p id="fail">{props.summonerStats.failCount}L</p>
             </S.ProgressBar>
             <S.KDAList>
-              {props.summoner.summonerStats.statsList.map(({ isWin, championIcon, kda }, idx) => (
+              {props.summonerStats.statsList.map(({ isWin, championIcon, kda }, idx) => (
                 <div style={{ backgroundColor: isWin ? '#0F3054' : '#50383B' }} key={idx}>
                   <img src={championIcon} />
                   <p>{kda}</p>

@@ -99,10 +99,11 @@ function VoiceRoomModal() {
     <S.VoiceRoom>
       {(gameStatus === 'champ-select' || gameStatus === 'in-game') && (
         <>
-          {summoner && mySummonerStats && (
+          {summoner && (
             <SummonerVoiceBlock
               isMine={true}
-              summoner={{ ...summoner, summonerStats: mySummonerStats }}
+              summoner={summoner}
+              summonerStats={mySummonerStats}
               selectedChampInfo={selectedChampList.get(summoner.summonerId) ?? null}
               voiceOption={voiceOptionList.get(summoner.summonerId) ?? null}
               setVoiceOptionList={setVoiceOptionList}
@@ -110,39 +111,50 @@ function VoiceRoomModal() {
               gameStatus={gameStatus}
             />
           )}
-          {myTeamSummoners?.map((myTeamSummoner) => (
-            <SummonerVoiceBlock
-              isMine={false}
-              summoner={myTeamSummoner}
-              selectedChampInfo={selectedChampList.get(myTeamSummoner.summonerId) ?? null}
-              voiceOption={voiceOptionList.get(myTeamSummoner.summonerId) ?? null}
-              setVoiceOptionList={setVoiceOptionList}
-              managementSocket={teamManagementSocket}
-              gameStatus={gameStatus}
-            />
-          ))}
+          {myTeamSummoners?.map((myTeam) => {
+            const { summonerStats, ...teamSummoner } = myTeam;
+
+            return (
+              <SummonerVoiceBlock
+                isMine={false}
+                summoner={teamSummoner}
+                summonerStats={summonerStats}
+                selectedChampInfo={selectedChampList.get(myTeam.summonerId) ?? null}
+                voiceOption={voiceOptionList.get(myTeam.summonerId) ?? null}
+                setVoiceOptionList={setVoiceOptionList}
+                managementSocket={teamManagementSocket}
+                gameStatus={gameStatus}
+              />
+            );
+          })}
         </>
       )}
 
       {gameStatus === 'loading' && (
         <S.LeagueBlockBundle>
           <S.TeamBlocks isMyTeam={false}>
-            {enemySummoners?.map((enemy) => (
-              <SummonerLeagueVoiceBlock
-                isMine={false}
-                summoner={enemy}
-                voiceOption={voiceOptionList.get(enemy.summonerId) ?? null}
-                setVoiceOptionList={setVoiceOptionList}
-                managementSocket={leagueManagementSocket}
-              />
-            ))}
+            {enemySummoners?.map((enemy) => {
+              const { summonerStats, ...enemySummoner } = enemy;
+
+              return (
+                <SummonerLeagueVoiceBlock
+                  isMine={false}
+                  summoner={enemySummoner}
+                  summonerStats={summonerStats}
+                  voiceOption={voiceOptionList.get(enemy.summonerId) ?? null}
+                  setVoiceOptionList={setVoiceOptionList}
+                  managementSocket={leagueManagementSocket}
+                />
+              );
+            })}
           </S.TeamBlocks>
 
           <S.TeamBlocks isMyTeam={true}>
-            {summoner && mySummonerStats && (
+            {summoner && (
               <SummonerLeagueVoiceBlock
                 isMine={true}
-                summoner={{ ...summoner, summonerStats: mySummonerStats }}
+                summoner={summoner}
+                summonerStats={mySummonerStats}
                 voiceOption={voiceOptionList.get(summoner.summonerId) ?? null}
                 setVoiceOptionList={setVoiceOptionList}
                 managementSocket={leagueManagementSocket}
