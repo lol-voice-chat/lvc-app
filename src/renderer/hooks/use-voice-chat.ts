@@ -181,7 +181,7 @@ function useVoiceChat() {
     };
 
     // 두번 호출되면 안됨
-    const disconnectAll = () => {
+    const disconnectAll = (voiceRoomType: 'team' | 'league') => {
       socket.disconnect();
 
       if (voiceRoomType === 'team' && stream) {
