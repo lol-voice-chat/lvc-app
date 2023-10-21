@@ -14,7 +14,7 @@ export const connect = () => {
   });
 
   redisClient.on('error', (err: any) => {
-    console.error('Redis Client Error', err);
+    console.log(err);
   });
 
   redisClient.connect().then();

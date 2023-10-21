@@ -18,6 +18,8 @@ if (!store.has('general-settings-config') || isDifferentGeneralSetting) {
 }
 
 const createWindow = () => {
+  client.connect();
+
   mainWindow = new BrowserWindow({
     minWidth: 1300,
     minHeight: 800,
@@ -46,7 +48,6 @@ const createWindow = () => {
 
 async function handleLoadEvent() {
   mainWindow.webContents.on('did-finish-load', async () => {
-    client.connect();
     const app = new LvcApplication(mainWindow.webContents);
 
     app.initialize().then(() => {
