@@ -48,7 +48,7 @@ function VoiceRoomModal() {
   useEffect(() => {
     electronStore.get('team-voice-room-name').then((roomName) => {
       const socket = connectSocket('/team-voice-chat/manage');
-      socket.emit('team-manage-join-room', { roomName, name: summoner?.name });
+      // socket.emit('team-manage-join-room', { roomName, name: summoner?.name });
       setTeamManagementSocket(socket);
     });
 
@@ -80,7 +80,7 @@ function VoiceRoomModal() {
     if (gameStatus === 'loading') {
       electronStore.get('league-voice-room-name').then(({ roomName }) => {
         const socket = connectSocket('/league-voice-chat/manage');
-        socket.emit('league-manage-join-room', roomName);
+        // socket.emit('league-manage-join-room', roomName);
         setLeagueManagementSocket(socket);
       });
     }

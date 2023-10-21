@@ -41,15 +41,15 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
     }
 
     /* 소환사 마이크 설정 유지 + 음소거 단축키 이벤트 */
-    if (props.isMine && generalSettingsConfig) {
+    if (props.isMine) {
       if (props.gameStatus === 'champ-select') {
-        if (generalSettingsConfig.isPressToTalk) {
+        if (generalSettingsConfig?.isPressToTalk) {
           userStream?.getAudioTracks().forEach((track) => (track.enabled = false));
           setIsMuteMic(true);
         }
       }
       if (props.gameStatus === 'in-game' && props.voiceOption) {
-        const isMute = props.voiceOption?.isMuteMic;
+        const isMute = props.voiceOption.isMuteMic;
         userStream?.getAudioTracks().forEach((track) => (track.enabled = !isMute));
         setIsMuteMic(isMute);
       }
@@ -63,10 +63,12 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
   }, []);
 
   useEffect(() => {
-    const summonerId = props.summoner.summonerId;
-    const option = { speakerVolume, beforeMuteSpeakerVolume, isMuteMic };
+    if (props.gameStatus === 'champ-select') {
+      const summonerId = props.summoner.summonerId;
+      const option = { speakerVolume, beforeMuteSpeakerVolume, isMuteMic };
 
-    props.setVoiceOptionList((prev) => new Map([...prev, [summonerId, option]]));
+      props.setVoiceOptionList((prev) => new Map([...prev, [summonerId, option]]));
+    }
   }, [speakerVolume, beforeMuteSpeakerVolume, isMuteMic]);
 
   useEffect(() => {
@@ -82,7 +84,7 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
     return () => {
       props.managementSocket?.off('mic-visualizer', micVisualizer);
     };
-  }, [props.managementSocket]);
+  }, [props.managementSocket, isMuteSpeaker]);
 
   useEffect(() => {
     if (props.isMine) {
