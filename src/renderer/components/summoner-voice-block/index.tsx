@@ -47,9 +47,7 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
         setIsMuteMic(true);
       }
       if (props.gameStatus === 'in-game' && props.voiceOption) {
-        const isMute = props.voiceOption.isMuteMic;
-        userStream?.getAudioTracks().forEach((track) => (track.enabled = !isMute));
-        setIsMuteMic(isMute);
+        setIsMuteMic(props.voiceOption.isMuteMic);
       }
 
       ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, handleClickMuteMic);
@@ -76,7 +74,7 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
       }
     };
 
-    /* 팀원 소환사 */
+    /* 팀원 */
     if (!props.isMine) {
       props.managementSocket?.on('mic-visualizer', onVisualizer);
     }
@@ -89,7 +87,7 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
     if (props.isMine && !isMuteMic && userStream) {
       micVisualizer(userStream, setVisualizerVolume);
     }
-  }, [userStream, isMuteMic]);
+  }, [isMuteMic]);
 
   useEffect(() => {
     if (props.isMine) {

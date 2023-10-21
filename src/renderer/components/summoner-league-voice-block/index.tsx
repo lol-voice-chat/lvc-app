@@ -47,10 +47,10 @@ function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
     }
 
     /* 소환사 마이크 설정 유지 + 음소거 단축키 이벤트 */
-    if (props.isMine && props.voiceOption) {
-      const isMute = props.voiceOption.isMuteMic;
-      userStream?.getAudioTracks().forEach((track) => (track.enabled = !isMute));
-      setIsMuteMic(isMute);
+    if (props.isMine) {
+      if (props.voiceOption?.isMuteMic) {
+        setIsMuteMic(true);
+      }
 
       ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, handleClickMuteMic);
     }
@@ -87,7 +87,7 @@ function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
     if (props.isMine && !isMuteMic && userStream) {
       micVisualizer(userStream, setVisualizerVolume);
     }
-  }, [userStream, isMuteMic]);
+  }, [isMuteMic]);
 
   useEffect(() => {
     if (props.isMine) {
