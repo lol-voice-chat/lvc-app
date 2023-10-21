@@ -88,7 +88,7 @@ function SummonerLeagueVoiceBlock(props: {
     return () => {
       visualizerInterval && clearInterval(visualizerInterval);
     };
-  }, [userStream]);
+  }, [userStream, isMuteMic]);
 
   useEffect(() => {
     if (props.isMine) {
