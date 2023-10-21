@@ -29,7 +29,6 @@ export const handleFetchMatchHistoryEvent = () => {
         credentials!
       );
 
-      console.log(response);
       if (!response) {
         return {
           summonerStats: null,
