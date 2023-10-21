@@ -269,40 +269,30 @@ export class LvcApplication {
 
       const { myTeam } = await request('/lol-champ-select/v1/session');
       this.joinTeamVoice(myTeam);
-
       this.sendMyTeamChampionStatsList(myTeam);
+
       return;
     }
 
     if (flow.phase === 'InProgress' && flow.gameClient.running) {
       isInProgress = true;
 
-      const { teamOne, teamTwo } = flow.gameData;
-      await this.joinLeagueVoice(teamOne, teamTwo);
+      try {
+        const response = await axios({
+          url: 'https://127.0.0.1:2999/liveclientdata/allgamedata',
+          method: 'GET',
+          httpsAgent: new https.Agent({
+            rejectUnauthorized: false,
+          }),
+        });
 
-      const _teamOne = new Team(teamOne);
-      const summoner = _teamOne.findBySummonerId(this.summoner.summonerId);
-      const myTeam = summoner ? teamOne : teamTwo;
+        if (!response.data.gameData.gameTime) {
+          throw new Error('ECONNREFUSED');
+        }
 
-      this.sendMyTeamChampionStatsList(myTeam);
-      return;
-    }
-
-    try {
-      const response = await axios({
-        url: 'https://127.0.0.1:2999/liveclientdata/allgamedata',
-        method: 'GET',
-        httpsAgent: new https.Agent({
-          rejectUnauthorized: false,
-        }),
-      });
-
-      if (response.data.gameData.gameTime) {
         const time = Math.floor(response.data.gameData.gameTime);
-
-        if (time < 50) {
-          isInProgress = true;
-
+        if (time < 60) {
+          //미니언 나오기 시간 전이라면 전체보이스 참가
           const timeout = setTimeout(() => {
             this.webContents.send(IPC_KEY.START_IN_GAME);
             clearTimeout(timeout);
@@ -316,10 +306,8 @@ export class LvcApplication {
           const myTeam = summoner ? teamOne : teamTwo;
 
           this.sendMyTeamChampionStatsList(myTeam);
-          return;
         } else {
-          isInProgress = true;
-
+          //미니언 나오는 시간이 지났다면 팀원보이스 참가
           const { teamOne, teamTwo } = flow.gameData;
 
           const _teamOne = new Team(teamOne);
@@ -328,18 +316,32 @@ export class LvcApplication {
           this.joinTeamVoice(myTeam);
 
           this.sendMyTeamChampionStatsList(myTeam);
-          this.webContents.send(IPC_KEY.START_IN_GAME);
+        }
+
+        return;
+      } catch (error: any) {
+        if (error.toString().includes('ECONNREFUSED')) {
+          //아직 게임로딩이라면 전체보이스 참가
+          const { teamOne, teamTwo } = flow.gameData;
+          await this.joinLeagueVoice(teamOne, teamTwo);
+
+          const _teamOne = new Team(teamOne);
+          const summoner = _teamOne.findBySummonerId(this.summoner.summonerId);
+          const myTeam = summoner ? teamOne : teamTwo;
+
+          this.sendMyTeamChampionStatsList(myTeam);
+
+          const inGameCurrentTime = await this.fetchInGameTime();
+          const timeout = setTimeout(() => {
+            this.webContents.send(IPC_KEY.START_IN_GAME);
+            clearTimeout(timeout);
+          }, 1000 * 60 + 5000 - inGameCurrentTime * 1000);
+
           return;
         }
-      }
 
-      return;
-    } catch (error: any) {
-      if (error.toString().includes('ECONNREFUSED')) {
-        return;
+        throw new Error(error);
       }
-
-      throw new Error(error);
     }
   }
 
