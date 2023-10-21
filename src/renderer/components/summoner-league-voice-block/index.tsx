@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import {
   LeagueChampInfoType,
   generalSettingsConfigState,
@@ -70,7 +70,7 @@ function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
   useEffect(() => {
     function micVisualizer(summoner: { summonerId: number; visualizerVolume: number }) {
       if (props.summoner.summonerId === summoner.summonerId && !isMuteSpeaker) {
-        setVisualizerVolume(visualizerVolume);
+        setVisualizerVolume(summoner.visualizerVolume);
       }
     }
     /* 팀 or 적팀 소환사 */
@@ -85,9 +85,9 @@ function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
   useEffect(() => {
     let visualizerInterval: NodeJS.Timer | null = null;
     if (props.isMine && !isMuteMic && userStream) {
-      visualizerInterval = setInterval(() => {
-        micVolumeHandler(userStream, setVisualizerVolume);
-      }, 1000);
+      // visualizerInterval = setInterval(() => {
+      //   micVolumeHandler(userStream, setVisualizerVolume);
+      // }, 1000);
     }
     return () => {
       visualizerInterval && clearInterval(visualizerInterval);
