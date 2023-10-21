@@ -87,18 +87,15 @@ export class LvcApplication {
     };
     this.webContents.send(IPC_KEY.ON_LEAGUE_CLIENT, leagueClient);
 
-    const [recentSummonerList, matchHistory] = await Promise.all([
-      summoner.getRecentSummonerList(),
-      MatchHistory.fetch(summoner.puuid),
-    ]);
+    const recentSummonerList = await summoner.getRecentSummonerList();
     this.webContents.send(IPC_KEY.RECENT_SUMMONER, recentSummonerList);
 
+    const matchHistory: MatchHistory = await MatchHistory.fetch(summoner.puuid);
     const key = summoner.puuid + 'match';
-    matchHistory.getSummonerStats().then(async (summonerStats: SummonerStats) => {
-      await redisClient.hSet(key, {
-        summonerStats: JSON.stringify(summonerStats),
-        length: matchHistory.matchLength.toString(),
-      });
+
+    await redisClient.hSet(key, {
+      summonerStats: JSON.stringify(await matchHistory.getSummonerStats()),
+      length: matchHistory.matchLength.toString(),
     });
 
     this.summoner = summoner;
@@ -374,6 +371,7 @@ export class LvcApplication {
   }
 
   private async joinLeagueVoice(teamOneData: [], teamTwoData: []) {
+    console.log('test: ', teamOneData, teamTwoData);
     const teamOne = new Team(teamOneData);
     const teamTwo = new Team(teamTwoData);
 
