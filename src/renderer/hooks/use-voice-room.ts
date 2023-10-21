@@ -96,6 +96,7 @@ function useVoiceRoom() {
 
     const disconnectVoiceChat = () => {
       if (!isClosed) {
+        console.log('종료~');
         isClosed = true;
         setGameStatus('none');
         setMyTeamSummoners(null);
@@ -121,7 +122,6 @@ function useVoiceRoom() {
             stream: stream,
             routerRtpCapabilities: leagueRoom.rtpCapabilities,
           });
-
           disconnectAllLeague = disconnectAll;
           closeConsumerLeague = closeConsumer;
         }
@@ -150,7 +150,6 @@ function useVoiceRoom() {
 
     const disconnectVoiceChat = () => {
       socket.disconnect();
-      // todo : 초기화 셋팅 추가
       setEnemySummoners(null);
       disconnectAllLeague();
     };

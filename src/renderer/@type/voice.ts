@@ -11,3 +11,9 @@ export type ConsumerTransportType = {
   consumer: Consumer<AppData>;
   consumerTransport: TransportType;
 };
+
+export type VoiceRoomAudioOptionType = {
+  speakerVolume: number;
+  beforeMuteSpeakerVolume: number;
+  isMuteMic: boolean;
+};

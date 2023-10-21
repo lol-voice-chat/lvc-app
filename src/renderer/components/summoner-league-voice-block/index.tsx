@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import {
   LeagueChampInfoType,
@@ -12,16 +12,23 @@ import { getSummonerSpeaker, micVolumeHandler } from '../../utils/audio';
 import VolumeSlider from '../@common/volume-slider';
 import * as S from './style';
 import RankBadge from '../@common/rank-badge';
+import { IPC_KEY } from '../../../const';
+import { VoiceRoomAudioOptionType } from '../../@type/voice';
+const { ipcRenderer } = window.require('electron');
 
 function SummonerLeagueVoiceBlock(props: {
   isMine: boolean;
   summoner: SummonerType & { summonerStats: SummonerStatsType };
+  voiceOption: VoiceRoomAudioOptionType | null;
+  setVoiceOptionList: Dispatch<SetStateAction<Map<number, VoiceRoomAudioOptionType>>>;
   managementSocket: Socket | null;
 }) {
-  const leagueChampInfoList = useRecoilValue(leagueChampInfoListState);
-  const [myChampInfo, setMyChampInfo] = useState<LeagueChampInfoType | null>(null);
   const generalSettingsConfig = useRecoilValue(generalSettingsConfigState);
   const userStream = useRecoilValue(userStreamState);
+
+  const leagueChampInfoList = useRecoilValue(leagueChampInfoListState);
+  const [myChampInfo, setMyChampInfo] = useState<LeagueChampInfoType | null>(null);
+
   const [speakerVolume, setSpeakerVolume] = useState(generalSettingsConfig?.speakerVolume ?? 0.8);
   const [beforeMuteSpeakerVolume, setBeforeMuteSpeakerVolume] = useState(
     generalSettingsConfig?.speakerVolume ?? 0.8
@@ -29,12 +36,32 @@ function SummonerLeagueVoiceBlock(props: {
   const [isMuteSpeaker, setIsMuteSpeaker] = useState(false);
   const [isMuteMic, setIsMuteMic] = useState(false);
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
+
+  useEffect(() => {
+    /* 팀 보이스에서 저장했던 옵션 받아오기  */
+    if (!props.isMine && props.voiceOption) {
+      setBeforeMuteSpeakerVolume(props.voiceOption.beforeMuteSpeakerVolume);
+      handleChangeSpeakerVolume(props.voiceOption.speakerVolume);
+    }
+  }, []);
+
+  useEffect(() => {
+    // 리그 -> 팀 보이스로 넘어갈 때 저장
+    return () => {
+      const summonerId = props.summoner.summonerId;
+      const option = { speakerVolume, beforeMuteSpeakerVolume, isMuteMic };
+
+      props.setVoiceOptionList((prev) => new Map(prev).set(summonerId, option));
+    };
+  }, [speakerVolume, isMuteSpeaker, isMuteMic]);
+
   useEffect(() => {
     function micVisualizer(summoner: { summonerId: number; visualizerVolume: number }) {
       if (props.summoner.summonerId === summoner.summonerId) {
         setVisualizerVolume(visualizerVolume);
       }
     }
+
     if (!props.isMine) {
       props.managementSocket?.on('mic-visualizer', micVisualizer);
     }
@@ -42,9 +69,27 @@ function SummonerLeagueVoiceBlock(props: {
       props.managementSocket?.off('mic-visualizer', micVisualizer);
     };
   }, [props.managementSocket]);
+
+  useEffect(() => {
+    /* 음소거 단축키 이벤트 */
+    if (props.isMine && generalSettingsConfig) {
+      if (
+        (generalSettingsConfig.isPressToTalk && props.voiceOption?.isMuteMic) ||
+        props.voiceOption?.isMuteMic
+      ) {
+        userStream?.getAudioTracks().forEach((track) => (track.enabled = false));
+        setIsMuteMic(true);
+      }
+      ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, handleClickMuteMic);
+    }
+    return () => {
+      ipcRenderer.removeAllListeners(IPC_KEY.SUMMONER_MUTE);
+    };
+  }, [userStream, generalSettingsConfig]);
+
   useEffect(() => {
     let visualizerInterval: NodeJS.Timer | null = null;
-    if (userStream && props.isMine) {
+    if (props.isMine && !isMuteMic && userStream) {
       visualizerInterval = setInterval(() => {
         micVolumeHandler(userStream, setVisualizerVolume);
       }, 1000);
@@ -53,6 +98,7 @@ function SummonerLeagueVoiceBlock(props: {
       visualizerInterval && clearInterval(visualizerInterval);
     };
   }, [userStream]);
+
   useEffect(() => {
     if (props.isMine) {
       props.managementSocket?.emit('mic-visualizer', {
@@ -61,6 +107,7 @@ function SummonerLeagueVoiceBlock(props: {
       });
     }
   }, [visualizerVolume]);
+
   useEffect(() => {
     if (leagueChampInfoList) {
       leagueChampInfoList.map((champInfo) => {
@@ -70,12 +117,14 @@ function SummonerLeagueVoiceBlock(props: {
       });
     }
   }, [leagueChampInfoList]);
+
   const handleChangeSpeakerVolume = (speakerVolume: number) => {
     const speaker = getSummonerSpeaker(props.summoner.summonerId);
     speaker.volume = speakerVolume;
     setSpeakerVolume(speakerVolume);
     setIsMuteSpeaker(speakerVolume === 0);
   };
+
   const handleClickMuteSpeaker = () => {
     if (isMuteSpeaker) {
       handleChangeSpeakerVolume(beforeMuteSpeakerVolume);
@@ -84,21 +133,25 @@ function SummonerLeagueVoiceBlock(props: {
       handleChangeSpeakerVolume(0);
     }
   };
+
   const handleClickMuteMic = () => {
     userStream?.getAudioTracks().forEach((track) => (track.enabled = !track.enabled));
     setIsMuteMic((curMute) => !curMute);
   };
+
   return (
     <S.SummonerBlock id={props.summoner.summonerId.toString()}>
       <S.ProfileImg
         visualize={!isMuteSpeaker && visualizerVolume > 20}
         src={myChampInfo?.championIcon ?? props.summoner.profileImage}
       />
+
       <S.SummonerInfo id="summoner-info">
         <S.NameTag length={props.summoner.name.length}>
           <p id="name">{props.summoner.name}</p>
           <RankBadge size={'medium'} tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
         </S.NameTag>
+
         <S.SoundBox>
           {props.isMine ? (
             <img
@@ -122,7 +175,8 @@ function SummonerLeagueVoiceBlock(props: {
             </div>
           )}
         </S.SoundBox>
-        {props.summoner.summonerStats.statsList.length !== 0 ? (
+
+        {props.summoner.summonerStats.statsList.length > 0 ? (
           <>
             <S.WinningPercentage odds={props.summoner.summonerStats.odds}>
               <S.ProgressBar>
