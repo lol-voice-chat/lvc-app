@@ -167,7 +167,9 @@ export class LvcApplication {
     });
 
     this.ws.subscribe('/lol-gameflow/v1/session', async (data) => {
-      if (data.phase === 'InProgress' && data.gameClient.running && !isInProgress) {
+      const hasData = data.gameData.teamOne[0]?.championId || data.gameData.teamTwo[0]?.championId;
+      if (data.phase === 'InProgress' && data.gameClient.running && !isInProgress && hasData) {
+        console.log('ok');
         isInProgress = true;
         myTeamMembers = new Map();
 
@@ -254,7 +256,7 @@ export class LvcApplication {
             !error.toString().includes('Timeout') &&
             !error.toString().includes('404')
           ) {
-            throw new Error(error);
+            console.log(error);
           }
         }
       }, 5000);
@@ -383,7 +385,6 @@ export class LvcApplication {
   }
 
   private async joinLeagueVoice(teamOne: [], teamTwo: []) {
-    console.log('test: ', teamOne, teamTwo);
     const _teamOne = new Team(teamOne);
     const _teamTwo = new Team(teamTwo);
 
