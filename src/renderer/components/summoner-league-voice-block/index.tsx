@@ -48,7 +48,7 @@ function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
 
     /* 소환사 마이크 설정 유지 + 음소거 단축키 이벤트 */
     if (props.isMine && props.voiceOption) {
-      const isMute = props.voiceOption?.isMuteMic;
+      const isMute = props.voiceOption.isMuteMic;
       userStream?.getAudioTracks().forEach((track) => (track.enabled = !isMute));
       setIsMuteMic(isMute);
 
@@ -69,11 +69,10 @@ function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
 
   useEffect(() => {
     function micVisualizer(summoner: { summonerId: number; visualizerVolume: number }) {
-      if (props.summoner.summonerId === summoner.summonerId) {
+      if (props.summoner.summonerId === summoner.summonerId && !isMuteSpeaker) {
         setVisualizerVolume(visualizerVolume);
       }
     }
-
     /* 팀 or 적팀 소환사 */
     if (!props.isMine) {
       props.managementSocket?.on('mic-visualizer', micVisualizer);
@@ -81,7 +80,7 @@ function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
     return () => {
       props.managementSocket?.off('mic-visualizer', micVisualizer);
     };
-  }, [props.managementSocket]);
+  }, [props.managementSocket, isMuteSpeaker]);
 
   useEffect(() => {
     let visualizerInterval: NodeJS.Timer | null = null;
