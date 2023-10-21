@@ -16,13 +16,15 @@ import { IPC_KEY } from '../../../const';
 import { VoiceRoomAudioOptionType } from '../../@type/voice';
 const { ipcRenderer } = window.require('electron');
 
-function SummonerLeagueVoiceBlock(props: {
+type SummonerLeagueVoiceBlock = {
   isMine: boolean;
   summoner: SummonerType & { summonerStats: SummonerStatsType };
   voiceOption: VoiceRoomAudioOptionType | null;
   setVoiceOptionList: Dispatch<SetStateAction<Map<number, VoiceRoomAudioOptionType>>>;
   managementSocket: Socket | null;
-}) {
+};
+
+function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
   const generalSettingsConfig = useRecoilValue(generalSettingsConfigState);
   const userStream = useRecoilValue(userStreamState);
 
@@ -46,7 +48,9 @@ function SummonerLeagueVoiceBlock(props: {
 
     /* 소환사 마이크 설정 유지 + 음소거 단축키 이벤트 */
     if (props.isMine && props.voiceOption) {
-      setIsMuteMic(props.voiceOption.isMuteMic);
+      const isMute = props.voiceOption?.isMuteMic;
+      userStream?.getAudioTracks().forEach((track) => (track.enabled = !isMute));
+      setIsMuteMic(isMute);
 
       ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, handleClickMuteMic);
     }
