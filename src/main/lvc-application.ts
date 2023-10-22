@@ -109,6 +109,7 @@ export class LvcApplication {
     this.ws.subscribe('/lol-champ-select/v1/session', async (data) => {
       if (data.timer.phase === 'BAN_PICK' || data.timer.phase === 'FINALIZATION') {
         if (!isJoinedRoom) {
+          isJoinedRoom = true;
           this.joinTeamVoice(data.myTeam);
 
           const team = new Team(data.myTeam);
@@ -121,8 +122,6 @@ export class LvcApplication {
 
             this.webContents.send(IPC_KEY.CHAMP_INFO, championStats);
           }
-
-          isJoinedRoom = true;
         }
 
         if (data.actions[0]) {
@@ -160,7 +159,7 @@ export class LvcApplication {
 
       //매칭 종료
       const phase = await request('/lol-gameflow/v1/gameflow-phase');
-      if ((isJoinedRoom && data.timer.phase === '') || phase === 'Lobby' || phase === 'None') {
+      if (isJoinedRoom && data.timer.phase === '' && (phase === 'Lobby' || phase === 'None')) {
         isJoinedRoom = false;
         this.webContents.send(IPC_KEY.EXIT_CHAMP_SELECT);
         myTeamMembers = new Map();
