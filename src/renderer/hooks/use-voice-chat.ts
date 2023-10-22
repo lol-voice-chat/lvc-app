@@ -184,23 +184,23 @@ function useVoiceChat() {
     const disconnectAll = () => {
       socket.disconnect();
 
-      // if (voiceRoomType === 'team' && stream) {
-      //   stream.getTracks().forEach((track) => track.stop());
-      //   stream.removeTrack(stream.getAudioTracks()[0]);
-      //   setUserStream(null);
-      // }
+      if (voiceRoomType === 'team' && stream) {
+        producerTransport?.close();
+        producerTransport = null;
 
-      producerTransport?.close();
+        stream.getTracks().forEach((track) => track.stop());
+        stream.removeTrack(stream.getAudioTracks()[0]);
+        setUserStream(null);
+      }
+
       consumerTransportList?.map(({ consumer, consumerTransport }) => {
         consumer.close();
         consumerTransport.close();
       });
-
-      producerTransport = null;
       consumerTransportList = [];
     };
 
-    return { closeConsumer, disconnectAll };
+    return { closeConsumer, disconnectAll, producerTransport, consumerTransportList };
   };
 
   return { connect };

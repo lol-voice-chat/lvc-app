@@ -17,7 +17,11 @@ function SummonerRecord(props: SummonerRecrodPropsType) {
   useEffect(() => {
     if (props.puuid !== 'leage-client-off') {
       ipcRenderer
-        .invoke(IPC_KEY.FETCH_MATCH_HISTORY, { isMine: props.isMine, puuid: props.puuid })
+        .invoke(IPC_KEY.FETCH_MATCH_HISTORY, {
+          isMine: props.isMine,
+          isVoice: false,
+          puuid: props.puuid,
+        })
         .then(
           (payload: { summonerStats: SummonerStatsType; isFriend: boolean; isError: boolean }) => {
             if (payload.isError) return setIsError(true);

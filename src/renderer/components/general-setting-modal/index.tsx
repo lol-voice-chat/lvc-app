@@ -133,7 +133,7 @@ function GeneralSettingModal(props: {
           <div id="category">단축키 설정</div>
 
           <div id="bundle">
-            <p>눌러서 말하기</p>
+            <p>눌러서 말하기 - {isPressToTalk ? 'on' : 'off'}</p>
             <ToggleButton
               size="S"
               value={isPressToTalk}
