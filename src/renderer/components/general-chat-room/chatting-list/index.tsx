@@ -42,7 +42,7 @@ function ChattingList(props: GeneralChatChildPropsType) {
     }
 
     if (props.isConnected) {
-      props.socket?.emit('init', (messageList: MessageInfoType[]) => {
+      props.socket?.once('init', (messageList: MessageInfoType[]) => {
         setMessageList(messageList);
         setMessageEvent({ key: 'init' });
       });
