@@ -26,6 +26,6 @@ export const generalSettingsDefaultConfig = {
   isPressToTalk: false,
   pressToTalkShortcutKey: 'M',
   muteMicShortcutKey: 'M',
-  micVolume: 100,
-  speakerVolume: 100,
+  micVolume: 1,
+  speakerVolume: 1,
 } as GeneralSettingsConfigType;
