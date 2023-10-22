@@ -87,8 +87,8 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
   }, [props.managementSocket, isMuteSpeaker]);
 
   useEffect(() => {
-    if (props.isMine && !isMuteMic && userStream) {
-      micVisualizer(userStream, setVisualizerVolume);
+    if (props.isMine && userStream) {
+      micVisualizer(userStream, isMuteMic, setVisualizerVolume);
     }
   }, [userStream, isMuteMic]);
 
