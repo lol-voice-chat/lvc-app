@@ -48,8 +48,7 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
         setIsMuteMic(true);
       }
       if (props.gameStatus === 'in-game' && props.voiceOption?.isMuteMic) {
-        // userStream?.getAudioTracks().forEach((track) => (track.enabled = !isMute));
-        setIsMuteMic(true);
+        handleClickMuteMic();
       }
 
       ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, handleClickMuteMic);
@@ -80,6 +79,7 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
     if (!props.isMine) {
       props.managementSocket?.on('mic-visualizer', onVisualizer);
     }
+
     return () => {
       props.managementSocket?.off('mic-visualizer', onVisualizer);
     };
