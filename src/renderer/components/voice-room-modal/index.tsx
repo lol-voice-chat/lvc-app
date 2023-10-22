@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import {
   enemySummonersState,
   gameStatusState,
-  mySummonerStatsState,
   myTeamSummonersState,
   summonerState,
   userStreamState,
@@ -28,7 +27,7 @@ function VoiceRoomModal() {
   const myTeamSummoners = useRecoilValue(myTeamSummonersState);
   const enemySummoners = useRecoilValue(enemySummonersState);
 
-  const [mySummonerStats, setMySummonerStats] = useRecoilState(mySummonerStatsState);
+  const [mySummonerStats, setMySummonerStats] = useState<SummonerStatsType | null>(null);
   const [selectedChampList, setSelectedChampList] = useState<Map<number, ChampionInfoType>>(
     new Map()
   );
@@ -39,7 +38,7 @@ function VoiceRoomModal() {
   const [teamManagementSocket, setTeamManagementSocket] = useState<Socket | null>(null);
   const [leagueManagementSocket, setLeagueManagementSocket] = useState<Socket | null>(null);
 
-  const { onTeamVoiceRoom, onLeagueVoiceRoom } = useVoiceRoom();
+  const { joinTeamVoiceRoom, joinLeagueVoiceRoom } = useVoiceRoom();
 
   useEffect(() => {
     /* 소환사 최신 전적 불러오기 */
@@ -52,31 +51,38 @@ function VoiceRoomModal() {
 
   useEffect(() => {
     if (userStream && mySummonerStats) {
-      if (gameStatus === 'champ-select') {
-        onTeamVoiceRoom(userStream, mySummonerStats);
+      joinTeamVoiceRoom(userStream, mySummonerStats);
 
-        const socket = connectSocket('/team-voice-chat/manage');
+      const socket = connectSocket('/team-voice-chat/manage');
 
-        electronStore.get('team-voice-room-name').then((roomName) => {
-          // socket.emit('team-manage-join-room', { roomName, name: summoner?.name });
-          setTeamManagementSocket(socket);
+      electronStore.get('team-voice-room-name').then((roomName) => {
+        // socket.emit('team-manage-join-room', { roomName, name: summoner?.name });
+        setTeamManagementSocket(socket);
+      });
+
+      /* 입장시 팀원의 (자신포함) 챔피언 리스트 받음 */
+      ipcRenderer.once('selected-champ-info-list', (_, championInfoList: ChampionInfoType[]) => {
+        championInfoList.map((champInfo: ChampionInfoType) => {
+          setSelectedChampList((prev) => new Map([...prev, [champInfo.summonerId, champInfo]]));
         });
+      });
 
-        /* 입장시 팀원의 (자신포함) 챔피언 리스트 받음 */
-        ipcRenderer.once('selected-champ-info-list', (_, championInfoList: ChampionInfoType[]) => {
-          championInfoList.map((champInfo: ChampionInfoType) => {
-            setSelectedChampList((prev) => new Map([...prev, [champInfo.summonerId, champInfo]]));
-          });
-        });
+      /* 실시간 챔피언 선택 */
+      ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
+        setSelectedChampList((prev) => new Map(prev).set(championInfo.summonerId, championInfo));
+      });
+    }
 
-        /* 실시간 챔피언 선택 */
-        ipcRenderer.on(IPC_KEY.CHAMP_INFO, (_, championInfo: ChampionInfoType) => {
-          setSelectedChampList((prev) => new Map(prev).set(championInfo.summonerId, championInfo));
-        });
-      }
+    return () => {
+      teamManagementSocket?.disconnect();
+      ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
+    };
+  }, [mySummonerStats]);
 
+  useEffect(() => {
+    if (userStream && mySummonerStats) {
       if (gameStatus === 'loading') {
-        onLeagueVoiceRoom(userStream, mySummonerStats);
+        joinLeagueVoiceRoom(userStream, mySummonerStats);
 
         const socket = connectSocket('/league-voice-chat/manage');
 
@@ -92,11 +98,9 @@ function VoiceRoomModal() {
     }
 
     return () => {
-      teamManagementSocket?.disconnect();
       leagueManagementSocket?.disconnect();
-      ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
     };
-  }, [userStream, gameStatus, mySummonerStats]);
+  }, [gameStatus, mySummonerStats]);
 
   return (
     <S.VoiceRoom>

@@ -2,7 +2,6 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   enemySummonersState,
   gameStatusState,
-  mySummonerStatsState,
   myTeamSummonersState,
   summonerState,
   userDeviceIdState,
@@ -35,10 +34,12 @@ function useVoiceRoom() {
     });
   }, [userDeviceId]);
 
-  const onTeamVoiceRoom = (stream: MediaStream, summonerStats: SummonerStatsType) => {
+  const joinTeamVoiceRoom = (stream: MediaStream, summonerStats: SummonerStatsType) => {
     const socket = connectSocket('/team-voice-chat');
+
     let isClosed = false;
-    let disconnectAllTeamVoice: (voiceRoomType: 'team' | 'league') => void;
+
+    let disconnectAllTeamVoice: () => void;
     let closeConsumerTeamVoice: (summonerId: number) => void;
 
     electronStore.get('team-voice-room-name').then((roomName) => {
@@ -50,8 +51,9 @@ function useVoiceRoom() {
             voiceRoomType: 'team',
             socket: socket,
             stream: stream,
-            routerRtpCapabilities: teamRoom.rtpCapabilities,
+            rtpCapabilities: teamRoom.rtpCapabilities,
           });
+
           disconnectAllTeamVoice = disconnectAll;
           closeConsumerTeamVoice = closeConsumer;
         }
@@ -91,15 +93,19 @@ function useVoiceRoom() {
         isClosed = true;
         setGameStatus('none');
         setMyTeamSummoners(null);
-        disconnectAllTeamVoice('team');
+        disconnectAllTeamVoice();
+
+        // stream.getAudioTracks().forEach((track) => track.stop());
+        // stream.removeTrack(stream.getAudioTracks()[0]);
+        // setUserStream(null);
       }
     };
   };
 
-  const onLeagueVoiceRoom = (stream: MediaStream, summonerStats: SummonerStatsType) => {
+  const joinLeagueVoiceRoom = (stream: MediaStream, summonerStats: SummonerStatsType) => {
     const socket = connectSocket('/league-voice-chat');
 
-    let disconnectAllLeague: (voiceRoomType: 'team' | 'league') => void;
+    let disconnectAllLeague: () => void;
     let closeConsumerLeague: (summonerId: number) => void;
 
     electronStore.get('league-voice-room-name').then(({ roomName, teamName }) => {
@@ -111,8 +117,9 @@ function useVoiceRoom() {
             voiceRoomType: 'league',
             socket: socket,
             stream: stream,
-            routerRtpCapabilities: leagueRoom.rtpCapabilities,
+            rtpCapabilities: leagueRoom.rtpCapabilities,
           });
+
           disconnectAllLeague = disconnectAll;
           closeConsumerLeague = closeConsumer;
         }
@@ -142,11 +149,11 @@ function useVoiceRoom() {
     const disconnectVoiceChat = () => {
       socket.disconnect();
       setEnemySummoners(null);
-      disconnectAllLeague('league');
+      disconnectAllLeague();
     };
   };
 
-  return { onTeamVoiceRoom, onLeagueVoiceRoom };
+  return { joinTeamVoiceRoom, joinLeagueVoiceRoom };
 }
 
 export default useVoiceRoom;
