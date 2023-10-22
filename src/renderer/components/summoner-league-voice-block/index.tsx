@@ -50,8 +50,7 @@ function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
     /* 소환사 마이크 설정 유지 + 음소거 단축키 이벤트 */
     if (props.isMine) {
       if (props.voiceOption?.isMuteMic) {
-        // handleClickMuteMic();
-        setIsMuteMic(true);
+        handleClickMuteMic();
       }
 
       ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, handleClickMuteMic);
