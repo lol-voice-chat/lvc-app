@@ -17,16 +17,16 @@ function useVoiceChat() {
     voiceRoomType: 'team' | 'league';
     socket: Socket;
     stream: MediaStream;
-    routerRtpCapabilities: RtpCapabilities;
+    rtpCapabilities: RtpCapabilities;
   }) => {
-    const { voiceRoomType, socket, stream, routerRtpCapabilities } = params;
+    const { voiceRoomType, socket, stream, rtpCapabilities } = params;
 
     let device = new mediasoup.Device();
     let producerTransport: TransportType | null = null;
     let consumerTransportList: ConsumerTransportType[] = [];
 
     device
-      .load({ routerRtpCapabilities })
+      .load({ routerRtpCapabilities: rtpCapabilities })
       .then(() => createSendTransport(stream.getAudioTracks()[0]))
       .catch((err) => console.log('디바이스 로드 에러', err));
 
@@ -181,17 +181,14 @@ function useVoiceChat() {
     };
 
     // 두번 호출되면 안됨
-    const disconnectAll = (voiceRoomType: 'team' | 'league') => {
+    const disconnectAll = () => {
       socket.disconnect();
 
-      console.log('뭐고', voiceRoomType);
-
-      if (voiceRoomType === 'team' && stream) {
-        console.log('스트림 컷');
-        stream.getTracks().forEach((track) => track.stop());
-        stream.removeTrack(stream.getAudioTracks()[0]);
-        setUserStream(null);
-      }
+      // if (voiceRoomType === 'team' && stream) {
+      //   stream.getTracks().forEach((track) => track.stop());
+      //   stream.removeTrack(stream.getAudioTracks()[0]);
+      //   setUserStream(null);
+      // }
 
       producerTransport?.close();
       consumerTransportList?.map(({ consumer, consumerTransport }) => {
