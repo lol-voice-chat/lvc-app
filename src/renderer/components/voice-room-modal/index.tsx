@@ -92,14 +92,10 @@ function VoiceRoomModal() {
   useEffect(() => {
     if (userStream && mySummonerStats) {
       if (gameStatus === 'loading') {
-        console.log('리그 보이스 연결');
-
         joinLeagueVoiceRoom(userStream, mySummonerStats);
       }
 
       if (gameStatus === 'in-game') {
-        console.log('리그 보이스 매니저 연결 해제');
-
         leagueManagementSocket?.disconnect();
       }
     }
