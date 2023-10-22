@@ -1,4 +1,4 @@
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   enemySummonersState,
   gameStatusState,
@@ -105,6 +105,8 @@ function useVoiceRoom() {
   const joinLeagueVoiceRoom = (stream: MediaStream, summonerStats: SummonerStatsType) => {
     const socket = connectSocket('/league-voice-chat');
 
+    let isClosed = false;
+
     let disconnectAllLeague: () => void;
     let closeConsumerLeague: (summonerId: number) => void;
 
@@ -147,9 +149,11 @@ function useVoiceRoom() {
     });
 
     const disconnectVoiceChat = () => {
-      socket.disconnect();
-      setEnemySummoners(null);
-      disconnectAllLeague();
+      if (!isClosed) {
+        isClosed = true;
+        setEnemySummoners(null);
+        disconnectAllLeague();
+      }
     };
   };
 

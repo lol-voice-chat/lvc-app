@@ -47,10 +47,9 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
         userStream?.getAudioTracks().forEach((track) => (track.enabled = false));
         setIsMuteMic(true);
       }
-      if (props.gameStatus === 'in-game' && props.voiceOption) {
-        const isMute = props.voiceOption.isMuteMic;
-        userStream?.getAudioTracks().forEach((track) => (track.enabled = !isMute));
-        setIsMuteMic(isMute);
+      if (props.gameStatus === 'in-game' && props.voiceOption?.isMuteMic) {
+        // userStream?.getAudioTracks().forEach((track) => (track.enabled = !isMute));
+        setIsMuteMic(true);
       }
 
       ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, handleClickMuteMic);

@@ -58,9 +58,9 @@ function VoiceRoomModal() {
 
     /* 소환사 최신 전적 불러오기 */
     ipcRenderer
-      .invoke(IPC_KEY.FETCH_MATCH_HISTORY, { isMine: true, puuid: summoner?.puuid })
-      .then((my: { summonerStats: SummonerStatsType }) => {
-        setMySummonerStats(my.summonerStats);
+      .invoke(IPC_KEY.FETCH_MATCH_HISTORY, { isMine: true, isVoice: true, puuid: summoner?.puuid })
+      .then((summonerStats: SummonerStatsType) => {
+        setMySummonerStats(summonerStats);
       });
 
     /* 입장시 팀원의 (자신포함) 챔피언 리스트 받음 */
