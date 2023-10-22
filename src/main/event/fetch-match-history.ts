@@ -10,7 +10,7 @@ import dayjs from 'dayjs';
 const MATCH_EXPIRE_TIME = 1800; //30분
 
 export const handleFetchMatchHistoryEvent = () => {
-  ipcMain.handle(IPC_KEY.FETCH_MATCH_HISTORY, async (event, { puuid, isMine }) => {
+  ipcMain.handle(IPC_KEY.FETCH_MATCH_HISTORY, async (_event, { puuid, isVoice, isMine }) => {
     if (!credentials) {
       return {
         summonerStats: null,
@@ -30,11 +30,7 @@ export const handleFetchMatchHistoryEvent = () => {
       );
 
       if (!response) {
-        return {
-          summonerStats: null,
-          isFriend: null,
-          isError: true,
-        };
+        throw new Error();
       }
     } catch (error) {
       return {
@@ -42,6 +38,11 @@ export const handleFetchMatchHistoryEvent = () => {
         isFriend: null,
         isError: true,
       };
+    }
+
+    if (isVoice) {
+      const summonerStatsData = await redisClient.hGet(puuid + 'match', 'summonerStats');
+      return JSON.parse(summonerStatsData);
     }
 
     const [friends, summonerStatsData]: [Friends, string | undefined] = await Promise.all([
