@@ -159,7 +159,8 @@ export class LvcApplication {
       }
 
       //매칭 종료
-      if (isJoinedRoom && data.timer.phase === '' && !isInProgress) {
+      const phase = await request('/lol-gameflow/v1/gameflow-phase');
+      if ((isJoinedRoom && data.timer.phase === '') || phase === 'Lobby' || phase === 'None') {
         isJoinedRoom = false;
         this.webContents.send(IPC_KEY.EXIT_CHAMP_SELECT);
         myTeamMembers = new Map();
