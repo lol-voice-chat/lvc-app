@@ -41,7 +41,7 @@ autoUpdater.on('download-progress', (progressObj) => {
 });
 
 autoUpdater.on('update-downloaded', (info) => {
-  log.info('업데이트가 완료되었습니다.');
+  log.info('업데이트가 완료되었습니다: ', app.getVersion());
   autoUpdater.quitAndInstall();
 });
 
@@ -95,11 +95,13 @@ ipcMain.on(IPC_KEY.CLOSE_APP, () => {
 
 app.whenReady().then(() => {
   createWindow();
-  autoUpdater.checkForUpdates();
+  autoUpdater.checkForUpdatesAndNotify();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
+
+      autoUpdater.checkForUpdatesAndNotify();
     }
   });
 });
