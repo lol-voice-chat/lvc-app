@@ -2,6 +2,7 @@ import React from 'react';
 import * as _ from './style';
 import { SummonerType } from '../../../@type/summoner';
 import { GeneralChatChildPropsType } from '../../general-chat-room';
+import img_add_icon from '../../../asset/icon/img_add_icon.svg';
 
 const ENTER = 13;
 const TAB = 9;
@@ -59,7 +60,7 @@ function MessageInput(props: GeneralChatChildPropsType) {
     <_.MessageInputContainer id="message-input" isOnClient={!!props.summoner}>
       <div id="input-box">
         <div id="img-upload-btn" onClick={handleClickImgUpload}>
-          <img src="img/img_add_btn.svg" />
+          <img src={img_add_icon} />
           <input id="img-upload-input" type="file" accept="image/*" />
         </div>
 

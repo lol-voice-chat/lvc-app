@@ -2,6 +2,7 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import * as _ from './style';
 import { SummonerStatsType } from '../../../../@type/summoner';
 import { IPC_KEY } from '../../../../../const';
+import warning_icon from '../../../../asset/icon/warning_icon.svg';
 const { ipcRenderer } = window.require('electron');
 
 type SummonerRecrodPropsType = {
@@ -96,7 +97,7 @@ function SummonerRecord(props: SummonerRecrodPropsType) {
 
             {record.statsList.length === 0 && (
               <div id="none-game-info">
-                <img src="img/warning_icon.svg" />
+                <img src={warning_icon} />
                 <p>전적이 없습니다.</p>
               </div>
             )}
