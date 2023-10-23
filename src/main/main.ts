@@ -5,6 +5,8 @@ import { LvcApplication } from './lvc-application';
 import { resolvePath } from './lib/common';
 import handleGlobalKeyEvent from './event/global-key-event';
 import handleFetchMatchHistoryEvent from './event/fetch-match-history-event';
+import { autoUpdater } from 'electron-updater';
+import log from 'electron-log';
 
 let mainWindow: BrowserWindow;
 
@@ -15,6 +17,32 @@ const isDifferentGeneralSetting =
 if (!store.has('general-settings-config') || isDifferentGeneralSetting) {
   store.set('general-settings-config', generalSettingsDefaultConfig);
 }
+
+autoUpdater.on('checking-for-update', () => {
+  log.info('업데이트 확인중...');
+});
+
+autoUpdater.on('update-available', (info) => {
+  log.info('업데이트가 가능합니다.');
+});
+
+autoUpdater.on('update-not-available', (info) => {
+  log.info('현재 최신버전입니다.');
+});
+
+autoUpdater.on('error', (error) => {
+  log.info('에러가 발생했습니다: ', error);
+});
+
+autoUpdater.on('download-progress', (progressObj) => {
+  let message = '다운로드 속도: ' + progressObj.bytesPerSecond;
+  message = message + ' - 현재 ' + progressObj.percent + '%';
+  log.info(message);
+});
+
+autoUpdater.on('update-downloaded', (info) => {
+  log.info('업데이트가 완료되었습니다.');
+});
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -66,6 +94,7 @@ ipcMain.on(IPC_KEY.CLOSE_APP, () => {
 
 app.whenReady().then(() => {
   createWindow();
+  autoUpdater.checkForUpdates();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
