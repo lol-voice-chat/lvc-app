@@ -15,7 +15,7 @@
     "start:renderer": "react-scripts start",
     "start": "concurrently \"npm run start:renderer\" \"wait-on http://localhost:3000\" \"npm run start:main\"",
     "deploy": "ts-node ./.erb/scripts/clean.ts && npm run build",
-    "deploy:xos": "npm run deploy && electron-builder --mac"
+    "deploy:xos": "npm run deploy && electron-builder --mac --publish never"
   },
   "eslintConfig": {
     "extends": [
@@ -44,6 +44,7 @@
     "electron-localshortcut": "^3.2.1",
     "electron-log": "^4.4.8",
     "electron-store": "^8.1.0",
+    "electron-updater": "^6.1.4",
     "league-connect": "^6.0.0-rc12",
     "mediasoup-client": "^3.6.101",
     "node-global-key-listener": "^0.1.1",
@@ -117,12 +118,18 @@
     "dmg": {},
     "directories": {
       "app": "release/app",
-      "buildResources": "public/img",
+      "buildResources": "src/renderer/asset",
       "output": "release/build"
     },
     "extraResources": [
-      "./public/img/**"
-    ]
+      "./src/renderer/asset/**"
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "lvc",
+      "repo": "lvc-app",
+      "private": true
+    }
   },
   "electronmon": {
     "patterns": [
