@@ -128,8 +128,7 @@
       "provider": "github",
       "repo": "lvc-app",
       "private": true,
-      "releaseType": "release",
-      "token": "<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>"
+      "releaseType": "release"
     }
   },
   "electronmon": {
