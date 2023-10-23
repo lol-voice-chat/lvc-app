@@ -6,6 +6,7 @@ import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import baseConfig from './webpack.config.base';
 import { merge } from 'webpack-merge';
+import Dotenv from 'dotenv-webpack';
 
 const configuration: webpack.Configuration = {
   devtool: 'source-map',
@@ -75,6 +76,8 @@ const configuration: webpack.Configuration = {
       isBrowser: false,
       isDevelopment: false,
     }),
+
+    new Dotenv(),
   ],
 };
 

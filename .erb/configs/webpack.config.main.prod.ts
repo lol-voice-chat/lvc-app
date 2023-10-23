@@ -5,6 +5,7 @@ import TerserPlugin from 'terser-webpack-plugin';
 import baseConfig from './webpack.config.base';
 import { merge } from 'webpack-merge';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
+import Dotenv from 'dotenv-webpack';
 
 const configuration: webpack.Configuration = {
   externals: {
@@ -42,6 +43,8 @@ const configuration: webpack.Configuration = {
       analyzerMode: 'disabled',
       analyzerPort: 8888,
     }),
+
+    new Dotenv(),
   ],
 
   node: {
