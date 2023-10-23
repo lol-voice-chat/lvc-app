@@ -42,6 +42,7 @@ autoUpdater.on('download-progress', (progressObj) => {
 
 autoUpdater.on('update-downloaded', (info) => {
   log.info('업데이트가 완료되었습니다.');
+  autoUpdater.quitAndInstall();
 });
 
 const createWindow = () => {
