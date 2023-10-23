@@ -26,7 +26,7 @@ function MessageBlock(props: {
       <div className="drag-able" id="message-info">
         <div id="summoner-info">
           <p id="name">{props.summoner.name}</p>
-          <RankBadge size="small" tierImg={'img/dummy_rank.png'} tier={props.summoner.tier} />
+          <RankBadge size="small" tierImg={''} tier={props.summoner.tier} />
           <p id="time">{props.time}</p>
         </div>
         {props.messageType === 'text' ? (

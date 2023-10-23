@@ -9,6 +9,11 @@ import { generalSettingsConfigState, userStreamState } from '../../@store/atom';
 import { Socket } from 'socket.io-client';
 import { IPC_KEY } from '../../../const';
 import { VoiceRoomAudioOptionType } from '../../@type/voice';
+import mic_icon from '../../asset/icon/mic_icon.svg';
+import mic_mute_icon from '../../asset/icon/mic_mute_icon.svg';
+import headset_icon from '../../asset/icon/headset_icon.svg';
+import headset_mute_icon from '../../asset/icon/headset_mute_icon.svg';
+import warning_icon from '../../asset/icon/warning_icon.svg';
 const { ipcRenderer } = window.require('electron');
 
 type SummonerVoiceBlockPropsType = {
@@ -129,20 +134,20 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
       />
       <S.NameTag length={props.summoner.name.length}>
         <p id="name">{props.summoner.name}</p>
-        <RankBadge size={'medium'} tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
+        <RankBadge size={'medium'} tierImg="" tier={props.summoner.tier} />
       </S.NameTag>
       <S.SoundBox>
         {props.isMine ? (
           <img
             id="mic-button"
-            src={!isMuteMic ? 'img/mic_icon.svg' : 'img/mic_mute_icon.svg'}
+            src={!isMuteMic ? mic_icon : mic_mute_icon}
             onClick={handleClickMuteMic}
           />
         ) : (
           <div id="speaker-ctrl">
             <img
               id="speaker-button"
-              src={!isMuteSpeaker ? 'img/headset_icon.svg' : 'img/headset_mute_icon.svg'}
+              src={!isMuteSpeaker ? headset_icon : headset_mute_icon}
               onClick={handleClickMuteSpeaker}
             />
             <VolumeSlider
@@ -200,7 +205,7 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
           </S.WinningPercentage>
         ) : (
           <div id="warning-box">
-            <img src="img/warning_icon.svg" />
+            <img src={warning_icon} />
             <p>전적이 없습니다.</p>
           </div>
         )}

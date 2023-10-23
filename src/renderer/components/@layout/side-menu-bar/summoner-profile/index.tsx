@@ -4,6 +4,7 @@ import RankBadge from '../../../@common/rank-badge';
 import * as _ from './style';
 import InfoBox from '../../../@common/info-box';
 import useHover from '../../../../hooks/use-hover';
+import friend_request_icon from '../../../../asset/icon/friend_request_icon.svg';
 const { ipcRenderer } = window.require('electron');
 
 type SummonerProfilePropsType = {
@@ -44,7 +45,7 @@ function SummonerProfile(props: SummonerProfilePropsType) {
               <p id="name">{props.summoner.name}</p>
 
               <div id="badge-bundle">
-                <RankBadge size="small" tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
+                <RankBadge size="small" tierImg="" tier={props.summoner.tier} />
 
                 {!props.isFriend && !isRequested && (
                   <div id="friend-request-box">
@@ -57,7 +58,7 @@ function SummonerProfile(props: SummonerProfilePropsType) {
                     )}
                     <img
                       id="friend-request-badge"
-                      src="img/friend_request_icon.svg"
+                      src={friend_request_icon}
                       onClick={handleClickRequestFriend}
                     />
                   </div>
