@@ -1,6 +1,6 @@
 {
   "name": "lvc-app",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "author": "lvc",
   "description": "lol voice chat app",
@@ -127,7 +127,8 @@
     "publish": {
       "provider": "github",
       "repo": "lvc-app",
-      "private": true
+      "private": true,
+      "releaseType": "release"
     }
   },
   "electronmon": {
