@@ -1,6 +1,6 @@
 {
   "name": "lvc-app",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "author": "lvc",
   "description": "lol voice chat app",
@@ -15,7 +15,7 @@
     "start:renderer": "react-scripts start",
     "start": "concurrently \"npm run start:renderer\" \"wait-on http://localhost:3000\" \"npm run start:main\"",
     "deploy": "ts-node ./.erb/scripts/clean.ts && npm run build",
-    "deploy:xos": "npm run deploy && electron-builder --mac --publish never"
+    "deploy:xos": "npm run deploy && electron-builder --mac --publish always"
   },
   "eslintConfig": {
     "extends": [
@@ -126,7 +126,6 @@
     ],
     "publish": {
       "provider": "github",
-      "owner": "lvc",
       "repo": "lvc-app",
       "private": true
     }
