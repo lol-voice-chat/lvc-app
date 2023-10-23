@@ -5,7 +5,6 @@ import { LvcApplication } from './lvc-application';
 import { resolvePath } from './lib/common';
 import handleGlobalKeyEvent from './event/global-key-event';
 import handleFetchMatchHistoryEvent from './event/fetch-match-history';
-import * as client from './lib/redis-client';
 
 let mainWindow: BrowserWindow;
 
@@ -18,8 +17,6 @@ if (!store.has('general-settings-config') || isDifferentGeneralSetting) {
 }
 
 const createWindow = () => {
-  client.connect();
-
   mainWindow = new BrowserWindow({
     minWidth: 1300,
     minHeight: 800,
