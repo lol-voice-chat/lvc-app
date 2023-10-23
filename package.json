@@ -129,8 +129,7 @@
       "owner": "lol-voice-chat",
       "repo": "lvc-app",
       "private": true,
-      "releaseType": "release",
-      "token": "<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>"
+      "releaseType": "release"
     }
   },
   "electronmon": {
