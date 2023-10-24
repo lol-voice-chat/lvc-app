@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import onElectronStore, { store } from './store';
 import { generalSettingsDefaultConfig, IPC_KEY } from '../const';
 import { LvcApplication } from './lvc-application';
@@ -41,8 +41,21 @@ autoUpdater.on('download-progress', (progressObj) => {
 });
 
 autoUpdater.on('update-downloaded', (info) => {
-  log.info('업데이트가 완료되었습니다: ', app.getVersion());
-  autoUpdater.quitAndInstall();
+  log.info('업데이트가 완료되었습니다.');
+
+  dialog
+    .showMessageBox(mainWindow, {
+      type: 'question',
+      buttons: ['Yes', 'No'],
+      defaultId: 0,
+      title: 'UPDATE',
+      message: '업데이트를 진행하시겠습니까? (앱이 재시작됩니다)',
+    })
+    .then((response) => {
+      if (response.response === 0) {
+        autoUpdater.quitAndInstall();
+      }
+    });
 });
 
 const createWindow = () => {
@@ -100,8 +113,6 @@ app.whenReady().then(() => {
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
-
-      autoUpdater.checkForUpdatesAndNotify();
     }
   });
 });
