@@ -81,6 +81,7 @@ export const SoundBox = styled.div`
   #mic-button {
     width: 30px;
     height: 30px;
+    margin: 12px 0;
     cursor: pointer;
   }
   #speaker-button {

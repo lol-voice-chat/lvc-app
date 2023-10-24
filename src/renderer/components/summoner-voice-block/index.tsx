@@ -31,16 +31,9 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
   const userStream = useRecoilValue(userStreamState);
   const generalSettingsConfig = useRecoilValue(generalSettingsConfigState);
 
-  const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
-
   const [isMuteMic, setIsMuteMic] = useState(false);
-  const [micVolume, setMicVolume] = useState(generalSettingsConfig?.micVolume ?? 1);
-  const [beforeMuteMicVolume, setBeforeMuteMicVolume] = useState(
-    generalSettingsConfig?.micVolume ?? 1
-  );
-
   const [isMuteSpeaker, setIsMuteSpeaker] = useState(false);
-  const [speakerMaxVolume, setSpeakerMaxVolume] = useState(1);
+  const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
   const [speakerVolume, setSpeakerVolume] = useState(generalSettingsConfig?.speakerVolume ?? 1);
   const [beforeMuteSpeakerVolume, setBeforeMuteSpeakerVolume] = useState(
     generalSettingsConfig?.speakerVolume ?? 1
@@ -81,14 +74,6 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
   }, [speakerVolume, beforeMuteSpeakerVolume, isMuteMic]);
 
   useEffect(() => {
-    const onMicVolume = (someone: { summonerId: number; volume: number }) => {
-      if (props.summoner.summonerId === someone.summonerId) {
-        setSpeakerMaxVolume(someone.volume);
-        if (someone.volume === 0) {
-          handleChangeSpeakerVolume(0);
-        }
-      }
-    };
     const onVisualizer = (someone: { summonerId: number; visualizerVolume: number }) => {
       if (!isMuteSpeaker && props.summoner.summonerId === someone.summonerId) {
         setVisualizerVolume(someone.visualizerVolume);
@@ -97,22 +82,13 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
 
     /* 팀원 */
     if (!props.isMine) {
-      props.managementSocket?.on('mic-volume', onMicVolume);
       props.managementSocket?.on('mic-visualizer', onVisualizer);
     }
 
     return () => {
       props.managementSocket?.off('mic-visualizer', onVisualizer);
-      props.managementSocket?.off('mic-volume', onMicVolume);
     };
   }, [props.managementSocket, isMuteSpeaker]);
-
-  useEffect(() => {
-    props.managementSocket?.emit('mic-volume', {
-      summonerId: props.summoner.summonerId,
-      volume: micVolume,
-    });
-  }, [micVolume]);
 
   useEffect(() => {
     if (props.isMine) {
@@ -145,19 +121,9 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
     }
   };
 
-  const handleChangeMicVolume = (micVolume: number) => {
-    setMicVolume(micVolume);
-    setIsMuteMic(micVolume === 0);
-    userStream?.getAudioTracks().forEach((track) => (track.enabled = micVolume !== 0));
-  };
-
   const handleClickMuteMic = () => {
-    if (isMuteMic) {
-      handleChangeMicVolume(beforeMuteMicVolume);
-    } else {
-      setBeforeMuteMicVolume(micVolume);
-      handleChangeMicVolume(0);
-    }
+    userStream?.getAudioTracks().forEach((track) => (track.enabled = !track.enabled));
+    setIsMuteMic((prev) => !prev);
   };
 
   return (
@@ -175,18 +141,11 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
 
       <S.SoundBox>
         {props.isMine ? (
-          <div id="audio-ctrl">
-            <img
-              id="mic-button"
-              src={!isMuteMic ? mic_icon : mic_mute_icon}
-              onClick={handleClickMuteMic}
-            />
-            <VolumeSlider
-              audiotype="mic"
-              volume={micVolume}
-              handleChangeVolume={handleChangeMicVolume}
-            />
-          </div>
+          <img
+            id="mic-button"
+            src={!isMuteMic ? mic_icon : mic_mute_icon}
+            onClick={handleClickMuteMic}
+          />
         ) : (
           <div id="audio-ctrl">
             <img
@@ -197,7 +156,6 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
             <VolumeSlider
               audiotype="speaker"
               volume={speakerVolume}
-              maxVolume={speakerMaxVolume}
               handleChangeVolume={handleChangeSpeakerVolume}
             />
             <audio id={props.summoner.summonerId.toString() + 'speaker'} autoPlay />
