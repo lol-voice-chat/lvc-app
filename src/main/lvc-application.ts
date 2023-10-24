@@ -217,7 +217,7 @@ export class LvcApplication {
 
         const existsSummoner = teamOneSummoners.findBySummonerId(this.summoner.summonerId);
         const myTeam = existsSummoner ? teamOneSummoners : teamTwoSummoners;
-        const summonerIds: Set<number> = new Set(myTeam.getSummonerIds(this.summoner.summonerId));
+        const summonerIds: number[] = myTeam.getSummonerIds(this.summoner.summonerId);
 
         //최근 함께한 소환사 업데이트
         const key = this.summoner.summonerId.toString() + 'recent';
@@ -225,9 +225,9 @@ export class LvcApplication {
         if (summoner) {
           const _summoner: SummonerType = JSON.parse(summoner);
 
-          for (const summonerId of summonerIds) {
-            _summoner.recentSummonerIds.add(summonerId);
-          }
+          _summoner.recentSummonerIds = [
+            ...new Set(_summoner.recentSummonerIds.concat(summonerIds)),
+          ];
 
           await redisClient.set(key, JSON.stringify(_summoner));
         }
