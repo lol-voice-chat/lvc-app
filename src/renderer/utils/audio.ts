@@ -1,11 +1,11 @@
 import { Dispatch, SetStateAction } from 'react';
 
 export const getUserAudioStream = async (userDeviceId: string) => {
-  /* 현재 deviceId가 연결된 상태인지 검증 */
   const userStream = await getConnectedAudioDevices('input').then(async (deviceList) => {
     let stream: MediaStream | null = null;
     let isExist = false;
 
+    /* 현재 deviceId가 연결된 상태인지 검증 */
     if (userDeviceId !== 'default') {
       deviceList.map(({ deviceId }) => {
         if (userDeviceId === deviceId) isExist = true;

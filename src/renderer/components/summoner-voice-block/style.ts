@@ -26,7 +26,7 @@ export const SummonerBlock = styled.div`
   }
 `;
 
-export const ProfileImg = styled.img<{ visualize: boolean }>`
+export const ProfileImg = styled.img<{ isMute: boolean; visualize: boolean }>`
   position: absolute;
   top: -45px;
 
@@ -38,6 +38,7 @@ export const ProfileImg = styled.img<{ visualize: boolean }>`
 
   transition: border-color 0.1s;
   box-shadow: 0 5px 18px -7px rgba(0, 0, 0, 0.3);
+  filter: brightness(${({ isMute }) => (isMute ? 0.7 : 1)});
 
   @media (min-width: ${SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
     width: 110px;
@@ -83,18 +84,18 @@ export const SoundBox = styled.div`
     margin: 12px 0;
     cursor: pointer;
   }
+  #speaker-button {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+  }
 
-  #speaker-ctrl {
+  #audio-ctrl {
     display: flex;
     justify-content: space-between;
     width: 80%;
     margin: 12px 0;
 
-    #speaker-button {
-      width: 30px;
-      height: 30px;
-      cursor: pointer;
-    }
     #volume-slider {
       width: 75%;
     }

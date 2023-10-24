@@ -31,13 +31,16 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
   const userStream = useRecoilValue(userStreamState);
   const generalSettingsConfig = useRecoilValue(generalSettingsConfigState);
 
+  const [micVolume, setMicVolume] = useState(generalSettingsConfig?.micVolume ?? 1);
+  const [speakerMaxVolume, setSpeakerMaxVolume] = useState(1);
   const [speakerVolume, setSpeakerVolume] = useState(generalSettingsConfig?.speakerVolume ?? 1);
   const [beforeMuteSpeakerVolume, setBeforeMuteSpeakerVolume] = useState(
     generalSettingsConfig?.speakerVolume ?? 1
   );
+  const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
+
   const [isMuteSpeaker, setIsMuteSpeaker] = useState(false);
   const [isMuteMic, setIsMuteMic] = useState(false);
-  const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
 
   useEffect(() => {
     /* 팀원 스피커 설정 유지 */
@@ -64,6 +67,20 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
     };
   }, []);
 
+  // useEffect(() => {
+  //   if (userStream) {
+  //     const audioTrack = userStream.getAudioTracks()[0];
+  //     var ctx = new AudioContext();
+  //     var src = ctx.createMediaStreamSource(new MediaStream([audioTrack]));
+  //     var dst = ctx.createMediaStreamDestination();
+  //     var gainNode = ctx.createGain();
+  //     gainNode.gain.value = 1;
+  //     [src, gainNode, dst].reduce((a: any, b: any) => a?.connect(b));
+  //     userStream.removeTrack(audioTrack);
+  //     userStream.addTrack(dst.stream.getAudioTracks()[0]);
+  //   }
+  // }, [userStream]);
+
   useEffect(() => {
     if (props.gameStatus === 'champ-select') {
       const summonerId = props.summoner.summonerId;
@@ -74,6 +91,14 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
   }, [speakerVolume, beforeMuteSpeakerVolume, isMuteMic]);
 
   useEffect(() => {
+    const onMicVolume = (someone: { summonerId: number; volume: number }) => {
+      if (props.summoner.summonerId === someone.summonerId) {
+        setSpeakerMaxVolume(someone.volume);
+        if (someone.volume === 0) {
+          handleChangeSpeakerVolume(0);
+        }
+      }
+    };
     const onVisualizer = (someone: { summonerId: number; visualizerVolume: number }) => {
       if (!isMuteSpeaker && props.summoner.summonerId === someone.summonerId) {
         setVisualizerVolume(someone.visualizerVolume);
@@ -82,19 +107,22 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
 
     /* 팀원 */
     if (!props.isMine) {
+      props.managementSocket?.on('mic-volume', onMicVolume);
       props.managementSocket?.on('mic-visualizer', onVisualizer);
     }
 
     return () => {
       props.managementSocket?.off('mic-visualizer', onVisualizer);
+      props.managementSocket?.off('mic-volume', onMicVolume);
     };
   }, [props.managementSocket, isMuteSpeaker]);
 
   useEffect(() => {
-    if (props.isMine && userStream) {
-      micVisualizer(userStream, isMuteMic, setVisualizerVolume);
-    }
-  }, [userStream, isMuteMic]);
+    props.managementSocket?.emit('mic-volume', {
+      summonerId: props.summoner.summonerId,
+      volume: micVolume,
+    });
+  }, [micVolume]);
 
   useEffect(() => {
     if (props.isMine) {
@@ -104,6 +132,12 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
       });
     }
   }, [visualizerVolume]);
+
+  useEffect(() => {
+    if (props.isMine && userStream) {
+      micVisualizer(userStream, isMuteMic, setVisualizerVolume);
+    }
+  }, [userStream, isMuteMic]);
 
   const handleChangeSpeakerVolume = (speakerVolume: number) => {
     const speaker = getSummonerSpeaker(props.summoner.summonerId);
@@ -121,6 +155,11 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
     }
   };
 
+  const handleChangeMicVolume = (micVolume: number) => {
+    setMicVolume(micVolume);
+    setIsMuteMic(micVolume === 0);
+  };
+
   const handleClickMuteMic = () => {
     userStream?.getAudioTracks().forEach((track) => (track.enabled = !track.enabled));
     setIsMuteMic((prev) => !prev);
@@ -129,22 +168,32 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
   return (
     <S.SummonerBlock id={props.summoner.summonerId.toString()}>
       <S.ProfileImg
-        visualize={!isMuteSpeaker && visualizerVolume > 20}
+        isMute={isMuteMic || isMuteSpeaker}
+        visualize={!isMuteMic && !isMuteSpeaker && visualizerVolume > 20}
         src={props.selectedChampInfo?.championIcon ?? props.summoner.profileImage}
       />
+
       <S.NameTag length={props.summoner.name.length}>
         <p id="name">{props.summoner.name}</p>
         <RankBadge size={'medium'} tierImg="" tier={props.summoner.tier} />
       </S.NameTag>
+
       <S.SoundBox>
         {props.isMine ? (
-          <img
-            id="mic-button"
-            src={!isMuteMic ? mic_icon : mic_mute_icon}
-            onClick={handleClickMuteMic}
-          />
+          <div id="audio-ctrl">
+            <img
+              id="mic-button"
+              src={!isMuteMic ? mic_icon : mic_mute_icon}
+              onClick={handleClickMuteMic}
+            />
+            <VolumeSlider
+              audiotype="mic"
+              volume={micVolume}
+              handleChangeVolume={handleChangeMicVolume}
+            />
+          </div>
         ) : (
-          <div id="speaker-ctrl">
+          <div id="audio-ctrl">
             <img
               id="speaker-button"
               src={!isMuteSpeaker ? headset_icon : headset_mute_icon}
@@ -153,6 +202,7 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
             <VolumeSlider
               audiotype="speaker"
               volume={speakerVolume}
+              maxVolume={speakerMaxVolume}
               handleChangeVolume={handleChangeSpeakerVolume}
             />
             <audio id={props.summoner.summonerId.toString() + 'speaker'} autoPlay />
