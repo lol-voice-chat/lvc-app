@@ -31,16 +31,20 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
   const userStream = useRecoilValue(userStreamState);
   const generalSettingsConfig = useRecoilValue(generalSettingsConfigState);
 
+  const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
+
+  const [isMuteMic, setIsMuteMic] = useState(false);
   const [micVolume, setMicVolume] = useState(generalSettingsConfig?.micVolume ?? 1);
+  const [beforeMuteMicVolume, setBeforeMuteMicVolume] = useState(
+    generalSettingsConfig?.micVolume ?? 1
+  );
+
+  const [isMuteSpeaker, setIsMuteSpeaker] = useState(false);
   const [speakerMaxVolume, setSpeakerMaxVolume] = useState(1);
   const [speakerVolume, setSpeakerVolume] = useState(generalSettingsConfig?.speakerVolume ?? 1);
   const [beforeMuteSpeakerVolume, setBeforeMuteSpeakerVolume] = useState(
     generalSettingsConfig?.speakerVolume ?? 1
   );
-  const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
-
-  const [isMuteSpeaker, setIsMuteSpeaker] = useState(false);
-  const [isMuteMic, setIsMuteMic] = useState(false);
 
   useEffect(() => {
     /* 팀원 스피커 설정 유지 */
@@ -66,20 +70,6 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
       ipcRenderer.removeAllListeners(IPC_KEY.SUMMONER_MUTE);
     };
   }, []);
-
-  // useEffect(() => {
-  //   if (userStream) {
-  //     const audioTrack = userStream.getAudioTracks()[0];
-  //     var ctx = new AudioContext();
-  //     var src = ctx.createMediaStreamSource(new MediaStream([audioTrack]));
-  //     var dst = ctx.createMediaStreamDestination();
-  //     var gainNode = ctx.createGain();
-  //     gainNode.gain.value = 1;
-  //     [src, gainNode, dst].reduce((a: any, b: any) => a?.connect(b));
-  //     userStream.removeTrack(audioTrack);
-  //     userStream.addTrack(dst.stream.getAudioTracks()[0]);
-  //   }
-  // }, [userStream]);
 
   useEffect(() => {
     if (props.gameStatus === 'champ-select') {
@@ -158,11 +148,16 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
   const handleChangeMicVolume = (micVolume: number) => {
     setMicVolume(micVolume);
     setIsMuteMic(micVolume === 0);
+    userStream?.getAudioTracks().forEach((track) => (track.enabled = micVolume !== 0));
   };
 
   const handleClickMuteMic = () => {
-    userStream?.getAudioTracks().forEach((track) => (track.enabled = !track.enabled));
-    setIsMuteMic((prev) => !prev);
+    if (isMuteMic) {
+      handleChangeMicVolume(beforeMuteMicVolume);
+    } else {
+      setBeforeMuteMicVolume(micVolume);
+      handleChangeMicVolume(0);
+    }
   };
 
   return (
