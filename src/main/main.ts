@@ -27,7 +27,7 @@ autoUpdater.on('update-available', (info) => {
 });
 
 autoUpdater.on('update-not-available', (info) => {
-  log.info('현재 최신버전입니다.');
+  log.info('현재 최신버전입니다: ', app.getVersion());
 });
 
 autoUpdater.on('error', (error) => {
