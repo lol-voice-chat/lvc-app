@@ -49,7 +49,7 @@ autoUpdater.on('update-downloaded', (info) => {
       buttons: ['Yes', 'No'],
       defaultId: 0,
       title: 'UPDATE',
-      message: '업데이트를 진행하시겠습니까? (앱이 재시작됩니다)',
+      message: '업데이트를 진행하시겠습니까? (앱이 재시작됩니다.)',
     })
     .then((response) => {
       if (response.response === 0) {
