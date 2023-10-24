@@ -94,10 +94,6 @@ function useVoiceRoom() {
         setGameStatus('none');
         setMyTeamSummoners(null);
         disconnectAllTeamVoice();
-
-        // stream.getAudioTracks().forEach((track) => track.stop());
-        // stream.removeTrack(stream.getAudioTracks()[0]);
-        // setUserStream(null);
       }
     };
   };

@@ -5,17 +5,22 @@ import { PALETTE } from '../../const';
 type VolumeSliderPropsType = {
   audiotype: 'speaker' | 'mic';
   volume: number;
+  maxVolume?: number;
   handleChangeVolume: (volume: number) => void;
 };
 
 function VolumeSlider(props: VolumeSliderPropsType) {
   return (
-    <Slider id="volume-slider" volume={props.volume * 100} audiotype={props.audiotype}>
+    <Slider
+      id="volume-slider"
+      volume={props.volume * 100 * (props.maxVolume ?? 1)}
+      audiotype={props.audiotype}
+    >
       <input
         type="range"
         min={0}
-        max={1}
-        step={0.005}
+        max={props.maxVolume ?? 1}
+        step={0.005 * (props.maxVolume ?? 1)}
         value={props.volume}
         onChange={(event) => {
           props.handleChangeVolume(event.target.valueAsNumber);

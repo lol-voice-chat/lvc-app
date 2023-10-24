@@ -189,7 +189,6 @@ function useVoiceChat() {
         producerTransport = null;
 
         stream.getTracks().forEach((track) => track.stop());
-        stream.removeTrack(stream.getAudioTracks()[0]);
         setUserStream(null);
       }
 
