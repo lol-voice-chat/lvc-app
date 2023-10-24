@@ -4,7 +4,7 @@ import { redisClient } from '../lib/redis-client';
 
 export interface SummonerType {
   details: any;
-  recentSummonerIdList: number[];
+  recentSummonerIds: Set<number>;
 }
 
 interface LeagueRanked {
@@ -89,20 +89,20 @@ export class Summoner {
 
     if (summoner) {
       const _summoner: SummonerType = JSON.parse(summoner);
-      if (_summoner.recentSummonerIdList.length === 0) {
+      if (_summoner.recentSummonerIds.size === 0) {
         _summoner.details = details;
         await redisClient.set(key, JSON.stringify(_summoner));
         return [];
       }
 
-      const newRecentSummonerIdList: number[] = [];
+      const newRecentSummonerIds: Set<number> = new Set();
       const recentSummonerList = await Promise.all(
-        _summoner.recentSummonerIdList.map(async (recentSummonerId: number) => {
+        Array.from(_summoner.recentSummonerIds.values()).map(async (recentSummonerId: number) => {
           const key = recentSummonerId.toString() + 'recent';
           const recentSummoner: string | null = await redisClient.get(key);
 
           if (recentSummoner) {
-            newRecentSummonerIdList.push(recentSummonerId);
+            newRecentSummonerIds.add(recentSummonerId);
 
             const _recentSummoner = JSON.parse(recentSummoner);
             return _recentSummoner.details;
@@ -110,7 +110,7 @@ export class Summoner {
         })
       );
 
-      _summoner.recentSummonerIdList = newRecentSummonerIdList;
+      _summoner.recentSummonerIds = newRecentSummonerIds;
       _summoner.details = details;
       await redisClient.set(key, JSON.stringify(_summoner));
 
@@ -119,7 +119,7 @@ export class Summoner {
 
     const newSummoner: SummonerType = {
       details,
-      recentSummonerIdList: [],
+      recentSummonerIds: new Set(),
     };
 
     await redisClient.set(key, JSON.stringify(newSummoner));
