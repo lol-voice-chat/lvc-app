@@ -15,7 +15,7 @@
     "start:renderer": "react-scripts start",
     "start": "concurrently \"npm run start:renderer\" \"wait-on http://localhost:3000\" \"npm run start:main\"",
     "deploy": "ts-node ./.erb/scripts/clean.ts && npm run build",
-    "deploy:xos": "npm run deploy && electron-builder --mac --publish always"
+    "deploy:xos": "npm run deploy && electron-builder --mac --publish never"
   },
   "eslintConfig": {
     "extends": [
