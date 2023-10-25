@@ -14,8 +14,7 @@
     "start:main": "electronmon -r ts-node/register .",
     "start:renderer": "react-scripts start",
     "start": "concurrently \"npm run start:renderer\" \"wait-on http://localhost:3000\" \"npm run start:main\"",
-    "deploy": "ts-node ./.erb/scripts/clean.ts && npm run build",
-    "deploy:xos": "npm run deploy && electron-builder --mac --publish never"
+    "deploy:xos": "ts-node ./.erb/scripts/clean.ts && npm run build && electron-builder --mac --publish never"
   },
   "eslintConfig": {
     "extends": [
@@ -116,6 +115,22 @@
       }
     },
     "dmg": {},
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true
+    },
     "directories": {
       "app": "release/app",
       "buildResources": "src/renderer/asset",
