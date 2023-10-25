@@ -42,20 +42,7 @@ autoUpdater.on('download-progress', (progressObj) => {
 
 autoUpdater.on('update-downloaded', (info) => {
   log.info('업데이트가 완료되었습니다.');
-
-  dialog
-    .showMessageBox(mainWindow, {
-      type: 'question',
-      buttons: ['Yes', 'No'],
-      defaultId: 0,
-      title: 'UPDATE',
-      message: '업데이트를 진행하시겠습니까? (앱이 재시작됩니다.)',
-    })
-    .then((response) => {
-      if (response.response === 0) {
-        autoUpdater.quitAndInstall();
-      }
-    });
+  autoUpdater.quitAndInstall();
 });
 
 const createWindow = () => {
@@ -108,7 +95,7 @@ ipcMain.on(IPC_KEY.CLOSE_APP, () => {
 
 app.whenReady().then(() => {
   createWindow();
-  autoUpdater.checkForUpdatesAndNotify();
+  autoUpdater.checkForUpdates();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
