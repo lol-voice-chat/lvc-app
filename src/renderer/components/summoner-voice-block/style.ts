@@ -253,6 +253,13 @@ export const ProgressBar = styled.div`
     right: 6px;
   }
 
+  #sk-progress-bar {
+    width: 100%;
+    height: 19px;
+    border-radius: 2px;
+    background-color: ${PALETTE.GRAY_2};
+  }
+
   @media (min-width: ${SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
     margin: 15px 0;
 

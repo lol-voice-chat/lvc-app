@@ -31,6 +31,7 @@ export const getUserAudioStream = async (userDeviceId: string) => {
 
 export const micVisualizer = (
   stream: MediaStream,
+  displayFps: number,
   isMuted: boolean,
   setVolume: Dispatch<SetStateAction<number>>
 ) => {
@@ -50,10 +51,9 @@ export const micVisualizer = (
       total += dataArray[i];
     }
     setVolume(isMuted ? 0 : total / bufferLength);
-    requestAnimationFrame(updateMicVolume);
   };
 
-  updateMicVolume();
+  setInterval(updateMicVolume, 1000 / displayFps);
 };
 
 export const getSummonerSpeaker = (summonerId: number) => {

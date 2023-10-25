@@ -2,6 +2,7 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import {
   LeagueChampInfoType,
+  displayFpsState,
   generalSettingsConfigState,
   leagueChampInfoListState,
   userStreamState,
@@ -33,17 +34,19 @@ type SummonerLeagueVoiceBlock = {
 function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
   const generalSettingsConfig = useRecoilValue(generalSettingsConfigState);
   const userStream = useRecoilValue(userStreamState);
+  const displayFps = useRecoilValue(displayFpsState);
 
   const leagueChampInfoList = useRecoilValue(leagueChampInfoListState);
   const [myChampInfo, setMyChampInfo] = useState<LeagueChampInfoType | null>(null);
 
+  const [isMuteMic, setIsMuteMic] = useState(false);
+  const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
+
+  const [isMuteSpeaker, setIsMuteSpeaker] = useState(false);
   const [speakerVolume, setSpeakerVolume] = useState(generalSettingsConfig?.speakerVolume ?? 0.8);
   const [beforeMuteSpeakerVolume, setBeforeMuteSpeakerVolume] = useState(
     generalSettingsConfig?.speakerVolume ?? 0.8
   );
-  const [isMuteSpeaker, setIsMuteSpeaker] = useState(false);
-  const [isMuteMic, setIsMuteMic] = useState(false);
-  const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
 
   useEffect(() => {
     /* 팀 보이스에서 저장했던 옵션 받아오기 */
@@ -92,10 +95,10 @@ function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
   }, [props.managementSocket, isMuteSpeaker]);
 
   useEffect(() => {
-    if (props.isMine && userStream) {
-      micVisualizer(userStream, isMuteMic, setVisualizerVolume);
+    if (props.isMine && userStream && displayFps) {
+      micVisualizer(userStream, displayFps, isMuteMic, setVisualizerVolume);
     }
-  }, [userStream, isMuteMic]);
+  }, [userStream, displayFps, isMuteMic]);
 
   useEffect(() => {
     if (props.isMine) {

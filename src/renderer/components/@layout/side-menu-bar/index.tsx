@@ -3,6 +3,7 @@ import * as _ from './style';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   GeneralSettingsConfigType,
+  displayFpsState,
   generalSettingsConfigState,
   generalSettingsModalState,
   summonerState,

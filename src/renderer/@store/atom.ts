@@ -59,3 +59,8 @@ export const generalSettingsModalState = atom<boolean>({
   key: 'general-settings-modal',
   default: false,
 });
+
+export const displayFpsState = atom<number | null>({
+  key: 'display-fps',
+  default: null,
+});
