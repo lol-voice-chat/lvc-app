@@ -15,7 +15,7 @@
     "start:renderer": "react-scripts start",
     "start": "concurrently \"npm run start:renderer\" \"wait-on http://localhost:3000\" \"npm run start:main\"",
     "deploy:xos": "ts-node ./.erb/scripts/clean.ts && npm run build && electron-builder --mac --publish never",
-    "deploy:win": "ts-node ./.erb/scripts/clean.ts && npm run build && electron-builder --win --publish always"
+    "deploy:win": "ts-node ./.erb/scripts/clean.ts && npm run build && electron-builder --win --publish never"
   },
   "eslintConfig": {
     "extends": [
@@ -118,19 +118,11 @@
     "dmg": {},
     "win": {
       "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64",
-            "ia32"
-          ]
-        }
+        "nsis"
       ]
     },
     "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": false,
-      "createDesktopShortcut": true
+      "createDesktopShortcut": "always"
     },
     "directories": {
       "app": "release/app",
