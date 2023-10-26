@@ -20,6 +20,12 @@ export const IPC_KEY = {
   UPDATE_MATCH_HISTORY: 'update-match-history',
   CLICK_SUMMONER_PROFILE: 'click-summoner-profile',
   SETTINGS_SHORTCUT_KEY: 'settings-shortcut-key',
+
+  CHECKING_FOR_UPDATE: 'checking-for-update',
+  UPDATE_AVAILABLE: 'update-available',
+  UPDATE_NOT_AVAILABLE: 'update-not-available',
+  DOWNLOAD_PROGRESS: 'download-progress',
+  UPDATE_DOWNLOADED: 'update-downloaded',
 };
 
 export const generalSettingsDefaultConfig = {
