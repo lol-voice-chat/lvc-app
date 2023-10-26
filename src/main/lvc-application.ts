@@ -174,7 +174,6 @@ export class LvcApplication {
 
         const { teamOne, teamTwo } = data.gameData;
         await this.joinLeagueVoice(teamOne, teamTwo);
-        console.log('전체방 입장');
 
         const inGameCurrentTime = await this.fetchInGameTime();
         const timeout = setTimeout(() => {
