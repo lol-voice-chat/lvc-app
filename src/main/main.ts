@@ -39,6 +39,9 @@ const createWindow = () => {
     mainWindow.show();
   });
 
+  const autoUpdateManager = new AutoUpdateManager(mainWindow);
+  autoUpdateManager.initialize();
+
   handleGlobalKeyEvent(mainWindow);
   handleLoadEvent();
 };
@@ -67,7 +70,6 @@ ipcMain.on(IPC_KEY.CLOSE_APP, () => {
 
 app.whenReady().then(() => {
   createWindow();
-  AutoUpdateManager.initialize(mainWindow);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
