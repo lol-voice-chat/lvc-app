@@ -4,9 +4,7 @@ import { IPC_KEY } from '../const';
 import { app, BrowserWindow } from 'electron';
 
 export class AutoUpdateManager {
-  public static initialize(mainWindow: BrowserWindow) {
-    autoUpdater.checkForUpdates();
-
+  constructor(mainWindow: BrowserWindow) {
     autoUpdater.on('checking-for-update', () => {
       mainWindow.webContents.send(IPC_KEY.CHECKING_FOR_UPDATE);
       log.info('업데이트 확인중...');
@@ -37,5 +35,9 @@ export class AutoUpdateManager {
       log.info('업데이트가 완료되었습니다.');
       autoUpdater.quitAndInstall();
     });
+  }
+
+  public initialize() {
+    autoUpdater.checkForUpdates();
   }
 }
