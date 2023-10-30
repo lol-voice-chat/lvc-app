@@ -167,8 +167,7 @@ export class LvcApplication {
     });
 
     this.ws.subscribe('/lol-gameflow/v1/session', async (data) => {
-      const hasData = data.gameData.teamOne[0]?.championId || data.gameData.teamTwo[0]?.championId;
-      if (data.phase === 'InProgress' && data.gameClient.running && !isInProgress && hasData) {
+      if (data.phase === 'InProgress' && data.gameClient.running && !isInProgress) {
         isInProgress = true;
         myTeamMembers = new Map();
 

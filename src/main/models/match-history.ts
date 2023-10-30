@@ -82,7 +82,7 @@ export class MatchHistory {
       return new MatchHistory(matches);
     }
 
-    const url = `/lol-match-history/v1/products/lol/${puuid}/matches?begIndex=0&endIndex=200`;
+    const url = `/lol-match-history/v1/products/lol/${puuid}/matches?begIndex=0&endIndex=100`;
     const matchHistory = await request(url);
     const matches = matchHistory.games.games.filter(
       (match: Match) => match.gameType !== 'CUSTOM_GAME'
