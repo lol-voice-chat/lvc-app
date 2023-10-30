@@ -167,7 +167,7 @@ export class LvcApplication {
     });
 
     this.ws.subscribe('/lol-gameflow/v1/session', async (data) => {
-      if (data.phase === 'InProgress' && data.gameClient.running && !isInProgress) {
+      if (data.phase === 'InProgress' && !isInProgress) {
         isInProgress = true;
         myTeamMembers = new Map();
 
