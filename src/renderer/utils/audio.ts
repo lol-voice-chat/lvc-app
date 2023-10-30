@@ -53,7 +53,7 @@ export const micVisualizer = (
     requestAnimationFrame(updateMicVolume);
   };
 
-  updateMicVolume();
+  requestAnimationFrame(updateMicVolume);
 };
 
 export const getSummonerSpeaker = (summonerId: number) => {
