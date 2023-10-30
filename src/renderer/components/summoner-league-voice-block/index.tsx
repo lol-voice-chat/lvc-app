@@ -2,7 +2,6 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import {
   LeagueChampInfoType,
-  displayFpsState,
   generalSettingsConfigState,
   leagueChampInfoListState,
   userStreamState,
@@ -34,7 +33,6 @@ type SummonerLeagueVoiceBlock = {
 function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
   const generalSettingsConfig = useRecoilValue(generalSettingsConfigState);
   const userStream = useRecoilValue(userStreamState);
-  const displayFps = useRecoilValue(displayFpsState);
 
   const leagueChampInfoList = useRecoilValue(leagueChampInfoListState);
   const [myChampInfo, setMyChampInfo] = useState<LeagueChampInfoType | null>(null);
@@ -95,10 +93,10 @@ function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
   }, [props.managementSocket, isMuteSpeaker]);
 
   useEffect(() => {
-    if (props.isMine && userStream && displayFps) {
-      micVisualizer(userStream, displayFps, isMuteMic, setVisualizerVolume);
+    if (props.isMine && userStream) {
+      micVisualizer(userStream, isMuteMic, setVisualizerVolume);
     }
-  }, [userStream, displayFps, isMuteMic]);
+  }, [userStream, isMuteMic]);
 
   useEffect(() => {
     if (props.isMine) {

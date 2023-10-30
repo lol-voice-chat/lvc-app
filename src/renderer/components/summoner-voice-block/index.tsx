@@ -5,7 +5,7 @@ import { ChampionInfoType, SummonerStatsType, SummonerType } from '../../@type/s
 import VolumeSlider from '../@common/volume-slider';
 import { getSummonerSpeaker, micVisualizer } from '../../utils/audio';
 import { useRecoilValue } from 'recoil';
-import { displayFpsState, generalSettingsConfigState, userStreamState } from '../../@store/atom';
+import { generalSettingsConfigState, userStreamState } from '../../@store/atom';
 import { Socket } from 'socket.io-client';
 import { IPC_KEY } from '../../../const';
 import { VoiceRoomAudioOptionType } from '../../@type/voice';
@@ -31,7 +31,6 @@ type SummonerVoiceBlockPropsType = {
 function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
   const generalSettingsConfig = useRecoilValue(generalSettingsConfigState);
   const userStream = useRecoilValue(userStreamState);
-  const displayFps = useRecoilValue(displayFpsState);
 
   const [isMuteMic, setIsMuteMic] = useState(false);
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
@@ -103,10 +102,10 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
   }, [visualizerVolume]);
 
   useEffect(() => {
-    if (props.isMine && userStream && displayFps) {
-      micVisualizer(userStream, displayFps, isMuteMic, setVisualizerVolume);
+    if (props.isMine && userStream) {
+      micVisualizer(userStream, isMuteMic, setVisualizerVolume);
     }
-  }, [userStream, displayFps, isMuteMic]);
+  }, [userStream, isMuteMic]);
 
   const handleChangeSpeakerVolume = (speakerVolume: number) => {
     const speaker = getSummonerSpeaker(props.summoner.summonerId);
