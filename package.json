@@ -1,6 +1,6 @@
 {
   "name": "lvc-app",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "author": "lvc",
   "description": "lol voice chat app",
@@ -14,8 +14,8 @@
     "start:main": "electronmon -r ts-node/register .",
     "start:renderer": "react-scripts start",
     "start": "concurrently \"npm run start:renderer\" \"wait-on http://localhost:3000\" \"npm run start:main\"",
-    "deploy:xos": "ts-node ./.erb/scripts/clean.ts && npm run build && electron-builder --mac --publish never",
-    "deploy:win": "ts-node ./.erb/scripts/clean.ts && npm run build && electron-builder --win --publish always"
+    "deploy:xos": "ts-node ./.erb/scripts/clean.ts && npm run build && electron-builder --mac --publish always",
+    "deploy:win": "ts-node ./.erb/scripts/clean.ts && npm run build && electron-builder --win --publish never"
   },
   "eslintConfig": {
     "extends": [
