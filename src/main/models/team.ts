@@ -1,16 +1,4 @@
-import { MatchHistory } from './MatchHistory';
-import { Member } from './Member';
-
-export interface MemberMatchHistoryData {
-  summonerId: number;
-  matchHistory: MatchHistory;
-}
-
-export interface MemberChampionData {
-  summonerId: number;
-  championIcon: string;
-  kda: string;
-}
+import { Member, ChampionData } from './member';
 
 export class Team {
   private members: Member[];
@@ -33,7 +21,7 @@ export class Team {
   }
 
   public async getMemberChampionKdaList() {
-    const memberChampionKdaList: MemberChampionData[] = await Promise.all(
+    const memberChampionKdaList: ChampionData[] = await Promise.all(
       this.members.map((member) => {
         return member.getChampionKda();
       })
@@ -42,7 +30,7 @@ export class Team {
     return memberChampionKdaList;
   }
 
-  public getSummonerIdList(summonerId: number) {
+  public getSummonerIds(summonerId: number) {
     return this.members
       .filter((member) => !member.isSameSummonerId(summonerId))
       .map((member) => member.summonerId);

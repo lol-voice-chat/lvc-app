@@ -9,8 +9,8 @@ export const RecordContainer = styled.div`
   width: 70%;
   margin-top: 15px;
   padding: 20px;
-
   border-radius: 10px;
+
   background-color: #313338;
   box-shadow: 0 5px 18px -7px rgba(0, 0, 0, 0.3);
 
@@ -160,7 +160,6 @@ export const RecentlyPlayList = styled.div`
   #category-tag {
     display: flex;
     justify-content: space-between;
-
     width: 100%;
     margin-bottom: 15px;
 
@@ -188,11 +187,9 @@ export const RecentlyPlayList = styled.div`
         display: flex;
         justify-content: center;
         align-items: center;
-
         width: 80px;
         height: 25px;
         margin-right: 7.5px;
-
         font-size: 14px;
         color: ${PALETTE.WHITE_1};
       }
@@ -206,6 +203,22 @@ export const RecentlyPlayList = styled.div`
     #kill-involvement {
       font-size: 15px;
       color: ${PALETTE.WHITE_1};
+    }
+  }
+
+  #none-game-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    img {
+      width: 27%;
+      height: auto;
+      margin: 17px;
+    }
+    p {
+      font-size: 16.5px;
+      color: ${PALETTE.GRAY_1};
     }
   }
 

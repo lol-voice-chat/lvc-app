@@ -1,11 +1,10 @@
 import React from 'react';
 import * as _ from './style';
 import { SummonerType } from '../../../../@type/summoner';
-import { RecentSummonerType } from '..';
 
 function RecentSummonerList(props: {
-  recentSummonerList: RecentSummonerType[] | null;
-  handleClickSummonerBlock: (summonerData: SummonerType) => void;
+  recentSummonerList: SummonerType[] | null;
+  handleClickSummonerBlock: (summoner: SummonerType) => void;
 }) {
   return (
     <_.RecentSummonerContainer>

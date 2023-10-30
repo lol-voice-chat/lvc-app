@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import { createHttp1Request } from 'league-connect';
-import { credentials } from './LvcApplication';
+import { credentials } from '../lvc-application';
 
 interface Recipient {
   gameName: string;
@@ -15,7 +15,7 @@ interface Recipient {
 }
 
 export const handleFriendRequestEvent = () => {
-  ipcMain.on('friend-request', async (event, recipient: Recipient) => {
+  ipcMain.on('friend-request', async (_, recipient: Recipient) => {
     const icon: number = getIconByProfileImage(recipient.profileImage);
 
     try {
@@ -36,7 +36,7 @@ export const handleFriendRequestEvent = () => {
             summonerId: recipient.summonerId,
           },
         },
-        credentials
+        credentials!
       );
     } catch (error) {
       throw new Error('친구요청중 오류가 발생했습니다: ' + error);
@@ -49,3 +49,5 @@ function getIconByProfileImage(profileImage: string) {
   const icon = parts[parts.length - 1].replace('.webp', '');
   return parseInt(icon);
 }
+
+export default handleFriendRequestEvent;

@@ -266,10 +266,13 @@ export const ProgressBar = styled.div`
 
 export const KDAList = styled.div`
   display: grid;
+  grid-auto-flow: column;
   grid-template-columns: repeat(2, 85px);
   grid-template-rows: repeat(5, 25px);
   column-gap: 14px;
-  row-gap: 7px;
+  row-gap: 8.5px;
+
+  margin-top: 10px;
 
   div {
     display: flex;
@@ -302,11 +305,11 @@ export const KDAList = styled.div`
   @media (min-width: ${LEAGUE_SUMMONER_BLOCK_RESPONSIVE_WIDTH}) {
     grid-template-columns: repeat(2, 115px);
     grid-template-rows: repeat(5, 30px);
-    column-gap: 25px;
+    column-gap: 30px;
     row-gap: 10px;
 
     div {
-      width: 115px;
+      width: 105px;
       height: 30px;
     }
     p {

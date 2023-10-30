@@ -1,4 +1,4 @@
-import request from '../utils';
+import { request } from '../lib/common';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -15,7 +15,7 @@ export interface SummonerStats {
   statsList: StatsData[];
 }
 
-interface StatsData {
+export interface StatsData {
   championIcon: string;
   kda: string;
   isWin: boolean;
@@ -71,17 +71,46 @@ export class MatchHistory {
     this.matches = matches;
   }
 
-  public static async fetch(puuid: string) {
-    const url = `/lol-match-history/v1/products/lol/${puuid}/matches?begIndex=0&endIndex=99`;
-    const matchHistoryData = await request(url);
-    const matches = matchHistoryData.games.games
-      .slice(0, 100)
-      .filter((match: Match) => match.gameType !== 'CUSTOM_GAME');
+  public static async fetch(puuid: string, isMine: boolean = true) {
+    if (!isMine) {
+      const url = `/lol-match-history/v1/products/lol/${puuid}/matches`;
+      const matchHistory = await request(url);
+      const matches = matchHistory.games.games.filter(
+        (match: Match) => match.gameType !== 'CUSTOM_GAME'
+      );
+
+      return new MatchHistory(matches);
+    }
+
+    const url = `/lol-match-history/v1/products/lol/${puuid}/matches?begIndex=0&endIndex=200`;
+    const matchHistory = await request(url);
+    const matches = matchHistory.games.games.filter(
+      (match: Match) => match.gameType !== 'CUSTOM_GAME'
+    );
 
     return new MatchHistory(matches);
   }
 
+  get matchLength() {
+    return this.matches.length;
+  }
+
   public async getSummonerStats() {
+    if (this.matches.length === 0) {
+      const summonerStats: SummonerStats = {
+        kda: '전적없음',
+        damage: '전적없음',
+        cs: '전적없음',
+        mostChampionList: [],
+        odds: 0,
+        winCount: 0,
+        failCount: 0,
+        statsList: [],
+      };
+
+      return summonerStats;
+    }
+
     const recentUsedChampionList = new Map<number, ChampCount>();
     let killCount = 0;
     let deathCount = 0;
@@ -129,7 +158,7 @@ export class MatchHistory {
           kda: `${kills}/${deaths}/${assists}`,
           isWin: participant.stats.win,
           killInvolvement: `${killInvolvement}%`,
-          time: dayjs(date.toISOString()).fromNow(),
+          time: date.toISOString(),
         };
 
         if (participant.stats.win) {
@@ -152,7 +181,7 @@ export class MatchHistory {
     const damage = Math.floor(totalDamage / gameCount).toString();
     const cs = this.getStatsAverage(totalCs, gameCount);
     const mostChampionList = this.getMostChampionList(recentUsedChampionList);
-    const odds = (winCount / RECENT_PVP_MATCH_COUNT) * 100;
+    const odds = Math.floor((winCount / gameCount) * 100);
 
     const summonerStats: SummonerStats = {
       kda,
@@ -209,7 +238,8 @@ export class MatchHistory {
       .reverse()
       .sort((a, b) => a.count - b.count)
       .slice(-3)
-      .map((champ) => `https://lolcdn.darkintaqt.com/cdn/champion/${champ.championId}/tile`);
+      .map((champ) => `https://lolcdn.darkintaqt.com/cdn/champion/${champ.championId}/tile`)
+      .reverse();
   }
 
   public getChampionStats(summonerId: number, championId: number) {
@@ -234,7 +264,6 @@ export class MatchHistory {
     });
 
     const championIcon = `https://lolcdn.darkintaqt.com/cdn/champion/${championId}/tile`;
-
     const championName: string = CHAMPIONS[championId.toString()];
 
     if (champCount === 0) {
@@ -268,13 +297,13 @@ export class MatchHistory {
     return championStats;
   }
 
-  public getChampionKda(championId: number) {
+  public getChampionKda(matchLength: number, championId: number) {
     let champKill = 0;
     let champDeath = 0;
     let champAssists = 0;
     let champCount = 0;
 
-    this.matches.forEach((match: Match) => {
+    this.matches.slice(0, matchLength).forEach((match: Match) => {
       const participant: ParticipantData = match.participants[0];
 
       if (participant.championId === championId) {

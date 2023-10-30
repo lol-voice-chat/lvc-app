@@ -1,83 +1,112 @@
-import React, { useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import * as S from './style';
 import RankBadge from '../@common/rank-badge';
-import { ChampionInfoType, SummonerType } from '../../@type/summoner';
+import { ChampionInfoType, SummonerStatsType, SummonerType } from '../../@type/summoner';
 import VolumeSlider from '../@common/volume-slider';
-import { getSummonerSpeaker, micVolumeHandler } from '../../utils/audio';
+import { getSummonerSpeaker, micVisualizer } from '../../utils/audio';
 import { useRecoilValue } from 'recoil';
-import { generalSettingsConfigState, userStreamState } from '../../@store/atom';
+import { displayFpsState, generalSettingsConfigState, userStreamState } from '../../@store/atom';
 import { Socket } from 'socket.io-client';
 import { IPC_KEY } from '../../../const';
+import { VoiceRoomAudioOptionType } from '../../@type/voice';
+import mic_icon from '../../asset/icon/mic_icon.svg';
+import mic_mute_icon from '../../asset/icon/mic_mute_icon.svg';
+import headset_icon from '../../asset/icon/headset_icon.svg';
+import headset_mute_icon from '../../asset/icon/headset_mute_icon.svg';
+import warning_icon from '../../asset/icon/warning_icon.svg';
+import { PALETTE } from '../../const';
 const { ipcRenderer } = window.require('electron');
 
-function SummonerVoiceBlock(props: {
+type SummonerVoiceBlockPropsType = {
   isMine: boolean;
   summoner: SummonerType;
+  summonerStats: SummonerStatsType | null;
   selectedChampInfo: ChampionInfoType | null;
+  voiceOption: VoiceRoomAudioOptionType | null;
+  setVoiceOptionList: Dispatch<SetStateAction<Map<number, VoiceRoomAudioOptionType>>>;
   managementSocket: Socket | null;
-}) {
-  const userStream = useRecoilValue(userStreamState);
-  const generalSettingsConfig = useRecoilValue(generalSettingsConfigState);
+  gameStatus: 'champ-select' | 'in-game';
+};
 
-  const [speakerVolume, setSpeakerVolume] = useState(0.8);
-  const [beforeMuteSpeakerVolume, setBeforeMuteSpeakerVolume] = useState(0.8);
-  const [isMuteSpeaker, setIsMuteSpeaker] = useState(false);
+function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
+  const generalSettingsConfig = useRecoilValue(generalSettingsConfigState);
+  const userStream = useRecoilValue(userStreamState);
+  const displayFps = useRecoilValue(displayFpsState);
+
   const [isMuteMic, setIsMuteMic] = useState(false);
   const [visualizerVolume, setVisualizerVolume] = useState<number>(0);
 
-  useEffect(() => {
-    /* 팀원 소환사 */
-    if (!props.isMine) {
-      props.managementSocket?.on('mic-visualizer', ({ summonerId, visualizerVolume }) => {
-        if (props.summoner.summonerId === summonerId && !isMuteSpeaker) {
-          ipcRenderer.send(IPC_KEY.SUMMONER_VISUALIZER, {
-            summonerId,
-            value: { visualizerVolume, isMuteSpeaker },
-          });
-          setVisualizerVolume(visualizerVolume);
-        }
-      });
-    }
-  }, [props.managementSocket]);
+  const [isMuteSpeaker, setIsMuteSpeaker] = useState(false);
+  const [speakerVolume, setSpeakerVolume] = useState(generalSettingsConfig?.speakerVolume ?? 1);
+  const [beforeMuteSpeakerVolume, setBeforeMuteSpeakerVolume] = useState(
+    generalSettingsConfig?.speakerVolume ?? 1
+  );
 
   useEffect(() => {
-    if (props.isMine && generalSettingsConfig) {
-      if (generalSettingsConfig.isPressToTalk) {
+    /* 팀원 스피커 설정 유지 */
+    if (!props.isMine && props.voiceOption) {
+      setBeforeMuteSpeakerVolume(props.voiceOption.beforeMuteSpeakerVolume);
+      handleChangeSpeakerVolume(props.voiceOption.speakerVolume);
+    }
+
+    /* 소환사 마이크 설정 유지 + 음소거 단축키 이벤트 */
+    if (props.isMine) {
+      if (
+        (props.gameStatus === 'champ-select' && generalSettingsConfig?.isPressToTalk) ||
+        (props.gameStatus === 'in-game' && props.voiceOption?.isMuteMic)
+      ) {
         userStream?.getAudioTracks().forEach((track) => (track.enabled = false));
         setIsMuteMic(true);
       }
+
       ipcRenderer.on(IPC_KEY.SUMMONER_MUTE, handleClickMuteMic);
     }
 
     return () => {
       ipcRenderer.removeAllListeners(IPC_KEY.SUMMONER_MUTE);
     };
-  }, [userStream, generalSettingsConfig]);
+  }, [userStream]);
+
+  useEffect(() => {
+    if (props.gameStatus === 'champ-select') {
+      const summonerId = props.summoner.summonerId;
+      const option = { speakerVolume, beforeMuteSpeakerVolume, isMuteMic };
+
+      props.setVoiceOptionList((prev) => new Map(prev).set(summonerId, option));
+    }
+  }, [speakerVolume, beforeMuteSpeakerVolume, isMuteMic]);
+
+  useEffect(() => {
+    const onVisualizer = (someone: { summonerId: number; visualizerVolume: number }) => {
+      if (!isMuteSpeaker && props.summoner.summonerId === someone.summonerId) {
+        setVisualizerVolume(someone.visualizerVolume);
+      }
+    };
+
+    /* 팀원 */
+    if (!props.isMine) {
+      props.managementSocket?.on('mic-visualizer', onVisualizer);
+    }
+
+    return () => {
+      props.managementSocket?.off('mic-visualizer', onVisualizer);
+    };
+  }, [props.managementSocket, isMuteSpeaker]);
 
   useEffect(() => {
     if (props.isMine) {
-      const summonerId = props.summoner.summonerId;
-
-      ipcRenderer.send(IPC_KEY.SUMMONER_VISUALIZER, {
-        summonerId,
-        value: { visualizerVolume, isMuteSpeaker },
-      });
       props.managementSocket?.emit('mic-visualizer', {
-        summonerId,
+        summonerId: props.summoner.summonerId,
         visualizerVolume,
       });
     }
   }, [visualizerVolume]);
 
   useEffect(() => {
-    let visualizerInterval;
-    if (props.isMine && !isMuteMic && userStream) {
-      visualizerInterval = setInterval(() => {
-        micVolumeHandler(userStream, setVisualizerVolume);
-      }, 1000);
+    if (props.isMine && userStream && displayFps) {
+      micVisualizer(userStream, displayFps, isMuteMic, setVisualizerVolume);
     }
-    return () => clearInterval(visualizerInterval);
-  }, [userStream, isMuteMic]);
+  }, [userStream, displayFps, isMuteMic]);
 
   const handleChangeSpeakerVolume = (speakerVolume: number) => {
     const speaker = getSummonerSpeaker(props.summoner.summonerId);
@@ -103,27 +132,28 @@ function SummonerVoiceBlock(props: {
   return (
     <S.SummonerBlock id={props.summoner.summonerId.toString()}>
       <S.ProfileImg
-        visualize={!isMuteSpeaker && visualizerVolume > 20}
+        isMute={isMuteMic || isMuteSpeaker}
+        visualize={!isMuteMic && !isMuteSpeaker && visualizerVolume > 20}
         src={props.selectedChampInfo?.championIcon ?? props.summoner.profileImage}
       />
 
       <S.NameTag length={props.summoner.name.length}>
         <p id="name">{props.summoner.name}</p>
-        <RankBadge size={'medium'} tierImg="img/dummy_rank.png" tier={props.summoner.tier} />
+        <RankBadge size={'medium'} tierImg="" tier={props.summoner.tier} />
       </S.NameTag>
 
       <S.SoundBox>
         {props.isMine ? (
           <img
             id="mic-button"
-            src={!isMuteMic ? 'img/mic_icon.svg' : 'img/mic_mute_icon.svg'}
+            src={!isMuteMic ? mic_icon : mic_mute_icon}
             onClick={handleClickMuteMic}
           />
         ) : (
-          <div id="speaker-ctrl">
+          <div id="audio-ctrl">
             <img
               id="speaker-button"
-              src={!isMuteSpeaker ? 'img/headset_icon.svg' : 'img/headset_mute_icon.svg'}
+              src={!isMuteSpeaker ? headset_icon : headset_mute_icon}
               onClick={handleClickMuteSpeaker}
             />
             <VolumeSlider
@@ -135,7 +165,6 @@ function SummonerVoiceBlock(props: {
           </div>
         )}
       </S.SoundBox>
-
       <S.AverageGameData>
         <p id="name">{props.selectedChampInfo?.name ?? '선택한 챔피언'}</p>
         <div>
@@ -155,39 +184,53 @@ function SummonerVoiceBlock(props: {
           <p id="value">{props.selectedChampInfo?.playCount ?? '-'}</p>
         </div>
       </S.AverageGameData>
-
       <S.GameRecord>
         {/* 이번 시즌 전적이 없을 경우 알림창 */}
-        {props.summoner.summonerStats.statsList.length !== 0 ? (
+        {props.summonerStats ? (
+          props.summonerStats.statsList.length > 0 ? (
+            <S.WinningPercentage>
+              <S.Text>
+                <p>승률</p>
+                <p id="value">{props.summonerStats.odds}%</p>
+              </S.Text>
+              <S.ProgressBar>
+                <progress
+                  value={props.summonerStats.winCount}
+                  max={props.summonerStats.winCount + props.summonerStats.failCount}
+                />
+                <p id="win">{props.summonerStats.winCount}W</p>
+                <p id="fail">{props.summonerStats.failCount}L</p>
+              </S.ProgressBar>
+              <S.KDAList>
+                {props.summonerStats.statsList.map(({ isWin, championIcon, kda }, idx) => (
+                  <div style={{ backgroundColor: isWin ? '#0F3054' : '#50383B' }} key={idx}>
+                    <img src={championIcon} />
+                    <p>{kda}</p>
+                  </div>
+                ))}
+              </S.KDAList>
+            </S.WinningPercentage>
+          ) : (
+            <div id="warning-box">
+              <img src={warning_icon} />
+              <p>전적이 없습니다.</p>
+            </div>
+          )
+        ) : (
           <S.WinningPercentage>
             <S.Text>
               <p>승률</p>
-              <p id="value">{props.summoner.summonerStats.odds}%</p>
+              <p>%</p>
             </S.Text>
-
             <S.ProgressBar>
-              <progress
-                value={props.summoner.summonerStats.winCount}
-                max={props.summoner.summonerStats.winCount + props.summoner.summonerStats.failCount}
-              />
-              <p id="win">{props.summoner.summonerStats.winCount}W</p>
-              <p id="fail">{props.summoner.summonerStats.failCount}L</p>
+              <div id="sk-progress-bar" />
             </S.ProgressBar>
-
             <S.KDAList>
-              {props.summoner.summonerStats.statsList.map(({ isWin, championIcon, kda }, idx) => (
-                <div style={{ backgroundColor: isWin ? '#0F3054' : '#50383B' }} key={idx}>
-                  <img src={championIcon} />
-                  <p>{kda}</p>
-                </div>
+              {Array.from({ length: 10 }).map((_, idx) => (
+                <div style={{ backgroundColor: PALETTE.GRAY_2 }} key={idx} />
               ))}
             </S.KDAList>
           </S.WinningPercentage>
-        ) : (
-          <div id="warning-box">
-            <img src="img/warning_icon.svg" />
-            <p>전적이 없습니다.</p>
-          </div>
         )}
       </S.GameRecord>
     </S.SummonerBlock>

@@ -1,25 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react';
 import MessageBlock from '../../@common/message-block';
 import * as _ from './style';
-import { SummonerType } from '../../../@type/summoner';
 import useObserver from '../../../hooks/use-observer';
 import SkeletonChattingList from './skeleton';
+import { GeneralChatChildPropsType } from '..';
+import { SummonerType } from '../../../@type/summoner';
 
 type MessageInfoType = {
-  summoner: {
-    name: string;
-    profileImage: string;
-    tier: string;
-    tierImage: string;
-  };
+  summoner: SummonerType;
   message: string;
   time: string;
 };
 
-function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType | null }) {
-  const [messageList, setMessageList] = useState<MessageInfoType[] | null>(null);
+type MessageEventType = 'none' | 'init' | 'message' | 'response-before-message';
 
-  const [messageEvent, setMessageEvent] = useState({ key: 'none' });
+function ChattingList(props: GeneralChatChildPropsType) {
+  const [messageList, setMessageList] = useState<MessageInfoType[] | null>(null);
+  const [messageEvent, setMessageEvent] = useState<{ key: MessageEventType }>({ key: 'none' });
 
   const [isReceiveNewMsg, setIsReceiveNewMsg] = useState(false);
 
@@ -28,82 +25,99 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const [prevScrollHeight, setPrevScrollHeight] = useState(0);
-  const [fetchingMsgPage, setFetchingMsgPage] = useState(0);
+  const [fetchingPage, setFetchingPage] = useState(0);
   const [isFetchLoading, setIsFetchLoading] = useState(false);
+
   const [isFetchEnd, setIsFetchEnd] = useState(false);
 
   useEffect(() => {
-    if (props.socket) {
-      props.socket.onmessage = ({ data }) => {
-        const payload = JSON.parse(data);
+    function responseBeforeMessage(payload: { isLast: boolean; messageList: MessageInfoType[] }) {
+      const { isLast, messageList } = payload;
 
-        if (payload.key === 'init') {
-          setMessageList(payload.messageList.map((messageInfo) => JSON.parse(messageInfo)));
-          setMessageEvent({ key: payload.key });
-        }
-
-        if (payload.key === 'message') {
-          const { summoner, message, time } = payload;
-          setMessageList((msgList) => [...(msgList ?? []), { summoner, message, time }]);
-
-          if (containerRef.current) {
-            const isScrollEnd =
-              containerRef.current.scrollTop + containerRef.current.clientHeight >=
-              containerRef.current.scrollHeight - 100;
-
-            /* 내가 보낸 거 or 최신 메시지 보는 중 */
-            if (props.summoner?.name === summoner.name || isScrollEnd) {
-              setMessageEvent({ key: payload.key });
-            }
-            /* 남이 보낸 거 and 이전 메시지 보는 중 */
-            if (props.summoner?.name !== summoner.name && !isScrollEnd) {
-              setIsReceiveNewMsg(true);
-            }
-          }
-        }
-
-        if (payload.key === 'response-before-message') {
-          if (payload.isLast) setIsFetchEnd(true);
-
-          setMessageList((msgList) => [
-            ...payload.messageList.map((messageInfo) => JSON.parse(messageInfo)),
-            ...(msgList ?? []),
-          ]);
-          setFetchingMsgPage((page) => page + 1);
-          setMessageEvent({ key: payload.key });
-          setIsFetchLoading(false);
-        }
-      };
+      setMessageList((msgList) => [...messageList, ...(msgList ?? [])]);
+      setFetchingPage((page) => page + 1);
+      setIsFetchLoading(false);
+      setIsFetchEnd(isLast);
+      setMessageEvent({ key: 'response-before-message' });
     }
-  }, [props.socket, props.summoner]);
 
-  /* 새 메시지 항목별 이벤트 수행 */
+    if (props.isConnected) {
+      props.socket?.once('init', (messageList: MessageInfoType[]) => {
+        setMessageList(messageList);
+        setMessageEvent({ key: 'init' });
+      });
+
+      props.socket?.on('response-before-message', responseBeforeMessage);
+    }
+
+    return () => {
+      props.socket?.off('response-before-message', responseBeforeMessage);
+    };
+  }, [props.isConnected]);
+
+  useEffect(() => {
+    function message(payload: MessageInfoType) {
+      const { summoner, message, time } = payload;
+
+      setMessageList((msgList) => [...(msgList ?? []), { summoner, message, time }]);
+
+      if (containerRef.current) {
+        const isScrollEnd =
+          containerRef.current.scrollTop + containerRef.current.clientHeight >=
+          containerRef.current.scrollHeight - 100;
+
+        /* 롤 클라이언트 꺼진 상태 */
+        if (!props.summoner) {
+          isScrollEnd ? setMessageEvent({ key: 'message' }) : setIsReceiveNewMsg(true);
+        }
+        /* 내가 보낸 거 or 최신 메시지 보는 중 */
+        if (props.summoner?.name === summoner.name || isScrollEnd) {
+          setMessageEvent({ key: 'message' });
+        }
+        /* 남이 보낸 거 and 이전 메시지 보는 중 */
+        if (props.summoner?.name !== summoner.name && !isScrollEnd) {
+          setIsReceiveNewMsg(true);
+        }
+      }
+    }
+
+    if (props.isConnected) {
+      props.socket?.on('message', message);
+    }
+
+    return () => {
+      props.socket?.off('message', message);
+    };
+  }, [props.isConnected, props.summoner]);
+
+  /* 받은 메시지 항목별 이벤트 수행 */
   useEffect(() => {
     if (messageEvent.key === 'init' || messageEvent.key === 'message') {
       bottomRef.current?.scrollIntoView();
     }
     if (messageEvent.key === 'response-before-message') {
-      if (containerRef.current) {
-        containerRef.current.scrollTo({
-          top: containerRef.current.scrollHeight - prevScrollHeight,
-        });
-      }
+      containerRef.current?.scrollTo({
+        top: containerRef.current.scrollHeight - prevScrollHeight,
+      });
     }
   }, [messageEvent]);
 
-  /* chat-list-top 감지되면 이전 채팅목록 불러오기 */
-  useObserver(topRef, ([entry]: any) => entry.isIntersecting && fetchBeforeChatList());
+  /* 이전 채팅목록 불러오기 */
+  useObserver(topRef, ([entry]: any) => {
+    if (entry.isIntersecting && props.isConnected) {
+      props.socket?.emit('before-message', fetchingPage + 1);
 
-  const fetchBeforeChatList = () => {
-    if (props.socket) {
-      props.socket.send(JSON.stringify({ key: 'before-message', page: fetchingMsgPage + 1 }));
       const curScrollHeight = containerRef.current?.scrollHeight;
       if (curScrollHeight) {
         setPrevScrollHeight(curScrollHeight);
         setIsFetchLoading(true);
       }
     }
-  };
+  });
+
+  useObserver(bottomRef, ([entry]: any) => {
+    if (entry.isIntersecting && isReceiveNewMsg) setIsReceiveNewMsg(false);
+  });
 
   const handleClickNewMessageAlram = () => {
     bottomRef.current?.scrollIntoView();
@@ -118,10 +132,7 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
 
           {messageList?.map(({ summoner, message, time }, idx) => (
             <MessageBlock
-              summonerIcon={summoner.profileImage}
-              tier={summoner.tier}
-              tierImg={summoner.tierImage}
-              name={summoner.name}
+              summoner={summoner}
               time={time}
               messageType="text"
               message={message}
@@ -129,14 +140,18 @@ function ChattingList(props: { socket: WebSocket | null; summoner: SummonerType 
             />
           ))}
 
-          {isReceiveNewMsg && <div id="new-message-alram" onClick={handleClickNewMessageAlram} />}
+          {isReceiveNewMsg && (
+            <div id="new-message-alram" onClick={handleClickNewMessageAlram}>
+              새로운 메시지가 왔습니다
+            </div>
+          )}
 
-          <div ref={bottomRef} />
+          <div ref={bottomRef} style={{ marginBottom: '25px' }} />
         </>
       ) : (
         <>
           {/* 스켈레톤 */}
-          {Array.from({ length: 15 }, (__, idx) => (
+          {Array.from({ length: 6 }, (__, idx) => (
             <SkeletonChattingList key={idx} />
           ))}
         </>

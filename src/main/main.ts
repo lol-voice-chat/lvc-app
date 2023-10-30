@@ -1,12 +1,21 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import onElectronStore, { store } from './store';
-import { generalSettingsDefaultConfig } from '../const';
-import { LvcApplication } from './league/LvcApplication';
-import { authenticate, createWebSocketConnection } from 'league-connect';
-import path from 'path';
-import isDev from 'electron-is-dev';
+import { generalSettingsDefaultConfig, IPC_KEY } from '../const';
+import { LvcApplication } from './lvc-application';
+import { resolvePath } from './lib/common';
+import handleGlobalKeyEvent from './event/global-key-event';
+import handleFetchMatchHistoryEvent from './event/fetch-match-history-event';
+import { AutoUpdateManager } from './auto-update-manager';
 
 let mainWindow: BrowserWindow;
+
+const isDifferentGeneralSetting =
+  Object.keys(store.get('general-settings-config') ?? {}).length !==
+  Object.keys(generalSettingsDefaultConfig).length;
+
+if (!store.has('general-settings-config') || isDifferentGeneralSetting) {
+  store.set('general-settings-config', generalSettingsDefaultConfig);
+}
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -18,27 +27,25 @@ const createWindow = () => {
       nodeIntegration: true,
       contextIsolation: false,
     },
+    show: false,
+    backgroundColor: '#313338',
     frame: false,
     autoHideMenuBar: true,
   });
 
-  if (!store.has('general-settings-config')) {
-    store.set('general-settings-config', generalSettingsDefaultConfig);
-  }
+  mainWindow.loadURL(resolvePath());
 
-  if (isDev) {
-    mainWindow.loadURL('http://localhost:3000');
-  } else {
-    mainWindow.loadFile(path.join(__dirname, '../../build/index.html'));
-  }
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+  });
 
+  handleGlobalKeyEvent(mainWindow);
   handleLoadEvent();
 };
 
 async function handleLoadEvent() {
   mainWindow.webContents.on('did-finish-load', async () => {
-    const { credentials, ws } = await onLeagueClientUx();
-    const app = new LvcApplication(mainWindow.webContents, credentials, ws);
+    const app = new LvcApplication(mainWindow.webContents);
 
     app.initialize().then(() => {
       app.handle();
@@ -46,23 +53,21 @@ async function handleLoadEvent() {
   });
 }
 
-async function onLeagueClientUx() {
-  const [credentials, ws] = await Promise.all([
-    authenticate({
-      awaitConnection: true,
-    }),
-    createWebSocketConnection({
-      authenticationOptions: {
-        awaitConnection: true,
-      },
-    }),
-  ]);
+ipcMain.on(IPC_KEY.CLICK_SUMMONER_PROFILE, (_, summonerData) => {
+  mainWindow.webContents.send(IPC_KEY.CLICK_SUMMONER_PROFILE, summonerData);
+});
 
-  return { credentials, ws };
-}
+ipcMain.on(IPC_KEY.QUIT_APP, () => {
+  app.quit();
+});
+
+ipcMain.on(IPC_KEY.CLOSE_APP, () => {
+  mainWindow.minimize();
+});
 
 app.whenReady().then(() => {
   createWindow();
+  AutoUpdateManager.initialize(mainWindow);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -75,4 +80,9 @@ app.on('window-all-closed', () => {
   app.quit();
 });
 
+app.on('before-quit', () => {
+  mainWindow.webContents.send(IPC_KEY.QUIT_APP);
+});
+
+handleFetchMatchHistoryEvent();
 onElectronStore();

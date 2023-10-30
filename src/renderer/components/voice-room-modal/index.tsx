@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import useVoiceChat from '../../hooks/use-voice-chat';
 import { useRecoilValue } from 'recoil';
 import {
   enemySummonersState,
   gameStatusState,
   myTeamSummonersState,
   summonerState,
+  userDeviceIdState,
   userStreamState,
 } from '../../@store/atom';
 import * as S from './style';
@@ -15,38 +15,53 @@ import { IPC_KEY } from '../../../const';
 import electronStore from '../../@store/electron';
 import { Socket } from 'socket.io-client';
 import SummonerLeagueVoiceBlock from '../summoner-league-voice-block';
-import { ChampionInfoType } from '../../@type/summoner';
-
+import { ChampionInfoType, SummonerStatsType } from '../../@type/summoner';
+import useVoiceRoom from '../../hooks/use-voice-room';
+import { VoiceRoomAudioOptionType } from '../../@type/voice';
 const { ipcRenderer } = window.require('electron');
 
 function VoiceRoomModal() {
   const userStream = useRecoilValue(userStreamState);
-
   const gameStatus = useRecoilValue(gameStatusState);
 
   const summoner = useRecoilValue(summonerState);
   const myTeamSummoners = useRecoilValue(myTeamSummonersState);
   const enemySummoners = useRecoilValue(enemySummonersState);
 
+  const [mySummonerStats, setMySummonerStats] = useState<SummonerStatsType | null>(null);
   const [selectedChampList, setSelectedChampList] = useState<Map<number, ChampionInfoType>>(
+    new Map()
+  );
+  const [voiceOptionList, setVoiceOptionList] = useState<Map<number, VoiceRoomAudioOptionType>>(
     new Map()
   );
 
   const [teamManagementSocket, setTeamManagementSocket] = useState<Socket | null>(null);
   const [leagueManagementSocket, setLeagueManagementSocket] = useState<Socket | null>(null);
 
-  const { onTeamVoiceRoom, onLeagueVoiceRoom } = useVoiceChat();
+  const [isJoined, setIsJoined] = useState(false);
+
+  const { joinTeamVoiceRoom, joinLeagueVoiceRoom } = useVoiceRoom();
 
   useEffect(() => {
-    userStream && onTeamVoiceRoom(userStream);
-  }, [userStream]);
+    const teamSocket = connectSocket('/team-voice-chat/manage');
+    const leagueSocket = connectSocket('/league-voice-chat/manage');
 
-  useEffect(() => {
     electronStore.get('team-voice-room-name').then((roomName) => {
-      const socket = connectSocket('/team-voice-chat/manage');
-      socket.emit('team-manage-join-room', roomName);
-      setTeamManagementSocket(socket);
+      // socket.emit('team-manage-join-room', { roomName, name: summoner?.name });
+      setTeamManagementSocket(teamSocket);
     });
+    electronStore.get('league-voice-room-name').then(({ roomName }) => {
+      // socket.emit('league-manage-join-room', roomName);
+      setLeagueManagementSocket(leagueSocket);
+    });
+
+    /* 소환사 최신 전적 불러오기 */
+    ipcRenderer
+      .invoke(IPC_KEY.FETCH_MATCH_HISTORY, { isMine: true, isVoice: true, puuid: summoner?.puuid })
+      .then((summonerStats: SummonerStatsType) => {
+        setMySummonerStats(summonerStats);
+      });
 
     /* 입장시 팀원의 (자신포함) 챔피언 리스트 받음 */
     ipcRenderer.once('selected-champ-info-list', (_, championInfoList: ChampionInfoType[]) => {
@@ -61,42 +76,30 @@ function VoiceRoomModal() {
     });
 
     return () => {
-      teamManagementSocket?.disconnect();
+      teamSocket.disconnect();
+      leagueSocket.disconnect();
       ipcRenderer.removeAllListeners(IPC_KEY.CHAMP_INFO);
     };
   }, []);
 
   useEffect(() => {
-    if (gameStatus === 'loading' && userStream) {
-      onLeagueVoiceRoom(userStream);
+    if (userStream && mySummonerStats && !isJoined) {
+      joinTeamVoiceRoom(userStream, mySummonerStats);
+      setIsJoined(true);
     }
-  }, [gameStatus, userStream]);
+  }, [userStream, mySummonerStats, isJoined]);
 
   useEffect(() => {
-    if (gameStatus === 'loading') {
-      electronStore.get('league-voice-room-name').then(({ roomName }) => {
-        const socket = connectSocket('/league-voice-chat/manage');
-        socket.emit('league-manage-join-room', roomName);
-        setLeagueManagementSocket(socket);
-      });
-    }
-    if (gameStatus === 'in-game') {
-      leagueManagementSocket?.disconnect();
-    }
+    if (userStream && mySummonerStats) {
+      if (gameStatus === 'loading') {
+        joinLeagueVoiceRoom(userStream, mySummonerStats);
+      }
 
-    return () => {
-      leagueManagementSocket?.disconnect();
-    };
-  }, [gameStatus]);
-
-  useEffect(() => {
-    if (summoner) {
-      ipcRenderer.send(IPC_KEY.OVERLAY_SUMMONER, summoner);
+      if (gameStatus === 'in-game') {
+        leagueManagementSocket?.disconnect();
+      }
     }
-    if (myTeamSummoners) {
-      ipcRenderer.send(IPC_KEY.OVERLAY_MY_TEAM_SUMMONERS, myTeamSummoners);
-    }
-  }, [summoner, myTeamSummoners]);
+  }, [gameStatus, userStream, mySummonerStats]);
 
   return (
     <S.VoiceRoom>
@@ -106,31 +109,50 @@ function VoiceRoomModal() {
             <SummonerVoiceBlock
               isMine={true}
               summoner={summoner}
+              summonerStats={mySummonerStats}
               selectedChampInfo={selectedChampList.get(summoner.summonerId) ?? null}
+              voiceOption={voiceOptionList.get(summoner.summonerId) ?? null}
+              setVoiceOptionList={setVoiceOptionList}
               managementSocket={teamManagementSocket}
+              gameStatus={gameStatus}
             />
           )}
-          {myTeamSummoners?.map((summoner) => (
-            <SummonerVoiceBlock
-              isMine={false}
-              summoner={summoner}
-              selectedChampInfo={selectedChampList.get(summoner.summonerId) ?? null}
-              managementSocket={teamManagementSocket}
-            />
-          ))}
+          {myTeamSummoners?.map((myTeam) => {
+            const { summonerStats, ...teamSummoner } = myTeam;
+
+            return (
+              <SummonerVoiceBlock
+                isMine={false}
+                summoner={teamSummoner}
+                summonerStats={summonerStats}
+                selectedChampInfo={selectedChampList.get(myTeam.summonerId) ?? null}
+                voiceOption={voiceOptionList.get(myTeam.summonerId) ?? null}
+                setVoiceOptionList={setVoiceOptionList}
+                managementSocket={teamManagementSocket}
+                gameStatus={gameStatus}
+              />
+            );
+          })}
         </>
       )}
 
       {gameStatus === 'loading' && (
         <S.LeagueBlockBundle>
           <S.TeamBlocks isMyTeam={false}>
-            {enemySummoners?.map((enemy) => (
-              <SummonerLeagueVoiceBlock
-                isMine={false}
-                summoner={enemy}
-                managementSocket={leagueManagementSocket}
-              />
-            ))}
+            {enemySummoners?.map((enemy) => {
+              const { summonerStats, ...enemySummoner } = enemy;
+
+              return (
+                <SummonerLeagueVoiceBlock
+                  isMine={false}
+                  summoner={enemySummoner}
+                  summonerStats={summonerStats}
+                  voiceOption={voiceOptionList.get(enemy.summonerId) ?? null}
+                  setVoiceOptionList={setVoiceOptionList}
+                  managementSocket={leagueManagementSocket}
+                />
+              );
+            })}
           </S.TeamBlocks>
 
           <S.TeamBlocks isMyTeam={true}>
@@ -138,6 +160,9 @@ function VoiceRoomModal() {
               <SummonerLeagueVoiceBlock
                 isMine={true}
                 summoner={summoner}
+                summonerStats={mySummonerStats}
+                voiceOption={voiceOptionList.get(summoner.summonerId) ?? null}
+                setVoiceOptionList={setVoiceOptionList}
                 managementSocket={leagueManagementSocket}
               />
             )}

@@ -1,14 +1,12 @@
 import styled from 'styled-components';
-import { PALETTE } from '../../../const';
+import { FONT, PALETTE } from '../../../const';
 
 export const ChatContainer = styled.div`
-  position: absolute;
-  top: 20px;
   display: flex;
   flex-direction: column;
 
   width: 100%;
-  height: 90vh;
+  height: calc(100vh - 40px);
   background-color: #303236;
 
   overflow-x: hidden;
@@ -22,11 +20,23 @@ export const ChatContainer = styled.div`
     position: absolute;
     bottom: 100px;
     left: calc(50% - 100px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 200px;
     height: 30px;
-    border-radius: 30px;
-    background-color: ${PALETTE.YELLOW};
-    cursor: pointer;
+    border-radius: 5px;
+    background-color: ${PALETTE.GREEN};
+    font-weight: ${FONT.REGULAR};
+    font-size: 14px;
+    color: ${PALETTE.WHITE_1};
+    opacity: 0.7;
+
+    transition: 0.15s;
+    &:hover {
+      cursor: pointer;
+      opacity: 0.9;
+    }
   }
 `;
 

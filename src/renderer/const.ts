@@ -12,6 +12,7 @@ export const PALETTE = {
   RED: '#E05262',
   BLUE: '#698DE7',
   YELLOW: '#F4E55C',
+  GREEN: '#50AB64',
 };
 
 export const FONT = {

@@ -1,57 +1,37 @@
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import {
-  enemySummonersState,
-  gameStatusState,
-  myTeamSummonersState,
-  summonerState,
-  userStreamState,
-} from '../@store/atom';
-import * as mediasoup from 'mediasoup-client';
 import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
-import { DeviceType, ConsumerTransportType, TransportType } from '../@type/webRtc';
-import { SummonerType } from '../@type/summoner';
-import { IPC_KEY } from '../../const';
-import electronStore from '../@store/electron';
-import { connectSocket } from '../utils/socket';
 import { Socket } from 'socket.io-client';
-import { getSummonerSpeaker, getUserAudioStream } from '../utils/audio';
-import { useEffect } from 'react';
-const { ipcRenderer } = window.require('electron');
+import { getSummonerSpeaker } from '../utils/audio';
+import * as mediasoup from 'mediasoup-client';
+import { ConsumerTransportType, TransportType } from '../@type/voice';
+import { SummonerStatsType, SummonerType } from '../@type/summoner';
+import { useSetRecoilState } from 'recoil';
+import { enemySummonersState, myTeamSummonersState, userStreamState } from '../@store/atom';
 
 function useVoiceChat() {
   const setUserStream = useSetRecoilState(userStreamState);
 
-  const setGameStatus = useSetRecoilState(gameStatusState);
+  const setMyTeamSummoners = useSetRecoilState(myTeamSummonersState);
+  const setEnemySummoners = useSetRecoilState(enemySummonersState);
 
-  const summoner = useRecoilValue(summonerState);
-  const [myTeamSummoners, setMyTeamSummoners] = useRecoilState(myTeamSummonersState);
-  const [enemySummoners, setEnemySummoners] = useRecoilState(enemySummonersState);
+  const connect = (params: {
+    voiceRoomType: 'team' | 'league';
+    socket: Socket;
+    stream: MediaStream;
+    rtpCapabilities: RtpCapabilities;
+  }) => {
+    const { voiceRoomType, socket, stream, rtpCapabilities } = params;
 
-  useEffect(() => {
-    getUserAudioStream().then((stream) => {
-      setUserStream(stream);
-    });
-  }, []);
+    let device = new mediasoup.Device();
+    let producerTransport: TransportType | null = null;
+    let consumerTransportList: ConsumerTransportType[] = [];
 
-  const connectVoiceChat = (
-    isTeamVoiceChat: Boolean,
-    socket: Socket,
-    device: DeviceType | null,
-    stream: MediaStream,
-    routerRtpCapabilities: RtpCapabilities,
-    producerTransport: TransportType | null,
-    consumerTransportList: ConsumerTransportType[]
-  ) => {
-    (() => {
-      device = new mediasoup.Device();
-      device
-        .load({ routerRtpCapabilities })
-        .then(() => createSendTransport(stream.getAudioTracks()[0]))
-        .catch((err) => console.log('디바이스 로드 에러', err));
-    })();
+    device
+      .load({ routerRtpCapabilities: rtpCapabilities })
+      .then(() => createSendTransport(stream.getAudioTracks()[0]))
+      .catch((err) => console.log('디바이스 로드 에러', err));
 
     const createSendTransport = (audioTrack: MediaStreamTrack) => {
-      socket.emit('create-producer-transport', (params) => {
+      socket.emit('create-producer-transport', (params: any) => {
         if (!device) return;
 
         producerTransport = device.createSendTransport(params);
@@ -66,10 +46,14 @@ function useVoiceChat() {
         });
         producerTransport.on('produce', ({ kind, rtpParameters }, callback, errback) => {
           try {
-            socket.emit('transport-produce', { kind, rtpParameters }, ({ id, producersExist }) => {
-              callback({ id });
-              producersExist && getProducers();
-            });
+            socket.emit(
+              'transport-produce',
+              { kind, rtpParameters },
+              (producer: { id: string; producersExist: boolean }) => {
+                callback({ id: producer.id });
+                producer.producersExist && getProducers();
+              }
+            );
           } catch (err) {
             errback(err as Error);
           }
@@ -91,22 +75,39 @@ function useVoiceChat() {
         .catch((err) => console.log('프로듀스 메서드 에러', err));
     };
 
-    socket.on('new-producer', ({ id, summoner }) => {
-      signalNewConsumerTransport(id, summoner);
-    });
+    socket.on(
+      'new-producer',
+      (newProducer: {
+        id: string;
+        summoner: SummonerType & { summonerStats: SummonerStatsType };
+      }) => {
+        signalNewConsumerTransport(newProducer.id, newProducer.summoner);
+      }
+    );
 
     const getProducers = () => {
-      socket.emit('get-producers', (producers) => {
-        producers.forEach(({ id, summoner }) => {
-          signalNewConsumerTransport(id, summoner);
-        });
-      });
+      socket.emit(
+        'get-producers',
+        (
+          producers: { id: string; summoner: SummonerType & { summonerStats: SummonerStatsType } }[]
+        ) => {
+          producers.forEach(({ id, summoner }) => {
+            signalNewConsumerTransport(id, summoner);
+          });
+        }
+      );
     };
 
-    const signalNewConsumerTransport = (remoteProducerId: string, newSummoner: SummonerType) => {
-      isTeamVoiceChat
-        ? setMyTeamSummoners([...(myTeamSummoners ?? []), newSummoner])
-        : setEnemySummoners([...(enemySummoners ?? []), newSummoner]);
+    const signalNewConsumerTransport = (
+      remoteProducerId: string,
+      newSummoner: SummonerType & { summonerStats: SummonerStatsType }
+    ) => {
+      if (voiceRoomType === 'team') {
+        setMyTeamSummoners((prev) => [...(prev ?? []), newSummoner]);
+      }
+      if (voiceRoomType === 'league') {
+        setEnemySummoners((prev) => [...(prev ?? []), newSummoner]);
+      }
 
       socket.emit('create-consumer-transport', remoteProducerId);
       socket.on('complete-create-consumer-transport', (params) => {
@@ -165,127 +166,43 @@ function useVoiceChat() {
         }
       );
     };
-  };
 
-  const onTeamVoiceRoom = (userStream: MediaStream) => {
-    const socket = connectSocket('/team-voice-chat');
-
-    let device: DeviceType | null = null;
-    let producerTransport: TransportType | null = null;
-    let consumerTransportList: ConsumerTransportType[] = [];
-
-    electronStore.get('team-voice-room-name').then((roomName) => {
-      socket.emit('team-join-room', { roomName, summoner }, ({ rtpCapabilities }) => {
-        connectVoiceChat(
-          true,
-          socket,
-          device,
-          userStream,
-          rtpCapabilities,
-          producerTransport,
-          consumerTransportList
-        );
-      });
-    });
-
-    /* 팀원 나감 */
-    socket.on('inform-exit-in-game', ({ summonerId }) => {
-      consumerTransportList = consumerTransportList.filter((consumerTransport) => {
-        if (consumerTransport.summonerId === summonerId) {
-          consumerTransport.consumer.close();
-          consumerTransport.consumerTransport.close();
-          return false;
+    const closeConsumer = (targetId: number) => {
+      consumerTransportList = consumerTransportList.filter(
+        ({ summonerId, consumer, consumerTransport }) => {
+          if (summonerId === targetId) {
+            consumer.close();
+            consumerTransport.close();
+            return false;
+          }
+          return true;
         }
-        return true;
-      });
-      setMyTeamSummoners(
-        myTeamSummoners?.filter((summoner) => summoner.summonerId !== summonerId) ?? null
       );
-    });
+    };
 
-    /* 게임 시작 */
-    ipcRenderer.once(IPC_KEY.START_IN_GAME, () => {});
-
-    /* 게임 방 떠남 */
-    ipcRenderer.once(IPC_KEY.EXIT_IN_GAME, () => {
-      disconnectVoiceChat();
-    });
-
-    /* 챔피언 선택창에서 닷지 */
-    ipcRenderer.once(IPC_KEY.EXIT_CHAMP_SELECT, () => {
-      socket.emit('exit-champ-select');
-      disconnectVoiceChat();
-    });
-
-    const disconnectVoiceChat = () => {
+    // 두번 호출되면 안됨
+    const disconnectAll = () => {
       socket.disconnect();
-      producerTransport?.close();
-      consumerTransportList.map(({ consumer, consumerTransport }) => {
+
+      if (voiceRoomType === 'team' && stream) {
+        producerTransport?.close();
+        producerTransport = null;
+
+        stream.getTracks().forEach((track) => track.stop());
+        setUserStream(null);
+      }
+
+      consumerTransportList?.map(({ consumer, consumerTransport }) => {
         consumer.close();
         consumerTransport.close();
       });
-      window.location.reload();
+      consumerTransportList = [];
     };
+
+    return { closeConsumer, disconnectAll, producerTransport, consumerTransportList };
   };
 
-  const onLeagueVoiceRoom = (userStream: MediaStream) => {
-    const socket = connectSocket('/league-voice-chat');
-
-    let device: DeviceType | null = null;
-    let producerTransport: TransportType | null = null;
-    let consumerTransportList: ConsumerTransportType[] = [];
-
-    electronStore.get('league-voice-room-name').then(({ roomName, teamName }) => {
-      socket.emit('league-join-room', { roomName, teamName, summoner }, ({ rtpCapabilities }) => {
-        connectVoiceChat(
-          false,
-          socket,
-          device,
-          userStream,
-          rtpCapabilities,
-          producerTransport,
-          consumerTransportList
-        );
-      });
-    });
-
-    socket.on('inform-exit-in-game', ({ summonerId }) => {
-      consumerTransportList = consumerTransportList.filter((consumerTransport) => {
-        if (consumerTransport.summonerId === summonerId) {
-          consumerTransport.consumer.close();
-          consumerTransport.consumerTransport.close();
-          return false;
-        }
-        return true;
-      });
-      setEnemySummoners(
-        enemySummoners?.filter((summoner) => summoner.summonerId !== summonerId) ?? null
-      );
-    });
-
-    /* 게임 시작 */
-    ipcRenderer.once(IPC_KEY.START_IN_GAME, () => {
-      socket.emit('start-in-game');
-      disconnectVoiceChat();
-      setGameStatus('in-game');
-    });
-
-    /* 게임 나감 */
-    ipcRenderer.once(IPC_KEY.EXIT_IN_GAME, () => {
-      disconnectVoiceChat();
-    });
-
-    const disconnectVoiceChat = () => {
-      socket.disconnect();
-      producerTransport?.close();
-      consumerTransportList.map((localConsumer) => {
-        localConsumer.consumer.close();
-        localConsumer.consumerTransport.close();
-      });
-    };
-  };
-
-  return { onTeamVoiceRoom, onLeagueVoiceRoom };
+  return { connect };
 }
 
 export default useVoiceChat;

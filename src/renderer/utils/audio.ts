@@ -1,19 +1,38 @@
 import { Dispatch, SetStateAction } from 'react';
 
-export const getUserAudioStream = async () => {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-    });
+export const getUserAudioStream = async (userDeviceId: string) => {
+  const userStream = await getConnectedAudioDevices('input').then(async (deviceList) => {
+    let stream: MediaStream | null = null;
+    let isExist = false;
+
+    /* 현재 deviceId가 연결된 상태인지 검증 */
+    if (userDeviceId !== 'default') {
+      deviceList.map(({ deviceId }) => {
+        if (userDeviceId === deviceId) isExist = true;
+      });
+    } else {
+      isExist = true;
+    }
+
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: { deviceId: isExist ? userDeviceId : 'default' },
+      });
+    } catch (err) {
+      console.log('유저 미디어 스트림 획득 실패', err);
+      stream = null;
+    }
+
     return stream;
-  } catch (err) {
-    console.log('유저 미디어 스트림 획득 실패', err);
-    return null;
-  }
+  });
+
+  return userStream;
 };
 
-export const micVolumeHandler = (
+export const micVisualizer = (
   stream: MediaStream,
+  displayFps: number,
+  isMuted: boolean,
   setVolume: Dispatch<SetStateAction<number>>
 ) => {
   const audioContext = new AudioContext();
@@ -31,10 +50,10 @@ export const micVolumeHandler = (
     for (let i = 0; i < bufferLength; i++) {
       total += dataArray[i];
     }
-    setVolume(total / bufferLength);
-    requestAnimationFrame(updateMicVolume);
+    setVolume(isMuted ? 0 : total / bufferLength);
   };
-  updateMicVolume();
+
+  setInterval(updateMicVolume, 1000 / displayFps);
 };
 
 export const getSummonerSpeaker = (summonerId: number) => {
@@ -42,7 +61,7 @@ export const getSummonerSpeaker = (summonerId: number) => {
   return speaker;
 };
 
-export const getConnectedDevices = async () => {
+export const getConnectedAudioDevices = async (type: 'input' | 'output') => {
   const devices = await navigator.mediaDevices.enumerateDevices();
-  return devices.filter((device) => device.kind === 'audioinput');
+  return devices.filter((device) => device.kind === 'audio' + type);
 };

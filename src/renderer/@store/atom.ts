@@ -1,4 +1,4 @@
-import { SummonerType } from '../@type/summoner';
+import { SummonerStatsType, SummonerType } from '../@type/summoner';
 import { atom } from 'recoil';
 
 type GameStatus = 'none' | 'champ-select' | 'loading' | 'in-game';
@@ -13,14 +13,29 @@ export const summonerState = atom<SummonerType | null>({
   default: null,
 });
 
-export const myTeamSummonersState = atom<SummonerType[] | null>({
+export const myTeamSummonersState = atom<
+  (SummonerType & { summonerStats: SummonerStatsType })[] | null
+>({
   key: 'my-team-summoners',
   default: null,
 });
 
-export const enemySummonersState = atom<SummonerType[] | null>({
+export const enemySummonersState = atom<
+  (SummonerType & { summonerStats: SummonerStatsType })[] | null
+>({
   key: 'enemy-summoners',
   default: null,
+});
+
+export type LeagueChampInfoType = { summonerId: number; championIcon: string; kda: string };
+export const leagueChampInfoListState = atom<LeagueChampInfoType[] | null>({
+  key: 'league-champ-info-list',
+  default: null,
+});
+
+export const userDeviceIdState = atom<string>({
+  key: 'user-device-id',
+  default: 'default',
 });
 
 export const userStreamState = atom<MediaStream | null>({
@@ -32,8 +47,20 @@ export type GeneralSettingsConfigType = {
   isPressToTalk: boolean;
   pressToTalkShortcutKey: string;
   muteMicShortcutKey: string;
+  micVolume: number;
+  speakerVolume: number;
 };
 export const generalSettingsConfigState = atom<GeneralSettingsConfigType | null>({
   key: 'general-settings-config',
+  default: null,
+});
+
+export const generalSettingsModalState = atom<boolean>({
+  key: 'general-settings-modal',
+  default: false,
+});
+
+export const displayFpsState = atom<number | null>({
+  key: 'display-fps',
   default: null,
 });

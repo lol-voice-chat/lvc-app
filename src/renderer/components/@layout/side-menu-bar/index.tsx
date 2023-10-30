@@ -1,139 +1,99 @@
 import React, { useEffect, useState } from 'react';
 import * as _ from './style';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   GeneralSettingsConfigType,
+  displayFpsState,
   generalSettingsConfigState,
+  generalSettingsModalState,
   summonerState,
+  userStreamState,
 } from '../../../@store/atom';
 import SummonerProfile from './summoner-profile';
 import SummonerRecord from './summoner-record';
 import { IPC_KEY } from '../../../../const';
 import { SummonerType } from '../../../@type/summoner';
-import { connectSocket } from '../../../utils/socket';
-import { Socket } from 'socket.io-client';
 import RecentSummonerList from './recent-summoner-list';
 import AppHeader from './app-header';
-import GeneralSettingModal from '../../general-setting-modal';
-import electronStore from '../../../@store/electron';
 const { ipcRenderer } = window.require('electron');
-
-export type RecentSummonerType = SummonerType & { isRequested: boolean };
 
 function SideMenuBar() {
   const summoner = useRecoilValue(summonerState);
-  const [summonerStatusSocket, setSummonerStatusSocket] = useState<Socket | null>(null);
 
-  const [generalSettingModal, setGeneralSettingModal] = useState(false);
-  const [settingsConfig, setSettingsConfig] = useRecoilState<GeneralSettingsConfigType | null>(
-    generalSettingsConfigState
-  );
+  const setGeneralSettingsState = useSetRecoilState(generalSettingsModalState);
 
-  const [isSummonerRecord, setIsSummonerRecord] = useState(false);
-  const [summonerRecordInfo, setSummonerRecordInfo] = useState<
-    SummonerType | RecentSummonerType | null
-  >(null);
-  const [recentSummonerList, setRecentSummonerList] = useState<RecentSummonerType[] | null>(null);
+  const [isRecordPage, setIsRecordPage] = useState(false);
+  const [curSummonerProfile, setCurSummonerProfile] = useState<SummonerType | null>(null);
+  const [isFriendSummoner, setIsFriendSummoner] = useState(true);
+  const [recentSummonerList, setRecentSummonerList] = useState<SummonerType[] | null>(null);
 
   useEffect(() => {
-    const socket = connectSocket('/summoner-status');
-    setSummonerStatusSocket(socket);
+    /* 롤보챗 on - 최근 소환사 불러오기 */
+    ipcRenderer.once(IPC_KEY.RECENT_SUMMONER, (_, recentSummonerList: SummonerType[]) => {
+      setRecentSummonerList(recentSummonerList);
+    });
 
-    /* 롤 인게임 시작 */
-    ipcRenderer.once(IPC_KEY.START_IN_GAME, (_, summonerIdList) => {
-      socket.emit('start-in-game', summonerIdList);
+    /* 롤 게임 end - 최근 함께한 소환사 갱신 */
+    ipcRenderer.on(IPC_KEY.END_OF_THE_GAME, (_, recentSummonerList: SummonerType[]) => {
+      setRecentSummonerList(recentSummonerList);
     });
 
     return () => {
-      socket.disconnect();
+      ipcRenderer.removeAllListeners(IPC_KEY.END_OF_THE_GAME);
     };
   }, []);
 
   useEffect(() => {
     if (summoner) {
-      setSummonerRecordInfo(summoner);
-
-      /* 앱 시작 - 온라인 */
-      ipcRenderer.once('online-summoner', (_, friendSummonerIdList) => {
-        summonerStatusSocket?.emit(
-          'online-summoner',
-          { summoner, friendSummonerIdList },
-          (recentSummonerList: RecentSummonerType[]) => {
-            setRecentSummonerList(recentSummonerList);
-          }
-        );
-      });
-
-      /* 롤 종료 - 오프라인 */
-      ipcRenderer.once('shutdown-app', () => {
-        // summonerStatusSocket?.emit('offline-summoner');
-      });
+      setCurSummonerProfile(summoner);
     }
+
+    ipcRenderer.on(IPC_KEY.CLICK_SUMMONER_PROFILE, (_, summoner: SummonerType) => {
+      setCurSummonerProfile(summoner);
+      setIsRecordPage(true);
+    });
+
+    return () => {
+      ipcRenderer.removeAllListeners(IPC_KEY.CLICK_SUMMONER_PROFILE);
+    };
   }, [summoner]);
 
-  useEffect(() => {
-    electronStore.get('general-settings-config').then((config) => {
-      setSettingsConfig(config);
-      console.log(config);
-    });
-  }, [generalSettingModal]);
-
-  const getRecentSummonerData = (summonerInfo: SummonerType | RecentSummonerType) => {
-    setSummonerRecordInfo(summonerInfo);
-    setIsSummonerRecord(true);
-  };
-
-  const handleClickSummonerProfile = (isMine: boolean) => {
-    if (isMine) setSummonerRecordInfo(summoner);
-
-    setIsSummonerRecord((curState) => !curState);
-  };
-
-  const handleClickAddFriend = (recentSummonerInfo: RecentSummonerType) => {
-    if (recentSummonerList) {
-      setRecentSummonerList(
-        [...recentSummonerList].map((recentSummoner) => {
-          recentSummoner.isRequested = recentSummonerInfo === recentSummoner;
-          return recentSummoner;
-        })
-      );
+  const handleClickSummonerProfile = (target: SummonerType) => {
+    if (isRecordPage) {
+      setCurSummonerProfile(summoner);
+      setIsFriendSummoner(true);
+    } else {
+      setCurSummonerProfile(target);
     }
-    ipcRenderer.send('friend-request', recentSummonerInfo);
-    summonerStatusSocket?.emit('friend-request', recentSummonerInfo.summonerId);
+    setIsRecordPage((prev) => !prev);
   };
 
   return (
-    <>
-      {generalSettingModal && settingsConfig && (
-        <GeneralSettingModal
-          settingsConfig={settingsConfig}
-          handleClickModalTrigger={() => setGeneralSettingModal((prev) => !prev)}
+    <_.SideBarContainer>
+      <AppHeader handleClickSettingModalTrigger={() => setGeneralSettingsState((prev) => !prev)} />
+
+      <SummonerProfile
+        summoner={isRecordPage ? curSummonerProfile : summoner}
+        isFriend={isFriendSummoner}
+        isBackground={!isRecordPage}
+        handleClickSummonerProfile={handleClickSummonerProfile}
+      />
+
+      {isRecordPage ? (
+        /* 소환사 전적 */
+        <SummonerRecord
+          isMine={curSummonerProfile?.name === summoner?.name}
+          puuid={curSummonerProfile?.puuid ?? 'leage-client-off'}
+          setIsFriend={setIsFriendSummoner}
+        />
+      ) : (
+        /* 최근 보이스한 소환사 리스트 */
+        <RecentSummonerList
+          recentSummonerList={recentSummonerList}
+          handleClickSummonerBlock={handleClickSummonerProfile}
         />
       )}
-
-      <_.SideBarContainer id="side-menu-bar">
-        <AppHeader handleClickSettingModalTrigger={() => setGeneralSettingModal((prev) => !prev)} />
-
-        <SummonerProfile
-          summoner={isSummonerRecord ? summonerRecordInfo : summoner}
-          isMine={summoner}
-          isBackground={!isSummonerRecord}
-          handleClickSummonerProfile={handleClickSummonerProfile}
-          handleClickAddFriend={handleClickAddFriend}
-        />
-
-        {isSummonerRecord ? (
-          // 소환사 전적
-          <SummonerRecord summonerData={summonerRecordInfo} />
-        ) : (
-          // 최근 보이스한 소환사 리스트
-          <RecentSummonerList
-            recentSummonerList={recentSummonerList}
-            handleClickSummonerBlock={getRecentSummonerData}
-          />
-        )}
-      </_.SideBarContainer>
-    </>
+    </_.SideBarContainer>
   );
 }
 
