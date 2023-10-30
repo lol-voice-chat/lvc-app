@@ -12,7 +12,6 @@ import VoiceRoomModal from '../../voice-room-modal';
 import { IPC_KEY } from '../../../../const';
 import { Socket } from 'socket.io-client';
 import { connectSocket } from '../../../utils/socket';
-import useGetFps from '../../../hooks/use-get-fps';
 const { ipcRenderer } = window.require('electron');
 
 function ModalBundle() {
@@ -28,8 +27,6 @@ function ModalBundle() {
   );
 
   const generalSettingsRef = useRef<HTMLDivElement | null>(null);
-
-  useGetFps();
 
   useEffect(() => {
     const socket = connectSocket('/manage');
