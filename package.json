@@ -1,0 +1,151 @@
+{
+  "name": "lvc-app",
+  "version": "0.1.2",
+  "private": true,
+  "author": "lvc",
+  "description": "lol voice chat app",
+  "homepage": ".",
+  "sideEffects": false,
+  "main": "./src/main/main.ts",
+  "scripts": {
+    "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
+    "build:main": "webpack --config ./.erb/configs/webpack.config.main.prod.ts",
+    "build:renderer": "webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
+    "start:main": "electronmon -r ts-node/register .",
+    "start:renderer": "react-scripts start",
+    "start": "concurrently \"npm run start:renderer\" \"wait-on http://localhost:3000\" \"npm run start:main\"",
+    "deploy:xos": "ts-node ./.erb/scripts/clean.ts && npm run build && electron-builder --mac --publish never",
+    "deploy:win": "ts-node ./.erb/scripts/clean.ts && npm run build && electron-builder --win --publish always"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "dependencies": {
+    "axios": "^1.5.1",
+    "class-transformer": "^0.5.1",
+    "dayjs": "^1.11.10",
+    "dotenv": "^16.3.1",
+    "electron-is-dev": "^2.0.0",
+    "electron-localshortcut": "^3.2.1",
+    "electron-log": "^4.4.8",
+    "electron-store": "^8.1.0",
+    "electron-updater": "^6.1.4",
+    "league-connect": "^6.0.0-rc12",
+    "mediasoup-client": "^3.6.101",
+    "node-global-key-listener": "^0.1.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-helmet": "^6.1.0",
+    "react-router-dom": "^6.15.0",
+    "react-scripts": "^5.0.1",
+    "react-select": "^5.7.7",
+    "recoil": "^0.7.7",
+    "redis": "^4.6.10",
+    "socket.io-client": "^4.7.2",
+    "styled-components": "^6.0.7",
+    "typescript": "^4.9.5",
+    "uiohook-napi": "^1.5.2",
+    "web-vitals": "^2.1.4"
+  },
+  "devDependencies": {
+    "@svgr/webpack": "^8.1.0",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/dotenv-webpack": "^7.0.6",
+    "@types/electron-localshortcut": "^3.1.2",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.46",
+    "@types/react": "^18.2.21",
+    "@types/react-dom": "^18.2.7",
+    "@types/react-helmet": "^6.1.6",
+    "@types/webpack-bundle-analyzer": "^4.6.1",
+    "@types/webpack-node-externals": "^3.0.2",
+    "assert": "^2.0.0",
+    "concurrently": "^8.2.1",
+    "dotenv-webpack": "^8.0.1",
+    "electron": "^26.4.0",
+    "electron-builder": "^24.6.4",
+    "electronmon": "^2.0.2",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.5.3",
+    "rimraf": "^5.0.5",
+    "terser-webpack-plugin": "^5.3.9",
+    "ts-loader": "^9.5.0",
+    "ts-node": "^10.9.1",
+    "tsconfig-paths-webpack-plugin": "^4.1.0",
+    "wait-on": "^7.0.1",
+    "webpack": "^5.88.2",
+    "webpack-bundle-analyzer": "^4.9.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1",
+    "webpack-merge": "^5.9.0"
+  },
+  "build": {
+    "extends": null,
+    "productName": "lvc",
+    "appId": "com.lvc-app",
+    "asar": true,
+    "asarUnpack": "**\\*.{node}",
+    "files": [
+      "dist",
+      "node_modules",
+      "package.json"
+    ],
+    "mac": {
+      "target": {
+        "target": "default",
+        "arch": [
+          "arm64",
+          "x64"
+        ]
+      }
+    },
+    "dmg": {},
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "createDesktopShortcut": "always"
+    },
+    "directories": {
+      "app": "release/app",
+      "buildResources": "src/renderer/asset",
+      "output": "release/build"
+    },
+    "extraResources": [
+      "./src/renderer/asset/**"
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "lol-voice-chat",
+      "repo": "lvc-app",
+      "private": true,
+      "releaseType": "release"
+    }
+  },
+  "electronmon": {
+    "patterns": [
+      "!**/**",
+      "src/main/**"
+    ],
+    "logLevel": "quiet"
+  }
+}
