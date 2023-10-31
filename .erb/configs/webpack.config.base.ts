@@ -25,16 +25,8 @@ const configuration: webpack.Configuration = {
     ],
   },
 
-  output: {
-    path: webpackPaths.srcPath,
-    // https://github.com/webpack/webpack/issues/1114
-    library: {
-      type: 'commonjs2',
-    },
-  },
-
   resolve: {
-    extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
+    extensions: ['.js', '.jsx', '.ts', '.tsx'],
     modules: [webpackPaths.srcPath, 'node_modules'],
     plugins: [new TsconfigPathsPlugins()],
   },
