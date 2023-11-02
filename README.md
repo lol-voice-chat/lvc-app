@@ -19,6 +19,8 @@
 
 롤보챗은 보이스 말고도 전채채팅, 소환사 정보 표시, 최근 함께한 소환사, 단축키, 기타 설정 등 다양한 기능이 있습니다. 
 
+[시연 영상](https://youtu.be/dPKcg0MB7iA?si=Jrc3IPtli3JilJGz)에서 
+
 <br>
 
 ## 다운로드
@@ -105,8 +107,6 @@
 <div align="center">
   <img width="500" src="https://github.com/lol-voice-chat/.github/assets/80371249/4293fe0f-0002-45c2-882a-0c6a033f0460">
 </div>
-
-나머지 더 많은 기능들은 [테스트 영상](https://youtu.be/dPKcg0MB7iA?si=Jrc3IPtli3JilJGz)에서 
 
 <br/>
 
