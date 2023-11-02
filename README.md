@@ -19,7 +19,7 @@
 
 롤보챗은 보이스 말고도 전채채팅, 소환사 정보 표시, 최근 함께한 소환사, 단축키, 기타 설정 등 다양한 기능이 있습니다. 
 
-[시연 영상](https://youtu.be/dPKcg0MB7iA?si=Jrc3IPtli3JilJGz)에서 
+[시연 영상](https://youtu.be/dPKcg0MB7iA?si=Jrc3IPtli3JilJGz)
 
 <br>
 
