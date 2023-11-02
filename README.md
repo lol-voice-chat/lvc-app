@@ -30,6 +30,45 @@
 
 <br/>
 
+## 팀원
+|                                         Frontend                                         |                                           Backend                                           |
+| :--------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------:
+| <img src="https://avatars.githubusercontent.com/u/105103712?v=4" width=200px /> | <img src="https://avatars.githubusercontent.com/u/80371249?v=4" width=200px /> | 
+|                            [tkyung05](https://github.com/tkyung05)                             |                    [nswon](https://github.com/nswon)                |
+
+<br/>
+
+## 기술스택
+### FE 
+
+* **Language |** Typescript
+
+* **Framework |** Electron
+
+* **Library |** react.js, recoil, socket.io, mediasoup
+
+* **CSS |** styled-components 
+
+* **Module Bundler |** webpack
+
+* **Package Manager |** npm
+  
+<br/>
+
+### BE
+* **Language |** Typescript, Javascript
+
+* **Framework |** Electron, Nodejs
+
+* **Library |** socket.io, mediasoup, redis, class-transformer, league-connect, electron-builder
+  
+* **Module Bundler |** webpack
+
+* **Package Manager |** npm
+
+<br>
+
+
 ## 주요 기능 
 롤을 키면 로그인을 하지 않아도 자동으로 소환사의 정보를 불러옵니다.
 
@@ -71,41 +110,5 @@
 
 <br/>
 
-## 팀원
-|                                         Frontend                                         |                                           Backend                                           |
-| :--------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------:
-| <img src="https://avatars.githubusercontent.com/u/105103712?v=4" width=200px /> | <img src="https://avatars.githubusercontent.com/u/80371249?v=4" width=200px /> | 
-|                            [tkyung05](https://github.com/tkyung05)                             |                    [nswon](https://github.com/nswon)                |
 
-<br/>
-
-## 기술스택
-### FE 
-
-* **Language |** Typescript
-
-* **Framework |** Electron
-
-* **Library |** react.js, recoil, socket.io, mediasoup
-
-* **CSS |** styled-components 
-
-* **Module Bundler |** webpack
-
-* **Package Manager |** npm
-  
-<br/>
-
-### BE
-* **Language |** Typescript, Javascript
-
-* **Framework |** Electron, Nodejs
-
-* **Library |** socket.io, mediasoup, redis, class-transformer, league-connect, electron-builder
-  
-* **Module Bundler |** webpack
-
-* **Package Manager |** npm
-
-<br>
 
