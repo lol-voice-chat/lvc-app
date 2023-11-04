@@ -18,7 +18,7 @@ import mic_icon from '../../asset/icon/mic_icon.svg';
 import mic_mute_icon from '../../asset/icon/mic_mute_icon.svg';
 import headset_icon from '../../asset/icon/headset_icon.svg';
 import headset_mute_icon from '../../asset/icon/headset_mute_icon.svg';
-import warning_icon from '../../asset/icon/warning_icon.svg';
+import GameRecord from './game-record';
 const { ipcRenderer } = window.require('electron');
 
 type SummonerLeagueVoiceBlock = {
@@ -175,39 +175,7 @@ function SummonerLeagueVoiceBlock(props: SummonerLeagueVoiceBlock) {
           )}
         </S.SoundBox>
 
-        {props.summonerStats && props.summonerStats.statsList.length > 0 ? (
-          <>
-            <S.WinningPercentage odds={props.summonerStats.odds}>
-              <S.ProgressBar>
-                <progress
-                  value={props.summonerStats.winCount}
-                  max={props.summonerStats.winCount + props.summonerStats.failCount}
-                />
-                <p id="win">{props.summonerStats.winCount}W</p>
-                <p id="fail">{props.summonerStats.failCount}L</p>
-              </S.ProgressBar>
-              <p id="odds">{props.summonerStats.odds}%</p>
-            </S.WinningPercentage>
-            <S.AverageKDA>
-              <p>평균 KDA</p>
-              <p id="value">{myChampInfo?.kda ?? props.summonerStats.kda}</p>
-            </S.AverageKDA>
-            <S.KDAList>
-              {props.summonerStats.statsList.map(({ isWin, kda, championIcon }, idx) => (
-                <div style={{ backgroundColor: isWin ? '#0F3054' : '#50383B' }} key={idx}>
-                  <img src={championIcon} />
-                  <p>{kda}</p>
-                </div>
-              ))}
-            </S.KDAList>
-          </>
-        ) : (
-          <div id="warning-box">
-            <p>전적이 없습니다.</p>
-            <img src={warning_icon} />
-            <p id="warning-text">( 현재시즌 솔로랭크 전적이 없습니다 )</p>
-          </div>
-        )}
+        <GameRecord summonerStats={props.summonerStats} myChampInfo={myChampInfo} />
       </S.SummonerInfo>
     </S.SummonerBlock>
   );

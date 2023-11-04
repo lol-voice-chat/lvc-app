@@ -6,6 +6,7 @@ import { resolvePath } from './lib/common';
 import handleGlobalKeyEvent from './event/global-key-event';
 import handleFetchMatchHistoryEvent from './event/fetch-match-history-event';
 import { AutoUpdateManager } from './auto-update-manager';
+import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 
 let mainWindow: BrowserWindow;
 
@@ -33,6 +34,7 @@ const createWindow = () => {
     autoHideMenuBar: true,
   });
 
+  installExtension(REACT_DEVELOPER_TOOLS);
   mainWindow.loadURL(resolvePath());
 
   mainWindow.once('ready-to-show', () => {

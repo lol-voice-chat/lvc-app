@@ -5,7 +5,6 @@ import {
   gameStatusState,
   myTeamSummonersState,
   summonerState,
-  userDeviceIdState,
   userStreamState,
 } from '../../@store/atom';
 import * as S from './style';
