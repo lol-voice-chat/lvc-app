@@ -18,7 +18,7 @@ import mic_icon from '../../asset/icon/mic_icon.svg';
 import mic_mute_icon from '../../asset/icon/mic_mute_icon.svg';
 import headset_icon from '../../asset/icon/headset_icon.svg';
 import headset_mute_icon from '../../asset/icon/headset_mute_icon.svg';
-import GameRecord from './gameRecord';
+import GameRecord from './game-record';
 const { ipcRenderer } = window.require('electron');
 
 type SummonerLeagueVoiceBlock = {
