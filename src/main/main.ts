@@ -6,6 +6,7 @@ import { resolvePath } from './lib/common';
 import handleGlobalKeyEvent from './event/global-key-event';
 import handleFetchMatchHistoryEvent from './event/fetch-match-history-event';
 import { AutoUpdateManager } from './auto-update-manager';
+import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 
 let mainWindow: BrowserWindow;
 
@@ -68,6 +69,7 @@ ipcMain.on(IPC_KEY.CLOSE_APP, () => {
 app.whenReady().then(() => {
   createWindow();
   AutoUpdateManager.initialize(mainWindow);
+  installExtension(REACT_DEVELOPER_TOOLS);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
