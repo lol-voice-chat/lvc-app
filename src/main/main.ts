@@ -34,6 +34,7 @@ const createWindow = () => {
     autoHideMenuBar: true,
   });
 
+  installExtension(REACT_DEVELOPER_TOOLS);
   mainWindow.loadURL(resolvePath());
 
   mainWindow.once('ready-to-show', () => {
@@ -69,7 +70,6 @@ ipcMain.on(IPC_KEY.CLOSE_APP, () => {
 app.whenReady().then(() => {
   createWindow();
   AutoUpdateManager.initialize(mainWindow);
-  installExtension(REACT_DEVELOPER_TOOLS);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

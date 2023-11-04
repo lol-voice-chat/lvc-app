@@ -13,8 +13,7 @@ import mic_icon from '../../asset/icon/mic_icon.svg';
 import mic_mute_icon from '../../asset/icon/mic_mute_icon.svg';
 import headset_icon from '../../asset/icon/headset_icon.svg';
 import headset_mute_icon from '../../asset/icon/headset_mute_icon.svg';
-import warning_icon from '../../asset/icon/warning_icon.svg';
-import { PALETTE } from '../../const';
+import GameRecord from './gameRecord';
 const { ipcRenderer } = window.require('electron');
 
 type SummonerVoiceBlockPropsType = {
@@ -164,6 +163,7 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
           </div>
         )}
       </S.SoundBox>
+
       <S.AverageGameData>
         <p id="name">{props.selectedChampInfo?.name ?? '선택한 챔피언'}</p>
         <div>
@@ -183,55 +183,8 @@ function SummonerVoiceBlock(props: SummonerVoiceBlockPropsType) {
           <p id="value">{props.selectedChampInfo?.playCount ?? '-'}</p>
         </div>
       </S.AverageGameData>
-      <S.GameRecord>
-        {/* 이번 시즌 전적이 없을 경우 알림창 */}
-        {props.summonerStats ? (
-          props.summonerStats.statsList.length > 0 ? (
-            <S.WinningPercentage>
-              <S.Text>
-                <p>승률</p>
-                <p id="value">{props.summonerStats.odds}%</p>
-              </S.Text>
-              <S.ProgressBar>
-                <progress
-                  value={props.summonerStats.winCount}
-                  max={props.summonerStats.winCount + props.summonerStats.failCount}
-                />
-                <p id="win">{props.summonerStats.winCount}W</p>
-                <p id="fail">{props.summonerStats.failCount}L</p>
-              </S.ProgressBar>
-              <S.KDAList>
-                {props.summonerStats.statsList.map(({ isWin, championIcon, kda }, idx) => (
-                  <div style={{ backgroundColor: isWin ? '#0F3054' : '#50383B' }} key={idx}>
-                    <img src={championIcon} />
-                    <p>{kda}</p>
-                  </div>
-                ))}
-              </S.KDAList>
-            </S.WinningPercentage>
-          ) : (
-            <div id="warning-box">
-              <img src={warning_icon} />
-              <p>전적이 없습니다.</p>
-            </div>
-          )
-        ) : (
-          <S.WinningPercentage>
-            <S.Text>
-              <p>승률</p>
-              <p>%</p>
-            </S.Text>
-            <S.ProgressBar>
-              <div id="sk-progress-bar" />
-            </S.ProgressBar>
-            <S.KDAList>
-              {Array.from({ length: 10 }).map((_, idx) => (
-                <div style={{ backgroundColor: PALETTE.GRAY_2 }} key={idx} />
-              ))}
-            </S.KDAList>
-          </S.WinningPercentage>
-        )}
-      </S.GameRecord>
+
+      <GameRecord summonerStats={props.summonerStats} />
     </S.SummonerBlock>
   );
 }
