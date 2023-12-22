@@ -25,15 +25,6 @@
 
 <br>
 
-## 다운로드
-지원하는 운영체제 : window, mac os 
-
-- [macOS(arm64)](https://github.com/lol-voice-chat/lvc-app/releases/download/v0.1.3/lvc-0.1.3-arm64-mac.zip) 
-- [macOS(intel)](https://github.com/lol-voice-chat/lvc-app/releases/download/v0.1.3/lvc-0.1.3-mac.zip) 
-- [window](https://github.com/lol-voice-chat/lvc-app/releases/download/v0.1.2/lvc-Setup-0.1.2.exe)
-
-<br/>
-
 ## 주요 기능 
 롤을 키면 로그인을 하지 않아도 자동으로 소환사의 정보를 불러옵니다.
 
